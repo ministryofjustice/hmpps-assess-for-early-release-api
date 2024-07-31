@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppstemplatepackagename.health
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.health
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
