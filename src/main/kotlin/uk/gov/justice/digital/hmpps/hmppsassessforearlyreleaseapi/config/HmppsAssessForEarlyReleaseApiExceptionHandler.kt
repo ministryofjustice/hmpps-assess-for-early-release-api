@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppstemplatepackagename.config
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config
 
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
 @RestControllerAdvice
-class HmppsTemplateKotlinExceptionHandler {
+class HmppsAssessForEarlyReleaseApiExceptionHandler {
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(BAD_REQUEST)
