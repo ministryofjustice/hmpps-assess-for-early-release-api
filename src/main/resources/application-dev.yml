@@ -1,0 +1,7 @@
+#
+# The dev profile is for running the API service locally against a postgres database (5432).
+#
+spring:
+  jpa:
+    show-sql: true
+
