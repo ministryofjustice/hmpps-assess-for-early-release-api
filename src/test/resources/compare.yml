@@ -1,0 +1,92 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          public-key-location: classpath:local-public-key.pub
+
+  datasource:
+    url: 'jdbc:h2:mem:licences-db;MODE=PostgreSQL'
+    username: create_vary
+    password: dummy
+
+  flyway:
+    locations: classpath:/migration/common
+    url: ${spring.datasource.url}
+    user: create_vary
+    password: dummy
+
+  h2:
+    console:
+      enabled: true
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+  sql:
+    init:
+      continue-on-error: true
+
+server:
+  shutdown: immediate
+
+management.endpoint:
+  health.cache.time-to-live: 0
+  info.cache.time-to-live: 0
+
+# Wiremock auth server
+hmpps:
+  auth:
+    token:
+      url: http://localhost:8090/auth/oauth/token
+    url: http://localhost:8090/auth
+  govuk:
+    api:
+      url: http://localhost:8095
+  prison:
+    api:
+      url: http://localhost:8091/api
+  prisonregister:
+    api:
+      url: http://localhost:8092/api
+  community:
+    api:
+      url: http://localhost:8093
+  probationsearch:
+    api:
+      url: http://localhost:8094
+  prisonersearch:
+    api:
+      url: http://localhost:8099/api
+  document:
+    api:
+      url: http://localhost:8099/api
+      enabled: true
+
+notify:
+  enabled: false
+
+oauth:
+  client:
+    id: client-id
+    secret: clientsecret
+    token-url: http://localhost:8090/auth
+
+cache:
+  evict:
+    bank-holidays:
+      cron: "0 45 23 * * ?"
+
+hmpps.sqs:
+  provider: localstack
+  queues:
+    domaineventsqueue:
+      queueName: domainevents-queue
+      dlqName: domainevents-queue-dlq
+      subscribeTopicId: domainevents
+  topics:
+    domainevents:
+      arn: arn:aws:sns:eu-west-2:000000000000:domainevents-topic
