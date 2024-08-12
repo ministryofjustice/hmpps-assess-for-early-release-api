@@ -22,5 +22,7 @@ class AssessmentRepositoryIntTest : IntegrationTestBase() {
     assertThat(dbAssessment.id).isEqualTo(assessment.id)
     assertThat(dbAssessment.prisonerNumber).isEqualTo(assessment.prisonerNumber)
     assertThat(dbAssessment.bookingId).isEqualTo(assessment.bookingId)
+    assertThat(dbAssessment.createdTimestamp).isEqualToIgnoringNanos(assessment.createdTimestamp)
+    assertThat(dbAssessment.lastUpdatedTimestamp).isEqualToIgnoringNanos(assessment.lastUpdatedTimestamp)
   }
 }
