@@ -25,9 +25,6 @@ spring:
             token-uri: ${hmpps-auth.url}/oauth/token
   jpa:
     open-in-view: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
     show-sql: false
     generate-ddl: false
     hibernate:
