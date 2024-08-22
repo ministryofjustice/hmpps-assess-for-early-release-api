@@ -15,13 +15,14 @@ class AssessmentRepositoryIntTest : IntegrationTestBase() {
 
   @Test
   fun `should save and get assessments`() {
-    val assessment = Assessment(1, 1234L, "G4274GN")
+    val assessment = Assessment(1, 1234L, "G4274GN", "MDI")
     assessmentRepository.save(assessment)
 
     val dbAssessment = assessmentRepository.findByIdOrNull(assessment.id) ?: fail("assessment with id ${assessment.id} not found")
     assertThat(dbAssessment.id).isEqualTo(assessment.id)
     assertThat(dbAssessment.prisonerNumber).isEqualTo(assessment.prisonerNumber)
     assertThat(dbAssessment.bookingId).isEqualTo(assessment.bookingId)
+    assertThat(dbAssessment.prisonId).isEqualTo(assessment.prisonId)
     assertThat(dbAssessment.createdTimestamp).isEqualToIgnoringNanos(assessment.createdTimestamp)
     assertThat(dbAssessment.lastUpdatedTimestamp).isEqualToIgnoringNanos(assessment.lastUpdatedTimestamp)
   }

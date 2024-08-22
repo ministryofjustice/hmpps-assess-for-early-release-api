@@ -1,0 +1,1 @@
+ALTER TABLE assessment ADD COLUMN prison_id VARCHAR(3);
