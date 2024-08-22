@@ -13,10 +13,15 @@ dependencies {
   implementation("org.springframework.security:spring-security-config:6.3.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+  implementation("io.opentelemetry:opentelemetry-api:1.34.1")
+  implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.0.0")
 
   // Database dependencies
   runtimeOnly("org.flywaydb:flyway-database-postgresql")
   runtimeOnly("org.postgresql:postgresql:42.7.3")
+
+  // SQS/SNS dependencies
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.0")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.8.0")
