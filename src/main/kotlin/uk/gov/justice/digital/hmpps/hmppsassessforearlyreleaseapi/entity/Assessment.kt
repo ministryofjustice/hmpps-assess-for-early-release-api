@@ -20,7 +20,7 @@ data class Assessment(
 
   val prisonerNumber: String,
 
-  val prisonId: String? = null,
+  val prisonId: String,
 
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
