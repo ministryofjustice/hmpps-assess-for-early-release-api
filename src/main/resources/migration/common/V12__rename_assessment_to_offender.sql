@@ -1,0 +1,7 @@
+ALTER TABLE assessment RENAME TO offender;
+
+ALTER TABLE offender ADD COLUMN first_name VARCHAR(35);
+ALTER TABLE offender ADD COLUMN last_name VARCHAR(35);
+ALTER TABLE offender ADD COLUMN hdced DATE;
+ALTER TABLE offender ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'NOT_STARTED';
+ALTER TABLE offender ADD CONSTRAINT offender_status_chk CHECK (status in ('NOT_STARTED'))
