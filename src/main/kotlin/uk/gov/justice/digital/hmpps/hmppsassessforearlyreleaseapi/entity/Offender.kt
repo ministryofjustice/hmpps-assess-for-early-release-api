@@ -25,7 +25,7 @@ data class Offender(
   @NotNull
   val prisonerNumber: String,
 
-  val prisonId: String,
+  var prisonId: String,
 
   val firstName: String? = null,
 

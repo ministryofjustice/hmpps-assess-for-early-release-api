@@ -7,32 +7,34 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonerService
 
 @Service
 class PrisonOffenderEventListener(
   private val mapper: ObjectMapper,
-//  private val mergePrisonerService: MergePrisonerService,
+  private val transferPrisonerService: TransferPrisonerService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
 
-    const val PRISONER_MERGE_EVENT_TYPE = "prison-offender-events.prisoner.merged"
+    const val PRISONER_RECEIVE_EVENT_TYPE = "prison-offender-events.prisoner.received"
   }
 
   @SqsListener("domaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
-  @WithSpan(value = "hmpps-hdc-api-prisoner-event-queue", kind = SpanKind.SERVER)
+  @WithSpan(value = "hmpps-assess-for-early-release-prisoner-event-queue", kind = SpanKind.SERVER)
   fun onPrisonOffenderEvent(requestJson: String) {
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)
     val eventType = messageAttributes.eventType.Value
     log.info("Received message $message, type $eventType")
 
     when (eventType) {
-      PRISONER_MERGE_EVENT_TYPE -> {
-        val mergeEvent = mapper.readValue(message, HMPPSMergeDomainEvent::class.java)
-//        mergePrisonerService.mergePrisonerNumbers(
-//          mergeEvent.additionalInformation.removedNomsNumber,
-//          mergeEvent.additionalInformation.nomsNumber,
-//        )
+      PRISONER_RECEIVE_EVENT_TYPE -> {
+        val receiveEvent = mapper.readValue(message, HMPPSReceiveDomainEvent::class.java)
+        if (receiveEvent.additionalInformation.reason == "TRANSFERRED") {
+          val nomisId = receiveEvent.additionalInformation.nomsNumber
+          val prisonCode = receiveEvent.additionalInformation.prisonId
+          transferPrisonerService.transferPrisoner(nomisId, prisonCode)
+        }
       }
 
       else -> {
@@ -42,7 +44,7 @@ class PrisonOffenderEventListener(
   }
 }
 
-data class HMPPSMergeDomainEvent(
+data class HMPPSReceiveDomainEvent(
   val eventType: String? = null,
   val additionalInformation: AdditionalInformationMerge,
   val version: String,
@@ -52,7 +54,8 @@ data class HMPPSMergeDomainEvent(
 
 data class AdditionalInformationMerge(
   val nomsNumber: String,
-  val removedNomsNumber: String,
+  val reason: String,
+  val prisonId: String
 )
 
 data class HMPPSEventType(val Value: String, val Type: String)
