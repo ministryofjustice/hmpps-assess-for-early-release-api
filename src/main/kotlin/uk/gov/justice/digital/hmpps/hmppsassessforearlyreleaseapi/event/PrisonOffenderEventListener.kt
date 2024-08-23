@@ -55,7 +55,7 @@ data class HMPPSReceiveDomainEvent(
 data class AdditionalInformationMerge(
   val nomsNumber: String,
   val reason: String,
-  val prisonId: String
+  val prisonId: String,
 )
 
 data class HMPPSEventType(val Value: String, val Type: String)

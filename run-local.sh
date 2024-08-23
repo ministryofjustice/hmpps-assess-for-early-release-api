@@ -17,7 +17,7 @@ restart_docker () {
   #Prune existing containers
   #Comment in if you wish to perform a fresh install of all containers where all containers are removed and deleted
   #You will be prompted to continue with the deletion in the terminal
-  #docker system prune --all
+  docker system prune --all
 
   echo "Pulling back end containers ..."
   docker compose pull
@@ -25,6 +25,9 @@ restart_docker () {
 
   echo "Waiting for back end containers to be ready ..."
   until [ "`docker inspect -f {{.State.Health.Status}} afer-db`" == "healthy" ]; do
+      sleep 0.1;
+  done;
+  until [ "`docker inspect -f {{.State.Health.Status}} localstack-afer-api`" == "healthy" ]; do
       sleep 0.1;
   done;
 

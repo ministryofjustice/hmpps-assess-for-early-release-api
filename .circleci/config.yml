@@ -10,14 +10,36 @@ parameters:
   releases-slack-channel:
     type: string
     default: the_elephants_devs
+  java-version:
+      type: string
+      default: "21.0"
+  localstack-version:
+      type: string
+      default: "3.0.2"
 
 jobs:
   validate:
     executor:
-      name: hmpps/java
-      tag: "21.0"
+      name: hmpps/java_localstack_postgres_with_db_name
+      jdk_tag: << pipeline.parameters.java-version >>
+      localstack_tag: << pipeline.parameters.localstack-version >>
+      services: "sns,sqs"
+      postgres_tag: "16"
+      postgres_username: "assess-for-early-release-db"
+      postgres_password: "afer"
+      postgres_db: "afer"
     steps:
+      - run:
+            command: |
+              while true; do
+                sleep 5
+                ps auxwwf
+                echo "======"
+              done
+            background: true
       - checkout
+      - hmpps/wait_till_ready_postgres
+      - hmpps/wait_till_ready
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
@@ -65,42 +87,42 @@ workflows:
             - build_docker
             - helm_lint
           helm_timeout: 5m
-#      - request-preprod-approval:
-#          type: approval
-#          requires:
-#            - deploy_dev
-#      - hmpps/deploy_env:
-#          name: deploy_preprod
-#          env: "preprod"
-#          jira_update: true
-#          jira_env_type: staging
-#          pipeline_id: <<pipeline.id>>
-#          pipeline_number: <<pipeline.number>>
-#          context:
-#            - hmpps-common-vars
-#            - hmpps-assess-for-early-release-api-preprod
-#          requires:
-#            - request-preprod-approval
-#          helm_timeout: 5m
-#      - request-prod-approval:
-#          type: approval
-#          requires:
-#            - deploy_preprod
-#      - hmpps/deploy_env:
-#          name: deploy_prod
-#          env: "prod"
-#          jira_update: true
-#          jira_env_type: production
-#          pipeline_id: <<pipeline.id>>
-#          pipeline_number: <<pipeline.number>>
-#          slack_notification: true
-#          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
-#          context:
-#            - hmpps-common-vars
-#            - hmpps-assess-for-early-release-api-prod
-#          requires:
-#            - request-prod-approval
-#          helm_timeout: 5m
+      - request-preprod-approval:
+          type: approval
+          requires:
+            - deploy_dev
+      - hmpps/deploy_env:
+          name: deploy_preprod
+          env: "preprod"
+          jira_update: true
+          jira_env_type: staging
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
+          context:
+            - hmpps-common-vars
+            - hmpps-assess-for-early-release-api-preprod
+          requires:
+            - request-preprod-approval
+          helm_timeout: 5m
+      - request-prod-approval:
+          type: approval
+          requires:
+            - deploy_preprod
+      - hmpps/deploy_env:
+          name: deploy_prod
+          env: "prod"
+          jira_update: true
+          jira_env_type: production
+          pipeline_id: <<pipeline.id>>
+          pipeline_number: <<pipeline.number>>
+          slack_notification: true
+          slack_channel_name: << pipeline.parameters.releases-slack-channel >>
+          context:
+            - hmpps-common-vars
+            - hmpps-assess-for-early-release-api-prod
+          requires:
+            - request-prod-approval
+          helm_timeout: 5m
 
   security:
     triggers:

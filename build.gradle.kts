@@ -26,6 +26,8 @@ dependencies {
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.8.0")
   testImplementation("com.h2database:h2")
+  testImplementation("org.testcontainers:localstack:1.19.8")
+  testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
 }
 
 kotlin {
