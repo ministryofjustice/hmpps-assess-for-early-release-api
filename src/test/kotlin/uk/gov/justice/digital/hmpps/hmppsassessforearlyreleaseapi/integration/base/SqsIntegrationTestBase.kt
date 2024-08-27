@@ -35,7 +35,6 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   @MockBean
   lateinit var done: Done
 
-
   protected val domainEventsTopic by lazy {
     hmppsQueueService.findByTopicId("domainevents")
       ?: throw MissingQueueException("HmppsTopic domainevents not found")
@@ -65,4 +64,3 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
     }
   }
 }
-

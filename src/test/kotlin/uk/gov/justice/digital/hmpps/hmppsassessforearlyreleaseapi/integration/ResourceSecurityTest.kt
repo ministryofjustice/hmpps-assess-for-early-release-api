@@ -7,9 +7,10 @@ import org.springframework.context.ApplicationContext
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import java.io.File
 
-class ResourceSecurityTest : IntegrationTestBase() {
+class ResourceSecurityTest : SqsIntegrationTestBase() {
   @Autowired
   private lateinit var context: ApplicationContext
 
@@ -18,6 +19,7 @@ class ResourceSecurityTest : IntegrationTestBase() {
     "GET /swagger-ui.html",
     "GET /v3/api-docs",
     "GET /v3/api-docs/swagger-config",
+    "PUT /queue-admin/retry-all-dlqs",
     " /error",
   )
 
