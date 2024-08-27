@@ -1,5 +1,6 @@
 generic-service:
   nameOverride: hmpps-assess-for-early-release-api
+  serviceAccountName: hmpps-assess-for-early-release
   productId: "DPS087" # productId for the product that this belongs too, i.e. DPS001, see README.md for details
 
   replicaCount: 4

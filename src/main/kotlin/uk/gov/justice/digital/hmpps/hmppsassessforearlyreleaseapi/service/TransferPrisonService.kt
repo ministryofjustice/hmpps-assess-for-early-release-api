@@ -17,7 +17,7 @@ val NO_OP = Done { }
 
 @Service
 @Transactional
-class TransferPrisonerService(
+class TransferPrisonService(
   private val offenderRepository: OffenderRepository,
   private val telemetryClient: TelemetryClient,
   private val done: Done = NO_OP,
@@ -32,9 +32,10 @@ class TransferPrisonerService(
     prisonCode: String,
   ) {
     val updatedOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
+    val oldPrisonCode = updatedOffender.prisonId
 
-    log.info("Transfering prisoner number $nomisId to prison code $prisonCode")
-    log.debug("Updating assessment: {}", updatedOffender.id)
+    log.info("Updating prison code $oldPrisonCode to $prisonCode for prisoner number $nomisId")
+    log.debug("Updating offender: {}", updatedOffender.id)
 
     updatedOffender.prisonId = prisonCode
     offenderRepository.saveAllAndFlush(listOf(updatedOffender))
@@ -43,6 +44,7 @@ class TransferPrisonerService(
       TRANSFERRED_EVENT_NAME,
       mapOf(
         "NOMS-ID" to nomisId,
+        "PRISON-TRANSFERRED-FROM" to oldPrisonCode,
         "PRISON-TRANSFERRED-TO" to prisonCode,
       ),
       null,

@@ -1,4 +1,8 @@
 spring:
+
+  config:
+    use-legacy-processing: true
+
   security:
     oauth2:
       resourceserver:
@@ -37,9 +41,37 @@ management.endpoint:
   health.cache.time-to-live: 0
   info.cache.time-to-live: 0
 
+# Wiremock auth server
+hmpps:
+  auth:
+    token:
+      url: http://localhost:8090/auth/oauth/token
+    url: http://localhost:8090/auth
+  govuk:
+    api:
+      url: http://localhost:8095
+  prison:
+    api:
+      url: http://localhost:8091/api
+  prisonregister:
+    api:
+      url: http://localhost:8092/api
+  community:
+    api:
+      url: http://localhost:8093
+  probationsearch:
+    api:
+      url: http://localhost:8094
+  prisonersearch:
+    api:
+      url: http://localhost:8099/api
+  document:
+    api:
+      url: http://localhost:8099/api
+      enabled: true
+
 hmpps.sqs:
   provider: localstack
-  localstackUrl: http://localhost:4566
   queues:
     domaineventsqueue:
       queueName: domainevents-queue
@@ -48,3 +80,5 @@ hmpps.sqs:
   topics:
     domainevents:
       arn: arn:aws:sns:eu-west-2:000000000000:domainevents-topic
+
+hmpps-auth.url: "http://localhost:8090/auth"

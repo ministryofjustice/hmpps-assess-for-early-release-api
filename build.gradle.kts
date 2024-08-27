@@ -8,6 +8,31 @@ configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
+val integrationTest = task<Test>("integrationTest") {
+  description = "Integration tests"
+  group = "verification"
+  shouldRunAfter("test")
+}
+
+tasks.register<Copy>("installLocalGitHook") {
+  from(File(rootProject.rootDir, ".scripts/pre-commit"))
+  into(File(rootProject.rootDir, ".git/hooks"))
+  fileMode = "755".toInt(radix = 8)
+}
+
+tasks.named<Test>("integrationTest") {
+  useJUnitPlatform()
+  filter {
+    includeTestsMatching("*.integration.*")
+  }
+}
+
+tasks.named<Test>("test") {
+  filter {
+    excludeTestsMatching("*.integration.*")
+  }
+}
+
 dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.0.4")
   implementation("org.springframework.security:spring-security-config:6.3.2")
@@ -26,8 +51,11 @@ dependencies {
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.8.0")
   testImplementation("com.h2database:h2")
+  testImplementation("org.testcontainers:postgresql:1.19.8")
   testImplementation("org.testcontainers:localstack:1.19.8")
   testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
+  testImplementation("org.springframework.security:spring-security-test")
+  testImplementation("io.projectreactor:reactor-test")
 }
 
 kotlin {

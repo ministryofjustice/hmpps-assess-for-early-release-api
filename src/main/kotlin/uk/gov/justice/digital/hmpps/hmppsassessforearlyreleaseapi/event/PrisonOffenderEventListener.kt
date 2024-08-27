@@ -7,12 +7,12 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonerService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 
 @Service
 class PrisonOffenderEventListener(
   private val mapper: ObjectMapper,
-  private val transferPrisonerService: TransferPrisonerService,
+  private val transferPrisonerService: TransferPrisonService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
@@ -46,13 +46,13 @@ class PrisonOffenderEventListener(
 
 data class HMPPSReceiveDomainEvent(
   val eventType: String? = null,
-  val additionalInformation: AdditionalInformationMerge,
+  val additionalInformation: AdditionalInformationTransfer,
   val version: String,
   val occurredAt: String,
   val description: String,
 )
 
-data class AdditionalInformationMerge(
+data class AdditionalInformationTransfer(
   val nomsNumber: String,
   val reason: String,
   val prisonId: String,

@@ -21,7 +21,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   localstack-afer-api:
-    image: localstack/localstack:3.0.2
+    image: localstack/localstack:3.6
     networks:
       - hmpps
     container_name: localstack-afer-api
