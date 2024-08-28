@@ -21,7 +21,7 @@ class PrisonOffenderEventListener(
   }
 
   @SqsListener("domaineventsqueue", factory = "hmppsQueueContainerFactoryProxy")
-  @WithSpan(value = "hmpps-assess-for-early-release-prisoner-event-queue", kind = SpanKind.SERVER)
+  @WithSpan(value = "hmpps-assess-for-early-release-prisoner-domain-event-queue", kind = SpanKind.SERVER)
   fun onPrisonOffenderEvent(requestJson: String) {
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)
     val eventType = messageAttributes.eventType.Value
