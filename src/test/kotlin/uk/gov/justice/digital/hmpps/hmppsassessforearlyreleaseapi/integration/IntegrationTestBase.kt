@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDO
 import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
-import org.springframework.test.context.jdbc.SqlMergeMode
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
