@@ -31,20 +31,19 @@ class TransferPrisonService(
     nomisId: String,
     prisonCode: String,
   ) {
-    val updatedOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
-    val oldPrisonCode = updatedOffender.prisonId
+    val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
 
-    log.info("Updating prison code $oldPrisonCode to $prisonCode for prisoner number $nomisId")
-    log.debug("Updating offender: {}", updatedOffender.id)
+    log.info("Updating prison code $existingOffender.prisonId to $prisonCode for prisoner number $nomisId")
+    log.debug("Updating offender: {}", existingOffender.id)
 
-    updatedOffender.prisonId = prisonCode
+    val updatedOffender = existingOffender.copy(prisonId = prisonCode)
     offenderRepository.saveAllAndFlush(listOf(updatedOffender))
 
     telemetryClient.trackEvent(
       TRANSFERRED_EVENT_NAME,
       mapOf(
         "NOMS-ID" to nomisId,
-        "PRISON-TRANSFERRED-FROM" to oldPrisonCode,
+        "PRISON-TRANSFERRED-FROM" to existingOffender.prisonId,
         "PRISON-TRANSFERRED-TO" to prisonCode,
       ),
       null,
