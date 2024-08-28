@@ -5,6 +5,10 @@ spring:
   jpa:
     show-sql: true
 
+hmpps:
+  prisonersearch:
+    api:
+      url: "https://prisoner-search-dev.prison.service.justice.gov.uk"
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4666

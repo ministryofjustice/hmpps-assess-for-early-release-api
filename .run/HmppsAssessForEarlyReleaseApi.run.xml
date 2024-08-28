@@ -5,7 +5,7 @@
       <env name="DB_PASS" value="afer" />
       <env name="DB_SERVER" value="localhost" />
       <env name="DB_USER" value="afer" />
-      <env name="HMPPS-AUTH_URL" value="https://sign-in-dev.hmpps.service.justice.gov.uk/auth" />
+      <env name="HMPPS_AUTH_URL" value="https://sign-in-dev.hmpps.service.justice.gov.uk/auth" />
       <env name="SERVER_PORT" value="8089" />
       <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://${DB_SERVER}/${DB_NAME}" />
       <env name="SPRING_PROFILES_ACTIVE" value="dev" />

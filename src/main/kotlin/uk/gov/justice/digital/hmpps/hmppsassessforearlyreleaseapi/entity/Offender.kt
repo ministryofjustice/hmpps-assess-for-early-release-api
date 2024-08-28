@@ -17,7 +17,7 @@ data class Offender(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @NotNull
-  val id: Long,
+  val id: Long = -1,
 
   @NotNull
   val bookingId: Long,
