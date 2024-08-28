@@ -6,5 +6,6 @@
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Value: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val Message: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val MessageAttributes: HMPPSMessageAttributes</ID>
+    <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
   </CurrentIssues>
 </SmellBaseline>

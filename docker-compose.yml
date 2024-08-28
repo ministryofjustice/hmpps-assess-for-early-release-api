@@ -34,19 +34,16 @@ services:
       - GATEWAY_LISTEN=0.0.0.0:4666
       - EXTERNAL_SERVICE_PORTS_START=4610
       - EXTERNAL_SERVICE_PORTS_END=4659
-      - MAIN_CONTAINER_NAME=localstack-api
+      - MAIN_CONTAINER_NAME=hmpps-assess-for-early-release-api
       - AWS_ENDPOINT_URL=http://localhost:4666
     volumes:
       - "${TMPDIR:-/tmp/localstack}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     healthcheck:
       test: awslocal sqs list-queues
-      interval: 5s
-      timeout: 3s
+      interval: 10s
+      timeout: 5s
       retries: 5
-
-volumes:
-  pgdata:
 
 networks:
   hmpps:

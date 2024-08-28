@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 @RestController
 @PreAuthorize("hasRole('ROLE_TEMPLATE_KOTLIN__RO')")
-class ExampleResource() {
+class ExampleResource {
 
   @GetMapping("/time")
   fun getTime(): LocalDateTime = LocalDateTime.now()

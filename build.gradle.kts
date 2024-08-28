@@ -2,6 +2,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.3"
   kotlin("plugin.spring") version "2.0.10"
   kotlin("plugin.jpa") version "2.0.10"
+  id("io.gitlab.arturbosch.detekt") version "1.23.6"
 }
 
 configurations {
@@ -31,6 +32,14 @@ tasks.named<Test>("test") {
   filter {
     excludeTestsMatching("*.integration.*")
   }
+}
+
+detekt {
+  source.setFrom("$projectDir/src/main")
+  buildUponDefaultConfig = true // preconfigure defaults
+  allRules = false // activate all available (even unstable) rules.
+  config.setFrom("$projectDir/detekt.yml") // point to your custom config defining rules to run, overwriting default behavior
+  baseline = file("$projectDir/detekt-baseline.xml") // a way of suppressing issues before introducing detekt
 }
 
 dependencies {
@@ -65,6 +74,26 @@ kotlin {
 tasks {
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     compilerOptions.jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_21
+  }
+  withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    reports {
+      html.required.set(true) // observe findings in your browser with structure and code snippets
+    }
+  }
+  named("check").configure {
+    this.setDependsOn(
+      this.dependsOn.filterNot {
+        it is TaskProvider<*> && it.name == "detekt"
+      },
+    )
+  }
+}
+
+configurations.matching { it.name == "detekt" }.all {
+  resolutionStrategy.eachDependency {
+    if (requested.group == "org.jetbrains.kotlin") {
+      useVersion(io.gitlab.arturbosch.detekt.getSupportedKotlinVersion())
+    }
   }
 }
 

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -18,7 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.In
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Done
 import uk.gov.justice.hmpps.sqs.HmppsQueue
 import uk.gov.justice.hmpps.sqs.HmppsQueueService
-import uk.gov.justice.hmpps.sqs.HmppsSqsProperties
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 
@@ -28,9 +26,6 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
 
   @Autowired
   private lateinit var hmppsQueueService: HmppsQueueService
-
-  @SpyBean
-  protected lateinit var hmppsSqsPropertiesSpy: HmppsSqsProperties
 
   @MockBean
   lateinit var done: Done
