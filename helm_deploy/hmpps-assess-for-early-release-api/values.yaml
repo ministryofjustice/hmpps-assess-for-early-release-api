@@ -1,5 +1,6 @@
 generic-service:
   nameOverride: hmpps-assess-for-early-release-api
+  serviceAccountName: hmpps-assess-for-early-release
   productId: "DPS087" # productId for the product that this belongs too, i.e. DPS001, see README.md for details
 
   replicaCount: 4
@@ -13,6 +14,13 @@ generic-service:
     enabled: true
     host: app-hostname.local # override per environment
     tlsSecretName: hmpps-assess-for-early-release-api-cert
+    annotations:
+      nginx.ingress.kubernetes.io/server-snippet: |
+        server_tokens off;
+        location /queue-admin/retry-all-dlqs {
+          deny all;
+          return 401;
+        }
 
   # Environment variables to load into the deployment
   env:
@@ -36,6 +44,10 @@ generic-service:
       DB_NAME: "database_name"
       DB_USER: "database_username"
       DB_PASS: "database_password"
+    hmpps-assess-for-early-release-domain-events-sqs-instance-output:
+      HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_QUEUE_NAME: "sqs_name"
+    hmpps-assess-for-early-release-domain-events-sqs-dl-instance-output:
+      HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_DLQ_NAME: "sqs_name"
 
   allowlist:
     groups:

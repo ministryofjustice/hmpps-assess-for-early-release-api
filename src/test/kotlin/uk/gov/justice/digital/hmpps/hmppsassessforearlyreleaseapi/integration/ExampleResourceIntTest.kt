@@ -3,9 +3,10 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import java.time.LocalDate
 
-class ExampleResourceIntTest : IntegrationTestBase() {
+class ExampleResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class TimeEndpoint {
