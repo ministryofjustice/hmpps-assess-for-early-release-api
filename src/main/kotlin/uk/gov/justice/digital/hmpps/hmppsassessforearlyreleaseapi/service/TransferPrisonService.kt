@@ -33,7 +33,7 @@ class TransferPrisonService(
   ) {
     val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
 
-    log.info("Updating prison code $existingOffender.prisonId to $prisonCode for prisoner number $nomisId")
+    log.info("Updating prison code ${existingOffender.prisonId} to $prisonCode for prisoner number $nomisId")
     log.debug("Updating offender: {}", existingOffender.id)
 
     val updatedOffender = existingOffender.copy(prisonId = prisonCode)
