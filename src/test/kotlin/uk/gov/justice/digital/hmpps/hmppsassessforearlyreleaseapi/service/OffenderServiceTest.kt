@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -18,8 +19,9 @@ class OffenderServiceTest {
 
   private val offenderRepository = mock<OffenderRepository>()
   private val prisonerSearchService = mock<PrisonerSearchService>()
+  private val telemetryClient = mock<TelemetryClient>()
 
-  private val service: OffenderService = OffenderService(offenderRepository, prisonerSearchService)
+  private val service: OffenderService = OffenderService(offenderRepository, prisonerSearchService, telemetryClient)
 
   @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {
