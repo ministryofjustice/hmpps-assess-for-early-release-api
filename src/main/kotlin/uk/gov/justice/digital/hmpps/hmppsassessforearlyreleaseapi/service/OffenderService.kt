@@ -19,7 +19,6 @@ class OffenderService(
   private val offenderRepository: OffenderRepository,
   private val prisonerSearchService: PrisonerSearchService,
   private val telemetryClient: TelemetryClient,
-  private val done: EventProcessingCompleteHandler = NO_OP,
 ) {
   @Transactional
   fun createOrUpdateOffender(nomisId: String) {
@@ -39,7 +38,6 @@ class OffenderService(
         createOffender(prisoner)
       }
     }
-    return done.complete()
   }
 
   private fun createOffender(prisoner: PrisonerSearchPrisoner) {

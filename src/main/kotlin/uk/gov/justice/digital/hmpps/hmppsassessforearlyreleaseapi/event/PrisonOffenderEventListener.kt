@@ -10,10 +10,17 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.OffenderService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 
+fun interface EventProcessingCompleteHandler {
+  fun complete()
+}
+
+val NO_OP = EventProcessingCompleteHandler { }
+
 @Service
 class PrisonOffenderEventListener(
-  private val mapper: ObjectMapper,
+  private val done: EventProcessingCompleteHandler = NO_OP,
   private val offenderService: OffenderService,
+  private val mapper: ObjectMapper,
   private val transferPrisonerService: TransferPrisonService,
 ) {
   companion object {
@@ -53,6 +60,7 @@ class PrisonOffenderEventListener(
         log.debug("Ignoring message with type $eventType")
       }
     }
+    done.complete()
   }
 }
 

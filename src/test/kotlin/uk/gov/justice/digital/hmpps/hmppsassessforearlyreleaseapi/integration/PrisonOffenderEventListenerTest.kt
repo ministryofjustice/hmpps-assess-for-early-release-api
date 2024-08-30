@@ -52,7 +52,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(offenderRepository.findByPrisonerNumber(PRISONER_NUMBER)?.prisonId).isEqualTo(OLD_PRISON_CODE)
 
     publishDomainEventMessage(
-      PRISONER_RECEIVE_EVENT_TYPE,
       AdditionalInformationTransfer(
         nomsNumber = PRISONER_NUMBER,
         reason = "TRANSFERRED",
@@ -90,7 +89,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(offenderRepository.findByPrisonerNumber(someNonExistentPrisonNumber)).isNull()
 
     publishDomainEventMessage(
-      PRISONER_RECEIVE_EVENT_TYPE,
       AdditionalInformationTransfer(
         nomsNumber = someNonExistentPrisonNumber,
         reason = "TRANSFERRED",
@@ -135,9 +133,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     publishDomainEventMessage(
-      PRISONER_UPDATED_EVENT_TYPE,
       AdditionalInformationPrisonerUpdated(nomsNumber = prisonerNumber, listOf(DiffCategory.SENTENCE)),
-      "Release dates calculated for $PRISONER_NUMBER",
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -185,9 +181,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     publishDomainEventMessage(
-      PRISONER_UPDATED_EVENT_TYPE,
       AdditionalInformationPrisonerUpdated(nomsNumber = PRISONER_NUMBER, listOf(DiffCategory.SENTENCE)),
-      "Release dates calculated for $PRISONER_NUMBER",
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -214,13 +208,12 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   }
 
   private fun publishDomainEventMessage(
-    eventType: String,
     additionalInformation: AdditionalInformationTransfer,
     description: String,
   ) {
     val jsonMessage = jsonString(
       HMPPSReceiveDomainEvent(
-        eventType = eventType,
+        eventType = PRISONER_RECEIVE_EVENT_TYPE,
         additionalInformation = additionalInformation,
         occurredAt = Instant.now().toString(),
         description = description,
@@ -228,24 +221,22 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       ),
     )
 
-    publishDomainEventMessage(jsonMessage, eventType)
+    publishDomainEventMessage(jsonMessage, PRISONER_RECEIVE_EVENT_TYPE)
   }
 
   protected fun publishDomainEventMessage(
-    eventType: String,
     additionalInformation: AdditionalInformationPrisonerUpdated,
-    description: String,
   ) {
     val jsonMessage = jsonString(
       HMPPSPrisonerUpdatedEvent(
-        eventType = eventType,
+        eventType = PRISONER_UPDATED_EVENT_TYPE,
         additionalInformation = additionalInformation,
         occurredAt = Instant.now().toString(),
-        description = description,
+        description = "Release dates calculated for $PRISONER_NUMBER",
         version = "1.0",
       ),
     )
-    publishDomainEventMessage(jsonMessage, eventType)
+    publishDomainEventMessage(jsonMessage, PRISONER_UPDATED_EVENT_TYPE)
   }
 
   private fun publishDomainEventMessage(jsonMessage: String, eventType: String) {

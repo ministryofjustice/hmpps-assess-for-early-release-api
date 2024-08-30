@@ -14,7 +14,6 @@ const val TRANSFERRED_EVENT_NAME = "assess-for-early-release.prisoner.transferre
 class TransferPrisonService(
   private val offenderRepository: OffenderRepository,
   private val telemetryClient: TelemetryClient,
-  private val done: EventProcessingCompleteHandler = NO_OP,
 ) {
 
   companion object {
@@ -25,7 +24,7 @@ class TransferPrisonService(
     nomisId: String,
     prisonCode: String,
   ) {
-    val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
+    val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return
     val existingPrisonId = existingOffender.prisonId
 
     log.info("Updating prison code $existingOffender.prisonId to $prisonCode for prisoner number $nomisId")
@@ -43,6 +42,5 @@ class TransferPrisonService(
       ),
       null,
     )
-    return done.complete()
   }
 }
