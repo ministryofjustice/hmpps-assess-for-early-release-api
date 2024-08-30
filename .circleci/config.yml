@@ -21,7 +21,7 @@ jobs:
   validate:
     executor:
       name: hmpps/java
-      jdk_tag: << pipeline.parameters.java-version >>
+      tag: << pipeline.parameters.java-version >>
     steps:
       - checkout
       - restore_cache:
