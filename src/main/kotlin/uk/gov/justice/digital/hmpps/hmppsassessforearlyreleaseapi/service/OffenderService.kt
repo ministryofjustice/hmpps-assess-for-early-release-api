@@ -61,24 +61,29 @@ class OffenderService(
   }
 
   private fun updateOffender(offender: Offender, prisoner: PrisonerSearchPrisoner) {
-    val updatedOffender = offender.copy(
-      firstName = prisoner.firstName,
-      lastName = prisoner.lastName,
-      hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
-      lastUpdatedTimestamp = LocalDateTime.now(),
-    )
-    offenderRepository.save(updatedOffender)
-    telemetryClient.trackEvent(
-      PRISONER_UPDATED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to prisoner.prisonerNumber,
-        "PRISONER-FIRST_NAME" to prisoner.firstName,
-        "PRISONER-LAST_NAME" to prisoner.lastName,
-        "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
-      ),
-      null,
-    )
+    if (hasOffenderBeenUpdated(offender, prisoner)) {
+      val updatedOffender = offender.copy(
+        firstName = prisoner.firstName,
+        lastName = prisoner.lastName,
+        hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
+        lastUpdatedTimestamp = LocalDateTime.now(),
+      )
+      offenderRepository.save(updatedOffender)
+      telemetryClient.trackEvent(
+        PRISONER_UPDATED_EVENT_NAME,
+        mapOf(
+          "NOMS-ID" to prisoner.prisonerNumber,
+          "PRISONER-FIRST_NAME" to prisoner.firstName,
+          "PRISONER-LAST_NAME" to prisoner.lastName,
+          "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
+        ),
+        null,
+      )
+    }
   }
+
+  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
+    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate || offender.firstName != prisoner.firstName || offender.lastName != prisoner.lastName
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

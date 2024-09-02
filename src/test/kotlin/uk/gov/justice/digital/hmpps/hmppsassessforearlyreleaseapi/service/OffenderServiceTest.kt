@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -91,6 +92,35 @@ class OffenderServiceTest {
     assertThat(offenderCaptor.value)
       .extracting("prisonerNumber", "bookingId", "firstName", "lastName", "hdced")
       .isEqualTo(listOf(PRISONER_NUMBER, BOOKING_ID.toLong(), FIRST_NAME, LAST_NAME, updatedHdced))
+  }
+
+  @Test
+  fun `should not update an existing offender if hdced or names haven't changed`() {
+    val hdced = LocalDate.now().plusDays(28)
+
+    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced)
+    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISONER_NUMBER))).thenReturn(
+      listOf(
+        prisonerSearchPrisoner,
+      ),
+    )
+    whenever(offenderRepository.findByPrisonerNumber(PRISONER_NUMBER)).thenReturn(
+      Offender(
+        id = 1,
+        bookingId = BOOKING_ID.toLong(),
+        prisonerNumber = PRISONER_NUMBER,
+        prisonId = PRISON_ID,
+        hdced = hdced,
+        firstName = FIRST_NAME,
+        lastName = LAST_NAME,
+      ),
+    )
+
+    service.createOrUpdateOffender(PRISONER_NUMBER)
+
+    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISONER_NUMBER))
+    verify(offenderRepository).findByPrisonerNumber(PRISONER_NUMBER)
+    verify(offenderRepository, never()).save(any())
   }
 
   @Test
