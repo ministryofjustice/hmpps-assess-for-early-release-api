@@ -11,35 +11,19 @@ parameters:
     type: string
     default: the_elephants_devs
   java-version:
-      type: string
-      default: "21.0"
+    type: string
+    default: "21.0"
   localstack-version:
-      type: string
-      default: "3.0.2"
+    type: string
+    default: "3.0.2"
 
 jobs:
   validate:
     executor:
-      name: hmpps/java_localstack_postgres_with_db_name
-      jdk_tag: << pipeline.parameters.java-version >>
-      localstack_tag: << pipeline.parameters.localstack-version >>
-      services: "sns,sqs"
-      postgres_tag: "16"
-      postgres_username: "assess-for-early-release-db"
-      postgres_password: "afer"
-      postgres_db: "afer"
+      name: hmpps/java
+      tag: << pipeline.parameters.java-version >>
     steps:
-      - run:
-            command: |
-              while true; do
-                sleep 5
-                ps auxwwf
-                echo "======"
-              done
-            background: true
       - checkout
-      - hmpps/wait_till_ready_postgres
-      - hmpps/wait_till_ready
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
@@ -55,11 +39,52 @@ jobs:
       - store_artifacts:
           path: build/reports/tests
 
+  integration-test:
+    executor:
+      name: hmpps/java_localstack_postgres_with_db_name
+      jdk_tag: << pipeline.parameters.java-version >>
+      localstack_tag: << pipeline.parameters.localstack-version >>
+      services: "sns,sqs"
+      postgres_tag: "16"
+      postgres_username: "assess-for-early-release-db"
+      postgres_password: "afer"
+      postgres_db: "afer"
+    steps:
+      - run:
+          command: |
+            while true; do
+              sleep 5
+              ps auxwwf
+              echo "======"
+            done
+          background: true
+      - checkout
+      - hmpps/wait_till_ready_postgres
+      - hmpps/wait_till_ready
+      - restore_cache:
+          keys:
+            - gradle-{{ checksum "build.gradle.kts" }}
+            - gradle-
+      - run:
+          command: ./gradlew integrationTest
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: gradle-{{ checksum "build.gradle.kts" }}
+      - store_test_results:
+          path: build/test-results
+      - store_artifacts:
+          path: build/reports/tests
+
 workflows:
   version: 2
   build-test-and-deploy:
     jobs:
       - validate:
+          filters:
+            tags:
+              ignore: /.*/
+      - integration-test:
           filters:
             tags:
               ignore: /.*/
@@ -84,6 +109,7 @@ workflows:
                 - main
           requires:
             - validate
+            - integration-test
             - build_docker
             - helm_lint
           helm_timeout: 5m

@@ -9,18 +9,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 
 const val TRANSFERRED_EVENT_NAME = "assess-for-early-release.prisoner.transferred"
 
-fun interface Done {
-  fun complete()
-}
-
-val NO_OP = Done { }
-
 @Service
 @Transactional
 class TransferPrisonService(
   private val offenderRepository: OffenderRepository,
   private val telemetryClient: TelemetryClient,
-  private val done: Done = NO_OP,
 ) {
 
   companion object {
@@ -31,7 +24,8 @@ class TransferPrisonService(
     nomisId: String,
     prisonCode: String,
   ) {
-    val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return done.complete()
+    val existingOffender = offenderRepository.findByPrisonerNumber(nomisId) ?: return
+    val existingPrisonId = existingOffender.prisonId
 
     log.info("Updating prison code ${existingOffender.prisonId} to $prisonCode for prisoner number $nomisId")
     log.debug("Updating offender: {}", existingOffender.id)
@@ -43,11 +37,10 @@ class TransferPrisonService(
       TRANSFERRED_EVENT_NAME,
       mapOf(
         "NOMS-ID" to nomisId,
-        "PRISON-TRANSFERRED-FROM" to existingOffender.prisonId,
+        "PRISON-TRANSFERRED-FROM" to existingPrisonId,
         "PRISON-TRANSFERRED-TO" to prisonCode,
       ),
       null,
     )
-    return done.complete()
   }
 }
