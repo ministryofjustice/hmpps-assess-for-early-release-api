@@ -22,10 +22,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Offend
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class OffenderResource(private val offenderService: OffenderService) {
 
-  @GetMapping("/prison/{prisonCode}/decision-maker/caseload")
+  @GetMapping("/prison/{prisonCode}/case-admin/caseload")
   @PreAuthorize("hasAnyRole('SYSTEM_USER', 'AFER_ADMIN')")
   @Operation(
-    summary = "Returns the caseload for a decision maker within a prison",
+    summary = "Returns the caseload for a case admin within a prison",
     description = "Returns a list of offenders that require eligibility and suitability checks to be performed",
     security = [SecurityRequirement(name = "ROLE_SYSTEM_USER"), SecurityRequirement(name = "ROLE_AFER_ADMIN")],
   )
@@ -63,6 +63,6 @@ class OffenderResource(private val offenderService: OffenderService) {
       ),
     ],
   )
-  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
-    offenderService.getDecisionMakerCaseload(prisonCode)
+  fun getCaseAdminCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
+    offenderService.getCaseAdminCaseload(prisonCode)
 }

@@ -8,14 +8,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.ba
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 
 const val PRISON_CODE = "BMI"
-const val DECISION_MAKER_CASELOAD_URL = "/prison/$PRISON_CODE/decision-maker/caseload"
+const val CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
 
 class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
   @Test
   fun `should return unauthorized if no token`() {
     webTestClient.get()
-      .uri(DECISION_MAKER_CASELOAD_URL)
+      .uri(CASE_ADMIN_CASELOAD_URL)
       .exchange()
       .expectStatus()
       .isUnauthorized
@@ -24,7 +24,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
   @Test
   fun `should return forbidden if no role`() {
     webTestClient.get()
-      .uri(DECISION_MAKER_CASELOAD_URL)
+      .uri(CASE_ADMIN_CASELOAD_URL)
       .headers(setAuthorisation())
       .exchange()
       .expectStatus()
@@ -34,7 +34,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
   @Test
   fun `should return forbidden if wrong role`() {
     webTestClient.get()
-      .uri(DECISION_MAKER_CASELOAD_URL)
+      .uri(CASE_ADMIN_CASELOAD_URL)
       .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
       .exchange()
       .expectStatus()
@@ -48,7 +48,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
   @Test
   fun `should return offenders at prison with a status of not started`() {
     val offenders = webTestClient.get()
-      .uri(DECISION_MAKER_CASELOAD_URL)
+      .uri(CASE_ADMIN_CASELOAD_URL)
       .headers(setAuthorisation(roles = listOf("AFER_ADMIN")))
       .exchange()
       .expectStatus()

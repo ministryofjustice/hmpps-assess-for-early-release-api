@@ -22,7 +22,7 @@ class OffenderService(
   private val prisonerSearchService: PrisonerSearchService,
   private val telemetryClient: TelemetryClient,
 ) {
-  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
+  fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
     val offenders = offenderRepository.findByPrisonIdAndStatus(prisonCode, OffenderStatus.NOT_STARTED)
     return offenders.map {
       OffenderSummary(it.prisonerNumber, it.bookingId, it.firstName, it.lastName, it.hdced)
