@@ -9,7 +9,7 @@ data class OffenderSummary(
   @Schema(description = "The offender's prisoner number", example = "A1234AA")
   val prisonerNumber: String,
 
-  @Schema(description = "The bookingId associated with the licence", example = "773722")
+  @Schema(description = "The offender's booking id", example = "773722")
   val bookingId: Long,
 
   @Schema(description = "The offender's first name", example = "Bob")
