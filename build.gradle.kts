@@ -57,6 +57,9 @@ dependencies {
   // SQS/SNS dependencies
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.0")
 
+  // OpenAPI
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.8.0")
   testImplementation("com.h2database:h2")

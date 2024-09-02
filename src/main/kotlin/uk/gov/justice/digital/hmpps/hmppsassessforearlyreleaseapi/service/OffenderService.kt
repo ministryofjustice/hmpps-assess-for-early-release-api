@@ -5,6 +5,8 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
@@ -20,6 +22,13 @@ class OffenderService(
   private val prisonerSearchService: PrisonerSearchService,
   private val telemetryClient: TelemetryClient,
 ) {
+  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
+    val offenders = offenderRepository.findByPrisonIdAndStatus(prisonCode, OffenderStatus.NOT_STARTED)
+    return offenders.map {
+      OffenderSummary(it.prisonerNumber, it.bookingId, it.firstName, it.lastName, it.hdced)
+    }
+  }
+
   @Transactional
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonerSearchService.searchPrisonersByNomisIds(listOf(nomisId))
