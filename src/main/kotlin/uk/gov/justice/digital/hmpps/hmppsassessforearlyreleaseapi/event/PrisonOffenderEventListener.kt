@@ -37,7 +37,6 @@ class PrisonOffenderEventListener(
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)
     val eventType = messageAttributes.eventType.Value
     log.info("Received message $message, type $eventType")
-    println("Received fucking message $message, type $eventType")
 
     when (eventType) {
       PRISONER_RECEIVE_EVENT_TYPE -> {
