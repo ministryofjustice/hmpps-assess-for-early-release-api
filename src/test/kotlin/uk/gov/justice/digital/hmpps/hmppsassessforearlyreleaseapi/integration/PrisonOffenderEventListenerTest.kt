@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilAsserted
 import org.junit.jupiter.api.AfterAll
@@ -10,8 +11,10 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
+import org.springframework.transaction.annotation.Transactional
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.AdditionalInformationPrisonerUpdated
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.AdditionalInformationTransfer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.DiffCategory
@@ -107,6 +110,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   }
 
   @Test
+  @Transactional(readOnly = true)
   @Sql(
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",
@@ -149,10 +153,12 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       null,
     )
 
-    val updatedOffender = offenderRepository.findByPrisonerNumber(prisonerNumber)
-    assertThat(updatedOffender?.firstName).isEqualTo(firstName)
-    assertThat(updatedOffender?.lastName).isEqualTo(lastName)
-    assertThat(updatedOffender?.hdced).isEqualTo(hdced)
+    val createdOffender = offenderRepository.findByPrisonerNumber(prisonerNumber) ?: fail("offender not created")
+    assertThat(createdOffender.firstName).isEqualTo(firstName)
+    assertThat(createdOffender.lastName).isEqualTo(lastName)
+    assertThat(createdOffender.hdced).isEqualTo(hdced)
+    assertThat(createdOffender.assessments).hasSize(1)
+    assertThat(createdOffender.assessments.iterator().next().status).isEqualTo(AssessmentStatus.NOT_STARTED)
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
@@ -164,6 +170,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   )
   fun `Should update an existing offender`() {
     val newHdced = LocalDate.now().plusDays(20)
+    val newCrd = LocalDate.now().plusDays(56)
     val newFirstName = "new first name"
     val newLastName = "new last name"
 
@@ -175,6 +182,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
             firstName = newFirstName,
             lastName = newLastName,
             homeDetentionCurfewEligibilityDate = newHdced,
+            conditionalReleaseDate = newCrd,
           ),
         ),
       ),
@@ -199,10 +207,11 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       null,
     )
 
-    val updatedOffender = offenderRepository.findByPrisonerNumber(PRISONER_NUMBER)
-    assertThat(updatedOffender?.firstName).isEqualTo(newFirstName)
-    assertThat(updatedOffender?.lastName).isEqualTo(newLastName)
-    assertThat(updatedOffender?.hdced).isEqualTo(newHdced)
+    val updatedOffender = offenderRepository.findByPrisonerNumber(PRISONER_NUMBER) ?: fail("could not find updated offender")
+    assertThat(updatedOffender.firstName).isEqualTo(newFirstName)
+    assertThat(updatedOffender.lastName).isEqualTo(newLastName)
+    assertThat(updatedOffender.hdced).isEqualTo(newHdced)
+    assertThat(updatedOffender.crd).isEqualTo(newCrd)
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
