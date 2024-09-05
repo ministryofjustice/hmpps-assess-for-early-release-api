@@ -44,6 +44,7 @@ class OffenderServiceTest {
     assertThat(offenderCaptor.value)
       .extracting("prisonerNumber", "bookingId", "firstName", "lastName", "hdced")
       .isEqualTo(listOf(PRISONER_NUMBER, BOOKING_ID.toLong(), FIRST_NAME, LAST_NAME, hdced))
+    assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
 
   @Test

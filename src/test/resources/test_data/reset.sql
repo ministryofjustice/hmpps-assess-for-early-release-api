@@ -1,2 +1,2 @@
-truncate table offender;
-
+delete from assessment;
+delete from offender;

@@ -10,6 +10,9 @@ data class PrisonerSearchPrisoner(
   @JsonFormat(pattern = "yyyy-MM-dd")
   val homeDetentionCurfewEligibilityDate: LocalDate? = null,
 
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val conditionalReleaseDate: LocalDate? = null,
+
   val prisonId: String? = null,
 
   val firstName: String,

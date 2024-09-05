@@ -1,13 +1,17 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import org.hibernate.Hibernate
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -34,6 +38,11 @@ data class Offender(
   @NotNull
   val hdced: LocalDate,
 
+  val crd: LocalDate? = null,
+
+  @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  val assessments: MutableSet<Assessment> = mutableSetOf(),
+
   @NotNull
   @Enumerated(EnumType.STRING)
   val status: OffenderStatus = OffenderStatus.NOT_STARTED,
@@ -43,4 +52,19 @@ data class Offender(
 
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-)
+) {
+  @Override
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+    other as Offender
+
+    return id == other.id
+  }
+
+  @Override
+  override fun hashCode(): Int = javaClass.hashCode()
+
+  @Override
+  override fun toString() = this::class.simpleName + "(id: $id, status: $status)"
+}
