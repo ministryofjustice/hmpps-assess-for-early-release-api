@@ -14,10 +14,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import java.time.LocalDate
 
-const val PRISON_CODE = "BMI"
-const val PRISON_NUMBER = "A1234AD"
-const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
-const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
+private const val PRISON_CODE = "BMI"
+private const val PRISON_NUMBER = "A1234AD"
+private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
+private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 
 class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
@@ -68,8 +68,8 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
         .returnResult().responseBody!!
 
       assertThat(offenders).hasSize(4)
-      val prisonerNumbers = offenders.map { it.prisonerNumber }
-      assertThat(prisonerNumbers).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
+      val prisonNumbers = offenders.map { it.prisonNumber }
+      assertThat(prisonNumbers).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
     }
   }
 

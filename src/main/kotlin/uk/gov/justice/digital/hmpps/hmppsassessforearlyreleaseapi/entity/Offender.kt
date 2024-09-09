@@ -27,13 +27,13 @@ data class Offender(
   val bookingId: Long,
 
   @NotNull
-  val prisonerNumber: String,
+  val prisonNumber: String,
 
   val prisonId: String,
 
-  val firstName: String? = null,
+  val forename: String? = null,
 
-  val lastName: String? = null,
+  val surname: String? = null,
 
   @NotNull
   val hdced: LocalDate,

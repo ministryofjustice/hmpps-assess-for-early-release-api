@@ -34,7 +34,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-private const val PRISONER_NUMBER = "A1234AA"
+private const val PRISON_NUMBER = "A1234AA"
 private const val OLD_PRISON_CODE = "BMI"
 private const val NEW_PRISON_CODE = "MDI"
 
@@ -52,11 +52,11 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/transfer-prison.sql",
   )
   fun `prisoner received event should update offender prison`() {
-    assertThat(offenderRepository.findByPrisonerNumber(PRISONER_NUMBER)?.prisonId).isEqualTo(OLD_PRISON_CODE)
+    assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(OLD_PRISON_CODE)
 
     publishDomainEventMessage(
       AdditionalInformationTransfer(
-        nomsNumber = PRISONER_NUMBER,
+        nomsNumber = PRISON_NUMBER,
         reason = "TRANSFERRED",
         prisonId = NEW_PRISON_CODE,
       ),
@@ -70,14 +70,14 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       TRANSFERRED_EVENT_NAME,
       mapOf(
-        "NOMS-ID" to PRISONER_NUMBER,
+        "NOMS-ID" to PRISON_NUMBER,
         "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
         "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
       ),
       null,
     )
 
-    assertThat(offenderRepository.findByPrisonerNumber(PRISONER_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
+    assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
@@ -89,7 +89,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   )
   fun checkNoEventWhenNoRecordsToUpdate() {
     val someNonExistentPrisonNumber = "ZZ1234AA"
-    assertThat(offenderRepository.findByPrisonerNumber(someNonExistentPrisonNumber)).isNull()
+    assertThat(offenderRepository.findByPrisonNumber(someNonExistentPrisonNumber)).isNull()
 
     publishDomainEventMessage(
       AdditionalInformationTransfer(
@@ -116,7 +116,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/some-offenders.sql",
   )
   fun `Should create a new offender`() {
-    val prisonerNumber = "Z1234XY"
+    val prisonNumber = "Z1234XY"
     val hdced = LocalDate.now().plusDays(20)
     val firstName = "new first name"
     val lastName = "new last name"
@@ -126,7 +126,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         listOf(
           PrisonerSearchPrisoner(
             bookingId = "123",
-            prisonerNumber = prisonerNumber,
+            prisonerNumber = prisonNumber,
             prisonId = "HMI",
             firstName = firstName,
             lastName = lastName,
@@ -137,7 +137,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     publishDomainEventMessage(
-      AdditionalInformationPrisonerUpdated(nomsNumber = prisonerNumber, listOf(DiffCategory.SENTENCE)),
+      AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE)),
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -147,15 +147,15 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       PRISONER_CREATED_EVENT_NAME,
       mapOf(
-        "NOMS-ID" to prisonerNumber,
+        "NOMS-ID" to prisonNumber,
         "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
       ),
       null,
     )
 
-    val createdOffender = offenderRepository.findByPrisonerNumber(prisonerNumber) ?: fail("offender not created")
-    assertThat(createdOffender.firstName).isEqualTo(firstName)
-    assertThat(createdOffender.lastName).isEqualTo(lastName)
+    val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
+    assertThat(createdOffender.forename).isEqualTo(firstName)
+    assertThat(createdOffender.surname).isEqualTo(lastName)
     assertThat(createdOffender.hdced).isEqualTo(hdced)
     assertThat(createdOffender.assessments).hasSize(1)
     assertThat(createdOffender.assessments.iterator().next().status).isEqualTo(AssessmentStatus.NOT_STARTED)
@@ -178,7 +178,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       objectMapper.writeValueAsString(
         listOf(
           PrisonerSearchPrisoner(
-            PRISONER_NUMBER,
+            PRISON_NUMBER,
             firstName = newFirstName,
             lastName = newLastName,
             homeDetentionCurfewEligibilityDate = newHdced,
@@ -189,7 +189,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     publishDomainEventMessage(
-      AdditionalInformationPrisonerUpdated(nomsNumber = PRISONER_NUMBER, listOf(DiffCategory.SENTENCE)),
+      AdditionalInformationPrisonerUpdated(nomsNumber = PRISON_NUMBER, listOf(DiffCategory.SENTENCE)),
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -199,7 +199,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       PRISONER_UPDATED_EVENT_NAME,
       mapOf(
-        "NOMS-ID" to PRISONER_NUMBER,
+        "NOMS-ID" to PRISON_NUMBER,
         "PRISONER-FIRST_NAME" to newFirstName,
         "PRISONER-LAST_NAME" to newLastName,
         "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
@@ -207,9 +207,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       null,
     )
 
-    val updatedOffender = offenderRepository.findByPrisonerNumber(PRISONER_NUMBER) ?: fail("could not find updated offender")
-    assertThat(updatedOffender.firstName).isEqualTo(newFirstName)
-    assertThat(updatedOffender.lastName).isEqualTo(newLastName)
+    val updatedOffender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("could not find updated offender")
+    assertThat(updatedOffender.forename).isEqualTo(newFirstName)
+    assertThat(updatedOffender.surname).isEqualTo(newLastName)
     assertThat(updatedOffender.hdced).isEqualTo(newHdced)
     assertThat(updatedOffender.crd).isEqualTo(newCrd)
 
@@ -241,7 +241,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         eventType = PRISONER_UPDATED_EVENT_TYPE,
         additionalInformation = additionalInformation,
         occurredAt = Instant.now().toString(),
-        description = "Release dates calculated for $PRISONER_NUMBER",
+        description = "Release dates calculated for $PRISON_NUMBER",
         version = "1.0",
       ),
     )
