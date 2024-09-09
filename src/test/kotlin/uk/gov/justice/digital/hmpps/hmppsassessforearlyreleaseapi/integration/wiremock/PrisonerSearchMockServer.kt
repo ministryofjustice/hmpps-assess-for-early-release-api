@@ -6,11 +6,9 @@ import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import java.time.LocalDate
 
-class PrisonerSearchMockServer : WireMockServer(WIREMOCK_PORT) {
-  companion object {
-    private const val WIREMOCK_PORT = 8099
-  }
+private const val PRISONER_SEARCH_WIREMOCK_PORT = 8099
 
+class PrisonerSearchMockServer : WireMockServer(PRISONER_SEARCH_WIREMOCK_PORT) {
   fun stubSearchPrisonersByNomisIds(prisonerSearchResponse: String? = null) {
     val json = prisonerSearchResponse ?: """[
             {

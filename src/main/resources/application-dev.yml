@@ -9,6 +9,9 @@ hmpps:
   prisonersearch:
     api:
       url: "https://prisoner-search-dev.prison.service.justice.gov.uk"
+  prisonregister:
+    api:
+      url: "https://prison-register-dev.hmpps.service.justice.gov.uk"
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4666

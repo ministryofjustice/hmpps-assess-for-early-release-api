@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
 import java.time.LocalDateTime
@@ -23,6 +24,7 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 @Service
 class OffenderService(
   private val offenderRepository: OffenderRepository,
+  private val prisonRegisterService: PrisonRegisterService,
   private val prisonerSearchService: PrisonerSearchService,
   private val telemetryClient: TelemetryClient,
 ) {
@@ -39,6 +41,9 @@ class OffenderService(
     val offender = offenderRepository.findByPrisonerNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
+    val prisonIdsToNames = prisonRegisterService.getPrisonIdsAndNames()
+    val offenderLocation = prisonIdsToNames[offender.prisonId] ?: throw EntityNotFoundException("Cannot find a prison with prison id in prison register: ${offender.prisonId}")
+
     val currentAssessment = offender.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
     return AssessmentSummary(
       forename = offender.firstName,
@@ -46,7 +51,7 @@ class OffenderService(
       prisonNumber = offender.prisonerNumber,
       hdced = offender.hdced,
       crd = offender.crd,
-      location = offender.prisonId,
+      location = offenderLocation,
       status = currentAssessment.status,
     )
   }
