@@ -55,7 +55,7 @@ hmpps:
       url: http://localhost:8091/api
   prisonregister:
     api:
-      url: http://localhost:8092/api
+      url: http://localhost:8092
   community:
     api:
       url: http://localhost:8093

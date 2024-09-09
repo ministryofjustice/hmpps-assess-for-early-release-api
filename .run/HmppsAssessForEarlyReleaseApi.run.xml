@@ -9,6 +9,7 @@
       <env name="SERVER_PORT" value="8089" />
       <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://${DB_SERVER}/${DB_NAME}" />
       <env name="SPRING_PROFILES_ACTIVE" value="dev" />
+      <env name="HMPPS_PRISON_REGISTER_API_URL" value="https://prison-register-dev.hmpps.service.justice.gov.uk" />
     </envs>
     <module name="hmpps-assess-for-early-release-api.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.HmppsAssessForEarlyReleaseApi" />
