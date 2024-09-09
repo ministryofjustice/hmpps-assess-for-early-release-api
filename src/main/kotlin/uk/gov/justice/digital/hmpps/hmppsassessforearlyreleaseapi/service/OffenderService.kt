@@ -32,13 +32,13 @@ class OffenderService(
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
     val offenders = offenderRepository.findByPrisonIdAndStatus(prisonCode, OffenderStatus.NOT_STARTED)
     return offenders.map {
-      OffenderSummary(it.prisonerNumber, it.bookingId, it.firstName, it.lastName, it.hdced)
+      OffenderSummary(it.prisonNumber, it.bookingId, it.forename, it.surname, it.hdced)
     }
   }
 
   @Transactional
   fun getCurrentAssessment(prisonNumber: String): AssessmentSummary {
-    val offender = offenderRepository.findByPrisonerNumber(prisonNumber)
+    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
     val prisonIdsToNames = prisonRegisterService.getPrisonIdsAndNames()
@@ -46,9 +46,9 @@ class OffenderService(
 
     val currentAssessment = offender.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
     return AssessmentSummary(
-      forename = offender.firstName,
-      surname = offender.lastName,
-      prisonNumber = offender.prisonerNumber,
+      forename = offender.forename,
+      surname = offender.surname,
+      prisonNumber = offender.prisonNumber,
       hdced = offender.hdced,
       crd = offender.crd,
       location = offenderLocation,
@@ -59,14 +59,14 @@ class OffenderService(
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonerSearchService.searchPrisonersByNomisIds(listOf(nomisId))
     if (prisoners.isEmpty()) {
-      val msg = "Could not find prisoner with prisonerNumber $nomisId in prisoner search"
+      val msg = "Could not find prisoner with prisonNumber $nomisId in prisoner search"
       log.warn(msg)
       throw Exception(msg)
     }
 
     val prisoner = prisoners.first()
     if (prisoner.homeDetentionCurfewEligibilityDate != null) {
-      val offender = offenderRepository.findByPrisonerNumber(nomisId)
+      val offender = offenderRepository.findByPrisonNumber(nomisId)
       if (offender != null) {
         updateOffender(offender, prisoner)
       } else {
@@ -78,10 +78,10 @@ class OffenderService(
   private fun createOffender(prisoner: PrisonerSearchPrisoner) {
     val offender = Offender(
       bookingId = prisoner.bookingId!!.toLong(),
-      prisonerNumber = prisoner.prisonerNumber,
+      prisonNumber = prisoner.prisonerNumber,
       prisonId = prisoner.prisonId!!,
-      firstName = prisoner.firstName,
-      lastName = prisoner.lastName,
+      forename = prisoner.firstName,
+      surname = prisoner.lastName,
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
     )
@@ -101,8 +101,8 @@ class OffenderService(
   private fun updateOffender(offender: Offender, prisoner: PrisonerSearchPrisoner) {
     if (hasOffenderBeenUpdated(offender, prisoner)) {
       val updatedOffender = offender.copy(
-        firstName = prisoner.firstName,
-        lastName = prisoner.lastName,
+        forename = prisoner.firstName,
+        surname = prisoner.lastName,
         hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
         crd = prisoner.conditionalReleaseDate,
         lastUpdatedTimestamp = LocalDateTime.now(),
@@ -122,7 +122,7 @@ class OffenderService(
   }
 
   private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
-    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate || offender.crd != prisoner.conditionalReleaseDate || offender.firstName != prisoner.firstName || offender.lastName != prisoner.lastName
+    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate || offender.crd != prisoner.conditionalReleaseDate || offender.forename != prisoner.firstName || offender.surname != prisoner.lastName
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

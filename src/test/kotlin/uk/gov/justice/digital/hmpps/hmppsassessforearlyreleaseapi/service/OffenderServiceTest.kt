@@ -42,12 +42,12 @@ class OffenderServiceTest {
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
-    verify(offenderRepository).findByPrisonerNumber(PRISON_NUMBER)
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonerNumber", "bookingId", "firstName", "lastName", "hdced")
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
       .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
@@ -64,7 +64,7 @@ class OffenderServiceTest {
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
-    verify(offenderRepository, never()).findByPrisonerNumber(PRISON_NUMBER)
+    verify(offenderRepository, never()).findByPrisonNumber(PRISON_NUMBER)
   }
 
   @Test
@@ -78,11 +78,11 @@ class OffenderServiceTest {
         prisonerSearchPrisoner,
       ),
     )
-    whenever(offenderRepository.findByPrisonerNumber(PRISON_NUMBER)).thenReturn(
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
       Offender(
         id = 1,
         bookingId = BOOKING_ID.toLong(),
-        prisonerNumber = PRISON_NUMBER,
+        prisonNumber = PRISON_NUMBER,
         prisonId = PRISON_ID,
         hdced = existingHdced,
       ),
@@ -91,12 +91,12 @@ class OffenderServiceTest {
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
-    verify(offenderRepository).findByPrisonerNumber(PRISON_NUMBER)
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonerNumber", "bookingId", "firstName", "lastName", "hdced")
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
       .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, updatedHdced))
   }
 
@@ -110,29 +110,29 @@ class OffenderServiceTest {
         prisonerSearchPrisoner,
       ),
     )
-    whenever(offenderRepository.findByPrisonerNumber(PRISON_NUMBER)).thenReturn(
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
       Offender(
         id = 1,
         bookingId = BOOKING_ID.toLong(),
-        prisonerNumber = PRISON_NUMBER,
+        prisonNumber = PRISON_NUMBER,
         prisonId = PRISON_ID,
         hdced = hdced,
-        firstName = FORENAME,
-        lastName = SURNAME,
+        forename = FORENAME,
+        surname = SURNAME,
       ),
     )
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
-    verify(offenderRepository).findByPrisonerNumber(PRISON_NUMBER)
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
     verify(offenderRepository, never()).save(any())
   }
 
   @Test
   fun `should throw an exception when the the offender cannot be found in prisoner search`() {
     val exception = assertThrows<Exception> { service.createOrUpdateOffender(PRISON_NUMBER) }
-    assertThat(exception.message).isEqualTo("Could not find prisoner with prisonerNumber $PRISON_NUMBER in prisoner search")
+    assertThat(exception.message).isEqualTo("Could not find prisoner with prisonNumber $PRISON_NUMBER in prisoner search")
   }
 
   @Test
@@ -142,19 +142,19 @@ class OffenderServiceTest {
     val offender = Offender(
       id = 1,
       bookingId = BOOKING_ID.toLong(),
-      prisonerNumber = PRISON_NUMBER,
+      prisonNumber = PRISON_NUMBER,
       prisonId = PRISON_ID,
-      firstName = FORENAME,
-      lastName = SURNAME,
+      forename = FORENAME,
+      surname = SURNAME,
       hdced = hdced,
     )
     offender.assessments.add(Assessment(offender = offender))
-    whenever(offenderRepository.findByPrisonerNumber(PRISON_NUMBER)).thenReturn(offender)
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonRegisterService.getPrisonIdsAndNames()).thenReturn(mapOf(PRISON_ID to prisonName))
 
     val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-    verify(offenderRepository).findByPrisonerNumber(PRISON_NUMBER)
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
     verify(prisonRegisterService).getPrisonIdsAndNames()
     assertThat(assessment).extracting(
       "forename",

@@ -1,4 +1,4 @@
-insert into offender(id, booking_id, prisoner_number, prison_id, first_name, last_name, hdced, status)
+insert into offender(id, booking_id, prison_number, prison_id, forename, surname, hdced, status)
 values
     (1, 10, 'A1234AA', 'BMI', 'FIRST', 'LAST','2020-10-25', 'NOT_STARTED'),
     (2, 20, 'A1234AB', 'BMI', 'FIRST', 'LAST','2020-10-25', 'NOT_STARTED'),
