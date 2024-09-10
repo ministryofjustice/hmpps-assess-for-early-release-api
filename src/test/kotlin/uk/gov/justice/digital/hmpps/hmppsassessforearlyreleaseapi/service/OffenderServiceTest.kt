@@ -13,6 +13,7 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -21,13 +22,20 @@ import java.time.LocalDate
 
 class OffenderServiceTest {
 
+  private val assessmentRepository = mock<AssessmentRepository>()
   private val offenderRepository = mock<OffenderRepository>()
   private val prisonRegisterService = mock<PrisonRegisterService>()
   private val prisonerSearchService = mock<PrisonerSearchService>()
   private val telemetryClient = mock<TelemetryClient>()
 
   private val service: OffenderService =
-    OffenderService(offenderRepository, prisonRegisterService, prisonerSearchService, telemetryClient)
+    OffenderService(
+      assessmentRepository,
+      offenderRepository,
+      prisonRegisterService,
+      prisonerSearchService,
+      telemetryClient,
+    )
 
   @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {
@@ -79,13 +87,7 @@ class OffenderServiceTest {
       ),
     )
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
-      Offender(
-        id = 1,
-        bookingId = BOOKING_ID.toLong(),
-        prisonNumber = PRISON_NUMBER,
-        prisonId = PRISON_ID,
-        hdced = existingHdced,
-      ),
+      anOffender(existingHdced),
     )
 
     service.createOrUpdateOffender(PRISON_NUMBER)
@@ -111,15 +113,7 @@ class OffenderServiceTest {
       ),
     )
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
-      Offender(
-        id = 1,
-        bookingId = BOOKING_ID.toLong(),
-        prisonNumber = PRISON_NUMBER,
-        prisonId = PRISON_ID,
-        hdced = hdced,
-        forename = FORENAME,
-        surname = SURNAME,
-      ),
+      anOffender(hdced),
     )
 
     service.createOrUpdateOffender(PRISON_NUMBER)
@@ -139,16 +133,7 @@ class OffenderServiceTest {
   fun `should get an offenders current assessment`() {
     val hdced = LocalDate.now().plusDays(5)
     val prisonName = "a prison"
-    val offender = Offender(
-      id = 1,
-      bookingId = BOOKING_ID.toLong(),
-      prisonNumber = PRISON_NUMBER,
-      prisonId = PRISON_ID,
-      forename = FORENAME,
-      surname = SURNAME,
-      hdced = hdced,
-    )
-    offender.assessments.add(Assessment(offender = offender))
+    val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonRegisterService.getPrisonIdsAndNames()).thenReturn(mapOf(PRISON_ID to prisonName))
 
@@ -165,6 +150,32 @@ class OffenderServiceTest {
       "location",
       "status",
     ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, prisonName, AssessmentStatus.NOT_STARTED))
+  }
+
+  @Test
+  fun `should opt-out an offender`() {
+    val offender = anOffender()
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
+
+    service.optOut(PRISON_NUMBER)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository).save(assessmentCaptor.capture())
+    assertThat(assessmentCaptor.value.status).isEqualTo(AssessmentStatus.OPTED_OUT)
+  }
+
+  private fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
+    val offender = Offender(
+      id = 1,
+      bookingId = BOOKING_ID.toLong(),
+      prisonNumber = PRISON_NUMBER,
+      prisonId = PRISON_ID,
+      forename = FORENAME,
+      surname = SURNAME,
+      hdced = hdced,
+    )
+    offender.assessments.add(Assessment(offender = offender))
+    return offender
   }
 
   private fun aPrisonerSearchPrisoner(hdced: LocalDate? = null) = PrisonerSearchPrisoner(
