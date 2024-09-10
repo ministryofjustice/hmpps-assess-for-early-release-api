@@ -201,7 +201,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("couldn't find offender with prison number: $PRISON_NUMBER")
       val assessment = assessmentRepository.findByOffender(offender)
-      assertThat(assessment?.status).isEqualTo(AssessmentStatus.OPTED_OUT)
+      assertThat(assessment.first().status).isEqualTo(AssessmentStatus.OPTED_OUT)
     }
 
     @Test

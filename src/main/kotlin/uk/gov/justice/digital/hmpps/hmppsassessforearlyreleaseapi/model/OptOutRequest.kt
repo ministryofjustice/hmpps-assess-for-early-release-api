@@ -17,6 +17,6 @@ data class OptOutRequest(
   @field:NotNull
   val reasonType: OptOutReasonType,
 
-  @Schema(description = "The reason the offender is opting out if reasonType is other", example = "Does")
+  @Schema(description = "The reason the offender is opting out if reasonType is other", example = "Reason for the offending opting out")
   val otherDescription: String? = null,
 )
