@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -23,6 +24,7 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 
 @Service
 class OffenderService(
+  private val assessmentRepository: AssessmentRepository,
   private val offenderRepository: OffenderRepository,
   private val prisonRegisterService: PrisonRegisterService,
   private val prisonerSearchService: PrisonerSearchService,
@@ -44,7 +46,7 @@ class OffenderService(
     val prisonIdsToNames = prisonRegisterService.getPrisonIdsAndNames()
     val offenderLocation = prisonIdsToNames[offender.prisonId] ?: throw EntityNotFoundException("Cannot find a prison with prison id in prison register: ${offender.prisonId}")
 
-    val currentAssessment = offender.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
+    val currentAssessment = offender.currentAssessment()
     return AssessmentSummary(
       forename = offender.forename,
       surname = offender.surname,
@@ -54,6 +56,14 @@ class OffenderService(
       location = offenderLocation,
       status = currentAssessment.status,
     )
+  }
+
+  @Transactional
+  fun optOut(prisonNumber: String) {
+    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
+      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+    val optedOutAssessment = offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT)
+    assessmentRepository.save(optedOutAssessment)
   }
 
   fun createOrUpdateOffender(nomisId: String) {
@@ -123,6 +133,8 @@ class OffenderService(
 
   private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
     offender.hdced != prisoner.homeDetentionCurfewEligibilityDate || offender.crd != prisoner.conditionalReleaseDate || offender.forename != prisoner.firstName || offender.surname != prisoner.lastName
+
+  fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

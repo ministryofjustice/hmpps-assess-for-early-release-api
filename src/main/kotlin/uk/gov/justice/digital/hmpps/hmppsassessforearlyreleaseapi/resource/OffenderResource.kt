@@ -8,14 +8,22 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import jakarta.validation.ValidationException
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.OffenderService
 
 @RestController
@@ -109,4 +117,57 @@ class OffenderResource(private val offenderService: OffenderService) {
   )
   fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) =
     offenderService.getCurrentAssessment(prisonNumber)
+
+  @PutMapping("/offender/{prisonNumber}/current-assessment/opt-out")
+  @PreAuthorize("hasAnyRole('SYSTEM_USER', 'ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Opts an offender out of being assessed for early release.",
+    description = "Opts an offender out of being assessed for early release.",
+    security = [SecurityRequirement(name = "ROLE_SYSTEM_USER"), SecurityRequirement(name = "ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The offender has been opted out of assess for early release.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun optOut(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Valid @RequestBody optOutRequest: OptOutRequest,
+  ) {
+    if (optOutRequest.reasonType == OptOutReasonType.OTHER && optOutRequest.otherDescription.isNullOrBlank()) {
+      throw ValidationException("otherDescription cannot be blank if reasonType is OTHER")
+    }
+
+    offenderService.optOut(prisonNumber)
+  }
 }
