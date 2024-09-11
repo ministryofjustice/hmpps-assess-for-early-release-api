@@ -62,7 +62,7 @@ class OffenderService(
   fun optOut(prisonNumber: String) {
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-    val optedOutAssessment = offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT)
+    val optedOutAssessment = offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT, lastUpdatedTimestamp = LocalDateTime.now())
     assessmentRepository.save(optedOutAssessment)
   }
 

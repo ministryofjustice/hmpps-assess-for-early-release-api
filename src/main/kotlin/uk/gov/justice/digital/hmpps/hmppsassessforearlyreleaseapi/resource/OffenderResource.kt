@@ -90,7 +90,7 @@ class OffenderResource(private val offenderService: OffenderService) {
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AssessmentSummary::class)),
+            schema = Schema(implementation = AssessmentSummary::class),
           ),
         ],
       ),
