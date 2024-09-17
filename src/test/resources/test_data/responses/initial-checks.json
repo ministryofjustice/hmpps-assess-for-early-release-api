@@ -1,0 +1,142 @@
+{
+  "assessmentSummary": {
+    "forename": "FIRST-1",
+    "surname": "LAST-1",
+    "prisonNumber": "A1234AA",
+    "hdced": "2020-10-25",
+    "crd": "2020-11-14",
+    "location": "Birmingham (HMP)",
+    "status": "NOT_STARTED",
+    "policyVersion": "1.0"
+  },
+  "eligibility": [
+    {
+      "code": "sex-offender-register",
+      "taskName": "Sex offenders' register",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "extended-sentence-for-violent-or-sexual-offences",
+      "taskName": "Extended Sentence for violent or sexual offences",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "rotl-failure-to-return",
+      "taskName": "ROTL failure to return",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "community-order-curfew-breach",
+      "taskName": "Community order curfew breach",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "recalled-for-breaching-hdc-curfew",
+      "taskName": "Recalled for breaching HDC curfew",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "deportation-orders",
+      "taskName": "Deportation Orders",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "recalled-from-early-release-on-compassionate-grounds",
+      "taskName": "Recalled from early release on compassionate grounds",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "terrorism",
+      "taskName": "Terrorism",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "two-thirds-release",
+      "taskName": "Two-thirds release",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "section-244ZB-notice",
+      "taskName": "Section 244ZB notice",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "section-20b-release",
+      "taskName": "Section 20B release",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    }
+  ],
+  "suitability": [
+    {
+      "code": "sexual-offending-history",
+      "taskName": "Sexual offending history",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "liable-to-deportation",
+      "taskName": "Liable to deportation",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "recalled-for-poor-behaviour-on-hdc",
+      "taskName": "Recalled for poor behaviour on hdc",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "category-a",
+      "taskName": "Category A",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "rosh-and-mappa",
+      "taskName": "RoSH and MAPPA",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "presumed-unsuitable-offences",
+      "taskName": "Presumed unsuitable offences",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    },
+    {
+      "code": "terrorist-offending-history",
+      "taskName": "Terrorist offending history",
+      "question": "some question...",
+      "state": "NOT_STARTED",
+      "answer": null
+    }
+  ]
+}

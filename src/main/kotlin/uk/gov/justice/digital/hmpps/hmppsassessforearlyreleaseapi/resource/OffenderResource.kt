@@ -32,11 +32,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Offend
 class OffenderResource(private val offenderService: OffenderService) {
 
   @GetMapping("/prison/{prisonCode}/case-admin/caseload")
-  @PreAuthorize("hasAnyRole('SYSTEM_USER', 'ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
     summary = "Returns the caseload for a case admin within a prison",
     description = "Returns a list of offenders that require eligibility and suitability checks to be performed",
-    security = [SecurityRequirement(name = "ROLE_SYSTEM_USER"), SecurityRequirement(name = "ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN")],
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
     value = [
@@ -76,11 +76,11 @@ class OffenderResource(private val offenderService: OffenderService) {
     offenderService.getCaseAdminCaseload(prisonCode)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")
-  @PreAuthorize("hasAnyRole('SYSTEM_USER', 'ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
     summary = "Returns the current assessment for a prisoner",
     description = "Returns details of the current assessment for a prisoner",
-    security = [SecurityRequirement(name = "ROLE_SYSTEM_USER"), SecurityRequirement(name = "ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN")],
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
     value = [
@@ -120,12 +120,12 @@ class OffenderResource(private val offenderService: OffenderService) {
     offenderService.getCurrentAssessment(prisonNumber)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/opt-out")
-  @PreAuthorize("hasAnyRole('SYSTEM_USER', 'ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   @Operation(
     summary = "Opts an offender out of being assessed for early release.",
     description = "Opts an offender out of being assessed for early release.",
-    security = [SecurityRequirement(name = "ROLE_SYSTEM_USER"), SecurityRequirement(name = "ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN")],
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
     value = [

@@ -33,6 +33,9 @@ data class Assessment(
 
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
+
+  @NotNull
+  val policyVersion: String = "???",
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"

@@ -55,6 +55,7 @@ class OffenderService(
       crd = offender.crd,
       location = offenderLocation,
       status = currentAssessment.status,
+      policyVersion = currentAssessment.policyVersion,
     )
   }
 
@@ -71,7 +72,7 @@ class OffenderService(
     if (prisoners.isEmpty()) {
       val msg = "Could not find prisoner with prisonNumber $nomisId in prisoner search"
       log.warn(msg)
-      throw Exception(msg)
+      error(msg)
     }
 
     val prisoner = prisoners.first()
@@ -95,7 +96,7 @@ class OffenderService(
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
     )
-    offender.assessments.add(Assessment(offender = offender))
+    offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
     offenderRepository.save(offender)
 
     telemetryClient.trackEvent(

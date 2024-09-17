@@ -143,6 +143,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
           crd = LocalDate.of(2022, 3, 21),
           location = "Birmingham (HMP)",
           status = AssessmentStatus.NOT_STARTED,
+          policyVersion = "1.0",
         ),
       )
     }
@@ -199,7 +200,8 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isNoContent
 
-      val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("couldn't find offender with prison number: $PRISON_NUMBER")
+      val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
+        ?: fail("couldn't find offender with prison number: $PRISON_NUMBER")
       val assessment = assessmentRepository.findByOffender(offender)
       assertThat(assessment.first().status).isEqualTo(AssessmentStatus.OPTED_OUT)
     }

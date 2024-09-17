@@ -9,6 +9,8 @@
 # to match those used in the docker-compose files.
 #
 
+set -e
+
 restart_docker () {
   # Stop the back end containers
   echo "Bringing down current containers ..."
@@ -56,6 +58,6 @@ fi
 # Run the application with stdout and dev profiles active
 echo "Starting the API locally"
 
-SPRING_PROFILES_ACTIVE=dev ./gradlew bootRun
+SPRING_PROFILES_ACTIVE=dev ./gradlew clean bootRun
 
 # End
