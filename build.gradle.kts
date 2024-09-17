@@ -58,7 +58,7 @@ dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:4.0.0")
 
   // OpenAPI
-  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0")
+  implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0")
 
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.0.4")
   testImplementation("org.wiremock:wiremock-standalone:3.8.0")
@@ -68,6 +68,9 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.2.1")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.projectreactor:reactor-test")
+  testImplementation("io.swagger.parser.v3:swagger-parser:2.1.22") {
+    exclude(group = "io.swagger.core.v3")
+  }
 }
 
 kotlin {

@@ -15,8 +15,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
 import java.time.LocalDate
 
@@ -58,6 +65,7 @@ class OffenderServiceTest {
       .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
       .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
+    assertThat(offenderCaptor.value.assessments.first().policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
   }
 
   @Test
@@ -132,10 +140,9 @@ class OffenderServiceTest {
   @Test
   fun `should get an offenders current assessment`() {
     val hdced = LocalDate.now().plusDays(5)
-    val prisonName = "a prison"
     val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonRegisterService.getPrisonIdsAndNames()).thenReturn(mapOf(PRISON_ID to prisonName))
+    whenever(prisonRegisterService.getPrisonIdsAndNames()).thenReturn(mapOf(PRISON_ID to PRISON_NAME))
 
     val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
@@ -149,7 +156,7 @@ class OffenderServiceTest {
       "crd",
       "location",
       "status",
-    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, prisonName, AssessmentStatus.NOT_STARTED))
+    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, PRISON_NAME, AssessmentStatus.NOT_STARTED))
   }
 
   @Test
@@ -162,36 +169,5 @@ class OffenderServiceTest {
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(AssessmentStatus.OPTED_OUT)
-  }
-
-  private fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
-    val offender = Offender(
-      id = 1,
-      bookingId = BOOKING_ID.toLong(),
-      prisonNumber = PRISON_NUMBER,
-      prisonId = PRISON_ID,
-      forename = FORENAME,
-      surname = SURNAME,
-      hdced = hdced,
-    )
-    offender.assessments.add(Assessment(offender = offender))
-    return offender
-  }
-
-  private fun aPrisonerSearchPrisoner(hdced: LocalDate? = null) = PrisonerSearchPrisoner(
-    PRISON_NUMBER,
-    bookingId = BOOKING_ID,
-    hdced,
-    firstName = FORENAME,
-    lastName = SURNAME,
-    prisonId = PRISON_ID,
-  )
-
-  private companion object {
-    const val PRISON_NUMBER = "A1234AA"
-    const val BOOKING_ID = "123"
-    const val FORENAME = "Bob"
-    const val SURNAME = "Smith"
-    const val PRISON_ID = "AFG"
   }
 }

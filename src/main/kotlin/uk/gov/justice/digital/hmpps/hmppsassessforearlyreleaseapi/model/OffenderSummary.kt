@@ -15,7 +15,7 @@ data class OffenderSummary(
   @Schema(description = "The offender's first name", example = "Bob")
   val forename: String?,
 
-  @Schema(description = "The offender's surname", example = "Bob")
+  @Schema(description = "The offender's surname", example = "Smith")
   val surname: String?,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "22/11/2026")
