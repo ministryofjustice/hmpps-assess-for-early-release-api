@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import java.time.LocalDate
 
 class PrisonerSearchServiceTest {
   private val prisonerSearchApiClient = mock<PrisonerSearchApiClient>()
@@ -29,8 +30,8 @@ class PrisonerSearchServiceTest {
 
     val prisonerSearchPrisoners =
       listOf(
-        PrisonerSearchPrisoner(prisonerNumber = nomisId1, firstName = "firstname1", lastName = "lastname1"),
-        PrisonerSearchPrisoner(prisonerNumber = nomisId2, firstName = "firstname2", lastName = "lastname2"),
+        PrisonerSearchPrisoner(prisonerNumber = nomisId1, firstName = "firstname1", lastName = "lastname1", dateOfBirth = LocalDate.of(1981, 5, 23)),
+        PrisonerSearchPrisoner(prisonerNumber = nomisId2, firstName = "firstname2", lastName = "lastname2", dateOfBirth = LocalDate.of(1998, 3, 30)),
       )
     whenever(prisonerSearchApiClient.searchPrisonersByNomisIds(nomisIds)).thenReturn(prisonerSearchPrisoners)
 

@@ -36,6 +36,9 @@ data class Offender(
   val surname: String? = null,
 
   @NotNull
+  val dateOfBirth: LocalDate,
+
+  @NotNull
   val hdced: LocalDate,
 
   val crd: LocalDate? = null,

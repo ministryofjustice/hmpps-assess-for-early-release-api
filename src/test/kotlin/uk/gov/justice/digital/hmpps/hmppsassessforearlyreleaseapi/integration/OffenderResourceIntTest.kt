@@ -139,6 +139,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
           forename = "FIRST-4",
           surname = "LAST-4",
           prisonNumber = PRISON_NUMBER,
+          dateOfBirth = LocalDate.of(2001, 12, 25),
           hdced = LocalDate.of(2020, 10, 25),
           crd = LocalDate.of(2022, 3, 21),
           location = "Birmingham (HMP)",

@@ -18,4 +18,6 @@ data class PrisonerSearchPrisoner(
   val firstName: String,
 
   val lastName: String,
+
+  val dateOfBirth: LocalDate,
 )

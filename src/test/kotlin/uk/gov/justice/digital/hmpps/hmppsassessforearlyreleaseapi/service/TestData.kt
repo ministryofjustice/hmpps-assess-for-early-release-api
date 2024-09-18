@@ -24,6 +24,7 @@ object TestData {
       prisonId = PRISON_ID,
       forename = FORENAME,
       surname = SURNAME,
+      dateOfBirth = LocalDate.of(1981, 5, 23),
       hdced = hdced,
     )
     offender.assessments.add(Assessment(offender = offender))
@@ -36,12 +37,14 @@ object TestData {
     hdced,
     firstName = FORENAME,
     lastName = SURNAME,
+    dateOfBirth = LocalDate.of(1981, 5, 23),
     prisonId = PRISON_ID,
   )
 
   fun anAssessmentSummary() = AssessmentSummary(
     forename = FORENAME,
     surname = SURNAME,
+    dateOfBirth = LocalDate.of(1981, 5, 23),
     prisonNumber = PRISON_NUMBER,
     hdced = LocalDate.of(2020, 10, 25),
     crd = LocalDate.of(2022, 3, 21),
