@@ -130,6 +130,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
             prisonId = "HMI",
             firstName = firstName,
             lastName = lastName,
+            dateOfBirth = LocalDate.of(1981, 5, 23),
             homeDetentionCurfewEligibilityDate = hdced,
           ),
         ),
@@ -173,6 +174,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val newCrd = LocalDate.now().plusDays(56)
     val newFirstName = "new first name"
     val newLastName = "new last name"
+    val newDob = LocalDate.of(1994, 7, 16)
 
     prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
       objectMapper.writeValueAsString(
@@ -181,6 +183,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
             PRISON_NUMBER,
             firstName = newFirstName,
             lastName = newLastName,
+            dateOfBirth = newDob,
             homeDetentionCurfewEligibilityDate = newHdced,
             conditionalReleaseDate = newCrd,
           ),
@@ -202,6 +205,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         "NOMS-ID" to PRISON_NUMBER,
         "PRISONER-FIRST_NAME" to newFirstName,
         "PRISONER-LAST_NAME" to newLastName,
+        "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
         "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
       ),
       null,

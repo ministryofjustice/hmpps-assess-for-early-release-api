@@ -44,12 +44,14 @@ class OffenderService(
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
     val prisonIdsToNames = prisonRegisterService.getPrisonIdsAndNames()
-    val offenderLocation = prisonIdsToNames[offender.prisonId] ?: throw EntityNotFoundException("Cannot find a prison with prison id in prison register: ${offender.prisonId}")
+    val offenderLocation = prisonIdsToNames[offender.prisonId]
+      ?: throw EntityNotFoundException("Cannot find a prison with prison id in prison register: ${offender.prisonId}")
 
     val currentAssessment = offender.currentAssessment()
     return AssessmentSummary(
       forename = offender.forename,
       surname = offender.surname,
+      dateOfBirth = offender.dateOfBirth,
       prisonNumber = offender.prisonNumber,
       hdced = offender.hdced,
       crd = offender.crd,
@@ -63,7 +65,8 @@ class OffenderService(
   fun optOut(prisonNumber: String) {
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-    val optedOutAssessment = offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT, lastUpdatedTimestamp = LocalDateTime.now())
+    val optedOutAssessment =
+      offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT, lastUpdatedTimestamp = LocalDateTime.now())
     assessmentRepository.save(optedOutAssessment)
   }
 
@@ -93,6 +96,7 @@ class OffenderService(
       prisonId = prisoner.prisonId!!,
       forename = prisoner.firstName,
       surname = prisoner.lastName,
+      dateOfBirth = prisoner.dateOfBirth,
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
     )
@@ -114,6 +118,7 @@ class OffenderService(
       val updatedOffender = offender.copy(
         forename = prisoner.firstName,
         surname = prisoner.lastName,
+        dateOfBirth = prisoner.dateOfBirth,
         hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
         crd = prisoner.conditionalReleaseDate,
         lastUpdatedTimestamp = LocalDateTime.now(),
@@ -125,6 +130,7 @@ class OffenderService(
           "NOMS-ID" to prisoner.prisonerNumber,
           "PRISONER-FIRST_NAME" to prisoner.firstName,
           "PRISONER-LAST_NAME" to prisoner.lastName,
+          "PRISONER_DOB" to prisoner.dateOfBirth.format(DateTimeFormatter.ISO_DATE),
           "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
         ),
         null,
@@ -133,7 +139,11 @@ class OffenderService(
   }
 
   private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
-    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate || offender.crd != prisoner.conditionalReleaseDate || offender.forename != prisoner.firstName || offender.surname != prisoner.lastName
+    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+      offender.crd != prisoner.conditionalReleaseDate ||
+      offender.forename != prisoner.firstName ||
+      offender.surname != prisoner.lastName ||
+      offender.dateOfBirth != prisoner.dateOfBirth
 
   fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
 

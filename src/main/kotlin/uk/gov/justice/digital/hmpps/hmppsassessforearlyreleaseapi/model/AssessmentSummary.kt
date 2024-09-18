@@ -13,6 +13,10 @@ data class AssessmentSummary(
   @Schema(description = "The offender's surname", example = "Smith")
   val surname: String?,
 
+  @Schema(description = "The offender's date of birth", example = "15/04/2011")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val dateOfBirth: LocalDate,
+
   @Schema(description = "The offender's prison number", example = "A1234AA")
   val prisonNumber: String,
 
