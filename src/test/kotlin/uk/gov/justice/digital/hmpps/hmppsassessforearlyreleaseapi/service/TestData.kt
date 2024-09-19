@@ -4,6 +4,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCheckDetails
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCheckDetails
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 
@@ -51,5 +55,21 @@ object TestData {
     location = PRISON_NAME,
     status = AssessmentStatus.NOT_STARTED,
     policyVersion = "1.0",
+  )
+
+  fun anEligibilityCheckDetails() = EligibilityCheckDetails(
+    code = "code-1",
+    taskName = "task-1",
+    question = "question-1",
+    status = EligibilityStatus.ELIGIBLE,
+    answer = true,
+  )
+
+  fun anSuitabilityCheckDetails() = SuitabilityCheckDetails(
+    code = "code-1",
+    taskName = "task-1",
+    question = "question-1",
+    status = SuitabilityStatus.SUITABLE,
+    answer = true,
   )
 }
