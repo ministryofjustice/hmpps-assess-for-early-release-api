@@ -145,7 +145,7 @@ class OffenderService(
       offender.surname != prisoner.lastName ||
       offender.dateOfBirth != prisoner.dateOfBirth
 
-  fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED }
+  fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED || it.status === AssessmentStatus.OPTED_OUT }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
