@@ -62,7 +62,6 @@ val POLICY_1_0 = Policy(
       name = "Section 20B release",
       question = "some question...",
     ),
-
   ),
 
   suitabilityCriteria = listOf(

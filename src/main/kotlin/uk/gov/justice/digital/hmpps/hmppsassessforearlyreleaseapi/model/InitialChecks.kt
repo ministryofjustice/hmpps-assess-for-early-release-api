@@ -3,32 +3,46 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(
-  description = """The initial checks for a specific assessment:
-  * eligibility status: any ineligible: ELIGIBLE, INELIGIBLE, IN_PROGRESS, NOT_STARTED
-  * suitability status: any unsuitable: SUITABLE, UNSUITABLE, IN_PROGRESS, NOT_STARTED
-  * complete: all eligibility checks ELIGIBLE, or any eligibility check INELIGIBLE
-  * overall: eligibility status = ELIGIBLE and suitability status = SUITABLE
-""",
+  description = "The initial checks for a specific assessment",
 )
 data class InitialChecks(
   @Schema(description = "A summary of an offender's current assessment")
   val assessmentSummary: AssessmentSummary,
+
+  @Schema(description = "all eligibility checks ELIGIBLE, or any eligibility check INELIGIBLE")
+  val complete: Boolean = false,
+
+  @Schema(description = "eligibility status = ELIGIBLE and suitability status = SUITABLE")
+  val checksPassed: Boolean,
+
+  @Schema(description = "state of current eligibility checks")
+  val eligibilityStatus: EligibilityStatus,
   @Schema(description = "details of current eligibility checks")
   val eligibility: List<EligibilityCheckDetails>,
+
+  @Schema(description = "state of current suitability checks")
+  val suitabilityStatus: SuitabilityStatus,
   @Schema(description = "details of current suitability checks")
   val suitability: List<SuitabilityCheckDetails>,
 )
 
-enum class EligibilityState {
+enum class InitialChecksStatus {
   ELIGIBLE,
   INELIGIBLE,
   NOT_STARTED,
   IN_PROGRESS,
 }
 
-enum class SuitabilityState {
+enum class EligibilityStatus {
   ELIGIBLE,
   INELIGIBLE,
+  NOT_STARTED,
+  IN_PROGRESS,
+}
+
+enum class SuitabilityStatus {
+  SUITABLE,
+  UNSUITABLE,
   NOT_STARTED,
   IN_PROGRESS,
 }
@@ -42,9 +56,9 @@ data class EligibilityCheckDetails(
   @Schema(description = "The question that is posed to the user", example = "a question...")
   val question: String,
   @Schema(description = "The state of this check ", example = "NOT_STARTED")
-  val state: EligibilityState,
-  @Schema(description = "The answer provided by the user", example = "Yes")
-  val answer: Any?,
+  val status: EligibilityStatus,
+  @Schema(description = "The answer provided by the user", example = "false")
+  val answer: Boolean? = null,
 )
 
 @Schema(description = "The initial checks for a specific assessment")
@@ -56,7 +70,7 @@ data class SuitabilityCheckDetails(
   @Schema(description = "The question that is posed to the user", example = "a question...")
   val question: String,
   @Schema(description = "The state of this check ", example = "NOT_STARTED")
-  val state: SuitabilityState,
-  @Schema(description = "The answer provided by the user", example = "Yes")
-  val answer: Any?,
+  val status: SuitabilityStatus,
+  @Schema(description = "The answer provided by the user", example = "true")
+  val answer: Boolean? = null,
 )
