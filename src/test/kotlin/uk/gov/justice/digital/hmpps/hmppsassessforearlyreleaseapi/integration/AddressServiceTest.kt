@@ -29,6 +29,17 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(addresses[2].lastUpdateDate).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
+  @Test
+  fun `should get address by post uprn`() {
+    val uprn = "200010019924"
+    osPlacesMockServer.stubGetAddressByUprn(uprn)
+
+    val address = addressService.getAddressForUprn(uprn)
+    assertThat(address.postCode).isEqualTo("SO16 0AS")
+    assertThat(address.uprn).isEqualTo(uprn)
+    assertThat(address.yCoordinate).isEqualTo(115541.95)
+  }
+
   private companion object {
     val osPlacesMockServer = OsPlacesMockServer(OS_API_KEY)
 

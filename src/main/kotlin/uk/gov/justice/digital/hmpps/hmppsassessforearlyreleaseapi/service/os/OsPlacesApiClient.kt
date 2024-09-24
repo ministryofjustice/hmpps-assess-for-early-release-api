@@ -11,9 +11,6 @@ class OsPlacesApiClient(
   @Qualifier("osPlacesClient") private val osPlacesApiWebClient: WebClient,
   @Value("\${os.places.api.key}") private val apiKey: String,
 ) {
-  // TODO  : health check
-  // TODO : error handling?
-
   fun getAddressesForPostcode(postcode: String): List<OsPlacesApiDPA> {
     val searchResult = osPlacesApiWebClient
       .get()
@@ -33,7 +30,6 @@ class OsPlacesApiClient(
       .retrieve()
       .bodyToMono(OsPlacesApiResponse::class.java)
       .block()
-    return searchResult?.results?.map { it.dpa }?.get(0) ?: throw IllegalArgumentException("Invalid uprn: $uprn")
-//    return OsPlacesApiDPA("dsad", "a", "a", "a", "d", "dfa", ¡"dsfa", 32.3, 23.3, LocalDate.now())
+    return searchResult?.results?.map { it.dpa }?.get(0) ?: error("Could not find an address with uprn: $uprn")
   }
 }
