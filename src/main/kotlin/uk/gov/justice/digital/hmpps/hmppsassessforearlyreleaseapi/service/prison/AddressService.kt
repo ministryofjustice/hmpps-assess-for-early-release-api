@@ -12,8 +12,7 @@ class AddressService(
     return osPlacesApiClient.getAddressesForPostcode(postcode)
   }
 
-  fun getAddressForUprn(urpn: String): OsPlacesApiDPA {
-//    200010019924
-    return osPlacesApiClient.getAddressForUprn(urpn)
+  fun getAddressForUprn(uprn: String): OsPlacesApiDPA {
+    return osPlacesApiClient.getAddressForUprn(uprn)
   }
 }
