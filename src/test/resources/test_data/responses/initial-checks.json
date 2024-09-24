@@ -17,79 +17,157 @@
     {
       "code": "sex-offender-register",
       "taskName": "Sex offenders' register",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person required to sign the sex offenders' register?",
+          "hint": null,
+          "name": "requiredToSignSexOffenderRegister",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "extended-sentence-for-violent-or-sexual-offences",
       "taskName": "Extended Sentence for violent or sexual offences",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person serving an extended sentence for violent or sexual offences?",
+          "hint": null,
+          "name": "servingExtendedSentenceForViolentOrSexualOffence",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "rotl-failure-to-return",
       "taskName": "ROTL failure to return",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person serving a sentence for ROTL failure to return?",
+          "hint": null,
+          "name": "rotlFailedToReturn",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "community-order-curfew-breach",
       "taskName": "Community order curfew breach",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person serving a sentence for breaching a community order curfew?",
+          "hint": null,
+          "name": "communityOrderCurfewBreach",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "recalled-for-breaching-hdc-curfew",
       "taskName": "Recalled for breaching HDC curfew",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Has this person been recalled for breaching their HDC curfew within 2 years of their current sentence date",
+          "hint": null,
+          "name": "recalledForBreachingHdcCurfew",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "deportation-orders",
       "taskName": "Deportation Orders",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person a foreign national who has been recommended for deportation?",
+          "hint": null,
+          "name": "recommendedForDeportation",
+          "answer": null
+        },
+        {
+          "text": "Is this person a foreign national who is liable to deportation and been served with a decision to deport?",
+          "hint": null,
+          "name": "servedADecisionToDeport",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "recalled-from-early-release-on-compassionate-grounds",
       "taskName": "Recalled from early release on compassionate grounds",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person currently serving a recall from early release on compassionate grounds?",
+          "hint": null,
+          "name": "recalledFromEarlyReleaseOnCompassionateGrounds",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "terrorism",
       "taskName": "Terrorism",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person currently serving a sentence for terrorist or terrorist-connected offending?",
+          "hint": null,
+          "name": "terroristSentenceOrOffending",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "two-thirds-release",
       "taskName": "Two-thirds release",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person serving an SDS+, DYOI+, or S250+ sentence subject to two-thirds release criteria?",
+          "hint": null,
+          "name": "subjectToTwoThirdsReleaseCriteria",
+          "answer": null
+        },
+        {
+          "text": "Would this person be serving an SDS+, DYOI+ or S250+ sentence if they had been sentenced after the Police and Crime Sentencing Act 2022 was introduced?",
+          "hint": "\n            <p>This applies if a sentence of:</p>\n            <ul class=\"govuk-list govuk-list--bullet\" style=\"margin-top: 0px; margin-bottom: 20px;\">\n              <li>seven years or more was given before April 1 2020 for adults or before June 28 2022 for children for any of the serious sexual or violent offences in parts 1 and 2 of schedule 15 </li>\n              <li>between 4 and 7 years was given before 28 June 2022 for any of the serious sexual offences listed in Part 2 of schedule 15 or manslaughter, attempt/conspire/solicit/incite murder, and wounding with intent to do grievous bodily harm</li>\n            </ul>\n            ",
+          "name": "retrospectiveTwoThirdsReleaseCriteria",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "section-244ZB-notice",
       "taskName": "Section 244ZB notice",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Has notice under section 244ZB been served that is still in force?",
+          "hint": null,
+          "name": "served244ZBNoticeInForce",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "section-20b-release",
       "taskName": "Section 20B release",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person's release governed by schedule 20B of the Criminal Justice Act 2003?",
+          "hint": null,
+          "name": "schedule20BRelease",
+          "answer": null
+        }
+      ]
     }
   ],
   "suitabilityStatus": "NOT_STARTED",
@@ -97,51 +175,99 @@
     {
       "code": "sexual-offending-history",
       "taskName": "Sexual offending history",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Does this person have a history of sexual-offending but is not required to sign the sex offender's register?",
+          "hint": null,
+          "name": "historyOfSexualOffending",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "liable-to-deportation",
       "taskName": "Liable to deportation",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person a foreign national who is liable to deportation but not yet served a decision to deport?",
+          "hint": null,
+          "name": "liableToDeportation",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "recalled-for-poor-behaviour-on-hdc",
       "taskName": "Recalled for poor behaviour on hdc",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Has this person been recalled for poor behaviour on HDC within 2 years of their current HDC date?",
+          "hint": null,
+          "name": "poorBehaviourOnHdc",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "category-a",
       "taskName": "Category A",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person category A?",
+          "hint": null,
+          "name": "categoryA",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "rosh-and-mappa",
       "taskName": "RoSH and MAPPA",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Does this person have a high or very high risk of serious harm?",
+          "hint": null,
+          "name": "highOrVeryHighRoSH",
+          "answer": null
+        },
+        {
+          "text": "Are they MAPPA level 2 or 3?",
+          "hint": null,
+          "name": "mappaLevel2Or3",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "presumed-unsuitable-offences",
       "taskName": "Presumed unsuitable offences",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Is this person serving a prison sentence for any of these categories of offence?",
+          "hint": "<ul id=\"sentences-list\" class=\"govuk-list govuk-list--bullet\">\n   <li>Homicide</li>\n   <li>Explosives</li>\n   <li>Possession of an offensive weapon</li>\n   <li>Possession of firearms with intent</li>\n   <li>Cruelty to children</li>\n   <li>Racially aggravated offences</li>\n   <li>Stalking, harassment and other offences linked to domestic abuse</li>\n   <li>Terrorist offences not described in section 247A(2) of the Criminal Justice Act 2003</li>\n </ul>",
+          "name": "presumedUnsuitableOffences",
+          "answer": null
+        }
+      ]
     },
     {
       "code": "terrorist-offending-history",
       "taskName": "Terrorist offending history",
-      "question": "some question...",
       "status": "NOT_STARTED",
-      "answer": null
+      "questions": [
+        {
+          "text": "Does this person have a history of terrorist or terrorist connected offending?",
+          "hint": null,
+          "name": "terroristOffendingHistory",
+          "answer": null
+        }
+      ]
     }
   ]
 }
