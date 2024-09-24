@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import java.time.LocalDate
 
 @Service
 class OsPlacesApiClient(
@@ -24,6 +25,14 @@ class OsPlacesApiClient(
     return searchResult?.results ?: emptyList()
   }
 
-  //    return listOf(OsPlacesApiAddress(DPA("dsad", "a", "a", "a", "d", "dfa", "dsfa", 32.3, 23.3, LocalDate.now())))
-//  fun getAddressForUprn(uprn: String): DPA = DPA("dsad", "a", "a", "a", "d", "dfa", "dsfa")
+  fun getAddressForUprn(uprn: String): DPA {
+    val searchResult = osPlacesApiWebClient
+      .get()
+      .uri("/postcode?postcode=$postcode&key=$apiKey")
+      .accept(MediaType.APPLICATION_JSON)
+      .retrieve()
+      .bodyToMono(OsPlacesApiResponse::class.java)
+      .block()
+    return DPA("dsad", "a", "a", "a", "d", "dfa", "dsfa", 32.3, 23.3, LocalDate.now())
+  }
 }
