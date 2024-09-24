@@ -4,5 +4,5 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class OsPlacesApiAddress(
   @JsonProperty("DPA")
-  val dpa: DPA,
+  val dpa: OsPlacesApiDPA,
 )

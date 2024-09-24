@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.time.LocalDate
 
-data class DPA(
+data class OsPlacesApiDPA(
   @JsonProperty("UPRN")
   val uprn: String,
 

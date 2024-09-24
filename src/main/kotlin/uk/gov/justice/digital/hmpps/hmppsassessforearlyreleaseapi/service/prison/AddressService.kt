@@ -1,18 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiAddress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
 
 @Service
 class AddressService(
   private val osPlacesApiClient: OsPlacesApiClient,
 ) {
-  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiAddress> {
+  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiDPA> {
     return osPlacesApiClient.getAddressesForPostcode(postcode)
   }
 
-//  fun getAddressForUprn(urpn: String): DPA {
-//    return osPlacesApiClient.getAddressForUprn(urpn)
-//  }
+  fun getAddressForUprn(urpn: String): OsPlacesApiDPA {
+//    200010019924
+    return osPlacesApiClient.getAddressForUprn(urpn)
+  }
 }

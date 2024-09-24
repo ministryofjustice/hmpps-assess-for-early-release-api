@@ -23,10 +23,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addresses = addressService.getAddressesForPostcode(postcode)
     assertThat(addresses).size().isEqualTo(3)
-    assertThat(addresses[0].dpa.uprn).isEqualTo("100120991537")
-    assertThat(addresses[1].dpa.postCode).isEqualTo("AG12 1RW")
-    assertThat(addresses[2].dpa.xCoordinate).isEqualTo(401003.0)
-    assertThat(addresses[2].dpa.lastUpdateDate).isEqualTo(LocalDate.of(2021, 5, 1))
+    assertThat(addresses[0].uprn).isEqualTo("100120991537")
+    assertThat(addresses[1].postCode).isEqualTo("AG12 1RW")
+    assertThat(addresses[2].xCoordinate).isEqualTo(401003.0)
+    assertThat(addresses[2].lastUpdateDate).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
   private companion object {

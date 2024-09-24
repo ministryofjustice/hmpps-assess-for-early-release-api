@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
-import java.time.LocalDate
 
 @Service
 class OsPlacesApiClient(
@@ -13,8 +12,9 @@ class OsPlacesApiClient(
   @Value("\${os.places.api.key}") private val apiKey: String,
 ) {
   // TODO  : health check
+  // TODO : error handling?
 
-  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiAddress> {
+  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiDPA> {
     val searchResult = osPlacesApiWebClient
       .get()
       .uri("/postcode?postcode=$postcode&key=$apiKey")
@@ -22,17 +22,18 @@ class OsPlacesApiClient(
       .retrieve()
       .bodyToMono(OsPlacesApiResponse::class.java)
       .block()
-    return searchResult?.results ?: emptyList()
+    return searchResult?.results?.map { it.dpa } ?: emptyList()
   }
 
-  fun getAddressForUprn(uprn: String): DPA {
+  fun getAddressForUprn(uprn: String): OsPlacesApiDPA {
     val searchResult = osPlacesApiWebClient
       .get()
-      .uri("/postcode?postcode=$postcode&key=$apiKey")
+      .uri("/uprn?uprn=$uprn&key=$apiKey")
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .bodyToMono(OsPlacesApiResponse::class.java)
       .block()
-    return DPA("dsad", "a", "a", "a", "d", "dfa", "dsfa", 32.3, 23.3, LocalDate.now())
+    return searchResult?.results?.map { it.dpa }?.get(0) ?: throw IllegalArgumentException("Invalid uprn: $uprn")
+//    return OsPlacesApiDPA("dsad", "a", "a", "a", "d", "dfa", ¡"dsfa", 32.3, 23.3, LocalDate.now())
   }
 }
