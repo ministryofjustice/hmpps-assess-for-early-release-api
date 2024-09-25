@@ -39,7 +39,7 @@ class InitialChecksServiceTest {
   @Nested
   inner class IsComplete {
     @Test
-    fun noProgress() {
+    fun `no progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
 
@@ -47,7 +47,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun someInProgress() {
+    fun `some in progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -55,7 +55,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun allInProgress() {
+    fun `all in-progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -63,7 +63,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun unsuitableButNotIneligible() {
+    fun `unsuitable but not ineligible`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE))
 
@@ -71,7 +71,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun ineligibleWithoutCompleteSuitability() {
+    fun `ineligible without complete suitability`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -79,7 +79,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun ineligibleAndSuitable() {
+    fun `ineligible and suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -87,7 +87,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun eligibleAndSuitable() {
+    fun `eligible and suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -95,7 +95,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun someButNotAllEligibleAndSuitable() {
+    fun `some but not all eligbility criteria complete`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -103,9 +103,25 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun mixedEligibleAndInProgressSuitable() {
+    fun `mixed eligibility results`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
+
+      assertThat(service.isComplete(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `outstanding suitability questions when eligible is incomplete`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE), anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
+
+      assertThat(service.isComplete(eligibilityDetails, suitabilityStatus)).isEqualTo(false)
+    }
+
+    @Test
+    fun `outstanding suitability questions when eligible is incomplete unless unsuitable`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE), anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
       assertThat(service.isComplete(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
     }
@@ -114,7 +130,7 @@ class InitialChecksServiceTest {
   @Nested
   inner class IsChecksPassed {
     @Test
-    fun noProgress() {
+    fun `no progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
 
@@ -122,7 +138,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun someInProgress() {
+    fun `some in progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -130,7 +146,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun allInProgress() {
+    fun `all in progress`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -138,7 +154,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun unsuitableButNotIneligible() {
+    fun `unsuitable but not ineligible`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE))
 
@@ -146,7 +162,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun ineligibleWithoutCompleteSuitability() {
+    fun `ineligible without complete suitability`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS))
 
@@ -154,7 +170,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun ineligibleAndSuitable() {
+    fun `ineligible and suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -162,7 +178,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun eligibleAndSuitable() {
+    fun `eligible and suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -170,7 +186,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun someButNotAllEligibleAndSuitable() {
+    fun `some but not all eligible and suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = IN_PROGRESS))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 
@@ -178,7 +194,7 @@ class InitialChecksServiceTest {
     }
 
     @Test
-    fun mixedEligibleAndInProgressSuitable() {
+    fun `mixed eligible and in progress suitable`() {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = INELIGIBLE))
       val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
 

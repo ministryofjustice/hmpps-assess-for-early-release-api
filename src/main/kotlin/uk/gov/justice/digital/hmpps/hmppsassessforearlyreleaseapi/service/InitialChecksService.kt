@@ -8,12 +8,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.InitialChecks
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCheckDetails
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.EligibilityCheck
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.SuitabilityCheck
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Check
 
 private fun List<EligibilityCheckDetails>.toStatus() = when {
   all { it.status == ELIGIBLE } -> ELIGIBLE
@@ -57,7 +57,8 @@ class InitialChecksService(val offenderService: OffenderService, val policyServi
   ): Boolean {
     val ineligible = eligibilityDetails.any { it.status == INELIGIBLE }
     val eligible = eligibilityDetails.all { it.status == ELIGIBLE }
-    val suitabilityComplete = suitabilityDetails.all { it.status == SUITABLE || it.status == UNSUITABLE }
+    val suitabilityComplete =
+      suitabilityDetails.all { it.status == SUITABLE } || suitabilityDetails.any { it.status == UNSUITABLE }
 
     val complete = (eligible && suitabilityComplete) || ineligible
     return complete
@@ -74,28 +75,32 @@ class InitialChecksService(val offenderService: OffenderService, val policyServi
   }
 }
 
-private fun SuitabilityCheck.toSuitabilityCheckDetails() =
-  when {
-    this is SuitabilityCheck.YesNo -> SuitabilityCheckDetails(
-      code = code,
-      taskName = name,
-      question = question,
-      status = SuitabilityStatus.NOT_STARTED,
-      answer = null,
-    )
+private fun Check.toSuitabilityCheckDetails() =
+  SuitabilityCheckDetails(
+    code = code,
+    taskName = name,
+    status = SuitabilityStatus.NOT_STARTED,
+    questions = questions.map {
+      Question(
+        text = it.text,
+        hint = it.hint,
+        name = it.name,
+        answer = null,
+      )
+    },
+  )
 
-    else -> error("unable to convert class of type ${this.javaClass}")
-  }
-
-private fun EligibilityCheck.toEligibilityCheckDetails() =
-  when {
-    this is EligibilityCheck.YesNo -> EligibilityCheckDetails(
-      code = code,
-      taskName = name,
-      question = question,
-      status = NOT_STARTED,
-      answer = null,
-    )
-
-    else -> error("unable to convert class of type ${this.javaClass}")
-  }
+private fun Check.toEligibilityCheckDetails() =
+  EligibilityCheckDetails(
+    code = code,
+    taskName = name,
+    status = NOT_STARTED,
+    questions = questions.map {
+      Question(
+        text = it.text,
+        hint = it.hint,
+        name = it.name,
+        answer = null,
+      )
+    },
+  )

@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCheckDetails
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCheckDetails
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -60,16 +61,14 @@ object TestData {
   fun anEligibilityCheckDetails() = EligibilityCheckDetails(
     code = "code-1",
     taskName = "task-1",
-    question = "question-1",
+    questions = listOf(Question("question-1", answer = true)),
     status = EligibilityStatus.ELIGIBLE,
-    answer = true,
   )
 
   fun anSuitabilityCheckDetails() = SuitabilityCheckDetails(
     code = "code-1",
     taskName = "task-1",
-    question = "question-1",
+    questions = listOf(Question("question-1", answer = true)),
     status = SuitabilityStatus.SUITABLE,
-    answer = true,
   )
 }
