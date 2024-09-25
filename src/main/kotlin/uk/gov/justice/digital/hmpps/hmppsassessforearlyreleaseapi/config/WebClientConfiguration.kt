@@ -22,6 +22,7 @@ class WebClientConfiguration(
   @Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
   @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String,
   @Value("\${hmpps.prisonregister.api.url}") private val prisonRegisterApiUrl: String,
+  @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
 ) {
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient =
@@ -60,6 +61,18 @@ class WebClientConfiguration(
   @Bean
   fun prisonRegisterClient(): WebClient = WebClient.builder()
     .baseUrl(prisonRegisterApiUrl)
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer ->
+          configurer.defaultCodecs()
+            .maxInMemorySize(-1)
+        }
+        .build(),
+    ).build()
+
+  @Bean
+  fun osPlacesClient(): WebClient = WebClient.builder()
+    .baseUrl(osPlacesApiUrl)
     .exchangeStrategies(
       ExchangeStrategies.builder()
         .codecs { configurer ->
