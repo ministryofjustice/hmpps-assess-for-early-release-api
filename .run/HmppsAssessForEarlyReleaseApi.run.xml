@@ -6,10 +6,11 @@
       <env name="DB_SERVER" value="localhost" />
       <env name="DB_USER" value="afer" />
       <env name="HMPPS_AUTH_URL" value="https://sign-in-dev.hmpps.service.justice.gov.uk/auth" />
+      <env name="HMPPS_PRISON_REGISTER_API_URL" value="https://prison-register-dev.hmpps.service.justice.gov.uk" />
       <env name="SERVER_PORT" value="8089" />
       <env name="SPRING_DATASOURCE_URL" value="jdbc:postgresql://${DB_SERVER}/${DB_NAME}" />
       <env name="SPRING_PROFILES_ACTIVE" value="dev" />
-      <env name="HMPPS_PRISON_REGISTER_API_URL" value="https://prison-register-dev.hmpps.service.justice.gov.uk" />
+      <env name="OS_PLACES_API_KEY" value="4i617MdyQX8uDX5bcy132wdNjPQt3QcE" />
     </envs>
     <module name="hmpps-assess-for-early-release-api.main" />
     <option name="SPRING_BOOT_MAIN_CLASS" value="uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.HmppsAssessForEarlyReleaseApi" />

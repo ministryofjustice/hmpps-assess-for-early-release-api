@@ -23,8 +23,14 @@ data class OsPlacesApiDPA(
   @JsonProperty("POST_TOWN")
   val postTown: String,
 
+  @JsonProperty("LOCAL_CUSTODIAN_CODE_DESCRIPTION")
+  val county: String,
+
   @JsonProperty("POSTCODE")
-  val postCode: String,
+  val postcode: String,
+
+  @JsonProperty("COUNTRY_CODE_DESCRIPTION")
+  val countryDescription: String,
 
   @JsonProperty("X_COORDINATE")
   val xCoordinate: Double,
