@@ -24,6 +24,11 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   @Autowired
   private lateinit var addressService: AddressService
 
+  @BeforeEach
+  fun resetMocks() {
+    osPlacesMockServer.resetAll()
+  }
+
   @Test
   fun `should get addresses by post code`() {
     val postcode = "AG121RW"
@@ -80,11 +85,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   private companion object {
     val osPlacesMockServer = OsPlacesMockServer(OS_API_KEY)
-
-    @BeforeEach
-    fun resetMocks() {
-      osPlacesMockServer.resetAll()
-    }
 
     @JvmStatic
     @BeforeAll
