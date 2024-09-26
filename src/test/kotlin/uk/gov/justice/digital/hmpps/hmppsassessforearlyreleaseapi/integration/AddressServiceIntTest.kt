@@ -37,6 +37,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(addresses[2].addressLastUpdated).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/an-address.sql",
+  )
   @Test
   fun `should get address from OS places API when address doesn't exist in database`() {
     val uprn = "200010019924"
@@ -61,7 +65,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   fun `should get address from database when it already exists`() {
     val uprn = "200010019924"
 
-    osPlacesMockServer.resetAll()
     val address = addressService.getAddressForUprn(uprn)
 
     osPlacesMockServer.verify(0, getRequestedFor(urlEqualTo("/uprn?uprn=$uprn&key=$OS_API_KEY")))
