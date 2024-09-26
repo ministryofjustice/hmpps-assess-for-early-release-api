@@ -39,7 +39,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Sql(
     "classpath:test_data/reset.sql",
-    "classpath:test_data/an-address.sql",
   )
   @Test
   fun `should get address from OS places API when address doesn't exist in database`() {
