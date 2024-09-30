@@ -9,9 +9,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
 
@@ -20,6 +26,12 @@ const val OS_API_KEY = "os-places-api-key"
 class AddressServiceTest : SqsIntegrationTestBase() {
   @Autowired
   private lateinit var addressRepository: AddressRepository
+
+  @Autowired
+  private lateinit var casCheckRequestRepository: CasCheckRequestRepository
+
+  @Autowired
+  private lateinit var standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository
 
   @Autowired
   private lateinit var addressService: AddressService
@@ -81,6 +93,54 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(savedAddress).isNotNull()
     assertThat(savedAddress?.uprn).isEqualTo(uprn)
     assertThat(savedAddress?.country).isEqualTo("England")
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/an-address.sql",
+  )
+  @Test
+  fun `should save a standard address check request`() {
+    val address = addressRepository.findById(1).orElseThrow { throw Exception("couldn't find address!") }
+
+    val standardAddressCheckRequest = StandardAddressCheckRequest(
+      caAdditionalInfo = "ca info",
+      ppAdditionalInfo = "pp info",
+      dateRequested = LocalDate.now(),
+      status = AddressCheckRequestStatus.IN_PROGRESS,
+      preferencePriority = AddressPreferencePriority.FIRST,
+      address = address,
+    )
+
+    standardAddressCheckRequestRepository.save(standardAddressCheckRequest)
+
+    val standardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
+    assertThat(standardAddressCheckRequests).hasSize(1)
+    assertThat(standardAddressCheckRequests[0].status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/an-address.sql",
+  )
+  @Test
+  fun `should save a cas address check request`() {
+    val address = addressRepository.findById(1).orElseThrow { throw Exception("couldn't find address!") }
+
+    val casAddressCheckRequest = CasCheckRequest(
+      caAdditionalInfo = "ca info",
+      ppAdditionalInfo = "pp info",
+      dateRequested = LocalDate.now(),
+      status = AddressCheckRequestStatus.IN_PROGRESS,
+      preferencePriority = AddressPreferencePriority.FIRST,
+      allocatedAddress = address,
+    )
+
+    casCheckRequestRepository.save(casAddressCheckRequest)
+
+    val casCheckRequests = casCheckRequestRepository.findAll()
+    assertThat(casCheckRequests).hasSize(1)
+    assertThat(casCheckRequests[0].status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
   }
 
   private companion object {
