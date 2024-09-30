@@ -10,12 +10,12 @@ class CasCheckRequest(
   id: Long = -1,
   caAdditionalInfo: String?,
   ppAdditionalInfo: String?,
-  dateRequested: LocalDate,
+  dateRequested: LocalDate = LocalDate.now(),
   preferencePriority: AddressPreferencePriority,
-  status: AddressCheckRequestStatus,
+  status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS,
   @ManyToOne
   @JoinColumn(name = "allocated_address_id", referencedColumnName = "id")
-  val allocatedAddress: Address,
+  val allocatedAddress: Address? = null,
 ) : CurfewAddressCheckRequest(
   id = id,
   caAdditionalInfo = caAdditionalInfo,
