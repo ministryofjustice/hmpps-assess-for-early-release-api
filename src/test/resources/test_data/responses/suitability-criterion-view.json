@@ -1,0 +1,45 @@
+{
+  "assessmentSummary": {
+    "forename": "FIRST-1",
+    "surname": "LAST-1",
+    "dateOfBirth": "1978-03-20",
+    "prisonNumber": "A1234AA",
+    "hdced": "2020-10-25",
+    "crd": "2020-11-14",
+    "location": "Birmingham (HMP)",
+    "status": "NOT_STARTED",
+    "policyVersion": "1.0"
+  },
+  "criterion": {
+    "code": "category-a",
+    "taskName": "Category A",
+    "status": "SUITABLE",
+    "questions": [
+      {
+        "text": "Is this person category A?",
+        "hint": null,
+        "name": "categoryA",
+        "answer": true
+      }
+    ]
+  },
+  "nextCriterion": {
+    "code": "rosh-and-mappa",
+    "taskName": "RoSH and MAPPA",
+    "status": "NOT_STARTED",
+    "questions": [
+      {
+        "text": "Does this person have a high or very high risk of serious harm?",
+        "hint": null,
+        "name": "highOrVeryHighRoSH",
+        "answer": null
+      },
+      {
+        "text": "Are they MAPPA level 2 or 3?",
+        "hint": null,
+        "name": "mappaLevel2Or3",
+        "answer": null
+      }
+    ]
+  }
+}

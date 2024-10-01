@@ -110,7 +110,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  @Transactional(readOnly = true)
+  @Transactional
   @Sql(
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",

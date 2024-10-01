@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.InitialChecks
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 
 @RestController
@@ -35,7 +35,7 @@ class AddressResource(private val addressService: AddressService) {
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = InitialChecks::class),
+            schema = Schema(implementation = AddressSummary::class),
           ),
         ],
       ),
@@ -79,7 +79,7 @@ class AddressResource(private val addressService: AddressService) {
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = InitialChecks::class),
+            schema = Schema(implementation = AddressSummary::class),
           ),
         ],
       ),

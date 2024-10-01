@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model
 
-data class Check(
+data class Criterion(
   val code: String,
   val name: String,
   val questions: List<Question> = emptyList(),

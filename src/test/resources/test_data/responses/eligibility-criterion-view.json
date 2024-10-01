@@ -1,0 +1,39 @@
+{
+  "assessmentSummary": {
+    "forename": "FIRST-1",
+    "surname": "LAST-1",
+    "dateOfBirth": "1978-03-20",
+    "prisonNumber": "A1234AA",
+    "hdced": "2020-10-25",
+    "crd": "2020-11-14",
+    "location": "Birmingham (HMP)",
+    "status": "NOT_STARTED",
+    "policyVersion": "1.0"
+  },
+  "criterion": {
+    "code": "sex-offender-register",
+    "taskName": "Sex offenders' register",
+    "status": "ELIGIBLE",
+    "questions": [
+      {
+        "text": "Is this person required to sign the sex offenders' register?",
+        "hint": null,
+        "name": "requiredToSignSexOffenderRegister",
+        "answer": true
+      }
+    ]
+  },
+  "nextCriterion": {
+    "code": "extended-sentence-for-violent-or-sexual-offences",
+    "taskName": "Extended Sentence for violent or sexual offences",
+    "status": "NOT_STARTED",
+    "questions": [
+      {
+        "text": "Is this person serving an extended sentence for violent or sexual offences?",
+        "hint": null,
+        "name": "servingExtendedSentenceForViolentOrSexualOffence",
+        "answer": null
+      }
+    ]
+  }
+}
