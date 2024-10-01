@@ -6,7 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import java.time.LocalDateTime
 
-@Schema(description = "Response object which describes a CAS¡ check request")
+@Schema(description = "Response object which describes a CAS check request")
 data class CasCheckRequestSummary(
   @Schema(description = "Any additional information on the request added by the case administrator", example = "Some additional info")
   val caAdditionalInfo: String?,

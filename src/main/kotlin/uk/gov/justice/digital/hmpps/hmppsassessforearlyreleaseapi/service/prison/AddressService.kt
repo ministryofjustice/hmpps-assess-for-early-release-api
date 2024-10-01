@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
@@ -51,7 +50,7 @@ class AddressService(
       ?: error("Couldn't find an existing address with UPRN: ${addStandardAddressCheckRequest.addressUprn}")
 
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+      ?: error("Cannot find offender with prisonNumber $prisonNumber")
 
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.save(
       StandardAddressCheckRequest(
@@ -72,7 +71,7 @@ class AddressService(
     addCasCheckRequest: AddCasCheckRequest,
   ): CasCheckRequestSummary {
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+      ?: error("Cannot find offender with prisonNumber $prisonNumber")
 
     val casCheckRequest = casCheckRequestRepository.save(
       CasCheckRequest(
