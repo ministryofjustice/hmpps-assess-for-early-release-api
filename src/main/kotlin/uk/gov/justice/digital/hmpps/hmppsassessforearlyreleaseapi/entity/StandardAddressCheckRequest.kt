@@ -3,16 +3,17 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 import jakarta.persistence.Entity
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 class StandardAddressCheckRequest(
   id: Long = -1,
   caAdditionalInfo: String?,
   ppAdditionalInfo: String?,
-  dateRequested: LocalDate = LocalDate.now(),
+  dateRequested: LocalDateTime = LocalDateTime.now(),
   preferencePriority: AddressPreferencePriority,
   status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS,
+  assessment: Assessment,
   @ManyToOne
   @JoinColumn(name = "address_id", referencedColumnName = "id")
   val address: Address,
@@ -23,4 +24,5 @@ class StandardAddressCheckRequest(
   dateRequested = dateRequested,
   preferencePriority = preferencePriority,
   status = status,
+  assessment = assessment,
 )

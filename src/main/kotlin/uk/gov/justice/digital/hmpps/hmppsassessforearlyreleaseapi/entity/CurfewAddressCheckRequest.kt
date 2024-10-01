@@ -8,8 +8,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.validation.constraints.NotNull
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -25,7 +26,7 @@ abstract class CurfewAddressCheckRequest(
   val ppAdditionalInfo: String? = null,
 
   @NotNull
-  val dateRequested: LocalDate,
+  val dateRequested: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
   @Enumerated(EnumType.STRING)
@@ -34,6 +35,10 @@ abstract class CurfewAddressCheckRequest(
   @NotNull
   @Enumerated(EnumType.STRING)
   val status: AddressCheckRequestStatus,
+
+  @ManyToOne
+  @JoinColumn(name = "assessment_id", referencedColumnName = "id", nullable = false)
+  val assessment: Assessment,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),

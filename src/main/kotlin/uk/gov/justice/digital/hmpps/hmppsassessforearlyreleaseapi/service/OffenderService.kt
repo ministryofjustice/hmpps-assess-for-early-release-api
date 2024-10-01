@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.currentAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -144,8 +145,6 @@ class OffenderService(
       offender.forename != prisoner.firstName ||
       offender.surname != prisoner.lastName ||
       offender.dateOfBirth != prisoner.dateOfBirth
-
-  fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED || it.status === AssessmentStatus.OPTED_OUT }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

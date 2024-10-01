@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
@@ -97,50 +97,61 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Sql(
     "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
     "classpath:test_data/an-address.sql",
   )
   @Test
-  fun `should save a standard address check request`() {
-    val address = addressRepository.findById(1).orElseThrow { throw Exception("couldn't find address!") }
-
-    val standardAddressCheckRequest = StandardAddressCheckRequest(
-      caAdditionalInfo = "ca info",
-      ppAdditionalInfo = "pp info",
-      dateRequested = LocalDate.now(),
-      status = AddressCheckRequestStatus.IN_PROGRESS,
-      preferencePriority = AddressPreferencePriority.FIRST,
-      address = address,
+  fun `should add a standard address check request`() {
+    val prisonNumber = "C1234CC"
+    val caAdditionalInfo = "ca info"
+    val ppAdditionalInfo = "pp info"
+    val preferencePriority = AddressPreferencePriority.THIRD
+    val uprn = "200010019924"
+    val addStandardAddressCheckRequest = AddStandardAddressCheckRequest(
+      caAdditionalInfo = caAdditionalInfo,
+      ppAdditionalInfo = ppAdditionalInfo,
+      preferencePriority = preferencePriority,
+      addressUprn = uprn,
     )
 
-    standardAddressCheckRequestRepository.save(standardAddressCheckRequest)
+    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest)
 
-    val standardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
-    assertThat(standardAddressCheckRequests).hasSize(1)
-    assertThat(standardAddressCheckRequests[0].status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+    val dbStandardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
+    assertThat(dbStandardAddressCheckRequests).hasSize(1)
+    val dbAddressCheckRequest = dbStandardAddressCheckRequests.first()
+    assertThat(dbAddressCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+    assertThat(dbAddressCheckRequest.address.uprn).isEqualTo(uprn)
+    assertThat(dbAddressCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
+    assertThat(dbAddressCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
+    assertThat(dbAddressCheckRequest.preferencePriority).isEqualTo(preferencePriority)
   }
 
   @Sql(
     "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
     "classpath:test_data/an-address.sql",
   )
   @Test
-  fun `should save a cas address check request`() {
-    val address = addressRepository.findById(1).orElseThrow { throw Exception("couldn't find address!") }
-
-    val casAddressCheckRequest = CasCheckRequest(
-      caAdditionalInfo = "ca info",
-      ppAdditionalInfo = "pp info",
-      dateRequested = LocalDate.now(),
-      status = AddressCheckRequestStatus.IN_PROGRESS,
-      preferencePriority = AddressPreferencePriority.FIRST,
-      allocatedAddress = address,
+  fun `should add a cas check request`() {
+    val prisonNumber = "C1234CC"
+    val caAdditionalInfo = "ca info"
+    val ppAdditionalInfo = "pp info"
+    val preferencePriority = AddressPreferencePriority.FOURTH
+    val addCasCheckRequest = AddCasCheckRequest(
+      caAdditionalInfo = caAdditionalInfo,
+      ppAdditionalInfo = ppAdditionalInfo,
+      preferencePriority = preferencePriority,
     )
 
-    casCheckRequestRepository.save(casAddressCheckRequest)
+    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest)
 
-    val casCheckRequests = casCheckRequestRepository.findAll()
-    assertThat(casCheckRequests).hasSize(1)
-    assertThat(casCheckRequests[0].status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+    val dbCasCheckRequests = casCheckRequestRepository.findAll()
+    assertThat(dbCasCheckRequests).hasSize(1)
+    val dbCasCheckRequest = dbCasCheckRequests.first()
+    assertThat(dbCasCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+    assertThat(dbCasCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
+    assertThat(dbCasCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
+    assertThat(dbCasCheckRequest.preferencePriority).isEqualTo(preferencePriority)
   }
 
   private companion object {
