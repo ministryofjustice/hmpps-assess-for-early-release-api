@@ -142,12 +142,12 @@ class OffenderServiceTest {
     val hdced = LocalDate.now().plusDays(5)
     val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonRegisterService.getPrisonIdsAndNames()).thenReturn(mapOf(PRISON_ID to PRISON_NAME))
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
-    verify(prisonRegisterService).getPrisonIdsAndNames()
+    verify(prisonRegisterService).getNameForId(PRISON_ID)
     assertThat(assessment).extracting(
       "forename",
       "surname",

@@ -1,0 +1,27 @@
+services:
+  afer-test-db:
+    image: postgres:16.3
+    networks:
+      - hmpps-test
+    container_name: afer-test-db
+    user: postgres
+    restart: always
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=afer-test-db
+      - POSTGRES_USER=afer
+      - POSTGRES_PASSWORD=dummy
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d afer-test-db -U afer" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - test-pgdata:/var/lib/postgresql/data
+
+volumes:
+  test-pgdata:
+
+networks:
+  hmpps-test:

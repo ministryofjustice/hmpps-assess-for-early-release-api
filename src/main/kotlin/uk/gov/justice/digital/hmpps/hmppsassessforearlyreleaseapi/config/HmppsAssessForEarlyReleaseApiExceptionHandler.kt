@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.validation.ValidationException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -57,6 +58,17 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.error("Unexpected exception", e) }
+
+  @ExceptionHandler(EntityNotFoundException::class)
+  fun handleNotFoundException(e: Exception): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND,
+        userMessage = "Could not find entity: ${e.message}",
+        developerMessage = e.message,
+      ),
+    ).also { log.warn("Could not find entity", e) }
 
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

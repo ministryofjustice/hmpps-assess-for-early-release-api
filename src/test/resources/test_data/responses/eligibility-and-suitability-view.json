@@ -12,18 +12,18 @@
   },
   "complete": false,
   "checksPassed": false,
-  "eligibilityStatus": "NOT_STARTED",
+  "eligibilityStatus": "IN_PROGRESS",
   "eligibility": [
     {
       "code": "sex-offender-register",
       "taskName": "Sex offenders' register",
-      "status": "NOT_STARTED",
+      "status": "ELIGIBLE",
       "questions": [
         {
           "text": "Is this person required to sign the sex offenders' register?",
           "hint": null,
           "name": "requiredToSignSexOffenderRegister",
-          "answer": null
+          "answer": true
         }
       ]
     },
@@ -170,7 +170,7 @@
       ]
     }
   ],
-  "suitabilityStatus": "NOT_STARTED",
+  "suitabilityStatus": "IN_PROGRESS",
   "suitability": [
     {
       "code": "sexual-offending-history",
@@ -214,13 +214,13 @@
     {
       "code": "category-a",
       "taskName": "Category A",
-      "status": "NOT_STARTED",
+      "status": "SUITABLE",
       "questions": [
         {
           "text": "Is this person category A?",
           "hint": null,
           "name": "categoryA",
-          "answer": null
+          "answer": true
         }
       ]
     },

@@ -56,6 +56,9 @@ data class Offender(
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
+
+  fun currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED || it.status === AssessmentStatus.OPTED_OUT }
+
   @Override
   override fun equals(other: Any?): Boolean {
     if (this === other) return true

@@ -4,10 +4,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCheckDetails
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCheckDetails
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
@@ -32,7 +32,7 @@ object TestData {
       dateOfBirth = LocalDate.of(1981, 5, 23),
       hdced = hdced,
     )
-    offender.assessments.add(Assessment(offender = offender))
+    offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
     return offender
   }
 
@@ -58,14 +58,14 @@ object TestData {
     policyVersion = "1.0",
   )
 
-  fun anEligibilityCheckDetails() = EligibilityCheckDetails(
+  fun anEligibilityCheckDetails() = EligibilityCriterionProgress(
     code = "code-1",
     taskName = "task-1",
     questions = listOf(Question("question-1", answer = true)),
     status = EligibilityStatus.ELIGIBLE,
   )
 
-  fun anSuitabilityCheckDetails() = SuitabilityCheckDetails(
+  fun anSuitabilityCheckDetails() = SuitabilityCriterionProgress(
     code = "code-1",
     taskName = "task-1",
     questions = listOf(Question("question-1", answer = true)),

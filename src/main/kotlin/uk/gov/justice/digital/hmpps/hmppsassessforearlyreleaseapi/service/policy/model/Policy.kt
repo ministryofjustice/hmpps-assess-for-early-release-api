@@ -2,6 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.polic
 
 data class Policy(
   val code: String,
-  val suitabilityCriteria: List<Check> = emptyList(),
-  val eligibilityCriteria: List<Check> = emptyList(),
+  val suitabilityCriteria: List<Criterion> = emptyList(),
+  val eligibilityCriteria: List<Criterion> = emptyList(),
 )
