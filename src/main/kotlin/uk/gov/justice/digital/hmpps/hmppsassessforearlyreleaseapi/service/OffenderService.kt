@@ -44,10 +44,7 @@ class OffenderService(
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
-    val prisonIdsToNames = prisonRegisterService.getPrisonIdsAndNames()
-    val offenderLocation = prisonIdsToNames[offender.prisonId]
-      ?: throw EntityNotFoundException("Cannot find a prison with prison id in prison register: ${offender.prisonId}")
-
+    val prisonName = prisonRegisterService.getNameForId(offender.prisonId)
     val currentAssessment = offender.currentAssessment()
     return AssessmentSummary(
       forename = offender.forename,
@@ -56,7 +53,7 @@ class OffenderService(
       prisonNumber = offender.prisonNumber,
       hdced = offender.hdced,
       crd = offender.crd,
-      location = offenderLocation,
+      location = prisonName,
       status = currentAssessment.status,
       policyVersion = currentAssessment.policyVersion,
     )

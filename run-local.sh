@@ -43,6 +43,7 @@ export DB_SERVER=localhost
 export DB_NAME=assess-for-early-release-db
 export DB_USER=afer
 export DB_PASS=afer
+export OS_PLACES_API_KEY=xxxxxxxx
 
 # Provide URLs to other local container-based dependent services
 # Match with ports defined in docker-compose.yml

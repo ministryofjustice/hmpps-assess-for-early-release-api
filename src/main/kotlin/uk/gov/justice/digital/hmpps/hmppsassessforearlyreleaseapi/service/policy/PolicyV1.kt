@@ -1,13 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Check
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Question
 
 val POLICY_1_0 = Policy(
   code = "1.0",
   eligibilityCriteria = listOf(
-    Check(
+    Criterion(
       code = "sex-offender-register",
       name = "Sex offenders' register",
       question = Question(
@@ -15,7 +15,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person required to sign the sex offenders' register?",
       ),
     ),
-    Check(
+    Criterion(
       code = "extended-sentence-for-violent-or-sexual-offences",
       name = "Extended Sentence for violent or sexual offences",
       question = Question(
@@ -23,7 +23,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person serving an extended sentence for violent or sexual offences?",
       ),
     ),
-    Check(
+    Criterion(
       code = "rotl-failure-to-return",
       name = "ROTL failure to return",
       question = Question(
@@ -31,7 +31,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person serving a sentence for ROTL failure to return?",
       ),
     ),
-    Check(
+    Criterion(
       code = "community-order-curfew-breach",
       name = "Community order curfew breach",
       question = Question(
@@ -39,7 +39,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person serving a sentence for breaching a community order curfew?",
       ),
     ),
-    Check(
+    Criterion(
       code = "recalled-for-breaching-hdc-curfew",
       name = "Recalled for breaching HDC curfew",
       question = Question(
@@ -47,7 +47,7 @@ val POLICY_1_0 = Policy(
         text = "Has this person been recalled for breaching their HDC curfew within 2 years of their current sentence date",
       ),
     ),
-    Check(
+    Criterion(
       code = "deportation-orders",
       name = "Deportation Orders",
       questions = listOf(
@@ -61,7 +61,7 @@ val POLICY_1_0 = Policy(
         ),
       ),
     ),
-    Check(
+    Criterion(
       code = "recalled-from-early-release-on-compassionate-grounds",
       name = "Recalled from early release on compassionate grounds",
       question = Question(
@@ -69,7 +69,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person currently serving a recall from early release on compassionate grounds?",
       ),
     ),
-    Check(
+    Criterion(
       code = "terrorism",
       name = "Terrorism",
       question = Question(
@@ -77,7 +77,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person currently serving a sentence for terrorist or terrorist-connected offending?",
       ),
     ),
-    Check(
+    Criterion(
       code = "two-thirds-release",
       name = "Two-thirds release",
       questions = listOf(
@@ -98,7 +98,7 @@ val POLICY_1_0 = Policy(
         ),
       ),
     ),
-    Check(
+    Criterion(
       code = "section-244ZB-notice",
       name = "Section 244ZB notice",
       question = Question(
@@ -106,7 +106,7 @@ val POLICY_1_0 = Policy(
         text = "Has notice under section 244ZB been served that is still in force?",
       ),
     ),
-    Check(
+    Criterion(
       code = "section-20b-release",
       name = "Section 20B release",
       question = Question(
@@ -117,7 +117,7 @@ val POLICY_1_0 = Policy(
   ),
 
   suitabilityCriteria = listOf(
-    Check(
+    Criterion(
       code = "sexual-offending-history",
       name = "Sexual offending history",
       question = Question(
@@ -125,7 +125,7 @@ val POLICY_1_0 = Policy(
         text = "Does this person have a history of sexual-offending but is not required to sign the sex offender's register?",
       ),
     ),
-    Check(
+    Criterion(
       code = "liable-to-deportation",
       name = "Liable to deportation",
       question = Question(
@@ -133,7 +133,7 @@ val POLICY_1_0 = Policy(
         text = "Is this person a foreign national who is liable to deportation but not yet served a decision to deport?",
       ),
     ),
-    Check(
+    Criterion(
       code = "recalled-for-poor-behaviour-on-hdc",
       name = "Recalled for poor behaviour on hdc",
       question = Question(
@@ -141,12 +141,12 @@ val POLICY_1_0 = Policy(
         text = "Has this person been recalled for poor behaviour on HDC within 2 years of their current HDC date?",
       ),
     ),
-    Check(
+    Criterion(
       code = "category-a",
       name = "Category A",
       question = Question(name = "categoryA", text = "Is this person category A?"),
     ),
-    Check(
+    Criterion(
       code = "rosh-and-mappa",
       name = "RoSH and MAPPA",
       questions = listOf(
@@ -154,7 +154,7 @@ val POLICY_1_0 = Policy(
         Question(name = "mappaLevel2Or3", text = "Are they MAPPA level 2 or 3?"),
       ),
     ),
-    Check(
+    Criterion(
       code = "presumed-unsuitable-offences",
       name = "Presumed unsuitable offences",
       question = Question(
@@ -174,7 +174,7 @@ val POLICY_1_0 = Policy(
         """.trimIndent(),
       ),
     ),
-    Check(
+    Criterion(
       code = "terrorist-offending-history",
       name = "Terrorist offending history",
       question = Question(

@@ -1,13 +1,16 @@
-_  _ _  _ ___  ___  ____  
-|__| |\/| |__] |__] [__   
-|  | |  | |    |    ___]  
-                          
-___ ____ _  _ ___  _    ____ ___ ____ 
- |  |___ |\/| |__] |    |__|  |  |___ 
- |  |___ |  | |    |___ |  |  |  |___ 
-                                      
-_  _ ____ ___ _    _ _  _ 
-|_/  |  |  |  |    | |\ | 
-| \_ |__|  |  |___ | | \| 
-                          
-Please change me by generating your own ASCII art and placing in banner.txt
+ .S_SSSs      sSSs    sSSs   .S_sSSs     .S_SSSs     .S_sSSs     .S  
+.SS~SSSSS    d%%SP   d%%SP  .SS~YS%%b   .SS~SSSSS   .SS~YS%%b   .SS  
+S%S   SSSS  d%S'    d%S'    S%S   `S%b  S%S   SSSS  S%S   `S%b  S%S  
+S%S    S%S  S%S     S%S     S%S    S%S  S%S    S%S  S%S    S%S  S%S  
+S%S SSSS%S  S&S     S&S     S%S    d*S  S%S SSSS%S  S%S    d*S  S&S  
+S&S  SSS%S  S&S_Ss  S&S_Ss  S&S   .S*S  S&S  SSS%S  S&S   .S*S  S&S  
+S&S    S&S  S&S~SP  S&S~SP  S&S_sdSSS   S&S    S&S  S&S_sdSSS   S&S  
+S&S    S&S  S&S     S&S     S&S~YSY%b   S&S    S&S  S&S~YSSY    S&S  
+S*S    S&S  S*b     S*b     S*S   `S%b  S*S    S&S  S*S         S*S  
+S*S    S*S  S*S     S*S.    S*S    S%S  S*S    S*S  S*S         S*S  
+S*S    S*S  S*S      SSSbs  S*S    S&S  S*S    S*S  S*S         S*S  
+SSS    S*S  S*S       YSSP  S*S    SSS  SSS    S*S  S*S         S*S  
+       SP   SP              SP                 SP   SP          SP   
+       Y    Y               Y                  Y    Y           Y
+
+Powered by Spring Boot ${spring-boot.version}

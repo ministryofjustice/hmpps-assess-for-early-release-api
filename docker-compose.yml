@@ -12,7 +12,7 @@ services:
       - POSTGRES_USER=afer
       - POSTGRES_DB=assess-for-early-release-db
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -d assess-for-early-release-db -U cvl" ]
+      test: [ "CMD-SHELL", "pg_isready -d assess-for-early-release-db -U afer" ]
       interval: 10s
       timeout: 5s
       retries: 5
