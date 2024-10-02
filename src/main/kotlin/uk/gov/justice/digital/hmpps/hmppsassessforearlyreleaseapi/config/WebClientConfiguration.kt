@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -45,6 +47,7 @@ class WebClientConfiguration(
     val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
     oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
 
+    log.info("prisoner search client base url: $prisonerSearchApiUrl")
     return WebClient.builder()
       .baseUrl(prisonerSearchApiUrl)
       .apply(oauth2Client.oauth2Configuration())
@@ -81,4 +84,8 @@ class WebClientConfiguration(
         }
         .build(),
     ).build()
+
+  companion object {
+    val log: Logger = LoggerFactory.getLogger(this::class.java)
+  }
 }
