@@ -5,10 +5,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
@@ -19,8 +17,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.nio.charset.StandardCharsets
 
@@ -37,12 +33,6 @@ private const val PERFORM_CRITERIA_CHECK =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability-check"
 
 class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase() {
-
-  @Autowired
-  private lateinit var assessmentRepository: AssessmentRepository
-
-  @Autowired
-  private lateinit var offenderRepository: OffenderRepository
 
   @Nested
   inner class GetEligibilityAndSuitabilityCaseView {
