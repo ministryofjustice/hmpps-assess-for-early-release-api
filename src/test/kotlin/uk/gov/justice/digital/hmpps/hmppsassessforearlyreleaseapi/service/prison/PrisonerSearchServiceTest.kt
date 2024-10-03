@@ -23,23 +23,29 @@ class PrisonerSearchServiceTest {
   }
 
   @Test
-  fun `should search for prisoners by nomis ids`() {
-    val nomisId1 = "Z1234XY"
-    val nomisId2 = "H4784GE"
-    val nomisIds = listOf(nomisId1, nomisId2)
+  fun `should batch search for prisoners by nomis ids`() {
+    val batchSize = 500
+    val nomisIds = Array(batchSize * 2 + 1) { index -> "Z" + String.format("%03d", index) + "XY" }.asList()
 
-    val prisonerSearchPrisoners =
-      listOf(
-        PrisonerSearchPrisoner(prisonerNumber = nomisId1, firstName = "firstname1", lastName = "lastname1", dateOfBirth = LocalDate.of(1981, 5, 23)),
-        PrisonerSearchPrisoner(prisonerNumber = nomisId2, firstName = "firstname2", lastName = "lastname2", dateOfBirth = LocalDate.of(1998, 3, 30)),
+    val prisonerSearchPrisoners = nomisIds.mapIndexed { index, nomisId ->
+      PrisonerSearchPrisoner(
+        prisonerNumber = nomisId,
+        firstName = "firstname: $index",
+        lastName = "lastname1",
+        dateOfBirth = LocalDate.of(1981, 5, 23),
       )
-    whenever(prisonerSearchApiClient.searchPrisonersByNomisIds(nomisIds)).thenReturn(prisonerSearchPrisoners)
+    }
+
+    val prisoners1 = prisonerSearchPrisoners.slice(0..<batchSize)
+    val prisoners2 = prisonerSearchPrisoners.slice(batchSize..<batchSize * 2)
+    val prisoners3 = listOf(prisonerSearchPrisoners.last())
+    whenever(prisonerSearchApiClient.searchPrisonersByNomisIds(any())).thenReturn(prisoners1, prisoners2, prisoners3)
 
     val prisoners = prisonerSearchService.searchPrisonersByNomisIds(nomisIds)
 
-    verify(prisonerSearchApiClient).searchPrisonersByNomisIds(nomisIds)
-    assertThat(prisoners.size).isEqualTo(prisonerSearchPrisoners.size)
-    assertThat(prisoners[0].prisonerNumber).isEqualTo(nomisId1)
-    assertThat(prisoners[1].prisonerNumber).isEqualTo(nomisId2)
+    assertThat(prisoners).hasSize(batchSize * 2 + 1)
+    verify(prisonerSearchApiClient).searchPrisonersByNomisIds(nomisIds.slice(0..<batchSize))
+    verify(prisonerSearchApiClient).searchPrisonersByNomisIds(nomisIds.slice(batchSize..<batchSize * 2))
+    verify(prisonerSearchApiClient).searchPrisonersByNomisIds(listOf(nomisIds.last()))
   }
 }
