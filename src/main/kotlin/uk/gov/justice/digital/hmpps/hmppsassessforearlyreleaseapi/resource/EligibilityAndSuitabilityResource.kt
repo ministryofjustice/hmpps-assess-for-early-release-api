@@ -178,13 +178,7 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
     value = [
       ApiResponse(
         responseCode = "204",
-        description = "Returns details of a specific suitability criteria in the current assessment for the prisoner",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = SuitabilityCriterionView::class),
-          ),
-        ],
+        description = "Returns no content if check has been recorded correctly",
       ),
       ApiResponse(
         responseCode = "401",
@@ -212,6 +206,6 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
   fun answerCheck(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @Validated @RequestBody answer: CriterionCheck,
-  ) =
+  ): Unit =
     eligibilityAndSuitabilityService.saveAnswer(prisonNumber, answer)
 }
