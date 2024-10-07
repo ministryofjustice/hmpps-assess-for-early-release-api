@@ -19,7 +19,7 @@
         "text": "Is this person category A?",
         "hint": null,
         "name": "categoryA",
-        "answer": true
+        "answer": false
       }
     ]
   },

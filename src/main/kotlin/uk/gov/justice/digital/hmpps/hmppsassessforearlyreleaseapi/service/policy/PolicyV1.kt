@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.EvaluationStrategy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Question
 
@@ -153,6 +154,7 @@ val POLICY_1_0 = Policy(
         Question(name = "highOrVeryHighRoSH", text = "Does this person have a high or very high risk of serious harm?"),
         Question(name = "mappaLevel2Or3", text = "Are they MAPPA level 2 or 3?"),
       ),
+      evaluationStrategy = EvaluationStrategy.MET_IF_ANY_ARE_FALSE,
     ),
     Criterion(
       code = "presumed-unsuitable-offences",

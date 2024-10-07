@@ -6,10 +6,10 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaCheck
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType.ELIGIBILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType.SUITABILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
@@ -99,32 +99,32 @@ class EligibilityAndSuitabilityService(
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
     val assessment = offender.currentAssessment()
+    val criterionType = CriterionType.valueOf(answer.type.name)
 
-    val criteriaChecks = assessment.criteriaCheck
-
-    val existingCriteria =
-      criteriaChecks.find { it.criteriaType == CriteriaType.valueOf(answer.type.name) && it.criteriaCode == answer.code }
+    val currentResults = assessment.eligibilityCheckResults
+    val criterion = policyService.getCriterion(assessment.policyVersion, criterionType, answer.code)
+    val existingCriterionResult = currentResults.find(criterionType, answer)
 
     val criteria = when {
-      existingCriteria != null -> {
-        criteriaChecks.remove(existingCriteria)
-        existingCriteria.copy(
-          criteriaMet = answer.answers.all { it.value },
-          questionAnswers = answer.answers.toMap(HashMap()),
+      existingCriterionResult != null -> {
+        currentResults.remove(existingCriterionResult)
+        existingCriterionResult.copy(
+          criterionMet = criterion.isMet(answer.answers),
+          questionAnswers = answer.answers,
           lastUpdatedTimestamp = LocalDateTime.now(),
         )
       }
 
-      else -> CriteriaCheck(
+      else -> EligibilityCheckResult(
         assessment = assessment,
-        criteriaMet = answer.answers.all { it.value },
-        questionAnswers = answer.answers.toMap(HashMap()),
-        criteriaCode = answer.code,
-        criteriaVersion = assessment.policyVersion,
-        criteriaType = CriteriaType.valueOf(answer.type.name),
+        criterionMet = criterion.isMet(answer.answers),
+        questionAnswers = answer.answers,
+        criterionCode = answer.code,
+        criterionVersion = assessment.policyVersion,
+        criterionType = criterionType,
       )
     }
-    criteriaChecks.add(criteria)
+    currentResults.add(criteria)
     assessmentRepository.save(assessment)
   }
 
@@ -133,53 +133,59 @@ class EligibilityAndSuitabilityService(
    */
   private fun Assessment.getEligibilityProgress(): List<EligibilityCriterionProgress> {
     val policy = policyService.getVersionFromPolicy(this.policyVersion)
-    val codeToChecks = this.criteriaCheck
-      .filter { it.criteriaType == ELIGIBILITY }
-      .associateBy { it.criteriaCode }
+    val codeToChecks = this.eligibilityCheckResults
+      .filter { it.criterionType == ELIGIBILITY }
+      .associateBy { it.criterionCode }
 
     return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
   }
 
-  private fun Criterion.toEligibilityCriterionProgress(criteriaCheck: CriteriaCheck?) = EligibilityCriterionProgress(
-    code = code,
-    taskName = name,
-    status = criteriaCheck.getEligibilityStatus(),
-    questions = questions.map {
-      Question(
-        text = it.text,
-        hint = it.hint,
-        name = it.name,
-        answer = criteriaCheck.getAnswer(it.name),
-      )
-    },
-  )
+  private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
+    EligibilityCriterionProgress(
+      code = code,
+      taskName = name,
+      status = eligibilityCheckResult.getEligibilityStatus(),
+      questions = questions.map {
+        Question(
+          text = it.text,
+          hint = it.hint,
+          name = it.name,
+          answer = eligibilityCheckResult.getAnswer(it.name),
+        )
+      },
+    )
 
   /**
    * Combines suitability criteria from the policy with the checks on that criteria for a given case
    */
   private fun Assessment.getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
     val policy = policyService.getVersionFromPolicy(this.policyVersion)
-    val codeToChecks = this.criteriaCheck
-      .filter { it.criteriaType == SUITABILITY }
-      .associateBy { it.criteriaCode }
+    val codeToChecks = this.eligibilityCheckResults
+      .filter { it.criterionType == SUITABILITY }
+      .associateBy { it.criterionCode }
 
     return policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
   }
 
-  private fun Criterion.toSuitabilityCriterionProgress(criteriaCheck: CriteriaCheck?) =
+  private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
     SuitabilityCriterionProgress(
       code = code,
       taskName = name,
-      status = criteriaCheck.getSuitabilityStatus(),
+      status = eligibilityCheckResult.getSuitabilityStatus(),
       questions = questions.map {
         Question(
           text = it.text,
           hint = it.hint,
           name = it.name,
-          answer = criteriaCheck.getAnswer(it.name),
+          answer = eligibilityCheckResult.getAnswer(it.name),
         )
       },
     )
+
+  private fun Set<EligibilityCheckResult>.find(
+    criterionType: CriterionType,
+    answer: CriterionCheck,
+  ) = this.find { it.criterionType == criterionType && it.criterionCode == answer.code }
 
   private fun createAssessmentSummary(
     offender: Offender,

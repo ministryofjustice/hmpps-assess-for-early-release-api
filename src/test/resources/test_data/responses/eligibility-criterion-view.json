@@ -19,7 +19,7 @@
         "text": "Is this person required to sign the sex offenders' register?",
         "hint": null,
         "name": "requiredToSignSexOffenderRegister",
-        "answer": true
+        "answer": false
       }
     ]
   },

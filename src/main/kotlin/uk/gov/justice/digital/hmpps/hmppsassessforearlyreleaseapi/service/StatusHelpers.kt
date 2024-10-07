@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaCheck
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -51,16 +51,16 @@ object StatusHelpers {
     return checksPassed
   }
 
-  fun CriteriaCheck?.getEligibilityStatus() =
+  fun EligibilityCheckResult?.getEligibilityStatus() =
     this?.let {
-      if (it.criteriaMet) ELIGIBLE else INELIGIBLE
+      if (it.criterionMet) ELIGIBLE else INELIGIBLE
     } ?: EligibilityStatus.NOT_STARTED
 
-  fun CriteriaCheck?.getSuitabilityStatus() =
+  fun EligibilityCheckResult?.getSuitabilityStatus() =
     this?.let {
-      if (it.criteriaMet) SUITABLE else UNSUITABLE
+      if (it.criterionMet) SUITABLE else UNSUITABLE
     } ?: NOT_STARTED
 
-  fun CriteriaCheck?.getAnswer(questionName: String) =
+  fun EligibilityCheckResult?.getAnswer(questionName: String) =
     this?.let { questionAnswers[questionName] }
 }

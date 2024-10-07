@@ -15,14 +15,14 @@ import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.Type
 import java.time.LocalDateTime
 
-enum class CriteriaType {
+enum class CriterionType {
   ELIGIBILITY,
   SUITABILITY,
 }
 
 @Entity
-@Table(name = "criteria_check")
-data class CriteriaCheck(
+@Table(name = "eligibility_check_result")
+data class EligibilityCheckResult(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @NotNull
@@ -33,17 +33,17 @@ data class CriteriaCheck(
   val assessment: Assessment,
 
   @NotNull
-  val criteriaMet: Boolean,
+  val criterionMet: Boolean,
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  val criteriaType: CriteriaType,
+  val criterionType: CriterionType,
 
   @NotNull
-  val criteriaCode: String,
+  val criterionCode: String,
 
   @NotNull
-  val criteriaVersion: String,
+  val criterionVersion: String,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
@@ -58,7 +58,7 @@ data class CriteriaCheck(
 ) {
   @Override
   override fun toString(): String =
-    this::class.simpleName + "(id: $id, criteriaMet: $criteriaMet, questionAnswers: $questionAnswers)"
+    this::class.simpleName + "(id: $id, criterionMet: $criterionMet, questionAnswers: $questionAnswers)"
 
   @Override
   override fun hashCode(): Int = javaClass.hashCode()

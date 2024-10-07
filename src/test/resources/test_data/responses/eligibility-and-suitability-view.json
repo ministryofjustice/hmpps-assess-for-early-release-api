@@ -23,7 +23,7 @@
           "text": "Is this person required to sign the sex offenders' register?",
           "hint": null,
           "name": "requiredToSignSexOffenderRegister",
-          "answer": true
+          "answer": false
         }
       ]
     },
@@ -220,7 +220,7 @@
           "text": "Is this person category A?",
           "hint": null,
           "name": "categoryA",
-          "answer": true
+          "answer": false
         }
       ]
     },
