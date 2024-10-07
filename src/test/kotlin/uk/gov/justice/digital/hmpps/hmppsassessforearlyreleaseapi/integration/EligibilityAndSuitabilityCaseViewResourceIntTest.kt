@@ -214,11 +214,11 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
   }
 
   @Nested
-  open inner class PerformCriteriaCheck {
+  open inner class PerformEligibilityCheckResult {
     val payload = CriterionCheck(
       code = "category-a",
       type = CriteriaType.SUITABILITY,
-      answers = mapOf("categoryA" to false),
+      answers = mapOf("categoryA" to true),
     )
 
     @Test
@@ -258,7 +258,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       "classpath:test_data/reset.sql",
       "classpath:test_data/an-offender-with-eligibility-checks.sql",
     )
-    fun `can update a criterion check`() {
+    fun `can update a criterion check result`() {
       prisonRegisterMockServer.stubGetPrisons()
 
       run {
@@ -271,7 +271,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(SUITABLE)
-        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
+        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
       }
 
       webTestClient.put()
@@ -292,7 +292,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
-        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
+        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
       }
     }
 
@@ -305,7 +305,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       val payload = CriterionCheck(
         code = "recalled-for-breaching-hdc-curfew",
         type = CriteriaType.ELIGIBILITY,
-        answers = mapOf("recalledForBreachingHdcCurfew" to true),
+        answers = mapOf("recalledForBreachingHdcCurfew" to false),
       )
 
       prisonRegisterMockServer.stubGetPrisons()
@@ -341,7 +341,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(ELIGIBLE)
-        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
+        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
       }
     }
   }

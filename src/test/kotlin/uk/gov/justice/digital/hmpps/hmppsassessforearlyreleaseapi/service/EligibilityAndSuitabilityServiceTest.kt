@@ -8,9 +8,9 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaCheck
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType.ELIGIBILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriteriaType.SUITABILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
@@ -210,19 +210,19 @@ class EligibilityAndSuitabilityServiceTest {
         answers = mapOf(question.name to true),
       )
 
-      assertThat(anOffender.currentAssessment().criteriaCheck).isEmpty()
+      assertThat(anOffender.currentAssessment().eligibilityCheckResults).isEmpty()
 
       service.saveAnswer(PRISON_NUMBER, criterionChecks)
 
       argumentCaptor<Assessment> {
         verify(assessmentRepository).save(capture())
 
-        assertThat(firstValue.criteriaCheck).hasSize(1)
-        with(firstValue.criteriaCheck.first()) {
-          assertThat(criteriaCode).isEqualTo(criterion.code)
-          assertThat(criteriaType).isEqualTo(ELIGIBILITY)
-          assertThat(criteriaMet).isEqualTo(true)
-          assertThat(criteriaVersion).isEqualTo(firstValue.policyVersion)
+        assertThat(firstValue.eligibilityCheckResults).hasSize(1)
+        with(firstValue.eligibilityCheckResults.first()) {
+          assertThat(criterionCode).isEqualTo(criterion.code)
+          assertThat(criterionType).isEqualTo(ELIGIBILITY)
+          assertThat(criterionMet).isEqualTo(false)
+          assertThat(criterionVersion).isEqualTo(firstValue.policyVersion)
           assertThat(assessment).isEqualTo(firstValue)
           assertThat(questionAnswers).isEqualTo(mapOf(question.name to true))
         }
@@ -236,23 +236,23 @@ class EligibilityAndSuitabilityServiceTest {
       val eligibilityCriteria = POLICY_1_0.eligibilityCriteria.first()
       val suitabilityCriteria = POLICY_1_0.suitabilityCriteria.first()
       val assessment = currentAssessment.copy(
-        criteriaCheck = mutableSetOf(
-          CriteriaCheck(
+        eligibilityCheckResults = mutableSetOf(
+          EligibilityCheckResult(
             assessment = currentAssessment,
-            criteriaCode = eligibilityCriteria.code,
-            criteriaType = ELIGIBILITY,
-            criteriaMet = true,
+            criterionCode = eligibilityCriteria.code,
+            criterionType = ELIGIBILITY,
+            criterionMet = true,
             id = 1,
-            criteriaVersion = POLICY_1_0.code,
+            criterionVersion = POLICY_1_0.code,
             questionAnswers = mapOf(eligibilityCriteria.questions.first().name to true),
           ),
-          CriteriaCheck(
+          EligibilityCheckResult(
             assessment = currentAssessment,
-            criteriaCode = suitabilityCriteria.code,
-            criteriaType = SUITABILITY,
-            criteriaMet = true,
+            criterionCode = suitabilityCriteria.code,
+            criterionType = SUITABILITY,
+            criterionMet = true,
             id = 1,
-            criteriaVersion = POLICY_1_0.code,
+            criterionVersion = POLICY_1_0.code,
             questionAnswers = mapOf(suitabilityCriteria.questions.first().name to true),
           ),
         ),

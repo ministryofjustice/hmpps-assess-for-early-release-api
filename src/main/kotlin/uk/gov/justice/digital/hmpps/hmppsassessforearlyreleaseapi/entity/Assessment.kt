@@ -41,7 +41,7 @@ data class Assessment(
   val policyVersion: String = "???",
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  val criteriaCheck: MutableSet<CriteriaCheck> = mutableSetOf(),
+  val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
