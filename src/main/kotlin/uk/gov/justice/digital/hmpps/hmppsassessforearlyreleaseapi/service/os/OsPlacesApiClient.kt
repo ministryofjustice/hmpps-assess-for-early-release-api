@@ -2,9 +2,12 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientResponseException
+import reactor.core.publisher.Mono
 
 @Service
 class OsPlacesApiClient(
@@ -18,6 +21,7 @@ class OsPlacesApiClient(
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .bodyToMono(OsPlacesApiResponse::class.java)
+      .onErrorResume { e -> if (e is WebClientResponseException && e.statusCode == HttpStatus.BAD_REQUEST) Mono.empty() else Mono.error(e) }
       .block()
     return searchResult?.results?.map { it.dpa } ?: emptyList()
   }

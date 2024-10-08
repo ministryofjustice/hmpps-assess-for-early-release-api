@@ -9,7 +9,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.currentAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository

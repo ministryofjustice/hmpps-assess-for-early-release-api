@@ -54,6 +54,15 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(addresses[2].addressLastUpdated).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
+  @Test
+  fun `should return empty list of places for invalid post code`() {
+    val postcode = "INVALID"
+    osPlacesMockServer.stubGetAddressesForPostcodeBadRequest(postcode)
+
+    val addresses = addressService.getAddressesForPostcode(postcode)
+    assertThat(addresses).isEmpty()
+  }
+
   @Sql(
     "classpath:test_data/reset.sql",
   )
@@ -65,7 +74,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val address = addressService.getAddressForUprn(uprn)
     assertThat(address.postcode).isEqualTo("SO16 0AS")
     assertThat(address.uprn).isEqualTo(uprn)
-    assertThat(address.firstLine).isEqualTo("4 ADANAC DRIVE")
+    assertThat(address.firstLine).isEqualTo("ORDNANCE SURVEY, 4 ADANAC DRIVE")
 
     osPlacesMockServer.verify(1, getRequestedFor(urlEqualTo("/uprn?uprn=$uprn&key=$OS_API_KEY")))
     val savedAddress = addressRepository.findByUprn(uprn)

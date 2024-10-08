@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.currentAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
@@ -46,8 +45,12 @@ class AddressService(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
   ): StandardAddressCheckRequestSummary {
-    val address = addressRepository.findByUprn(addStandardAddressCheckRequest.addressUprn)
-      ?: error("Couldn't find an existing address with UPRN: ${addStandardAddressCheckRequest.addressUprn}")
+    val uprn = addStandardAddressCheckRequest.addressUprn
+    var address = addressRepository.findByUprn(uprn)
+    if (address == null) {
+      address = osPlacesApiClient.getAddressForUprn(uprn).toAddress()
+      address = addressRepository.save(address)
+    }
 
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: error("Cannot find offender with prisonNumber $prisonNumber")
@@ -57,7 +60,7 @@ class AddressService(
         caAdditionalInfo = addStandardAddressCheckRequest.caAdditionalInfo,
         ppAdditionalInfo = addStandardAddressCheckRequest.ppAdditionalInfo,
         preferencePriority = addStandardAddressCheckRequest.preferencePriority,
-        address = address,
+        address = address!!,
         assessment = offender.currentAssessment(),
       ),
     )
@@ -87,7 +90,7 @@ class AddressService(
   private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =
     AddressSummary(
       uprn = this.uprn,
-      firstLine = if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName,
+      firstLine = this.getAddressFirstLine(),
       secondLine = this.locality,
       town = this.postTown,
       county = this.county,
@@ -98,10 +101,17 @@ class AddressService(
       addressLastUpdated = this.lastUpdateDate,
     )
 
+  private fun OsPlacesApiDPA.getAddressFirstLine(): String {
+    var firstLine = if (this.organisationName != null) this.organisationName + ", " else ""
+    firstLine += if (this.buildingName != null) this.buildingName + ", " else ""
+    firstLine += if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
+    return firstLine
+  }
+
   private fun OsPlacesApiDPA.toAddress(): Address =
     Address(
       uprn = this.uprn,
-      firstLine = if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName,
+      firstLine = this.getAddressFirstLine(),
       secondLine = this.locality,
       town = this.postTown,
       county = this.county,
