@@ -1,0 +1,1 @@
+ALTER TABLE address ALTER COLUMN first_line TYPE VARCHAR(100);

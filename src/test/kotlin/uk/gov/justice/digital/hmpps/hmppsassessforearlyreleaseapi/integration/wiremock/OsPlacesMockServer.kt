@@ -151,6 +151,17 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
     )
   }
 
+  fun stubGetAddressesForPostcodeBadRequest(postcode: String) {
+    stubFor(
+      get(urlEqualTo("/postcode?postcode=$postcode&key=$apiKey"))
+        .willReturn(
+          WireMock.aResponse().withHeader(
+            "Content-Type",
+            "application/json",
+          ).withStatus(400),
+        ),
+    )
+  }
   fun stubGetAddressByUprn(uprn: String) {
     val json = """
       {

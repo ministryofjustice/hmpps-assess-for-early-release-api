@@ -11,6 +11,12 @@ data class OsPlacesApiDPA(
   @JsonProperty("ADDRESS")
   val address: String,
 
+  @JsonProperty("ORGANISATION_NAME")
+  val organisationName: String?,
+
+  @JsonProperty("BUILDING_NAME")
+  val buildingName: String?,
+
   @JsonProperty("BUILDING_NUMBER")
   val buildingNumber: String?,
 
