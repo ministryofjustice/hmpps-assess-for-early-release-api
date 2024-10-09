@@ -13,6 +13,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isChecksPassed
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isComplete
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 
 @Service
@@ -33,19 +35,19 @@ class EligibilityAndSuitabilityService(
 
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = createAssessmentSummary(assessment),
-      complete = StatusHelpers.isComplete(assessment.eligibilityProgress, assessment.suitabilityProgress),
-      checksPassed = StatusHelpers.isChecksPassed(assessment.eligibilityProgress, assessment.suitabilityProgress),
-      eligibility = assessment.eligibilityProgress,
-      eligibilityStatus = assessment.eligibilityProgress.toStatus(),
-      suitability = assessment.suitabilityProgress,
-      suitabilityStatus = assessment.suitabilityProgress.toStatus(),
+      complete = assessment.isComplete(),
+      checksPassed = assessment.isChecksPassed(),
+      eligibility = assessment.eligibilityProgress(),
+      eligibilityStatus = assessment.eligibilityProgress().toStatus(),
+      suitability = assessment.suitabilityProgress(),
+      suitabilityStatus = assessment.suitabilityProgress().toStatus(),
     )
   }
 
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val eligibilityProgress = currentAssessment.eligibilityProgress.dropWhile { it.code != code }.take(2)
+    val eligibilityProgress = currentAssessment.eligibilityProgress().dropWhile { it.code != code }.take(2)
     if (eligibilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
@@ -58,7 +60,7 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val suitabilityProgress = currentAssessment.suitabilityProgress.dropWhile { it.code != code }.take(2)
+    val suitabilityProgress = currentAssessment.suitabilityProgress().dropWhile { it.code != code }.take(2)
     if (suitabilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(

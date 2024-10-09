@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 
-class AssesssmentServiceTest {
+class AssessmentServiceTest {
   private val prisonRegisterService = mock<PrisonRegisterService>()
   private val offenderRepository = mock<OffenderRepository>()
 
@@ -39,11 +39,13 @@ class AssesssmentServiceTest {
 
       assertThat(currentAssessment.assessmentEntity).isEqualTo(anOffender.currentAssessment())
 
-      assertThat(currentAssessment.eligibilityProgress).hasSize(11)
-      assertThat(currentAssessment.eligibilityProgress).allMatch { it.status == NOT_STARTED }
+      val eligibilityProgress = currentAssessment.eligibilityProgress()
+      assertThat(eligibilityProgress).hasSize(11)
+      assertThat(eligibilityProgress).allMatch { it.status == NOT_STARTED }
 
-      assertThat(currentAssessment.suitabilityProgress).hasSize(7)
-      assertThat(currentAssessment.suitabilityProgress).allMatch { it.status == SuitabilityStatus.NOT_STARTED }
+      val suitabilityProgress = currentAssessment.suitabilityProgress()
+      assertThat(suitabilityProgress).hasSize(7)
+      assertThat(suitabilityProgress).allMatch { it.status == SuitabilityStatus.NOT_STARTED }
     }
 
     @Test
@@ -55,15 +57,15 @@ class AssesssmentServiceTest {
 
       val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      assertThat(currentAssessment.eligibilityProgress).hasSize(11)
-      assertThat(currentAssessment.eligibilityProgress).filteredOn { it.status == NOT_STARTED }.hasSize(10)
-      assertThat(currentAssessment.eligibilityProgress).filteredOn { it.status == ELIGIBLE }.hasSize(1)
+      val eligibilityProgress = currentAssessment.eligibilityProgress()
+      assertThat(eligibilityProgress).hasSize(11)
+      assertThat(eligibilityProgress).filteredOn { it.status == NOT_STARTED }.hasSize(10)
+      assertThat(eligibilityProgress).filteredOn { it.status == ELIGIBLE }.hasSize(1)
 
-      assertThat(currentAssessment.suitabilityProgress).hasSize(7)
-      assertThat(currentAssessment.suitabilityProgress).filteredOn { it.status == SuitabilityStatus.NOT_STARTED }
-        .hasSize(6)
-      assertThat(currentAssessment.suitabilityProgress).filteredOn { it.status == SuitabilityStatus.SUITABLE }
-        .hasSize(1)
+      val suitabilityProgress = currentAssessment.suitabilityProgress()
+      assertThat(suitabilityProgress).hasSize(7)
+      assertThat(suitabilityProgress).filteredOn { it.status == SuitabilityStatus.NOT_STARTED }.hasSize(6)
+      assertThat(suitabilityProgress).filteredOn { it.status == SuitabilityStatus.SUITABLE }.hasSize(1)
     }
   }
 
@@ -79,7 +81,7 @@ class AssesssmentServiceTest {
 
       val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      assertThat(assessment.suitabilityProgress.find { it.code === criterion1.code }).isEqualTo(
+      assertThat(assessment.suitabilityProgress().find { it.code === criterion1.code }).isEqualTo(
         SuitabilityCriterionProgress(
           code = criterion1.code,
           taskName = criterion1.name,
@@ -109,7 +111,7 @@ class AssesssmentServiceTest {
 
       val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      assertThat(assessment.eligibilityProgress.find { it.code === criterion1.code }).isEqualTo(
+      assertThat(assessment.eligibilityProgress().find { it.code === criterion1.code }).isEqualTo(
         EligibilityCriterionProgress(
           code = criterion1.code,
           taskName = criterion1.name,

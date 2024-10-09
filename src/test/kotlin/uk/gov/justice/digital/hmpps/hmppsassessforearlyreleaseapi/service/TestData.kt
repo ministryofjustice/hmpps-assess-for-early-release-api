@@ -112,35 +112,39 @@ object TestData {
     offender = anOffenderWithSomeProgress(),
     assessmentEntity = anOffenderWithSomeProgress().currentAssessment(),
     prison = "Birmingham (HMP)",
-    eligibilityProgress = POLICY_1_0.eligibilityCriteria.map {
-      EligibilityCriterionProgress(
-        code = it.code,
-        taskName = it.name,
-        status = NOT_STARTED,
-        questions = it.questions.map { question ->
-          Question(
-            text = question.text,
-            hint = question.hint,
-            name = question.name,
-            answer = null,
-          )
-        },
-      )
+    eligibilityProgress = {
+      POLICY_1_0.eligibilityCriteria.map {
+        EligibilityCriterionProgress(
+          code = it.code,
+          taskName = it.name,
+          status = NOT_STARTED,
+          questions = it.questions.map { question ->
+            Question(
+              text = question.text,
+              hint = question.hint,
+              name = question.name,
+              answer = null,
+            )
+          },
+        )
+      }
     },
-    suitabilityProgress = POLICY_1_0.suitabilityCriteria.map {
-      SuitabilityCriterionProgress(
-        code = it.code,
-        taskName = it.name,
-        status = SuitabilityStatus.NOT_STARTED,
-        questions = it.questions.map { question ->
-          Question(
-            text = question.text,
-            hint = question.hint,
-            name = question.name,
-            answer = null,
-          )
-        },
-      )
+    suitabilityProgress = {
+      POLICY_1_0.suitabilityCriteria.map {
+        SuitabilityCriterionProgress(
+          code = it.code,
+          taskName = it.name,
+          status = SuitabilityStatus.NOT_STARTED,
+          questions = it.questions.map { question ->
+            Question(
+              text = question.text,
+              hint = question.hint,
+              name = question.name,
+              answer = null,
+            )
+          },
+        )
+      }
     },
   )
 }

@@ -37,15 +37,13 @@ class AssessmentService(
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
     val currentAssessment = offender.currentAssessment()
-    val eligibilityProgress = currentAssessment.getEligibilityProgress()
-    val suitabilityProgress = currentAssessment.getSuitabilityProgress()
 
     return AssessmentWithEligibilityProgress(
       offender = offender,
       assessmentEntity = currentAssessment,
       prison = prisonRegisterService.getNameForId(offender.prisonId),
-      eligibilityProgress = eligibilityProgress,
-      suitabilityProgress = suitabilityProgress,
+      eligibilityProgress = { currentAssessment.getEligibilityProgress() },
+      suitabilityProgress = { currentAssessment.getSuitabilityProgress() },
     )
   }
 
@@ -107,7 +105,7 @@ class AssessmentService(
     val offender: Offender,
     val assessmentEntity: Assessment,
     val prison: String,
-    val eligibilityProgress: List<EligibilityCriterionProgress>,
-    val suitabilityProgress: List<SuitabilityCriterionProgress>,
+    val eligibilityProgress: () -> List<EligibilityCriterionProgress>,
+    val suitabilityProgress: () -> List<SuitabilityCriterionProgress>,
   )
 }

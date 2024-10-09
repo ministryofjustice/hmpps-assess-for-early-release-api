@@ -73,11 +73,13 @@ class EligibilityAndSuitabilityServiceTest {
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
         anAssessmentWithEligibilityProgress.copy(
-          suitabilityProgress = anAssessmentWithEligibilityProgress.suitabilityProgress.mapIndexed { i, it ->
-            if (i == 0) {
-              it.copy(status = SUITABLE, questions = listOf(it.questions[0].copy(answer = true)))
-            } else {
-              it
+          suitabilityProgress = {
+            anAssessmentWithEligibilityProgress.suitabilityProgress().mapIndexed { i, it ->
+              if (i == 0) {
+                it.copy(status = SUITABLE, questions = listOf(it.questions[0].copy(answer = true)))
+              } else {
+                it
+              }
             }
           },
         ),
@@ -100,14 +102,15 @@ class EligibilityAndSuitabilityServiceTest {
           code = criterion1.code,
           taskName = criterion1.name,
           status = SuitabilityStatus.SUITABLE,
-          questions = criterion1.questions.map {
-            Question(
-              text = it.text,
-              hint = it.hint,
-              name = it.name,
-              answer = true,
-            )
-          },
+          questions = criterion1.questions.map
+            {
+              Question(
+                text = it.text,
+                hint = it.hint,
+                name = it.name,
+                answer = true,
+              )
+            },
         ),
       )
       assertThat(criterionView.nextCriterion).isEqualTo(
@@ -115,14 +118,15 @@ class EligibilityAndSuitabilityServiceTest {
           code = criterion2.code,
           taskName = criterion2.name,
           status = SuitabilityStatus.NOT_STARTED,
-          questions = criterion2.questions.map {
-            Question(
-              text = it.text,
-              hint = it.hint,
-              name = it.name,
-              answer = null,
-            )
-          },
+          questions = criterion2.questions.map
+            {
+              Question(
+                text = it.text,
+                hint = it.hint,
+                name = it.name,
+                answer = null,
+              )
+            },
         ),
       )
     }
@@ -136,11 +140,13 @@ class EligibilityAndSuitabilityServiceTest {
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
         anAssessmentWithEligibilityProgress.copy(
-          eligibilityProgress = anAssessmentWithEligibilityProgress.eligibilityProgress.mapIndexed { i, it ->
-            if (i == 0) {
-              it.copy(status = ELIGIBLE, questions = listOf(it.questions[0].copy(answer = true)))
-            } else {
-              it
+          eligibilityProgress = {
+            anAssessmentWithEligibilityProgress.eligibilityProgress().mapIndexed { i, it ->
+              if (i == 0) {
+                it.copy(status = ELIGIBLE, questions = listOf(it.questions[0].copy(answer = true)))
+              } else {
+                it
+              }
             }
           },
         ),

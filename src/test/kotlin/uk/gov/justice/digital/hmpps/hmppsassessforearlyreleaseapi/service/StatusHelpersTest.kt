@@ -196,4 +196,63 @@ class StatusHelpersTest {
       assertThat(StatusHelpers.isChecksPassed(eligibilityDetails, suitabilityStatus)).isEqualTo(false)
     }
   }
+
+  @Nested
+  inner class InProgress {
+    @Test
+    fun `no progress`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(false)
+    }
+
+    @Test
+    fun `eligibility in progress`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `suitability in progress`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE), anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `eligibility complete`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `suitability complete`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `all in progress`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE), anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(true)
+    }
+
+    @Test
+    fun `all complete`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityStatus = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
+
+      assertThat(StatusHelpers.inProgress(eligibilityDetails, suitabilityStatus)).isEqualTo(false)
+    }
+  }
 }
