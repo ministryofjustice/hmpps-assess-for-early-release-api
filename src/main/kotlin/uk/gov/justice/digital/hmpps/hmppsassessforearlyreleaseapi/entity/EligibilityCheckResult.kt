@@ -58,7 +58,7 @@ data class EligibilityCheckResult(
 ) {
   @Override
   override fun toString(): String =
-    this::class.simpleName + "(id: $id, criterionMet: $criterionMet, questionAnswers: $questionAnswers)"
+    this::class.simpleName + "(id: $id, criterionType: $criterionType, criterionCode: $criterionCode, criterionMet: $criterionMet, questionAnswers: $questionAnswers, criterionVersion: $criterionVersion)"
 
   @Override
   override fun hashCode(): Int = javaClass.hashCode()

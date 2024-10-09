@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 
 object StatusHelpers {
 
@@ -28,27 +29,39 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
-  fun isComplete(
-    eligibilityDetails: List<EligibilityCriterionProgress>,
-    suitabilityDetails: List<SuitabilityCriterionProgress>,
-  ): Boolean {
-    val ineligible = eligibilityDetails.any { it.status == INELIGIBLE }
-    val eligible = eligibilityDetails.all { it.status == ELIGIBLE }
-    val suitabilityComplete =
-      suitabilityDetails.all { it.status == SUITABLE } || suitabilityDetails.any { it.status == UNSUITABLE }
+  fun AssessmentWithEligibilityProgress.isComplete() = isComplete(eligibilityProgress, suitabilityProgress)
+  fun AssessmentWithEligibilityProgress.isChecksPassed() = isChecksPassed(eligibilityProgress, suitabilityProgress)
+  fun AssessmentWithEligibilityProgress.inProgress() = inProgress(eligibilityProgress, suitabilityProgress)
 
-    val complete = (eligible && suitabilityComplete) || ineligible
-    return complete
+  fun isComplete(
+    eligibilityProgress: List<EligibilityCriterionProgress>,
+    suitabilityProgress: List<SuitabilityCriterionProgress>,
+  ): Boolean {
+    val eligibilityStatus = eligibilityProgress.toStatus()
+    val suitabilityStatus = suitabilityProgress.toStatus()
+
+    val ineligible = eligibilityStatus == INELIGIBLE
+    val eligible = eligibilityStatus == ELIGIBLE
+    val suitabilityComplete = suitabilityStatus == SUITABLE || suitabilityStatus == UNSUITABLE
+
+    return (eligible && suitabilityComplete) || ineligible
   }
 
   fun isChecksPassed(
-    eligibilityDetails: List<EligibilityCriterionProgress>,
-    suitabilityDetails: List<SuitabilityCriterionProgress>,
+    eligibilityProgress: List<EligibilityCriterionProgress>,
+    suitabilityProgress: List<SuitabilityCriterionProgress>,
   ): Boolean {
-    val eligible = eligibilityDetails.all { it.status == ELIGIBLE }
-    val suitabilityPassed = suitabilityDetails.all { it.status == SUITABLE }
-    val checksPassed = (eligible && suitabilityPassed)
-    return checksPassed
+    val eligible = eligibilityProgress.toStatus() == ELIGIBLE
+    val suitabilityPassed = suitabilityProgress.toStatus() == SUITABLE
+    return (eligible && suitabilityPassed)
+  }
+
+  fun inProgress(
+    eligibilityProgress: List<EligibilityCriterionProgress>,
+    suitabilityProgress: List<SuitabilityCriterionProgress>,
+  ): Boolean {
+    if (eligibilityProgress.toStatus() == IN_PROGRESS) return true
+    return suitabilityProgress.toStatus() == SuitabilityStatus.IN_PROGRESS
   }
 
   fun EligibilityCheckResult?.getEligibilityStatus() =

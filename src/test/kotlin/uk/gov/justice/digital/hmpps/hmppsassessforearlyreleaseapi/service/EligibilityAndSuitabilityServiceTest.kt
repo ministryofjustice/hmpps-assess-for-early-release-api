@@ -8,9 +8,8 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
@@ -19,31 +18,35 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 
 class EligibilityAndSuitabilityServiceTest {
-  private val prisonRegisterService = mock<PrisonRegisterService>()
+  private val assessmentService = mock<AssessmentService>()
+  private val assessmentLifecycleService = mock<AssessmentLifecycleService>()
   private val assessmentRepository = mock<AssessmentRepository>()
-  private val offenderRepository = mock<OffenderRepository>()
 
   private val service =
-    EligibilityAndSuitabilityService(PolicyService(), prisonRegisterService, assessmentRepository, offenderRepository)
+    EligibilityAndSuitabilityService(
+      PolicyService(),
+      assessmentService,
+      assessmentRepository,
+      assessmentLifecycleService,
+    )
 
   @Nested
   inner class GetCaseView {
     @Test
     fun `for existing unstarted offender`() {
       val anOffender = anOffender()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender.copy())
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
+        anAssessmentWithEligibilityProgress(),
+      )
 
       val caseView = service.getCaseView(PRISON_NUMBER)
 
@@ -60,40 +63,25 @@ class EligibilityAndSuitabilityServiceTest {
       assertThat(caseView.suitability).hasSize(7)
       assertThat(caseView.suitability).allMatch { it.status == SuitabilityStatus.NOT_STARTED }
     }
-
-    @Test
-    fun `for an offender with some progress`() {
-      val offender = anOffenderWithSomeProgress()
-
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-
-      val caseView = service.getCaseView(PRISON_NUMBER)
-
-      assertThat(caseView.assessmentSummary).isEqualTo(
-        anAssessmentSummary().copy(
-          hdced = offender.hdced,
-          crd = offender.crd,
-        ),
-      )
-
-      assertThat(caseView.eligibility).hasSize(11)
-      assertThat(caseView.eligibility).filteredOn { it.status == NOT_STARTED }.hasSize(10)
-      assertThat(caseView.eligibility).filteredOn { it.status == ELIGIBLE }.hasSize(1)
-
-      assertThat(caseView.suitability).hasSize(7)
-      assertThat(caseView.suitability).filteredOn { it.status == SuitabilityStatus.NOT_STARTED }.hasSize(6)
-      assertThat(caseView.suitability).filteredOn { it.status == SuitabilityStatus.SUITABLE }.hasSize(1)
-    }
   }
 
   @Nested
   inner class GetSuitabilityCriterionView {
     @Test
-    fun `for existing unstarted offender`() {
-      val anOffender = anOffenderWithSomeProgress()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    fun `for a started offender`() {
+      val anAssessmentWithEligibilityProgress = anAssessmentWithEligibilityProgress()
+
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
+        anAssessmentWithEligibilityProgress.copy(
+          suitabilityProgress = anAssessmentWithEligibilityProgress.suitabilityProgress.mapIndexed { i, it ->
+            if (i == 0) {
+              it.copy(status = SUITABLE, questions = listOf(it.questions[0].copy(answer = true)))
+            } else {
+              it
+            }
+          },
+        ),
+      )
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
       val criterion2 = POLICY_1_0.suitabilityCriteria[1]
@@ -102,8 +90,8 @@ class EligibilityAndSuitabilityServiceTest {
 
       assertThat(criterionView.assessmentSummary).isEqualTo(
         anAssessmentSummary().copy(
-          hdced = anOffender.hdced,
-          crd = anOffender.crd,
+          hdced = anAssessmentWithEligibilityProgress.offender.hdced,
+          crd = anAssessmentWithEligibilityProgress.offender.crd,
         ),
       )
 
@@ -143,10 +131,20 @@ class EligibilityAndSuitabilityServiceTest {
   @Nested
   inner class GetEligibilityCriterionView {
     @Test
-    fun `for existing unstarted offender`() {
-      val anOffender = anOffenderWithSomeProgress()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    fun `for a started offender`() {
+      val anAssessmentWithEligibilityProgress = anAssessmentWithEligibilityProgress()
+
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
+        anAssessmentWithEligibilityProgress.copy(
+          eligibilityProgress = anAssessmentWithEligibilityProgress.eligibilityProgress.mapIndexed { i, it ->
+            if (i == 0) {
+              it.copy(status = ELIGIBLE, questions = listOf(it.questions[0].copy(answer = true)))
+            } else {
+              it
+            }
+          },
+        ),
+      )
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
       val criterion2 = POLICY_1_0.eligibilityCriteria[1]
@@ -155,8 +153,8 @@ class EligibilityAndSuitabilityServiceTest {
 
       assertThat(criterionView.assessmentSummary).isEqualTo(
         anAssessmentSummary().copy(
-          hdced = anOffender.hdced,
-          crd = anOffender.crd,
+          hdced = anAssessmentWithEligibilityProgress.offender.hdced,
+          crd = anAssessmentWithEligibilityProgress.offender.crd,
         ),
       )
 
@@ -197,9 +195,16 @@ class EligibilityAndSuitabilityServiceTest {
   inner class SaveAnswer {
     @Test
     fun `for existing unstarted offender`() {
-      val anOffender = anOffender()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      val anAssessmentWithEligibilityProgress =
+        anAssessmentWithEligibilityProgress().copy(assessmentEntity = anOffender().currentAssessment())
+
+      whenever(assessmentLifecycleService.eligibilityAnswerSubmitted(anAssessmentWithEligibilityProgress)).thenReturn(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+      )
+
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
+        anAssessmentWithEligibilityProgress,
+      )
 
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
@@ -210,13 +215,14 @@ class EligibilityAndSuitabilityServiceTest {
         answers = mapOf(question.name to true),
       )
 
-      assertThat(anOffender.currentAssessment().eligibilityCheckResults).isEmpty()
+      assertThat(anAssessmentWithEligibilityProgress.assessmentEntity.eligibilityCheckResults).isEmpty()
 
       service.saveAnswer(PRISON_NUMBER, criterionChecks)
 
       argumentCaptor<Assessment> {
         verify(assessmentRepository).save(capture())
 
+        assertThat(firstValue.status).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
         assertThat(firstValue.eligibilityCheckResults).hasSize(1)
         with(firstValue.eligibilityCheckResults.first()) {
           assertThat(criterionCode).isEqualTo(criterion.code)
@@ -229,34 +235,4 @@ class EligibilityAndSuitabilityServiceTest {
       }
     }
   }
-
-  private fun anOffenderWithSomeProgress() =
-    anOffender().let {
-      val currentAssessment = it.currentAssessment()
-      val eligibilityCriteria = POLICY_1_0.eligibilityCriteria.first()
-      val suitabilityCriteria = POLICY_1_0.suitabilityCriteria.first()
-      val assessment = currentAssessment.copy(
-        eligibilityCheckResults = mutableSetOf(
-          EligibilityCheckResult(
-            assessment = currentAssessment,
-            criterionCode = eligibilityCriteria.code,
-            criterionType = ELIGIBILITY,
-            criterionMet = true,
-            id = 1,
-            criterionVersion = POLICY_1_0.code,
-            questionAnswers = mapOf(eligibilityCriteria.questions.first().name to true),
-          ),
-          EligibilityCheckResult(
-            assessment = currentAssessment,
-            criterionCode = suitabilityCriteria.code,
-            criterionType = SUITABILITY,
-            criterionMet = true,
-            id = 1,
-            criterionVersion = POLICY_1_0.code,
-            questionAnswers = mapOf(suitabilityCriteria.questions.first().name to true),
-          ),
-        ),
-      )
-      it.copy(assessments = mutableSetOf(assessment))
-    }
 }
