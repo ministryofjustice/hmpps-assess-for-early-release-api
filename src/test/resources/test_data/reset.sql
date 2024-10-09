@@ -1,3 +1,4 @@
+delete from assessment_event;
 delete from standard_address_check_request;
 delete from cas_check_request;
 delete from curfew_address_check_request;

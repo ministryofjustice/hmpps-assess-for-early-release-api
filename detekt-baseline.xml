@@ -10,6 +10,6 @@
     <ID>LongParameterList:CurfewAddressCheckRequest.kt$CurfewAddressCheckRequest$( @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @NotNull val id: Long = -1, val caAdditionalInfo: String? = null, val ppAdditionalInfo: String? = null, @NotNull val dateRequested: LocalDateTime = LocalDateTime.now(), @NotNull @Enumerated(EnumType.STRING) val preferencePriority: AddressPreferencePriority, @NotNull @Enumerated(EnumType.STRING) val status: AddressCheckRequestStatus, @ManyToOne @JoinColumn(name = "assessment_id", referencedColumnName = "id", nullable = false) val assessment: Assessment, @NotNull val createdTimestamp: LocalDateTime = LocalDateTime.now(), @NotNull val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(), )</ID>
     <ID>LongParameterList:StandardAddressCheckRequest.kt$StandardAddressCheckRequest$( id: Long = -1, caAdditionalInfo: String?, ppAdditionalInfo: String?, dateRequested: LocalDateTime = LocalDateTime.now(), preferencePriority: AddressPreferencePriority, status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS, assessment: Assessment, @ManyToOne @JoinColumn(name = "address_id", referencedColumnName = "id") val address: Address, )</ID>
     <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
-    <ID>TooGenericExceptionCaught:PrisonerSearchApiClient.kt$PrisonerSearchApiClient$e: Exception</ID>
+    <ID>TooManyFunctions:StatusHelpers.kt$StatusHelpers</ID>
   </CurrentIssues>
 </SmellBaseline>
