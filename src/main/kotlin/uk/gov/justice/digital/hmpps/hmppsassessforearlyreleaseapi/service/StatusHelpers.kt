@@ -29,9 +29,9 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
-  fun AssessmentWithEligibilityProgress.isComplete() = isComplete(eligibilityProgress, suitabilityProgress)
-  fun AssessmentWithEligibilityProgress.isChecksPassed() = isChecksPassed(eligibilityProgress, suitabilityProgress)
-  fun AssessmentWithEligibilityProgress.inProgress() = inProgress(eligibilityProgress, suitabilityProgress)
+  fun AssessmentWithEligibilityProgress.isComplete() = isComplete(eligibilityProgress(), suitabilityProgress())
+  fun AssessmentWithEligibilityProgress.isChecksPassed() = isChecksPassed(eligibilityProgress(), suitabilityProgress())
+  fun AssessmentWithEligibilityProgress.inProgress() = inProgress(eligibilityProgress(), suitabilityProgress())
 
   fun isComplete(
     eligibilityProgress: List<EligibilityCriterionProgress>,
@@ -59,9 +59,10 @@ object StatusHelpers {
   fun inProgress(
     eligibilityProgress: List<EligibilityCriterionProgress>,
     suitabilityProgress: List<SuitabilityCriterionProgress>,
-  ): Boolean {
-    if (eligibilityProgress.toStatus() == IN_PROGRESS) return true
-    return suitabilityProgress.toStatus() == SuitabilityStatus.IN_PROGRESS
+  ) = when {
+    isComplete(eligibilityProgress, suitabilityProgress) -> false
+    eligibilityProgress.toStatus() == EligibilityStatus.NOT_STARTED && suitabilityProgress.toStatus() == SuitabilityStatus.NOT_STARTED -> false
+    else -> true
   }
 
   fun EligibilityCheckResult?.getEligibilityStatus() =

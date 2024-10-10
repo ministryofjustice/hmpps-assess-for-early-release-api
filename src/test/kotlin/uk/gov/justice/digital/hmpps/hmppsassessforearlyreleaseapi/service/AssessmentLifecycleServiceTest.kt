@@ -24,10 +24,12 @@ class AssessmentLifecycleServiceTest {
     fun `checks failed`() {
       val assessment =
         anAssessmentWithEligibilityProgress().copy(
-          eligibilityProgress = anAssessmentWithEligibilityProgress().eligibilityProgress.map {
-            it.copy(
-              status = INELIGIBLE,
-            )
+          eligibilityProgress = {
+            anAssessmentWithEligibilityProgress().eligibilityProgress().map {
+              it.copy(
+                status = INELIGIBLE,
+              )
+            }
           },
         )
 
@@ -41,13 +43,15 @@ class AssessmentLifecycleServiceTest {
   fun `checks in progress`() {
     val assessment =
       anAssessmentWithEligibilityProgress().copy(
-        eligibilityProgress = anAssessmentWithEligibilityProgress().eligibilityProgress.mapIndexed { i, it ->
-          if (i == 0) {
-            it.copy(
-              status = ELIGIBLE,
-            )
-          } else {
-            it
+        eligibilityProgress = {
+          anAssessmentWithEligibilityProgress().eligibilityProgress().mapIndexed { i, it ->
+            if (i == 0) {
+              it.copy(
+                status = ELIGIBLE,
+              )
+            } else {
+              it
+            }
           }
         },
       )
@@ -64,15 +68,19 @@ class AssessmentLifecycleServiceTest {
     @BeforeEach
     fun seteup() {
       assessment = anAssessmentWithEligibilityProgress().copy(
-        eligibilityProgress = anAssessmentWithEligibilityProgress().eligibilityProgress.map {
-          it.copy(
-            status = ELIGIBLE,
-          )
+        eligibilityProgress = {
+          anAssessmentWithEligibilityProgress().eligibilityProgress().map {
+            it.copy(
+              status = ELIGIBLE,
+            )
+          }
         },
-        suitabilityProgress = anAssessmentWithEligibilityProgress().suitabilityProgress.map {
-          it.copy(
-            status = SUITABLE,
-          )
+        suitabilityProgress = {
+          anAssessmentWithEligibilityProgress().suitabilityProgress().map {
+            it.copy(
+              status = SUITABLE,
+            )
+          }
         },
       )
     }
