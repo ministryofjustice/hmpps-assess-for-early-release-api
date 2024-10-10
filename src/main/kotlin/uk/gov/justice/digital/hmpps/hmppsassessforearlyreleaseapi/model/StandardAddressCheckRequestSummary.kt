@@ -8,6 +8,9 @@ import java.time.LocalDateTime
 
 @Schema(description = "Response object which describes a standard address check request")
 data class StandardAddressCheckRequestSummary(
+  @Schema(description = "Unique internal identifier for this request", example = "123344")
+  val requestId: Long,
+
   @Schema(description = "Any additional information on the request added by the case administrator", example = "Some additional info")
   val caAdditionalInfo: String?,
 
