@@ -22,13 +22,13 @@ data class Resident(
 
   val surname: String,
 
-  val phoneNumber: String,
+  val phoneNumber: String?,
 
   val relation: String,
 
-  val dateOfBirth: LocalDate,
+  val dateOfBirth: LocalDate?,
 
-  val age: Int,
+  val age: Int?,
 
   @NotNull
   val isMainResident: Boolean,

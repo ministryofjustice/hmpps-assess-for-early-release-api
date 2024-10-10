@@ -1,10 +1,10 @@
 CREATE TABLE resident
 (
     id SERIAL NOT NULL CONSTRAINT resident_pk PRIMARY KEY,
-    forename VARCHAR(35),
-    surname VARCHAR(35),
+    forename VARCHAR(35) NOT NULL,
+    surname VARCHAR(35) NOT NULL,
     phone_number VARCHAR(40),
-    relation VARCHAR(50),
+    relation VARCHAR(50) NOT NULL,
     date_of_birth DATE,
     age INTEGER,
     is_main_resident BOOLEAN NOT NULL ,
