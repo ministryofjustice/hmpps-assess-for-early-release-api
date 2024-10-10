@@ -24,7 +24,7 @@ data class Assessment(
   @NotNull
   val id: Long = -1,
 
-  @ManyToOne
+  @ManyToOne(optional = false)
   @JoinColumn(name = "offender_id", nullable = false)
   val offender: Offender,
 
