@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import java.time.LocalDate
 
 data class OsPlacesApiDPA(
@@ -48,3 +49,24 @@ data class OsPlacesApiDPA(
   @JsonProperty("LAST_UPDATE_DATE")
   val lastUpdateDate: LocalDate,
 )
+
+fun OsPlacesApiDPA.getAddressFirstLine(): String {
+  var firstLine = if (this.organisationName != null) this.organisationName + ", " else ""
+  firstLine += if (this.buildingName != null) this.buildingName + ", " else ""
+  firstLine += if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
+  return firstLine
+}
+
+fun OsPlacesApiDPA.toAddress(): Address =
+  Address(
+    uprn = this.uprn,
+    firstLine = getAddressFirstLine(),
+    secondLine = this.locality,
+    town = this.postTown,
+    county = this.county,
+    postcode = this.postcode,
+    country = this.countryDescription.split("\\s+".toRegex()).last(),
+    xCoordinate = this.xCoordinate,
+    yCoordinate = this.yCoordinate,
+    addressLastUpdated = this.lastUpdateDate,
+  )

@@ -24,6 +24,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Res
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.getAddressFirstLine
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.toAddress
 
 @Service
 class AddressService(
@@ -121,27 +123,6 @@ class AddressService(
 
   private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =
     AddressSummary(
-      uprn = this.uprn,
-      firstLine = this.getAddressFirstLine(),
-      secondLine = this.locality,
-      town = this.postTown,
-      county = this.county,
-      postcode = this.postcode,
-      country = this.countryDescription.split("\\s+".toRegex()).last(),
-      xCoordinate = this.xCoordinate,
-      yCoordinate = this.yCoordinate,
-      addressLastUpdated = this.lastUpdateDate,
-    )
-
-  private fun OsPlacesApiDPA.getAddressFirstLine(): String {
-    var firstLine = if (this.organisationName != null) this.organisationName + ", " else ""
-    firstLine += if (this.buildingName != null) this.buildingName + ", " else ""
-    firstLine += if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
-    return firstLine
-  }
-
-  private fun OsPlacesApiDPA.toAddress(): Address =
-    Address(
       uprn = this.uprn,
       firstLine = this.getAddressFirstLine(),
       secondLine = this.locality,
