@@ -11,12 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
@@ -35,6 +37,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var addressService: AddressService
+
+  @Autowired
+  private lateinit var residentRepository: ResidentRepository
 
   @BeforeEach
   fun resetMocks() {
@@ -161,6 +166,31 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(dbCasCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
     assertThat(dbCasCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
     assertThat(dbCasCheckRequest.preferencePriority).isEqualTo(preferencePriority)
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  @Test
+  fun `should add a resident to a standard address check request`() {
+    val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
+    val resident = Resident(
+      forename = "Joshua",
+      surname = "Cook",
+      phoneNumber = "07739754284",
+      relation = "Father",
+      dateOfBirth = LocalDate.now().minusYears(24),
+      age = 24,
+      isMainResident = true,
+      standardAddressCheckRequest = standardAddressCheckRequest,
+    )
+
+    residentRepository.save(resident)
+
+    val dbResident = residentRepository.findAll().first()
+    assertThat(dbResident).usingRecursiveComparison().ignoringFields("id", "standardAddressCheckRequest", "createdTimestamp", "lastUpdatedTimestamp")
+      .isEqualTo(resident)
   }
 
   private companion object {

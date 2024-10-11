@@ -1,8 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import java.time.LocalDateTime
 
 @Entity
@@ -17,6 +20,8 @@ class StandardAddressCheckRequest(
   @ManyToOne
   @JoinColumn(name = "address_id", referencedColumnName = "id")
   val address: Address,
+  @OneToMany(mappedBy = "standardAddressCheckRequest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  val residents: MutableSet<Resident> = mutableSetOf(),
 ) : CurfewAddressCheckRequest(
   id = id,
   caAdditionalInfo = caAdditionalInfo,

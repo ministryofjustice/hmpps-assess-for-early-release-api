@@ -137,6 +137,7 @@ class AddressService(
 
   private fun StandardAddressCheckRequest.toSummary(): StandardAddressCheckRequestSummary =
     StandardAddressCheckRequestSummary(
+      requestId = this.id,
       caAdditionalInfo = this.caAdditionalInfo,
       ppAdditionalInfo = this.ppAdditionalInfo,
       preferencePriority = this.preferencePriority,
