@@ -11,18 +11,23 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
 private const val UPRN = "200010019924"
 private const val PRISON_NUMBER = "A1234AD"
+private const val ADDRESS_REQUEST_ID = 1
 private const val GET_ADDRESSES_FOR_POSTCODE_URL = "/addresses?postcode=$POSTCODE"
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
 private const val ADD_CAS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/cas-check-request"
+private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
 
@@ -249,6 +254,75 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     private fun aAddCasCheckRequest(): AddCasCheckRequest =
       AddCasCheckRequest(caInfo, ppInfo, priority)
+  }
+
+  @Nested
+  inner class AddResidentTests {
+    private val forename = "Refugio"
+    private val surname = "Whittaker"
+    private val phoneNumber = "07634183674"
+    private val relation = "Daughter"
+    private val dateOfBirth = LocalDate.of(1983, 6, 28)
+    private val isMainResident = true
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.post()
+        .uri(ADD_RESIDENT_URL)
+        .bodyValue(anAddResidentRequest())
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.post()
+        .uri(ADD_RESIDENT_URL)
+        .headers(setAuthorisation())
+        .bodyValue(anAddResidentRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.post()
+        .uri(ADD_RESIDENT_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(anAddResidentRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should add a standard address check request`() {
+      val residentSummary = webTestClient.post()
+        .uri(ADD_RESIDENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(anAddResidentRequest())
+        .exchange()
+        .expectStatus()
+        .isCreated
+        .expectBody(object : ParameterizedTypeReference<ResidentSummary>() {})
+        .returnResult().responseBody!!
+
+      assertThat(residentSummary.forename).isEqualTo(forename)
+      assertThat(residentSummary.surname).isEqualTo(surname)
+      assertThat(residentSummary.phoneNumber).isEqualTo(phoneNumber)
+      assertThat(residentSummary.relation).isEqualTo(relation)
+      assertThat(residentSummary.dateOfBirth).isEqualTo(dateOfBirth)
+      assertThat(residentSummary.isMainResident).isEqualTo(isMainResident)
+    }
+
+    private fun anAddResidentRequest(): AddResidentRequest =
+      AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, isMainResident = true)
   }
 
   private companion object {
