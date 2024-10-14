@@ -1,21 +1,31 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 
+import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.getAddressFirstLine
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.toAddress
 
 @Service
 class AddressService(
@@ -24,6 +34,7 @@ class AddressService(
   private val offenderRepository: OffenderRepository,
   private val osPlacesApiClient: OsPlacesApiClient,
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
+  private val residentRepository: ResidentRepository,
 ) {
   fun getAddressesForPostcode(postcode: String): List<AddressSummary> =
     osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
@@ -87,29 +98,31 @@ class AddressService(
     return casCheckRequest.toSummary()
   }
 
-  private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =
-    AddressSummary(
-      uprn = this.uprn,
-      firstLine = this.getAddressFirstLine(),
-      secondLine = this.locality,
-      town = this.postTown,
-      county = this.county,
-      postcode = this.postcode,
-      country = this.countryDescription.split("\\s+".toRegex()).last(),
-      xCoordinate = this.xCoordinate,
-      yCoordinate = this.yCoordinate,
-      addressLastUpdated = this.lastUpdateDate,
-    )
+  fun addResident(prisonNumber: String, requestId: Long, addResidentRequest: AddResidentRequest): ResidentSummary {
+    val standardAddressCheckRequest =
+      standardAddressCheckRequestRepository.findByIdOrNull(requestId)
+        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
-  private fun OsPlacesApiDPA.getAddressFirstLine(): String {
-    var firstLine = if (this.organisationName != null) this.organisationName + ", " else ""
-    firstLine += if (this.buildingName != null) this.buildingName + ", " else ""
-    firstLine += if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
-    return firstLine
+    if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+    }
+
+    var resident = Resident(
+      forename = addResidentRequest.forename,
+      surname = addResidentRequest.surname,
+      phoneNumber = addResidentRequest.phoneNumber,
+      relation = addResidentRequest.relation,
+      dateOfBirth = addResidentRequest.dateOfBirth,
+      age = addResidentRequest.age,
+      isMainResident = addResidentRequest.isMainResident,
+      standardAddressCheckRequest = standardAddressCheckRequest,
+    )
+    resident = residentRepository.save(resident)
+    return resident.toSummary()
   }
 
-  private fun OsPlacesApiDPA.toAddress(): Address =
-    Address(
+  private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =
+    AddressSummary(
       uprn = this.uprn,
       firstLine = this.getAddressFirstLine(),
       secondLine = this.locality,
@@ -154,5 +167,18 @@ class AddressService(
       dateRequested = this.dateRequested,
       status = this.status,
       allocatedAddress = this.allocatedAddress?.toAddressSummary(),
+    )
+
+  private fun Resident.toSummary(): ResidentSummary =
+    ResidentSummary(
+      residentId = this.id,
+      forename = this.forename,
+      surname = this.surname,
+      phoneNumber = this.phoneNumber,
+      relation = this.relation,
+      dateOfBirth = this.dateOfBirth,
+      age = this.age,
+      isMainResident = this.isMainResident,
+      standardAddressCheckRequest = this.standardAddressCheckRequest.toSummary(),
     )
 }

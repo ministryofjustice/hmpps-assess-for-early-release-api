@@ -10,7 +10,7 @@ insert into offender(id,
                      status)
 values (1,
         10,
-        'A1234AA',
+        'A1234AD',
         'BMI',
         'forename',
         'surname',

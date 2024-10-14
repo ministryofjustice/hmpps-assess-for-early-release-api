@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 
@@ -211,4 +213,52 @@ class AddressResource(private val addressService: AddressService) {
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody addCasCheckRequest: AddCasCheckRequest,
   ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest)
+
+  @PostMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}/resident")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @Operation(
+    summary = "Adds a resident to standard address check request for an assessment.",
+    description = "Adds a resident to a standard address check request for an offender's current assessment.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "201",
+        description = "The resident has been added to the standard address check request.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ResidentSummary::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun addStandardAddressCheckRequestResident(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+    @Valid @RequestBody addResidentRequest: AddResidentRequest,
+  ) = addressService.addResident(prisonNumber, requestId, addResidentRequest)
 }

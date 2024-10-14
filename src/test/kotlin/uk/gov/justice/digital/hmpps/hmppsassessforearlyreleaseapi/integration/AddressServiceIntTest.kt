@@ -7,14 +7,16 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
+import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
@@ -175,7 +177,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   @Test
   fun `should add a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
-    val resident = Resident(
+    val prisonNumber = "A1234AD"
+
+    val addResidentRequest = AddResidentRequest(
       forename = "Joshua",
       surname = "Cook",
       phoneNumber = "07739754284",
@@ -183,14 +187,39 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       dateOfBirth = LocalDate.now().minusYears(24),
       age = 24,
       isMainResident = true,
-      standardAddressCheckRequest = standardAddressCheckRequest,
     )
 
-    residentRepository.save(resident)
+    val residentSummary = addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest)
+    assertThat(residentSummary).isNotNull
 
     val dbResident = residentRepository.findAll().first()
-    assertThat(dbResident).usingRecursiveComparison().ignoringFields("id", "standardAddressCheckRequest", "createdTimestamp", "lastUpdatedTimestamp")
-      .isEqualTo(resident)
+    assertThat(dbResident).isNotNull
+    assertThat(dbResident.forename).isEqualTo(addResidentRequest.forename)
+    assertThat(dbResident.surname).isEqualTo(addResidentRequest.surname)
+    assertThat(dbResident.isMainResident).isEqualTo(addResidentRequest.isMainResident)
+    assertThat(dbResident.relation).isEqualTo(addResidentRequest.relation)
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  @Test
+  fun `should throw an unauthorised exception if standard address check request is not linked to prisoner`() {
+    val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
+    val prisonNumber = "G9374FU"
+
+    val addResidentRequest = AddResidentRequest(
+      forename = "Joshua",
+      surname = "Cook",
+      phoneNumber = "07739754284",
+      relation = "Father",
+      dateOfBirth = LocalDate.now().minusYears(24),
+      age = 24,
+      isMainResident = true,
+    )
+
+    assertThrows<HttpClientErrorException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
   }
 
   private companion object {

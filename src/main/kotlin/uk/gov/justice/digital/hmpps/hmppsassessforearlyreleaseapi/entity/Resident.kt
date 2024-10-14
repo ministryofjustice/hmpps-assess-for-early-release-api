@@ -18,12 +18,15 @@ data class Resident(
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   val id: Long = -1,
 
+  @NotNull
   val forename: String,
 
+  @NotNull
   val surname: String,
 
   val phoneNumber: String?,
 
+  @NotNull
   val relation: String,
 
   val dateOfBirth: LocalDate?,
