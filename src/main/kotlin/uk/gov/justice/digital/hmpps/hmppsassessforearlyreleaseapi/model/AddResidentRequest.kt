@@ -18,7 +18,7 @@ data class AddResidentRequest(
   @Schema(description = "The resident's relation to the offender", example = "Mother")
   val relation: String,
 
-  @Schema(description = "The resident's date of birth", example = "Mother")
+  @Schema(description = "The resident's date of birth", example = "2002-02-20")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val dateOfBirth: LocalDate? = null,
 
