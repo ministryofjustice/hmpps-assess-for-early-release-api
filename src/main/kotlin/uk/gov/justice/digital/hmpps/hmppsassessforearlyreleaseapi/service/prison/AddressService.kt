@@ -80,6 +80,19 @@ class AddressService(
   }
 
   @Transactional
+  fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary {
+    val standardAddressCheckRequest =
+      standardAddressCheckRequestRepository.findByIdOrNull(requestId)
+        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
+
+    if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+    }
+
+    return standardAddressCheckRequest.toSummary()
+  }
+
+  @Transactional
   fun addCasCheckRequest(
     prisonNumber: String,
     addCasCheckRequest: AddCasCheckRequest,

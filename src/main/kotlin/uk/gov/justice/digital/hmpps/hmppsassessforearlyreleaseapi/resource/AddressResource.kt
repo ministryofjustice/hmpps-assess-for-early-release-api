@@ -167,6 +167,50 @@ class AddressResource(private val addressService: AddressService) {
     @Valid @RequestBody addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
   ) = addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest)
 
+  @GetMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @Operation(
+    summary = "Gets a standard address check request by it's request id.",
+    description = "Gets a standard address check request by it's request id.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the standard address check request with the specified request id",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = StandardAddressCheckRequestSummary::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getStandardAddressCheckRequest(@PathVariable(name = "prisonNumber") prisonNumber: String, @PathVariable(name = "requestId") requestId: Long) =
+    addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
+
   @PostMapping("/offender/{prisonNumber}/current-assessment/cas-check-request")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @ResponseStatus(code = HttpStatus.CREATED)
