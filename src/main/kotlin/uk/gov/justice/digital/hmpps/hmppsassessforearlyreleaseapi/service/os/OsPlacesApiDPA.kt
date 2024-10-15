@@ -12,6 +12,9 @@ data class OsPlacesApiDPA(
   @JsonProperty("ADDRESS")
   val address: String,
 
+  @JsonProperty("SUB_BUILDING_NAME")
+  val subBuildingName: String? = null,
+
   @JsonProperty("ORGANISATION_NAME")
   val organisationName: String?,
 
@@ -52,8 +55,13 @@ data class OsPlacesApiDPA(
 
 fun OsPlacesApiDPA.getAddressFirstLine(): String {
   var firstLine = if (this.organisationName != null) this.organisationName + ", " else ""
+  firstLine += if (this.subBuildingName != null) this.subBuildingName + ", " else ""
   firstLine += if (this.buildingName != null) this.buildingName + ", " else ""
-  firstLine += if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
+  firstLine += if (this.thoroughfareName.isNullOrEmpty()) {
+    if (this.buildingNumber != null) this.buildingNumber + ", " + this.locality else this.locality
+  } else {
+    if (this.buildingNumber != null) this.buildingNumber + " " + this.thoroughfareName else this.thoroughfareName
+  }
   return firstLine
 }
 
