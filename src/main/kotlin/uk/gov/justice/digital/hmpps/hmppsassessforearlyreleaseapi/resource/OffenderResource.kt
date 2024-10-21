@@ -137,7 +137,7 @@ class OffenderResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+            array = ArraySchema(schema = Schema(implementation = Void::class)),
           ),
         ],
       ),

@@ -11,6 +11,7 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
@@ -257,6 +258,53 @@ class AddressResource(private val addressService: AddressService) {
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody addCasCheckRequest: AddCasCheckRequest,
   ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest)
+
+  @DeleteMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Deletes an address check request for an assessment.",
+    description = "Deletes an address check request for an offender's current assessment.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The address check request has been deleted.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = Void::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun deleteAddressCheckRequest(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+  ) = addressService.deleteAddressCheckRequest(prisonNumber, requestId)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}/resident")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

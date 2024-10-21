@@ -23,7 +23,7 @@ data class AddResidentRequest(
   val dateOfBirth: LocalDate? = null,
 
   @Schema(description = "The resident's age", example = "42")
-  val age: Int? = null,
+  val age: Int,
 
   @Schema(description = "Is this main resident at the address", example = "true")
   val isMainResident: Boolean,

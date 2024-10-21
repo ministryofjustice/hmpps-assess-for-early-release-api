@@ -5,6 +5,7 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
@@ -17,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
@@ -27,9 +29,13 @@ private const val GET_ADDRESSES_FOR_POSTCODE_URL = "/addresses?postcode=$POSTCOD
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
 private const val ADD_CAS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/cas-check-request"
+private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
+
+  @Autowired
+  private lateinit var curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository
 
   @Nested
   inner class GetAddressesForPostcode {
@@ -236,7 +242,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       "classpath:test_data/an-address.sql",
     )
     @Test
-    fun `should add a standard address check request`() {
+    fun `should add a CAS check request`() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -254,6 +260,55 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     private fun aAddCasCheckRequest(): AddCasCheckRequest =
       AddCasCheckRequest(caInfo, ppInfo, priority)
+  }
+
+  @Nested
+  inner class DeleteAddressCheckRequestTests {
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.delete()
+        .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.delete()
+        .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.delete()
+        .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should delete an address check request`() {
+      webTestClient.delete()
+        .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      assertThat(curfewAddressCheckRequestRepository.findAll()).isEmpty()
+    }
   }
 
   @Nested
@@ -322,7 +377,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anAddResidentRequest(): AddResidentRequest =
-      AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, isMainResident = true)
+      AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true)
   }
 
   private companion object {
