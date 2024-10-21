@@ -346,6 +346,16 @@ class AddressResource(private val addressService: AddressService) {
           ),
         ],
       ),
+      ApiResponse(
+        responseCode = "404",
+        description = "An address check request with the specified id does not exist",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
     ],
   )
   fun addStandardAddressCheckRequestResident(
