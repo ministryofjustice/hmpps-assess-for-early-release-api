@@ -88,7 +88,7 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
     }
 
     return standardAddressCheckRequest.toSummary()
@@ -120,7 +120,7 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
     }
 
     curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
@@ -132,7 +132,7 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
     }
 
     var resident = Resident(

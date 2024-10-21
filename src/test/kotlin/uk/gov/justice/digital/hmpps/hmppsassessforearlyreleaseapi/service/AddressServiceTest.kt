@@ -61,6 +61,6 @@ class AddressServiceTest {
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 
     val exception = assertThrows<HttpClientErrorException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId) }
-    assertThat(exception.statusCode).isEqualTo(HttpStatus.UNAUTHORIZED)
+    assertThat(exception.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
 }

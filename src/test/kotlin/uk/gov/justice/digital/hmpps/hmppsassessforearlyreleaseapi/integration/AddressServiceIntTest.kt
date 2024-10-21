@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
@@ -205,7 +206,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/a-standard-address-check-request.sql",
   )
   @Test
-  fun `should throw an unauthorised exception if standard address check request is not linked to prisoner`() {
+  fun `should throw a not found exception if standard address check request is not linked to prisoner`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
     val prisonNumber = "G9374FU"
 
@@ -219,7 +220,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    assertThrows<HttpClientErrorException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
+    val exception = assertThrows<HttpClientErrorException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
+    assertThat(exception.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
   }
 
   private companion object {

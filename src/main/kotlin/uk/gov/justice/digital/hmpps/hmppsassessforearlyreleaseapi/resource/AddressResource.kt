@@ -207,6 +207,16 @@ class AddressResource(private val addressService: AddressService) {
           ),
         ],
       ),
+      ApiResponse(
+        responseCode = "404",
+        description = "A standard address check request with the specified request id does not exist for the offender",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
     ],
   )
   fun getStandardAddressCheckRequest(@PathVariable(name = "prisonNumber") prisonNumber: String, @PathVariable(name = "requestId") requestId: Long) =
@@ -301,7 +311,7 @@ class AddressResource(private val addressService: AddressService) {
       ),
       ApiResponse(
         responseCode = "404",
-        description = "An address check request with the specified id does not exist",
+        description = "An address check request with the specified id does not exist for the offender",
         content = [
           Content(
             mediaType = "application/json",
@@ -349,6 +359,16 @@ class AddressResource(private val addressService: AddressService) {
       ApiResponse(
         responseCode = "403",
         description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "A standard address check request with the specified request id does not exist for the offender",
         content = [
           Content(
             mediaType = "application/json",
