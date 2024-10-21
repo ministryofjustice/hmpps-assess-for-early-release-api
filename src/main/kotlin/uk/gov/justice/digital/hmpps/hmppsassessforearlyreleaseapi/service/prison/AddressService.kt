@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
@@ -31,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.toA
 class AddressService(
   private val addressRepository: AddressRepository,
   private val casCheckRequestRepository: CasCheckRequestRepository,
+  private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val offenderRepository: OffenderRepository,
   private val osPlacesApiClient: OsPlacesApiClient,
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
@@ -86,7 +88,7 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
     }
 
     return standardAddressCheckRequest.toSummary()
@@ -111,13 +113,26 @@ class AddressService(
     return casCheckRequest.toSummary()
   }
 
+  @Transactional
+  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long) {
+    val curfewAddressCheckRequest =
+      curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
+
+    if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+    }
+
+    curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
+  }
+
   fun addResident(prisonNumber: String, requestId: Long, addResidentRequest: AddResidentRequest): ResidentSummary {
     val standardAddressCheckRequest =
       standardAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
     }
 
     var resident = Resident(

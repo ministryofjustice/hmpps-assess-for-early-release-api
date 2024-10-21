@@ -1,11 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
@@ -17,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Assess
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 object TestData {
 
@@ -146,5 +150,25 @@ object TestData {
         )
       }
     },
+  )
+
+  private fun anAddress() = Address(
+    uprn = "200010019924",
+    firstLine = "Langley Road",
+    secondLine = "Kington Langley",
+    town = "Chippers",
+    county = "Wiltshire",
+    postcode = "SN118TK",
+    country = "England",
+    xCoordinate = 401003.0,
+    yCoordinate = 154111.0,
+    addressLastUpdated = LocalDate.of(2022, 3, 21),
+  )
+
+  fun aStandardAddressCheckRequest() = StandardAddressCheckRequest(
+    dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
+    preferencePriority = AddressPreferencePriority.FIRST,
+    assessment = anOffender().currentAssessment(),
+    address = anAddress(),
   )
 }
