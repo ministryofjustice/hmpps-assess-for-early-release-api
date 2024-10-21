@@ -31,8 +31,7 @@ data class Resident(
 
   val dateOfBirth: LocalDate?,
 
-  @NotNull
-  val age: Int,
+  val age: Int?,
 
   @NotNull
   val isMainResident: Boolean,
