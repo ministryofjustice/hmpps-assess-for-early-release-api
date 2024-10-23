@@ -11,18 +11,15 @@ data class EligibilityAndSuitabilityCaseView(
   @Schema(description = "A summary of an offender's current assessment")
   val assessmentSummary: AssessmentSummary,
 
-  @Schema(description = "all eligibility checks ELIGIBLE, or any eligibility check INELIGIBLE")
-  val complete: Boolean = false,
+  @Schema(description = "Overall status of eligibility assessment", example = "IN_PROGRESS")
+  val overallStatus: EligibilityStatus,
 
-  @Schema(description = "eligibility status = ELIGIBLE and suitability status = SUITABLE")
-  val checksPassed: Boolean,
-
-  @Schema(description = "state of current eligibility checks")
+  @Schema(description = "state of current eligibility checks", example = "NOT_STARTED")
   val eligibilityStatus: EligibilityStatus,
   @Schema(description = "details of current eligibility checks")
   val eligibility: List<EligibilityCriterionProgress>,
 
-  @Schema(description = "state of current suitability checks")
+  @Schema(description = "state of current suitability checks", example = "NOT_STARTED")
   val suitabilityStatus: SuitabilityStatus,
   @Schema(description = "details of current suitability checks")
   val suitability: List<SuitabilityCriterionProgress>,
