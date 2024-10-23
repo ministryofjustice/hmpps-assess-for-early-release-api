@@ -18,11 +18,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
@@ -117,14 +118,14 @@ object TestData {
     code = "code-1",
     taskName = "task-1",
     questions = listOf(Question("question-1", answer = true)),
-    status = EligibilityStatus.ELIGIBLE,
+    status = ELIGIBLE,
   )
 
   fun anSuitabilityCheckDetails() = SuitabilityCriterionProgress(
     code = "code-1",
     taskName = "task-1",
     questions = listOf(Question("question-1", answer = true)),
-    status = SuitabilityStatus.SUITABLE,
+    status = SUITABLE,
   )
 
   fun anAssessmentWithEligibilityProgress() = AssessmentWithEligibilityProgress(
@@ -166,6 +167,24 @@ object TestData {
       }
     },
   )
+
+  fun anAssessmentWithChecksComplete() =
+    anAssessmentWithEligibilityProgress().copy(
+      eligibilityProgress = {
+        anAssessmentWithEligibilityProgress().eligibilityProgress().map {
+          it.copy(
+            status = ELIGIBLE,
+          )
+        }
+      },
+      suitabilityProgress = {
+        anAssessmentWithEligibilityProgress().suitabilityProgress().map {
+          it.copy(
+            status = SUITABLE,
+          )
+        }
+      },
+    )
 
   private fun anAddress() = Address(
     uprn = "200010019924",

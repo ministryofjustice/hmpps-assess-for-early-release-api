@@ -4,6 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
@@ -11,8 +13,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithChecksComplete
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
 
 class AssessmentLifecycleServiceTest {
@@ -66,23 +68,8 @@ class AssessmentLifecycleServiceTest {
     lateinit var assessment: AssessmentWithEligibilityProgress
 
     @BeforeEach
-    fun seteup() {
-      assessment = anAssessmentWithEligibilityProgress().copy(
-        eligibilityProgress = {
-          anAssessmentWithEligibilityProgress().eligibilityProgress().map {
-            it.copy(
-              status = ELIGIBLE,
-            )
-          }
-        },
-        suitabilityProgress = {
-          anAssessmentWithEligibilityProgress().suitabilityProgress().map {
-            it.copy(
-              status = SUITABLE,
-            )
-          }
-        },
-      )
+    fun setup() {
+      assessment = anAssessmentWithChecksComplete()
     }
 
     @Test
@@ -148,6 +135,18 @@ class AssessmentLifecycleServiceTest {
       val newStatus = assessmentLifecycleService.eligibilityAnswerSubmitted(assessment)
 
       assertThat(newStatus).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    }
+
+    @Test
+    fun `submit an assessment where checks are complete`() {
+      val newStatus = assessmentLifecycleService.submitAssessment(assessment)
+
+      assertThat(newStatus).isEqualTo(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
+    }
+
+    @Test
+    fun `submit an assessment where checks are incomplete`() {
+      assertThrows<IllegalStateException> { assessmentLifecycleService.submitAssessment(anAssessmentWithEligibilityProgress()) }
     }
   }
 }

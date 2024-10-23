@@ -56,7 +56,8 @@ class AssessmentService(
       .filter { it.criterionType == ELIGIBILITY }
       .associateBy { it.criterionCode }
 
-    return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
+    val returnVal = policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
+    return returnVal
   }
 
   private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
@@ -83,7 +84,8 @@ class AssessmentService(
       .filter { it.criterionType == SUITABILITY }
       .associateBy { it.criterionCode }
 
-    return policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
+    val returnVal = policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
+    return returnVal
   }
 
   private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
