@@ -36,4 +36,7 @@ data class AssessmentSummary(
 
   @Schema(description = "The version of the policy that this assessment has been carried out under", example = "1.0")
   val policyVersion: String,
+
+  @Schema(description = "The status of tasks that make up this assessment")
+  val tasks: List<TaskProgress>,
 )

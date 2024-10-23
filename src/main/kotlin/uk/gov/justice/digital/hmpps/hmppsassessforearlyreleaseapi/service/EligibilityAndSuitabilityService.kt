@@ -11,10 +11,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Criterio
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isChecksPassed
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isComplete
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 
 @Service
@@ -35,8 +35,7 @@ class EligibilityAndSuitabilityService(
 
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = createAssessmentSummary(assessment),
-      complete = assessment.isComplete(),
-      checksPassed = assessment.isChecksPassed(),
+      overallStatus = assessment.calculateAggregateStatus(),
       eligibility = assessment.eligibilityProgress(),
       eligibilityStatus = assessment.eligibilityProgress().toStatus(),
       suitability = assessment.suitabilityProgress(),
@@ -100,6 +99,7 @@ class EligibilityAndSuitabilityService(
       location = prison,
       status = assessmentEntity.status,
       policyVersion = assessmentEntity.policyVersion,
+      tasks = assessmentEntity.status.tasks().map { TaskProgress(it.task, it.status(assessmentEntity)) },
     )
   }
 }

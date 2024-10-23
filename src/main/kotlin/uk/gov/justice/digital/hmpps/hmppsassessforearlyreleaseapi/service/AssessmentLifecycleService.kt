@@ -8,10 +8,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChangedEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.inProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isChecksPassed
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.isComplete
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateStatus
 
 @Service
 class AssessmentLifecycleService {
@@ -21,8 +22,8 @@ class AssessmentLifecycleService {
   }
 
   fun eligibilityAnswerSubmitted(assessment: AssessmentWithEligibilityProgress): AssessmentStatus {
-    return when {
-      assessment.isChecksPassed() ->
+    return when (assessment.calculateAggregateStatus()) {
+      ELIGIBLE ->
         // Find the previous event that occurred before eligibility checks took place
         assessment.assessmentEntity.assessmentEvents
           .reversed()
@@ -35,9 +36,9 @@ class AssessmentLifecycleService {
             ).contains(it.changes.before)
           }?.changes?.before ?: AssessmentStatus.ELIGIBLE_AND_SUITABLE
 
-      assessment.isComplete() -> INELIGIBLE_OR_UNSUITABLE
-      assessment.inProgress() -> ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
-      else -> error("Assessment: ${assessment.assessmentEntity.id} is in an unknown state")
+      INELIGIBLE -> INELIGIBLE_OR_UNSUITABLE
+      IN_PROGRESS -> ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
+      else -> error("Assessment: ${assessment.assessmentEntity.id} is in an unexpected state: ${assessment.assessmentEntity.status}")
     }
   }
 }
