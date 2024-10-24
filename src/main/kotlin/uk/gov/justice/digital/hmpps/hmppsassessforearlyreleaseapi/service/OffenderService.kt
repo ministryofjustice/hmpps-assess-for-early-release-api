@@ -72,9 +72,9 @@ class OffenderService(
   }
 
   @Transactional
-  fun submitCurrentAssessment(prisonNumber: String) {
+  fun submitAssessmentForAddressChecks(prisonNumber: String) {
     val assessmentWithEligibilityProgress = assessmentService.getCurrentAssessment(prisonNumber)
-    val newStatus = assessmentLifecycleService.submitAssessment(assessmentWithEligibilityProgress)
+    val newStatus = assessmentLifecycleService.submitAssessmentForAddressChecks(assessmentWithEligibilityProgress)
     val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
 
     assessmentEntity.changeStatus(newStatus)

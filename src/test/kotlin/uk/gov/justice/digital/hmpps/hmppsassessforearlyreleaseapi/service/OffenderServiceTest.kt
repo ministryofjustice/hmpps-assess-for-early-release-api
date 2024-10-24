@@ -181,9 +181,9 @@ class OffenderServiceTest {
     val assessment = anAssessmentWithEligibilityProgress()
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
-    whenever(assessmentLifecycleService.submitAssessment(assessment)).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
+    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
 
-    service.submitCurrentAssessment(PRISON_NUMBER)
+    service.submitAssessmentForAddressChecks(PRISON_NUMBER)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())

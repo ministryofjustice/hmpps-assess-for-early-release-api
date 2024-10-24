@@ -34,7 +34,7 @@ private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
-private const val SUBMIT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/submit"
+private const val SUBMIT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 
 class OffenderResourceIntTest : SqsIntegrationTestBase() {
 

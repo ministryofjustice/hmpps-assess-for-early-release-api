@@ -139,14 +139,14 @@ class AssessmentLifecycleServiceTest {
 
     @Test
     fun `submit an assessment where checks are complete`() {
-      val newStatus = assessmentLifecycleService.submitAssessment(assessment)
+      val newStatus = assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)
 
       assertThat(newStatus).isEqualTo(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     }
 
     @Test
     fun `submit an assessment where checks are incomplete`() {
-      assertThrows<IllegalStateException> { assessmentLifecycleService.submitAssessment(anAssessmentWithEligibilityProgress()) }
+      assertThrows<IllegalStateException> { assessmentLifecycleService.submitAssessmentForAddressChecks(anAssessmentWithEligibilityProgress()) }
     }
   }
 }

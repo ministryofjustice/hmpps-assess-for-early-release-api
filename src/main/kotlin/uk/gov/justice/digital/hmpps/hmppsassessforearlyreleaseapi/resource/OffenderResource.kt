@@ -174,7 +174,7 @@ class OffenderResource(
     offenderService.optOut(prisonNumber)
   }
 
-  @PutMapping("/offender/{prisonNumber}/current-assessment/submit")
+  @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-address-checks")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   @Operation(
@@ -226,6 +226,6 @@ class OffenderResource(
       ),
     ],
   )
-  fun submitCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    offenderService.submitCurrentAssessment(prisonNumber)
+  fun submitForAddressChecks(@Parameter(required = true) @PathVariable prisonNumber: String) =
+    offenderService.submitAssessmentForAddressChecks(prisonNumber)
 }

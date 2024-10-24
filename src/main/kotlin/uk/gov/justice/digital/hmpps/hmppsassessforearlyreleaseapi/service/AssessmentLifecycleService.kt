@@ -43,7 +43,7 @@ class AssessmentLifecycleService {
     }
   }
 
-  fun submitAssessment(assessment: AssessmentWithEligibilityProgress): AssessmentStatus = when (assessment.calculateAggregateStatus()) {
+  fun submitAssessmentForAddressChecks(assessment: AssessmentWithEligibilityProgress): AssessmentStatus = when (assessment.calculateAggregateStatus()) {
     ELIGIBLE -> AWAITING_ADDRESS_AND_RISK_CHECKS
     else -> error("Cannot submit an assessment that is not eligible and suitable")
   }
