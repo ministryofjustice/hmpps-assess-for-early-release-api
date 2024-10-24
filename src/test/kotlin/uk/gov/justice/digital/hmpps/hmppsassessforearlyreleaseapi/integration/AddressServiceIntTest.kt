@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -9,9 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.jdbc.Sql
-import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -220,8 +219,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    val exception = assertThrows<HttpClientErrorException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
-    assertThat(exception.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+    assertThrows<EntityNotFoundException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
   }
 
   private companion object {

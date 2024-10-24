@@ -3,9 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.priso
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
@@ -92,8 +90,7 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(
-        HttpStatus.NOT_FOUND,
+      throw EntityNotFoundException(
         "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
@@ -135,7 +132,9 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw EntityNotFoundException(
+        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
+      )
     }
 
     curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
@@ -147,7 +146,9 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw EntityNotFoundException(
+        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
+      )
     }
 
     var resident = Resident(
