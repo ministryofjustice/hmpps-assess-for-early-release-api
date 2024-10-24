@@ -25,7 +25,9 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 
 @Service
 class OffenderService(
+  private val assessmentLifecycleService: AssessmentLifecycleService,
   private val assessmentRepository: AssessmentRepository,
+  private val assessmentService: AssessmentService,
   private val offenderRepository: OffenderRepository,
   private val prisonRegisterService: PrisonRegisterService,
   private val prisonerSearchService: PrisonerSearchService,
@@ -67,6 +69,16 @@ class OffenderService(
     val optedOutAssessment =
       offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT, lastUpdatedTimestamp = LocalDateTime.now())
     assessmentRepository.save(optedOutAssessment)
+  }
+
+  @Transactional
+  fun submitAssessmentForAddressChecks(prisonNumber: String) {
+    val assessmentWithEligibilityProgress = assessmentService.getCurrentAssessment(prisonNumber)
+    val newStatus = assessmentLifecycleService.submitAssessmentForAddressChecks(assessmentWithEligibilityProgress)
+    val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
+
+    assessmentEntity.changeStatus(newStatus)
+    assessmentRepository.save(assessmentEntity)
   }
 
   fun createOrUpdateOffender(nomisId: String) {

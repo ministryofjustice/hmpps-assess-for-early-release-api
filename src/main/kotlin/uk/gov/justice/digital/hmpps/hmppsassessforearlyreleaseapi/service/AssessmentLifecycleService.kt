@@ -4,6 +4,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
@@ -40,5 +41,10 @@ class AssessmentLifecycleService {
       IN_PROGRESS -> ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
       else -> error("Assessment: ${assessment.assessmentEntity.id} is in an unexpected state: ${assessment.assessmentEntity.status}")
     }
+  }
+
+  fun submitAssessmentForAddressChecks(assessment: AssessmentWithEligibilityProgress): AssessmentStatus = when (assessment.calculateAggregateStatus()) {
+    ELIGIBLE -> AWAITING_ADDRESS_AND_RISK_CHECKS
+    else -> error("Cannot submit an assessment that is not eligible and suitable")
   }
 }

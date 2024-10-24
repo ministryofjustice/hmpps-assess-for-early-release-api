@@ -26,13 +26,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.time.LocalDate
 
 private const val PRISON_CODE = "BMI"
-private const val PRISON_NUMBER = "A1234AD"
+private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
+private const val SUBMIT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 
 class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
@@ -144,12 +146,12 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
       assertThat(assessment).isEqualTo(
         AssessmentSummary(
-          forename = "FIRST-4",
-          surname = "LAST-4",
+          forename = "FIRST-1",
+          surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,
-          dateOfBirth = LocalDate.of(2001, 12, 25),
+          dateOfBirth = LocalDate.of(1978, 3, 20),
           hdced = LocalDate.of(2020, 10, 25),
-          crd = LocalDate.of(2022, 3, 21),
+          crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
           status = AssessmentStatus.NOT_STARTED,
           policyVersion = "1.0",
@@ -234,6 +236,58 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isBadRequest
+    }
+  }
+
+  @Nested
+  inner class SubmitAssessment {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(SUBMIT_ASSESSMENT_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(SUBMIT_ASSESSMENT_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(SUBMIT_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-checks-complete.sql",
+    )
+    @Test
+    fun `should submit an assessment`() {
+      prisonRegisterMockServer.stubGetPrisons()
+
+      webTestClient.put()
+        .uri(SUBMIT_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val updatedAssessment = assessmentRepository.findAll().first()
+      assertThat(updatedAssessment).isNotNull
+      assertThat(updatedAssessment.status).isEqualTo(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     }
   }
 

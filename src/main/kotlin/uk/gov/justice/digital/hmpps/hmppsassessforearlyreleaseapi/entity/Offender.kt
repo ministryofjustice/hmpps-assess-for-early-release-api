@@ -74,5 +74,3 @@ data class Offender(
   @Override
   override fun toString() = this::class.simpleName + "(id: $id, status: $status)"
 }
-
-fun Offender.currentAssessment(): Assessment = this.assessments.first { it.status == AssessmentStatus.NOT_STARTED || it.status === AssessmentStatus.OPTED_OUT }
