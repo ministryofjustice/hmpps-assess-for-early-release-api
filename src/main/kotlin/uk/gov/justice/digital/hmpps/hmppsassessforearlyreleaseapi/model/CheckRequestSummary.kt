@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import java.time.LocalDateTime
 
-@Schema(description = "Describes a licence within this service")
+@Schema(description = "Describes a check request")
 object CheckRequestType {
   const val STANDARD_ADDRESS = "STANDARD_ADDRESS"
   const val CAS = "CAS"
