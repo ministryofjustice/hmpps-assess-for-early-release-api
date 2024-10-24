@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
@@ -15,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResid
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
@@ -23,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.getAddressFirstLine
@@ -31,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.toA
 @Service
 class AddressService(
   private val addressRepository: AddressRepository,
+  private val assessmentService: AssessmentService,
   private val casCheckRequestRepository: CasCheckRequestRepository,
   private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val offenderRepository: OffenderRepository,
@@ -88,7 +92,10 @@ class AddressService(
         ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw HttpClientErrorException(HttpStatus.NOT_FOUND, "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber")
+      throw HttpClientErrorException(
+        HttpStatus.NOT_FOUND,
+        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
+      )
     }
 
     return standardAddressCheckRequest.toSummary()
@@ -111,6 +118,14 @@ class AddressService(
       ),
     )
     return casCheckRequest.toSummary()
+  }
+
+  @Transactional
+  fun getCheckRequestsForAssessment(prisonNumber: String): List<CheckRequestSummary> {
+    val assessmentWithEligibilityProgress = assessmentService.getCurrentAssessment(prisonNumber)
+    val assessment = assessmentWithEligibilityProgress.assessmentEntity
+    val checkRequests = curfewAddressCheckRequestRepository.findByAssessment(assessment)
+    return checkRequests.map { it.toSummary() }
   }
 
   @Transactional
@@ -158,8 +173,8 @@ class AddressService(
       county = this.county,
       postcode = this.postcode,
       country = this.countryDescription.split("\\s+".toRegex()).last(),
-      xCoordinate = this.xCoordinate,
-      yCoordinate = this.yCoordinate,
+      xcoordinate = this.xCoordinate,
+      ycoordinate = this.yCoordinate,
       addressLastUpdated = this.lastUpdateDate,
     )
 
@@ -171,8 +186,8 @@ class AddressService(
     county = this.county,
     postcode = this.postcode,
     country = this.country,
-    xCoordinate = this.xCoordinate,
-    yCoordinate = this.yCoordinate,
+    xcoordinate = this.xCoordinate,
+    ycoordinate = this.yCoordinate,
     addressLastUpdated = this.addressLastUpdated,
   )
 
@@ -189,6 +204,7 @@ class AddressService(
 
   private fun CasCheckRequest.toSummary(): CasCheckRequestSummary =
     CasCheckRequestSummary(
+      requestId = this.id,
       caAdditionalInfo = this.caAdditionalInfo,
       ppAdditionalInfo = this.ppAdditionalInfo,
       preferencePriority = this.preferencePriority,
@@ -209,4 +225,11 @@ class AddressService(
       isMainResident = this.isMainResident,
       standardAddressCheckRequest = this.standardAddressCheckRequest.toSummary(),
     )
+
+  private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary =
+    when (this) {
+      is StandardAddressCheckRequest -> this.toSummary()
+      is CasCheckRequest -> this.toSummary()
+      else -> error("Cannot transform request type of ${this::class.simpleName} to a check request summary")
+    }
 }
