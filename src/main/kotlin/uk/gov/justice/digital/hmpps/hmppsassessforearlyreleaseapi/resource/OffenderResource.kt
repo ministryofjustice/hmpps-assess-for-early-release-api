@@ -178,15 +178,15 @@ class OffenderResource(
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   @Operation(
-    summary = "Submits an offender's current assessment.",
-    description = "Submits an offender's current assessment so that checks by the probation practitioner can begin.",
+    summary = "Submits an offender's current assessment for address checks.",
+    description = "Submits an offender's current assessment so that address checks by the probation practitioner can begin.",
     security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
     value = [
       ApiResponse(
         responseCode = "204",
-        description = "The offender's current assessment has been submitted.",
+        description = "The offender's current assessment has been submitted for address checks.",
         content = [
           Content(
             mediaType = "application/json",
