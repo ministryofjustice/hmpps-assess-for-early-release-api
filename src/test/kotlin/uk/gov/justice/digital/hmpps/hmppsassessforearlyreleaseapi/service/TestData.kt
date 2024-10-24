@@ -4,6 +4,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
@@ -204,5 +205,12 @@ object TestData {
     preferencePriority = AddressPreferencePriority.FIRST,
     assessment = anOffender().currentAssessment(),
     address = anAddress(),
+  )
+
+  fun aCasCheckRequest() = CasCheckRequest(
+    dateRequested = LocalDateTime.of(2024, 9, 7, 15, 19),
+    preferencePriority = AddressPreferencePriority.FIRST,
+    assessment = anOffender().currentAssessment(),
+    allocatedAddress = anAddress(),
   )
 }

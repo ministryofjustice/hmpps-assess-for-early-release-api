@@ -28,12 +28,13 @@ data class AddressSummary(
   val country: String,
 
   @Schema(description = "The address's x-coordinate", example = "401003.0,")
-  val xCoordinate: Double,
+  val xcoordinate: Double,
 
   @Schema(description = "The address's y-coordinate", example = "154111.0")
-  val yCoordinate: Double,
+  val ycoordinate: Double,
 
   @Schema(description = "The date the address was last updated", example = "2021-05-23")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val addressLastUpdated: LocalDate,
+
 )

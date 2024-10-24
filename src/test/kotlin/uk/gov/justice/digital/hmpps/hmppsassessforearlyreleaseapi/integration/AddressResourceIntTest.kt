@@ -8,28 +8,34 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
 private const val UPRN = "200010019924"
-private const val PRISON_NUMBER = "A1234AD"
-private const val ADDRESS_REQUEST_ID = 1
+private const val PRISON_NUMBER = TestData.PRISON_NUMBER
+private const val ADDRESS_REQUEST_ID = 1L
 private const val GET_ADDRESSES_FOR_POSTCODE_URL = "/addresses?postcode=$POSTCODE"
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
+private const val GET_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID"
 private const val ADD_CAS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/cas-check-request"
 private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID"
+private const val GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/address-check-requests"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
@@ -137,7 +143,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   inner class AddStandardAddressCheckRequestTests {
     private val caInfo = "ca info"
     private val ppInfo = "pp info"
-    private val priority = AddressPreferencePriority.THIRD
+    private val priority = AddressPreferencePriority.FIRST
     private val uprn = "200010019924"
 
     @Test
@@ -199,10 +205,63 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
+  inner class GetStandardAddressCheckRequestTests {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should get a standard address check request`() {
+      val addressCheckRequest = webTestClient.get()
+        .uri(GET_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody(object : ParameterizedTypeReference<StandardAddressCheckRequestSummary>() {})
+        .returnResult().responseBody!!
+
+      assertThat(addressCheckRequest.requestId).isEqualTo(ADDRESS_REQUEST_ID)
+      assertThat(addressCheckRequest.preferencePriority).isEqualTo(AddressPreferencePriority.FIRST)
+      assertThat(addressCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+      assertThat(addressCheckRequest.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+    }
+  }
+
+  @Nested
   inner class AddCasCheckRequestTests {
     private val caInfo = "ca info"
     private val ppInfo = "pp info"
-    private val priority = AddressPreferencePriority.THIRD
+    private val priority = AddressPreferencePriority.SECOND
 
     @Test
     fun `should return unauthorized if no token`() {
@@ -312,6 +371,66 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
+  inner class GetCheckRequestsForAssessmentTests {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should get check requests for an assessment`() {
+      prisonRegisterMockServer.stubGetPrisons()
+
+      val checkRequestSummaries = webTestClient.get()
+        .uri(GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isOk
+        .expectBody(object : ParameterizedTypeReference<List<CheckRequestSummary>>() {})
+        .returnResult().responseBody!!
+
+      assertThat(checkRequestSummaries).hasSize(1)
+      val checkRequest = checkRequestSummaries.first()
+      assertThat(checkRequest.requestId).isEqualTo(ADDRESS_REQUEST_ID)
+      assertThat(checkRequest.preferencePriority).isEqualTo(AddressPreferencePriority.FIRST)
+      assertThat(checkRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
+      assertThat(checkRequest).isInstanceOf(StandardAddressCheckRequestSummary::class.java)
+
+      val standardAddressCheckRequestSummary = checkRequest as StandardAddressCheckRequestSummary
+      assertThat(standardAddressCheckRequestSummary.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+    }
+  }
+
+  @Nested
   inner class AddResidentTests {
     private val forename = "Refugio"
     private val surname = "Whittaker"
@@ -381,18 +500,21 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   }
 
   private companion object {
-    val osPlacesMockServer = OsPlacesMockServer("os-places-api-key")
+    val osPlacesMockServer = OsPlacesMockServer(OS_API_KEY)
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
       osPlacesMockServer.start()
+      prisonRegisterMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
       osPlacesMockServer.stop()
+      prisonRegisterMockServer.stop()
     }
   }
 }

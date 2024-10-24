@@ -8,8 +8,8 @@ import java.time.LocalDateTime
 @Entity
 class CasCheckRequest(
   id: Long = -1,
-  caAdditionalInfo: String?,
-  ppAdditionalInfo: String?,
+  caAdditionalInfo: String? = null,
+  ppAdditionalInfo: String? = null,
   dateRequested: LocalDateTime = LocalDateTime.now(),
   preferencePriority: AddressPreferencePriority,
   status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS,

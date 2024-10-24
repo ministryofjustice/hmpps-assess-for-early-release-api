@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -9,9 +10,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.test.context.jdbc.Sql
-import org.springframework.web.client.HttpClientErrorException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -23,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Add
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
 
@@ -58,7 +58,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(addresses).size().isEqualTo(3)
     assertThat(addresses[0].uprn).isEqualTo("100120991537")
     assertThat(addresses[1].postcode).isEqualTo(postcode)
-    assertThat(addresses[2].xCoordinate).isEqualTo(401003.0)
+    assertThat(addresses[2].xcoordinate).isEqualTo(401003.0)
     assertThat(addresses[2].addressLastUpdated).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
@@ -122,7 +122,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val prisonNumber = "C1234CC"
     val caAdditionalInfo = "ca info"
     val ppAdditionalInfo = "pp info"
-    val preferencePriority = AddressPreferencePriority.THIRD
+    val preferencePriority = AddressPreferencePriority.FIRST
     val uprn = "200010019924"
     val addStandardAddressCheckRequest = AddStandardAddressCheckRequest(
       caAdditionalInfo = caAdditionalInfo,
@@ -153,7 +153,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val prisonNumber = "C1234CC"
     val caAdditionalInfo = "ca info"
     val ppAdditionalInfo = "pp info"
-    val preferencePriority = AddressPreferencePriority.FOURTH
+    val preferencePriority = AddressPreferencePriority.SECOND
     val addCasCheckRequest = AddCasCheckRequest(
       caAdditionalInfo = caAdditionalInfo,
       ppAdditionalInfo = ppAdditionalInfo,
@@ -178,7 +178,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   @Test
   fun `should add a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
-    val prisonNumber = "A1234AD"
 
     val addResidentRequest = AddResidentRequest(
       forename = "Joshua",
@@ -190,7 +189,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    val residentSummary = addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest)
+    val residentSummary = addressService.addResident(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, addResidentRequest)
     assertThat(residentSummary).isNotNull
 
     val dbResident = residentRepository.findAll().first()
@@ -220,8 +219,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    val exception = assertThrows<HttpClientErrorException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
-    assertThat(exception.statusCode).isEqualTo(HttpStatus.NOT_FOUND)
+    assertThrows<EntityNotFoundException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
   }
 
   private companion object {
