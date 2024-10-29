@@ -51,6 +51,8 @@ values (1,
         '2020-03-31');
 
 
+
+
 insert into curfew_address_check_request(id, preference_priority, status, assessment_id)
 values (1, 'FIRST', 'IN_PROGRESS', 1);
 insert into standard_address_check_request(id, address_id)

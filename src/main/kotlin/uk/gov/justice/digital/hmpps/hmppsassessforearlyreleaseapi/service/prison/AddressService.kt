@@ -201,6 +201,7 @@ class AddressService(
       dateRequested = this.dateRequested,
       status = this.status,
       address = this.address.toAddressSummary(),
+      residents = this.residents.map { it.toSummary() },
     )
 
   private fun CasCheckRequest.toSummary(): CasCheckRequestSummary =
@@ -224,7 +225,6 @@ class AddressService(
       dateOfBirth = this.dateOfBirth,
       age = this.age,
       isMainResident = this.isMainResident,
-      standardAddressCheckRequest = this.standardAddressCheckRequest.toSummary(),
     )
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary =

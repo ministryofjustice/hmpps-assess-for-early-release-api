@@ -4,6 +4,7 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import software.amazon.awssdk.annotations.NotNull
@@ -37,6 +38,7 @@ data class Resident(
   val isMainResident: Boolean,
 
   @ManyToOne(optional = false)
+  @JoinColumn(name = "standard_address_check_request_id", nullable = false)
   val standardAddressCheckRequest: StandardAddressCheckRequest,
 
   @NotNull
