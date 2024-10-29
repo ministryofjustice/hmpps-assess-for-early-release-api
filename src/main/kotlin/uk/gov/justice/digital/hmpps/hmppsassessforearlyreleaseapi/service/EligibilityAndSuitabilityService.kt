@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 
 @Service
@@ -35,7 +35,7 @@ class EligibilityAndSuitabilityService(
 
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = createAssessmentSummary(assessment),
-      overallStatus = assessment.calculateAggregateStatus(),
+      overallStatus = assessment.calculateAggregateEligibilityStatus(),
       eligibility = assessment.eligibilityProgress(),
       eligibilityStatus = assessment.eligibilityProgress().toStatus(),
       suitability = assessment.suitabilityProgress(),

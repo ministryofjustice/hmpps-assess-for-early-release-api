@@ -175,6 +175,14 @@ enum class AssessmentStatus {
         OPTED_OUT,
         TIMED_OUT,
       )
+
+    override fun tasks() = setOf(
+      TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
+      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
+      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    )
   },
 
   REFUSED {
@@ -184,6 +192,7 @@ enum class AssessmentStatus {
         TIMED_OUT,
       )
   },
+
   TIMED_OUT {
     override fun transitions() = (AssessmentStatus.values().toSet() - RELEASED_ON_HDC).map { Transition(it) }.toSet()
   },
@@ -214,11 +223,21 @@ enum class AssessmentStatus {
         ADDRESS_UNSUITABLE,
         TIMED_OUT,
       )
+
+    override fun tasks() = setOf(
+      TaskProgress.Fixed(ASSESS_ELIGIBILITY, LOCKED),
+      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, IN_PROGRESS),
+      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    )
   },
 
   RELEASED_ON_HDC,
 
   ;
+
+  fun allowsTransitionTo(state: AssessmentStatus): Boolean = transitions().map { it.to }.contains(state)
 
   open fun transitions(): Set<Transition> = emptySet()
 

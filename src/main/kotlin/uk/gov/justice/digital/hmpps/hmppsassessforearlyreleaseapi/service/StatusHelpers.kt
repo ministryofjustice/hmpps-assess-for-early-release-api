@@ -30,7 +30,7 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
-  fun AssessmentWithEligibilityProgress.calculateAggregateStatus(): EligibilityStatus {
+  fun AssessmentWithEligibilityProgress.calculateAggregateEligibilityStatus(): EligibilityStatus {
     val eligibility = eligibilityProgress()
     val suitability = suitabilityProgress()
 

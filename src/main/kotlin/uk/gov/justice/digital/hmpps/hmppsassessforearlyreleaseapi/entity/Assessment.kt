@@ -36,7 +36,7 @@ data class Assessment(
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
-  val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
+  var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
   val policyVersion: String = "???",
@@ -87,8 +87,14 @@ data class Assessment(
 
   fun changeStatus(newStatus: AssessmentStatus) {
     if (status != newStatus) {
-      assessmentEvents.add(StatusChangedEvent(assessment = this, changes = StatusChange(before = status, after = newStatus)))
+      assessmentEvents.add(
+        StatusChangedEvent(
+          assessment = this,
+          changes = StatusChange(before = status, after = newStatus),
+        ),
+      )
       status = newStatus
+      lastUpdatedTimestamp = LocalDateTime.now()
     }
   }
 }

@@ -10,41 +10,25 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
 import java.time.LocalDate
 
 class OffenderServiceTest {
-  private val assessmentLifecycleService = mock<AssessmentLifecycleService>()
-  private val assessmentRepository = mock<AssessmentRepository>()
-  private val assessmentService = mock<AssessmentService>()
   private val offenderRepository = mock<OffenderRepository>()
-  private val prisonRegisterService = mock<PrisonRegisterService>()
   private val prisonerSearchService = mock<PrisonerSearchService>()
   private val telemetryClient = mock<TelemetryClient>()
 
   private val service: OffenderService =
     OffenderService(
-      assessmentLifecycleService,
-      assessmentRepository,
-      assessmentService,
       offenderRepository,
-      prisonRegisterService,
       prisonerSearchService,
       telemetryClient,
     )
@@ -140,55 +124,5 @@ class OffenderServiceTest {
   fun `should throw an exception when the the offender cannot be found in prisoner search`() {
     val exception = assertThrows<Exception> { service.createOrUpdateOffender(PRISON_NUMBER) }
     assertThat(exception.message).isEqualTo("Could not find prisoner with prisonNumber $PRISON_NUMBER in prisoner search")
-  }
-
-  @Test
-  fun `should get an offenders current assessment`() {
-    val hdced = LocalDate.now().plusDays(5)
-    val offender = anOffender(hdced)
-    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-
-    val assessment = service.getCurrentAssessment(PRISON_NUMBER)
-
-    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
-    verify(prisonRegisterService).getNameForId(PRISON_ID)
-    assertThat(assessment).extracting(
-      "forename",
-      "surname",
-      "prisonNumber",
-      "hdced",
-      "crd",
-      "location",
-      "status",
-    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, PRISON_NAME, AssessmentStatus.NOT_STARTED))
-  }
-
-  @Test
-  fun `should opt-out an offender`() {
-    val offender = anOffender()
-    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-
-    service.optOut(PRISON_NUMBER)
-
-    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository).save(assessmentCaptor.capture())
-    assertThat(assessmentCaptor.value.status).isEqualTo(AssessmentStatus.OPTED_OUT)
-  }
-
-  @Test
-  fun `should submit an assessment`() {
-    val assessment = anAssessmentWithEligibilityProgress()
-
-    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
-    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
-
-    service.submitAssessmentForAddressChecks(PRISON_NUMBER)
-
-    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository).save(assessmentCaptor.capture())
-    assertThat(assessmentCaptor.value)
-      .extracting("status")
-      .isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
   }
 }

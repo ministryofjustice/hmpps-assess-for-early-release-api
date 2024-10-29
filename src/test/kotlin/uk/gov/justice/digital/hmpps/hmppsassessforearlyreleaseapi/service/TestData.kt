@@ -4,12 +4,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChange
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
@@ -62,6 +66,16 @@ object TestData {
       val eligibilityCriteria = POLICY_1_0.eligibilityCriteria.first()
       val suitabilityCriteria = POLICY_1_0.suitabilityCriteria.first()
       val assessment = currentAssessment.copy(
+        assessmentEvents = mutableListOf(
+          StatusChangedEvent(
+            assessment = currentAssessment,
+            changes = StatusChange(before = AssessmentStatus.NOT_STARTED, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
+          ),
+          StatusChangedEvent(
+            assessment = currentAssessment,
+            changes = StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, ELIGIBLE_AND_SUITABLE),
+          ),
+        ),
         eligibilityCheckResults = mutableSetOf(
           EligibilityCheckResult(
             assessment = currentAssessment,

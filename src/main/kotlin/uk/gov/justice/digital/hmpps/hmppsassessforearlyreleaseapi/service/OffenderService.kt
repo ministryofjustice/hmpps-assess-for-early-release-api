@@ -1,20 +1,14 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
 import java.time.LocalDateTime
@@ -25,11 +19,7 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 
 @Service
 class OffenderService(
-  private val assessmentLifecycleService: AssessmentLifecycleService,
-  private val assessmentRepository: AssessmentRepository,
-  private val assessmentService: AssessmentService,
   private val offenderRepository: OffenderRepository,
-  private val prisonRegisterService: PrisonRegisterService,
   private val prisonerSearchService: PrisonerSearchService,
   private val telemetryClient: TelemetryClient,
 ) {
@@ -39,46 +29,6 @@ class OffenderService(
     return offenders.map {
       OffenderSummary(it.prisonNumber, it.bookingId, it.forename, it.surname, it.hdced)
     }
-  }
-
-  @Transactional
-  fun getCurrentAssessment(prisonNumber: String): AssessmentSummary {
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-
-    val prisonName = prisonRegisterService.getNameForId(offender.prisonId)
-    val currentAssessment = offender.currentAssessment()
-    return AssessmentSummary(
-      forename = offender.forename,
-      surname = offender.surname,
-      dateOfBirth = offender.dateOfBirth,
-      prisonNumber = offender.prisonNumber,
-      hdced = offender.hdced,
-      crd = offender.crd,
-      location = prisonName,
-      status = currentAssessment.status,
-      policyVersion = currentAssessment.policyVersion,
-      tasks = currentAssessment.status.tasks().map { TaskProgress(it.task, it.status(currentAssessment)) },
-    )
-  }
-
-  @Transactional
-  fun optOut(prisonNumber: String) {
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-    val optedOutAssessment =
-      offender.currentAssessment().copy(status = AssessmentStatus.OPTED_OUT, lastUpdatedTimestamp = LocalDateTime.now())
-    assessmentRepository.save(optedOutAssessment)
-  }
-
-  @Transactional
-  fun submitAssessmentForAddressChecks(prisonNumber: String) {
-    val assessmentWithEligibilityProgress = assessmentService.getCurrentAssessment(prisonNumber)
-    val newStatus = assessmentLifecycleService.submitAssessmentForAddressChecks(assessmentWithEligibilityProgress)
-    val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
-
-    assessmentEntity.changeStatus(newStatus)
-    assessmentRepository.save(assessmentEntity)
   }
 
   fun createOrUpdateOffender(nomisId: String) {
