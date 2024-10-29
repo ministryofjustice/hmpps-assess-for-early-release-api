@@ -1,15 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
+import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.fail
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
@@ -20,8 +21,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.DOES_NOT_WANT_TO_BE_TAGGED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NOWHERE_TO_STAY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -29,72 +32,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.time.LocalDate
 
-private const val PRISON_CODE = "BMI"
 private const val PRISON_NUMBER = TestData.PRISON_NUMBER
-private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
+private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
 private const val SUBMIT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 
-class OffenderResourceIntTest : SqsIntegrationTestBase() {
+class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var assessmentRepository: AssessmentRepository
 
   @Autowired
   private lateinit var offenderRepository: OffenderRepository
-
-  @Nested
-  inner class GetCaseAdminCaseload {
-    @Test
-    fun `should return unauthorized if no token`() {
-      webTestClient.get()
-        .uri(GET_CASE_ADMIN_CASELOAD_URL)
-        .exchange()
-        .expectStatus()
-        .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden if no role`() {
-      webTestClient.get()
-        .uri(GET_CASE_ADMIN_CASELOAD_URL)
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Test
-    fun `should return forbidden if wrong role`() {
-      webTestClient.get()
-        .uri(GET_CASE_ADMIN_CASELOAD_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Sql(
-      "classpath:test_data/reset.sql",
-      "classpath:test_data/some-offenders.sql",
-    )
-    @Test
-    fun `should return offenders at prison with a status of not started`() {
-      val offenders = webTestClient.get()
-        .uri(GET_CASE_ADMIN_CASELOAD_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .exchange()
-        .expectStatus()
-        .isOk
-        .expectBody(object : ParameterizedTypeReference<List<OffenderSummary>>() {})
-        .returnResult().responseBody!!
-
-      assertThat(offenders).hasSize(4)
-      val prisonNumbers = offenders.map { it.prisonNumber }
-      assertThat(prisonNumbers).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
-    }
-  }
 
   @Nested
   inner class GetCurrentAssessment {
@@ -153,7 +103,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
           hdced = LocalDate.of(2020, 10, 25),
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
-          status = AssessmentStatus.NOT_STARTED,
+          status = NOT_STARTED,
           policyVersion = "1.0",
           tasks = listOf(
             TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
@@ -173,7 +123,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
-        .bodyValue(OptOutRequest(OptOutReasonType.NO_REASON_GIVEN))
+        .bodyValue(OptOutRequest(NO_REASON_GIVEN))
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -184,7 +134,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation())
-        .bodyValue(OptOutRequest(OptOutReasonType.NOWHERE_TO_STAY))
+        .bodyValue(OptOutRequest(NOWHERE_TO_STAY))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -195,7 +145,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(OptOutRequest(OptOutReasonType.DOES_NOT_WANT_TO_BE_TAGGED))
+        .bodyValue(OptOutRequest(DOES_NOT_WANT_TO_BE_TAGGED))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -203,12 +153,12 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/some-offenders.sql",
+      "classpath:test_data/an-offender-with-checks-complete.sql",
     )
     @Test
     fun `should opt-out an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
-      val optOutRequest = OptOutRequest(OptOutReasonType.OTHER, "an opt-out reason")
+      val optOutRequest = OptOutRequest(OTHER, "an opt-out reason")
 
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
@@ -219,15 +169,90 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
         .isNoContent
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
-        ?: fail("couldn't find offender with prison number: $PRISON_NUMBER")
+        ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
       val assessment = assessmentRepository.findByOffender(offender)
-      assertThat(assessment.first().status).isEqualTo(AssessmentStatus.OPTED_OUT)
+      assertThat(assessment.first().status).isEqualTo(OPTED_OUT)
     }
 
     @Test
     fun `should return 401 if otherDescription not given when reasonType is other`() {
       prisonRegisterMockServer.stubGetPrisons()
-      val optOutRequest = OptOutRequest(OptOutReasonType.OTHER)
+      val optOutRequest = OptOutRequest(OTHER)
+
+      webTestClient.put()
+        .uri(OPT_OUT_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(optOutRequest)
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+  }
+
+  @Nested
+  inner class OptIn {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(OPT_IN_ASSESSMENT_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(OPT_IN_ASSESSMENT_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(OPT_IN_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-checks-complete.sql",
+    )
+    @Test
+    fun `should opt-in an offender`() {
+      prisonRegisterMockServer.stubGetPrisons()
+
+      webTestClient.put()
+        .uri(OPT_OUT_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(OptOutRequest(OTHER, "an opt-out reason"))
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      webTestClient.put()
+        .uri(OPT_IN_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
+        ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
+      val assessment = assessmentRepository.findByOffender(offender)
+      assertThat(assessment.first().status).isEqualTo(NOT_STARTED)
+    }
+
+    @Test
+    fun `should return 401 if otherDescription not given when reasonType is other`() {
+      prisonRegisterMockServer.stubGetPrisons()
+      val optOutRequest = OptOutRequest(OTHER)
 
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
@@ -287,7 +312,7 @@ class OffenderResourceIntTest : SqsIntegrationTestBase() {
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
-      assertThat(updatedAssessment.status).isEqualTo(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
+      assertThat(updatedAssessment.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
     }
   }
 

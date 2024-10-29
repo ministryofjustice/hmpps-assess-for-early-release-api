@@ -22,60 +22,15 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.OffenderService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class OffenderResource(
-  private val offenderService: OffenderService,
+class AssessmentResource(
+  private val assessmentService: AssessmentService,
 ) {
-
-  @GetMapping("/prison/{prisonCode}/case-admin/caseload")
-  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
-  @Operation(
-    summary = "Returns the caseload for a case admin within a prison",
-    description = "Returns a list of offenders that require eligibility and suitability checks to be performed",
-    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Returns a list of offenders that require eligibility and suitability checks to be performed",
-        content = [
-          Content(
-            mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorised, requires a valid Oauth2 token",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an appropriate role",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-    ],
-  )
-  fun getCaseAdminCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
-    offenderService.getCaseAdminCaseload(prisonCode)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -119,7 +74,7 @@ class OffenderResource(
     ],
   )
   fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    offenderService.getCurrentAssessment(prisonNumber)
+    assessmentService.getCurrentAssessmentSummary(prisonNumber)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/opt-out")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -170,8 +125,55 @@ class OffenderResource(
     if (optOutRequest.reasonType == OptOutReasonType.OTHER && optOutRequest.otherDescription.isNullOrBlank()) {
       throw ValidationException("otherDescription cannot be blank if reasonType is OTHER")
     }
+    assessmentService.optOut(prisonNumber)
+  }
 
-    offenderService.optOut(prisonNumber)
+  @PutMapping("/offender/{prisonNumber}/current-assessment/opt-in")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Allows an offender to opt back in to being assessed for early release.",
+    description = "Allows an offender to opt back in to being assessed for early release.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The offender has been opted back into being assessed for early release.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = Void::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun optBackIn(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+  ) {
+    assessmentService.optBackIn(prisonNumber)
   }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-address-checks")
@@ -227,5 +229,5 @@ class OffenderResource(
     ],
   )
   fun submitForAddressChecks(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    offenderService.submitAssessmentForAddressChecks(prisonNumber)
+    assessmentService.submitAssessmentForAddressChecks(prisonNumber)
 }
