@@ -22,7 +22,7 @@ class StandardAddressCheckRequest(
   @JoinColumn(name = "address_id", referencedColumnName = "id")
   val address: Address,
   @OneToMany(mappedBy = "standardAddressCheckRequest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  @OrderBy("lastUpdatedTimestamp")
+  @OrderBy("createdTimestamp")
   val residents: MutableSet<Resident> = mutableSetOf(),
 ) : CurfewAddressCheckRequest(
   id = id,
