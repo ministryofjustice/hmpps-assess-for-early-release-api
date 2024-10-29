@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChange
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChangedEvent
@@ -214,11 +215,31 @@ object TestData {
     addressLastUpdated = LocalDate.of(2022, 3, 21),
   )
 
+  private fun residents() = mutableSetOf(
+    Resident(
+      id = 1,
+      forename = "Langley",
+      surname = "Road",
+      phoneNumber = "07768967676",
+      relation = "Father",
+      dateOfBirth = LocalDate.of(1989, 3, 21),
+      age = 32,
+      isMainResident = true,
+      standardAddressCheckRequest = StandardAddressCheckRequest(
+        dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
+        preferencePriority = AddressPreferencePriority.FIRST,
+        assessment = anOffender().currentAssessment(),
+        address = anAddress(),
+      ),
+    ),
+  )
+
   fun aStandardAddressCheckRequest() = StandardAddressCheckRequest(
     dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
     preferencePriority = AddressPreferencePriority.FIRST,
     assessment = anOffender().currentAssessment(),
     address = anAddress(),
+    residents = residents(),
   )
 
   fun aCasCheckRequest() = CasCheckRequest(

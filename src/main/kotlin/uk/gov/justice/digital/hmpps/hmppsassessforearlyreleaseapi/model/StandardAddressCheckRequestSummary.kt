@@ -34,4 +34,7 @@ data class StandardAddressCheckRequestSummary(
 
   @Schema(description = "The address the check request is for", example = "See AddressSummary")
   val address: AddressSummary,
+
+  @Schema(description = "The residents the check request is for", example = "See ResidentSummary")
+  val residents: List<ResidentSummary>,
 ) : CheckRequestSummary

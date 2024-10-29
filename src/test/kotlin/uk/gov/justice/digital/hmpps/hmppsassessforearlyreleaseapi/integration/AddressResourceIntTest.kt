@@ -238,6 +238,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     @Sql(
       "classpath:test_data/reset.sql",
       "classpath:test_data/a-standard-address-check-request.sql",
+      "classpath:test_data/an-resident.sql",
     )
     @Test
     fun `should get a standard address check request`() {
@@ -254,6 +255,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(AddressPreferencePriority.FIRST)
       assertThat(addressCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
       assertThat(addressCheckRequest.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+      assertThat(addressCheckRequest.residents).hasSize(2)
+      assertThat(addressCheckRequest.residents.first().residentId).isEqualTo(2)
     }
   }
 
@@ -404,6 +407,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     @Sql(
       "classpath:test_data/reset.sql",
       "classpath:test_data/a-standard-address-check-request.sql",
+      "classpath:test_data/an-resident.sql",
     )
     @Test
     fun `should get check requests for an assessment`() {
@@ -427,6 +431,9 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
       val standardAddressCheckRequestSummary = checkRequest as StandardAddressCheckRequestSummary
       assertThat(standardAddressCheckRequestSummary.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+      val residentSummary = standardAddressCheckRequestSummary.residents
+      assertThat(residentSummary).hasSize(2)
+      assertThat(residentSummary.first().residentId).isEqualTo(2)
     }
   }
 
