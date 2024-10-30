@@ -8,6 +8,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
@@ -61,12 +62,14 @@ class AddressServiceTest {
     val checkRequests = addressService.getCheckRequestsForAssessment(PRISON_NUMBER)
 
     assertThat(checkRequests).hasSize(2)
-    val addressCheckRequestSummary = checkRequests.first()
+    val addressCheckRequestSummary = checkRequests.first() as StandardAddressCheckRequestSummary
     assertThat(addressCheckRequestSummary.requestType).isEqualTo(CheckRequestType.STANDARD_ADDRESS)
     assertThat(addressCheckRequestSummary.requestId).isEqualTo(addressCheckRequest.id)
     assertThat(addressCheckRequestSummary.preferencePriority).isEqualTo(addressCheckRequest.preferencePriority)
     assertThat(addressCheckRequestSummary.dateRequested).isEqualTo(addressCheckRequest.dateRequested)
     assertThat(addressCheckRequestSummary.status).isEqualTo(addressCheckRequest.status)
+    assertThat(addressCheckRequestSummary.residents).hasSize(1)
+    assertThat(addressCheckRequestSummary.residents.first().residentId).isEqualTo(1)
 
     val casCheckRequestSummary = checkRequests[1]
     assertThat(casCheckRequestSummary.requestType).isEqualTo(CheckRequestType.CAS)

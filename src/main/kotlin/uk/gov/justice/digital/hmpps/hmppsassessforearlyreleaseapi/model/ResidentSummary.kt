@@ -30,7 +30,4 @@ data class ResidentSummary(
 
   @Schema(description = "Is this main resident at the address", example = "true")
   val isMainResident: Boolean,
-
-  @Schema(description = "The standard address check request this resident is associated with", example = "A StandardAddressCheckRequestSummary")
-  val standardAddressCheckRequest: StandardAddressCheckRequestSummary,
 )
