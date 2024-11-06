@@ -13,8 +13,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anEligibilityCheckDetails
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anSuitabilityCheckDetails
 
@@ -113,7 +117,12 @@ class StatusHelpersTest {
         anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
       )
 
-      assertThatThrownBy { overallStatus(eligibilityDetails, suitabilityDetails) }.hasMessage("Should not be possible to start suitability without being eligible")
+      assertThatThrownBy {
+        overallStatus(
+          eligibilityDetails,
+          suitabilityDetails,
+        )
+      }.hasMessage("Should not be possible to start suitability without being eligible")
     }
 
     @Test
@@ -127,7 +136,12 @@ class StatusHelpersTest {
         anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
       )
 
-      assertThatThrownBy { overallStatus(eligibilityDetails, suitabilityDetails) }.hasMessage("Should not be possible to start suitability without being eligible")
+      assertThatThrownBy {
+        overallStatus(
+          eligibilityDetails,
+          suitabilityDetails,
+        )
+      }.hasMessage("Should not be possible to start suitability without being eligible")
     }
 
     private fun overallStatus(
@@ -143,5 +157,33 @@ class StatusHelpersTest {
           suitabilityProgress = { suitabilityDetails },
         ).calculateAggregateEligibilityStatus(),
       )
+  }
+
+  @Nested
+  inner class GetFailureReasons {
+
+    @Test
+    fun `ineligibility reasons`() {
+      val reasons = listOf(
+        anEligibilityCheckDetails().copy(status = INELIGIBLE, taskName = "Thing 1"),
+        anEligibilityCheckDetails().copy(status = NOT_STARTED, taskName = "Thing 2"),
+        anEligibilityCheckDetails().copy(status = INELIGIBLE, taskName = "Thing 3"),
+        anEligibilityCheckDetails().copy(status = IN_PROGRESS, taskName = "Thing 4"),
+      ).getIneligibleReasons()
+
+      assertThat(reasons).containsExactly("Thing 1", "Thing 3")
+    }
+
+    @Test
+    fun `unsuitability reasons`() {
+      val reasons = listOf(
+        anSuitabilityCheckDetails().copy(status = UNSUITABLE, taskName = "Thing 1"),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED, taskName = "Thing 2"),
+        anSuitabilityCheckDetails().copy(status = UNSUITABLE, taskName = "Thing 3"),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS, taskName = "Thing 4"),
+      ).getUnsuitableReasons()
+
+      assertThat(reasons).containsExactly("Thing 1", "Thing 3")
+    }
   }
 }
