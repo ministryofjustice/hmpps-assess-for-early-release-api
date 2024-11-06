@@ -299,7 +299,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     @Test
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-eligibility-checks.sql",
+      "classpath:test_data/an-offender-with-unstarted-eligibility-checks.sql",
     )
     fun `can record a criterion check`() {
       val payload = CriterionCheck(

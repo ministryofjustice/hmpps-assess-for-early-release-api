@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import org.assertj.core.api.AbstractComparableAssert
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
@@ -27,20 +28,7 @@ class StatusHelpersTest {
       val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
       val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
 
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(NOT_STARTED)
-    }
-
-    @Test
-    fun `suitability in progress`() {
-      val eligibilityDetails = listOf(
-        anEligibilityCheckDetails().copy(status = NOT_STARTED),
-      )
-      val suitabilityDetails = listOf(
-        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
-        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
-      )
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(NOT_STARTED)
     }
 
     @Test
@@ -53,11 +41,83 @@ class StatusHelpersTest {
         anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
       )
 
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
     }
 
     @Test
-    fun `suitability and eligibility in-progress`() {
+    fun ineligible() {
+      val eligibilityDetails = listOf(
+        anEligibilityCheckDetails().copy(status = ELIGIBLE),
+        anEligibilityCheckDetails().copy(status = INELIGIBLE),
+      )
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
+      )
+
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
+    }
+
+    @Test
+    fun `eligible and suitability not started`() {
+      val eligibilityDetails = listOf(
+        anEligibilityCheckDetails().copy(status = ELIGIBLE),
+      )
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
+      )
+
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
+    }
+
+    @Test
+    fun `eligible and suitability in-progress`() {
+      val eligibilityDetails = listOf(
+        anEligibilityCheckDetails().copy(status = ELIGIBLE),
+      )
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
+      )
+
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
+    }
+
+    @Test
+    fun `eligible and unsuitable`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE),
+      )
+
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
+    }
+
+    @Test
+    fun `eligible and suitable`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
+      )
+
+      overallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(ELIGIBLE)
+    }
+
+    @Test
+    fun `some progress on suitability without eligibility checks having started`() {
+      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
+      val suitabilityDetails = listOf(
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED),
+        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
+      )
+
+      assertThatThrownBy { overallStatus(eligibilityDetails, suitabilityDetails) }.hasMessage("Should not be possible to start suitability without being eligible")
+    }
+
+    @Test
+    fun `some progress on suitability whilst eligibility checks in progress`() {
       val eligibilityDetails = listOf(
         anEligibilityCheckDetails().copy(status = NOT_STARTED),
         anEligibilityCheckDetails().copy(status = ELIGIBLE),
@@ -67,72 +127,10 @@ class StatusHelpersTest {
         anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE),
       )
 
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
+      assertThatThrownBy { overallStatus(eligibilityDetails, suitabilityDetails) }.hasMessage("Should not be possible to start suitability without being eligible")
     }
 
-    @Test
-    fun `unsuitable but not ineligible`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = NOT_STARTED))
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
-    }
-
-    @Test
-    fun `ineligible without complete suitability`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE), anSuitabilityCheckDetails().copy(status = SuitabilityStatus.NOT_STARTED))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
-    }
-
-    @Test
-    fun `unsuitable without complete eligibility`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE), anEligibilityCheckDetails().copy(status = NOT_STARTED))
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(IN_PROGRESS)
-    }
-
-    @Test
-    fun `ineligible and suitable`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = INELIGIBLE))
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
-    }
-
-    @Test
-    fun `eligible and suitable`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(ELIGIBLE)
-    }
-
-    @Test
-    fun `mixed eligibility results`() {
-      val eligibilityDetails = listOf(
-        anEligibilityCheckDetails().copy(status = ELIGIBLE),
-        anEligibilityCheckDetails().copy(status = INELIGIBLE),
-      )
-      val suitabilityDetails = listOf(anSuitabilityCheckDetails().copy(status = SuitabilityStatus.SUITABLE))
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
-    }
-
-    @Test
-    fun `outstanding suitability questions when eligible is incomplete unless unsuitable`() {
-      val eligibilityDetails = listOf(anEligibilityCheckDetails().copy(status = ELIGIBLE))
-      val suitabilityDetails = listOf(
-        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.UNSUITABLE),
-        anSuitabilityCheckDetails().copy(status = SuitabilityStatus.IN_PROGRESS),
-      )
-
-      assertThatOverallStatus(eligibilityDetails, suitabilityDetails).isEqualTo(INELIGIBLE)
-    }
-
-    private fun assertThatOverallStatus(
+    private fun overallStatus(
       eligibilityDetails: List<EligibilityCriterionProgress>,
       suitabilityDetails: List<SuitabilityCriterionProgress>,
     ): AbstractComparableAssert<*, EligibilityStatus> =

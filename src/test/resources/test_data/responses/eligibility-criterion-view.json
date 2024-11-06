@@ -48,13 +48,13 @@
   "nextCriterion": {
     "code": "extended-sentence-for-violent-or-sexual-offences",
     "taskName": "Extended Sentence for violent or sexual offences",
-    "status": "NOT_STARTED",
+    "status": "ELIGIBLE",
     "questions": [
       {
         "text": "Is this person serving an extended sentence for violent or sexual offences?",
         "hint": null,
         "name": "servingExtendedSentenceForViolentOrSexualOffence",
-        "answer": null
+        "answer": false
       }
     ]
   }
