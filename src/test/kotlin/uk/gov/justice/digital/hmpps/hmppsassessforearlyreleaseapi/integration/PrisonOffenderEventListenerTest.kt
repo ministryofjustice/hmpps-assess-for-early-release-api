@@ -23,7 +23,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.HMPPSRec
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.PrisonOffenderEventListener.Companion.PRISONER_RECEIVE_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.PrisonOffenderEventListener.Companion.PRISONER_UPDATED_EVENT_TYPE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_CREATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_UPDATED_EVENT_NAME
@@ -60,7 +62,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         reason = "TRANSFERRED",
         prisonId = NEW_PRISON_CODE,
       ),
-      "A prisoner has been transferred from $OLD_PRISON_CODE to $NEW_PRISON_CODE",
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -97,7 +98,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         reason = "TRANSFERRED",
         prisonId = NEW_PRISON_CODE,
       ),
-      "A prisoner has been transferred from $OLD_PRISON_CODE to $NEW_PRISON_CODE",
     )
 
     awaitAtMost30Secs untilAsserted {
@@ -115,7 +115,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",
   )
-  fun `Should create a new offender`() {
+  fun `Should create a new offender `() {
     val prisonNumber = "Z1234XY"
     val hdced = LocalDate.now().plusDays(20)
     val firstName = "new first name"
@@ -136,6 +136,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         ),
       ),
     )
+    probationSearchApiMockServer.stubSearchForPersonOnProbation()
+    deliusMockServer.stubGetOffenderManager()
 
     publishDomainEventMessage(
       AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE)),
@@ -159,7 +161,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.surname).isEqualTo(lastName)
     assertThat(createdOffender.hdced).isEqualTo(hdced)
     assertThat(createdOffender.assessments).hasSize(1)
-    assertThat(createdOffender.assessments.iterator().next().status).isEqualTo(AssessmentStatus.NOT_STARTED)
+    val assessment = createdOffender.assessments.first()
+    assertThat(assessment.status).isEqualTo(AssessmentStatus.NOT_STARTED)
+    assertThat(assessment.responsibleCom).isNotNull
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
@@ -222,7 +226,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
   private fun publishDomainEventMessage(
     additionalInformation: AdditionalInformationTransfer,
-    description: String,
+    description: String = "A prisoner has been transferred from $OLD_PRISON_CODE to $NEW_PRISON_CODE",
   ) {
     val jsonMessage = jsonString(
       HMPPSReceiveDomainEvent(
@@ -268,18 +272,24 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   }
 
   private companion object {
+    val deliusMockServer = DeliusMockServer()
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val probationSearchApiMockServer = ProbationSearchMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
+      deliusMockServer.start()
       prisonerSearchApiMockServer.start()
+      probationSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
+      deliusMockServer.stop()
       prisonerSearchApiMockServer.stop()
+      probationSearchApiMockServer.stop()
     }
   }
 }

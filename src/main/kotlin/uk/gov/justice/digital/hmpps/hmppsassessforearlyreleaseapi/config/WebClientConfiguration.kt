@@ -18,10 +18,12 @@ private const val HMPPS_AUTH = "hmpps-auth"
 
 @Configuration
 class WebClientConfiguration(
-  @Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String,
   @Value("\${api.health-timeout:2s}") val healthTimeout: Duration,
-  @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String,
+  @Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String,
+  @Value("\${hmpps.delius.api.url}") private val deliusApiUrl: String,
   @Value("\${hmpps.prisonregister.api.url}") private val prisonRegisterApiUrl: String,
+  @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String,
+  @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String,
   @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
 ) {
   @Bean
@@ -69,6 +71,42 @@ class WebClientConfiguration(
         }
         .build(),
     ).build()
+
+  @Bean
+  fun oauthDeliusApiClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
+    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
+
+    return WebClient.builder()
+      .baseUrl(deliusApiUrl)
+      .apply(oauth2Client.oauth2Configuration())
+      .exchangeStrategies(
+        ExchangeStrategies.builder()
+          .codecs { configurer ->
+            configurer.defaultCodecs()
+              .maxInMemorySize(-1)
+          }
+          .build(),
+      ).build()
+  }
+
+  @Bean
+  fun oauthProbationSearchApiClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
+    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
+
+    return WebClient.builder()
+      .baseUrl(probationSearchApiUrl)
+      .apply(oauth2Client.oauth2Configuration())
+      .exchangeStrategies(
+        ExchangeStrategies.builder()
+          .codecs { configurer ->
+            configurer.defaultCodecs()
+              .maxInMemorySize(-1)
+          }
+          .build(),
+      ).build()
+  }
 
   @Bean
   fun osPlacesClient(): WebClient = WebClient.builder()

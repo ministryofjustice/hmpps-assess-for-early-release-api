@@ -5,7 +5,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
-private const val OS_PLACES_WIREMOCK_PORT = 8093
+private const val OS_PLACES_WIREMOCK_PORT = 8099
 
 class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_WIREMOCK_PORT) {
   fun stubGetAddressesForPostcode(postcode: String) {

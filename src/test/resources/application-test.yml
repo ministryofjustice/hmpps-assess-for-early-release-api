@@ -1,8 +1,4 @@
 spring:
-
-  config:
-    use-legacy-processing: true
-
   security:
     oauth2:
       resourceserver:
@@ -32,28 +28,19 @@ hmpps:
     token:
       url: http://localhost:8090/auth/oauth/token
     url: http://localhost:8090/auth
-  govuk:
+  delius:
     api:
-      url: http://localhost:8095
-  prison:
-    api:
-      url: http://localhost:8091/api
+      url: http://localhost:8091
   prisonregister:
     api:
       url: http://localhost:8092
-  community:
+  prisonersearch:
     api:
-      url: http://localhost:8093
+      url: http://localhost:8093/api
   probationsearch:
     api:
       url: http://localhost:8094
-  prisonersearch:
-    api:
-      url: http://localhost:8099/api
-  document:
-    api:
-      url: http://localhost:8099/api
-      enabled: true
+
 
 hmpps.sqs:
   provider: localstack
@@ -69,5 +56,5 @@ hmpps.sqs:
 os:
   places:
     api:
-      url: http://localhost:8093
+      url: http://localhost:8099
       key: "os-places-api-key"
