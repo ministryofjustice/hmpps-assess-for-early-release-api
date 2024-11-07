@@ -47,6 +47,10 @@ data class Assessment(
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("eventTime DESC")
   val assessmentEvents: MutableList<AssessmentEvent> = mutableListOf(),
+
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "responsible_com_id")
+  var responsibleCom: CommunityOffenderManager? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"

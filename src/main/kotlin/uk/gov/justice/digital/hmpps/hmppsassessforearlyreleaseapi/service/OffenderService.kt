@@ -5,12 +5,16 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -21,6 +25,8 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 class OffenderService(
   private val offenderRepository: OffenderRepository,
   private val prisonerSearchService: PrisonerSearchService,
+  private val probationService: ProbationService,
+  private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
 ) {
   @Transactional
@@ -61,7 +67,16 @@ class OffenderService(
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
     )
-    offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
+
+    var assessment = Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
+    val offenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)
+    if (offenderManager != null) {
+      val responsibleCom = staffRepository.findByStaffIdentifier(offenderManager.id)
+        ?: createCommunityOffenderManager(offenderManager)
+      assessment = assessment.copy(responsibleCom = responsibleCom)
+    }
+
+    offender.assessments.add(assessment)
     offenderRepository.save(offender)
 
     telemetryClient.trackEvent(
@@ -105,6 +120,18 @@ class OffenderService(
       offender.forename != prisoner.firstName ||
       offender.surname != prisoner.lastName ||
       offender.dateOfBirth != prisoner.dateOfBirth
+
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager {
+    return staffRepository.save(
+      CommunityOffenderManager(
+        staffIdentifier = offenderManager.id,
+        username = offenderManager.username,
+        email = offenderManager.email,
+        forename = offenderManager.name.forename,
+        surname = offenderManager.name.surname,
+      ),
+    )
+  }
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
