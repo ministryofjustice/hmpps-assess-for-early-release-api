@@ -7,6 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
@@ -34,6 +35,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProg
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Provider
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Team
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -248,4 +253,21 @@ object TestData {
     assessment = anOffender().currentAssessment(),
     allocatedAddress = anAddress(),
   )
+
+  fun aDeliusOffenderManager() = DeliusOffenderManager(
+    id = 1,
+    code = "staff-code",
+    Name(forename = "forename", surname = "surname"),
+    team = Team(code = "team 1", "a tgeam"),
+    provider = Provider(code = "probationArea-code-1", description = "probationArea-description-1"),
+  )
+
+  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) =
+    CommunityOffenderManager(
+      staffIdentifier = deliusOffenderManager.id,
+      username = deliusOffenderManager.username,
+      email = deliusOffenderManager.email,
+      forename = deliusOffenderManager.name.forename,
+      surname = deliusOffenderManager.name.surname,
+    )
 }
