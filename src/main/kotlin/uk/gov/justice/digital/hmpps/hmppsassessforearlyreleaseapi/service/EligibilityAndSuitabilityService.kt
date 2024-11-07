@@ -10,11 +10,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 
 @Service
@@ -33,13 +38,24 @@ class EligibilityAndSuitabilityService(
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
     val assessment = assessmentService.getCurrentAssessment(prisonNumber)
 
+    val eligibility = assessment.eligibilityProgress()
+    val eligibilityStatus = eligibility.toStatus()
+    val suitability = assessment.suitabilityProgress()
+    val suitabilityStatus = suitability.toStatus()
+
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = createAssessmentSummary(assessment),
       overallStatus = assessment.calculateAggregateEligibilityStatus(),
-      eligibility = assessment.eligibilityProgress(),
-      eligibilityStatus = assessment.eligibilityProgress().toStatus(),
-      suitability = assessment.suitabilityProgress(),
-      suitabilityStatus = assessment.suitabilityProgress().toStatus(),
+      eligibility = eligibility,
+      eligibilityStatus = eligibilityStatus,
+      suitability = suitability,
+      suitabilityStatus = suitabilityStatus,
+      failureType = when {
+        eligibilityStatus == INELIGIBLE -> FailureType.INELIGIBLE
+        suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
+        else -> null
+      },
+      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
     )
   }
 

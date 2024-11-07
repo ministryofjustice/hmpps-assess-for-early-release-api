@@ -14,8 +14,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 
 object StatusHelpers {
-  private val IN_PROGRESS_SUITABILITY = setOf(SuitabilityStatus.NOT_STARTED)
-
   fun List<EligibilityCriterionProgress>.toStatus() = when {
     all { it.status == ELIGIBLE } -> ELIGIBLE
     any { it.status == INELIGIBLE } -> INELIGIBLE
@@ -30,21 +28,29 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
+  fun List<SuitabilityCriterionProgress>.getUnsuitableReasons() =
+    this.filter { it.status == UNSUITABLE }.map { it.taskName }
+
+  fun List<EligibilityCriterionProgress>.getIneligibleReasons() =
+    this.filter { it.status == INELIGIBLE }.map { it.taskName }
+
   fun AssessmentWithEligibilityProgress.calculateAggregateEligibilityStatus(): EligibilityStatus {
     val eligibility = eligibilityProgress()
     val suitability = suitabilityProgress()
 
     val ineligible = eligibility.any { it.status == INELIGIBLE }
+    val unsuitable = suitability.any { it.status == UNSUITABLE }
+
     val eligible = eligibility.all { it.status == ELIGIBLE }
     val suitable = suitability.all { it.status == SUITABLE }
 
-    val suitabilityComplete = suitability.none { IN_PROGRESS_SUITABILITY.contains(it.status) }
     val eligibilityHasProgress = eligibility.toStatus() != NOT_STARTED
     val suitabilityHasProgress = suitability.toStatus() != SuitabilityStatus.NOT_STARTED
+    assert(!(suitabilityHasProgress && !eligible)) { "Should not be possible to start suitability without being eligible" }
 
     return when {
       eligible && suitable -> ELIGIBLE
-      (eligible && suitabilityComplete) || ineligible -> INELIGIBLE
+      ineligible || unsuitable -> INELIGIBLE
       eligibilityHasProgress || suitabilityHasProgress -> IN_PROGRESS
       else -> NOT_STARTED
     }

@@ -23,6 +23,10 @@ data class EligibilityAndSuitabilityCaseView(
   val suitabilityStatus: SuitabilityStatus,
   @Schema(description = "details of current suitability checks")
   val suitability: List<SuitabilityCriterionProgress>,
+  @Schema(description = "The type of the failure", example = "INELIGIBLE")
+  val failureType: FailureType?,
+  @Schema(description = "Reasons why someone is ineligible")
+  val failedCheckReasons: List<String>,
 )
 
 @Schema(
@@ -52,6 +56,11 @@ data class SuitabilityCriterionView(
   @Schema(description = "progress about the next criterion")
   val nextCriterion: SuitabilityCriterionProgress?,
 )
+
+enum class FailureType {
+  INELIGIBLE,
+  UNSUITABLE,
+}
 
 enum class EligibilityStatus {
   ELIGIBLE,
