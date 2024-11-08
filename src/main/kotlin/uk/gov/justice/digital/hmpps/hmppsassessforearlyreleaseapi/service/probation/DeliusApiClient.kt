@@ -30,4 +30,17 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
       .block()
     return communityApiResponse
   }
+
+  fun getStaffDetailsByUsername(username: String): User {
+    val communityApiResponse = communityApiClient
+      .post()
+      .uri("/staff")
+      .accept(MediaType.APPLICATION_JSON)
+      .bodyValue(username)
+      .retrieve()
+      .bodyToMono(typeReference<User>())
+      .block()
+    return communityApiResponse
+      ?: error("Unexpected null response from API")
+  }
 }

@@ -15,4 +15,8 @@ class ProbationService(
       null
     }
   }
+
+  fun getStaffDetailsByUsername(username: String): User {
+    return deliusApiClient.getStaffDetailsByUsername(username)
+  }
 }

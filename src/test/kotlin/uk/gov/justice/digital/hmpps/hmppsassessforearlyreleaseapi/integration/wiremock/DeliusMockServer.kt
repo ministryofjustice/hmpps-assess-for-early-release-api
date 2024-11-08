@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.w
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
 private const val DELIUS_WIREMOCK_PORT = 8091
@@ -33,6 +34,32 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
           }""",
         ).withStatus(200),
       ),
+    )
+  }
+
+  fun stubPostStaffDetailsByUsername() {
+    stubFor(
+      post(urlEqualTo("/staff"))
+        .willReturn(
+          aResponse().withHeader(
+            "Content-Type",
+            "application/json",
+          ).withBody(
+            """
+            {
+              "code": "AB00001",
+              "id": 2000,
+              "username": "com-user",
+              "email": "comuser@probation.gov.uk",
+              "teams": [],
+              "name": {
+              "forename": "com",
+              "surname": "user"
+            }
+            }
+            """.trimIndent(),
+          ).withStatus(200),
+        ),
     )
   }
 }
