@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
@@ -84,19 +85,8 @@ class AddressService(
   }
 
   @Transactional
-  fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary {
-    val standardAddressCheckRequest =
-      standardAddressCheckRequestRepository.findByIdOrNull(requestId)
-        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
-
-    if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw EntityNotFoundException(
-        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
-      )
-    }
-
-    return standardAddressCheckRequest.toSummary()
-  }
+  fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary =
+    (getCurfewAddressCheckRequest(requestId, prisonNumber) as StandardAddressCheckRequest).toSummary()
 
   @Transactional
   fun addCasCheckRequest(
@@ -140,16 +130,9 @@ class AddressService(
     curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
   }
 
+  @Transactional
   fun addResident(prisonNumber: String, requestId: Long, addResidentRequest: AddResidentRequest): ResidentSummary {
-    val standardAddressCheckRequest =
-      standardAddressCheckRequestRepository.findByIdOrNull(requestId)
-        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
-
-    if (standardAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw EntityNotFoundException(
-        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
-      )
-    }
+    val standardAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
 
     var resident = Resident(
       forename = addResidentRequest.forename,
@@ -159,10 +142,34 @@ class AddressService(
       dateOfBirth = addResidentRequest.dateOfBirth,
       age = addResidentRequest.age,
       isMainResident = addResidentRequest.isMainResident,
-      standardAddressCheckRequest = standardAddressCheckRequest,
+      standardAddressCheckRequest = standardAddressCheckRequest as StandardAddressCheckRequest,
     )
     resident = residentRepository.save(resident)
     return resident.toSummary()
+  }
+
+  @Transactional
+  fun updateCaseAdminAdditionalInformation(
+    prisonNumber: String,
+    requestId: Long,
+    caseAdminInfoRequest: UpdateCaseAdminAdditionInfoRequest,
+  ) {
+    val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
+    curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
+    curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
+  }
+
+  private fun getCurfewAddressCheckRequest(requestId: Long, prisonNumber: String): CurfewAddressCheckRequest {
+    val curfewAddressCheckRequest =
+      curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
+
+    if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+      throw EntityNotFoundException(
+        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
+      )
+    }
+    return curfewAddressCheckRequest
   }
 
   private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =

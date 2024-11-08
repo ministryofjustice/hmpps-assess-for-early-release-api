@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
@@ -21,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.time.LocalDate
@@ -37,6 +39,7 @@ private const val ADD_CAS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-
 private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID"
 private const val GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/address-check-requests"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
+private const val UPDATE_CASE_AMIN_ADDITIONAL_INFO = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/case-admin-additional-information"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
 
@@ -504,6 +507,80 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     private fun anAddResidentRequest(): AddResidentRequest =
       AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true)
+  }
+
+  @Nested
+  inner class UpdateCaseAdminAdditionalInformation {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
+        .headers(setAuthorisation())
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should update case admin additional information`() {
+      val updateCaAdditionalInfoRequest = anUpdateCaAdditionalInfoRequest()
+
+      webTestClient.put()
+        .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(updateCaAdditionalInfoRequest)
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
+      assertThat(addressCheckRequest?.caAdditionalInfo).isEqualTo(updateCaAdditionalInfoRequest.additionalInformation)
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should return bad request for additional info longer than 1000 characters`() {
+      val updateCaAdditionalInfoRequest = UpdateCaseAdminAdditionInfoRequest("A".repeat(1001))
+
+      webTestClient.put()
+        .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(updateCaAdditionalInfoRequest)
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    private fun anUpdateCaAdditionalInfoRequest() = UpdateCaseAdminAdditionInfoRequest("some information")
   }
 
   private companion object {

@@ -21,7 +21,7 @@ abstract class CurfewAddressCheckRequest(
   @NotNull
   val id: Long = -1,
 
-  val caAdditionalInfo: String? = null,
+  var caAdditionalInfo: String? = null,
 
   val ppAdditionalInfo: String? = null,
 
