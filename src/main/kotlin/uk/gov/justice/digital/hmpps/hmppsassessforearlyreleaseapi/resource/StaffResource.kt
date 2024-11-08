@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class StaffResource(
-  private val probationService: ProbationService
+  private val probationService: ProbationService,
 ) {
   @GetMapping("/staff")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

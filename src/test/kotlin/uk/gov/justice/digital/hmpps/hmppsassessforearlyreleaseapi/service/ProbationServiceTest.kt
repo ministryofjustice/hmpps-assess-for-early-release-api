@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusApiClient
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationSearchApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.User
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
 
 class ProbationServiceTest {
   private val deliusApiClient = mock<DeliusApiClient>()
@@ -22,7 +22,6 @@ class ProbationServiceTest {
 
   @Test
   fun `should get staff details by username`() {
-
     val comUsername = "com-user"
 
     whenever(deliusApiClient.getStaffDetailsByUsername(comUsername)).thenReturn(comUser)
@@ -32,7 +31,7 @@ class ProbationServiceTest {
     assertThat(com).isEqualTo(comUser)
   }
 
-  private companion object{
+  private companion object {
     val comUser = User(
       id = 2000,
       username = "com-user",

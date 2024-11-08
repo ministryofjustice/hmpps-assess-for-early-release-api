@@ -5,12 +5,9 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.*
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.User
 
@@ -18,9 +15,6 @@ private const val USERNAME = "com-user"
 private const val GET_STAFF_DETAILS_BY_USERNAME_URL = "/staff?username=$USERNAME"
 
 class StaffResourceIntTest : SqsIntegrationTestBase() {
-
-  @Autowired
-  private lateinit var curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository
 
   @Nested
   inner class GetStaffDetailsByUsername {
