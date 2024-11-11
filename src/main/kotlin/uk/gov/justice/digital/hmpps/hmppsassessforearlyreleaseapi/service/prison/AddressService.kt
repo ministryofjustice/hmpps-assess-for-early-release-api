@@ -162,11 +162,11 @@ class AddressService(
   private fun getCurfewAddressCheckRequest(requestId: Long, prisonNumber: String): CurfewAddressCheckRequest {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
-        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
+        ?: throw EntityNotFoundException("Cannot find curfew address check request with id: $requestId")
 
     if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
       throw EntityNotFoundException(
-        "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
+        "Curfew address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
     return curfewAddressCheckRequest
@@ -175,7 +175,7 @@ class AddressService(
   private fun getStandardAddressCheckRequest(requestId: Long, prisonNumber: String): StandardAddressCheckRequest {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     if (curfewAddressCheckRequest !is StandardAddressCheckRequest) {
-      error("$requestId is not a a valid Standard Address Check Request id")
+      throw EntityNotFoundException("Cannot find a standard address check request with id: $requestId")
     }
     return curfewAddressCheckRequest
   }
