@@ -132,7 +132,7 @@ class AddressService(
 
   @Transactional
   fun addResident(prisonNumber: String, requestId: Long, addResidentRequest: AddResidentRequest): ResidentSummary {
-    val standardAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
+    val standardAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber) as StandardAddressCheckRequest
 
     var resident = Resident(
       forename = addResidentRequest.forename,
@@ -142,7 +142,7 @@ class AddressService(
       dateOfBirth = addResidentRequest.dateOfBirth,
       age = addResidentRequest.age,
       isMainResident = addResidentRequest.isMainResident,
-      standardAddressCheckRequest = standardAddressCheckRequest as StandardAddressCheckRequest,
+      standardAddressCheckRequest = standardAddressCheckRequest,
     )
     resident = residentRepository.save(resident)
     return resident.toSummary()
