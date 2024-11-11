@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation
 
+import jakarta.persistence.EntityNotFoundException
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,5 +15,10 @@ class ProbationService(
     } else {
       null
     }
+  }
+
+  fun getStaffDetailsByUsername(username: String): User? {
+    val staffDetails = deliusApiClient.getStaffDetailsByUsername(username)
+    return staffDetails ?: throw EntityNotFoundException("Cannot find staff with username $username")
   }
 }

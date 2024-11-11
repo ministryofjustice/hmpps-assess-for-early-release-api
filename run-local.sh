@@ -43,7 +43,7 @@ export DB_SERVER=localhost
 export DB_NAME=assess-for-early-release-db
 export DB_USER=afer
 export DB_PASS=afer
-export OS_PLACES_API_KEY=xxxxxxxx
+export OS_PLACES_API_KEY=$(kubectl -n hmpps-assess-for-early-release-dev get secrets hmpps-assess-for-early-release-api -o json  | jq -r '.data.OS_PLACES_API_KEY | @base64d')
 
 # Provide URLs to other local container-based dependent services
 # Match with ports defined in docker-compose.yml
