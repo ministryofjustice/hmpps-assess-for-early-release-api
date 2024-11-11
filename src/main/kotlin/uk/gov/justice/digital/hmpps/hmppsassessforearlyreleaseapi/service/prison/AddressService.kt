@@ -86,7 +86,7 @@ class AddressService(
 
   @Transactional
   fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary =
-    (getCurfewAddressCheckRequest(requestId, prisonNumber) as StandardAddressCheckRequest).toSummary()
+    getStandardAddressCheckRequest(requestId, prisonNumber).toSummary()
 
   @Transactional
   fun addCasCheckRequest(
@@ -132,7 +132,7 @@ class AddressService(
 
   @Transactional
   fun addResident(prisonNumber: String, requestId: Long, addResidentRequest: AddResidentRequest): ResidentSummary {
-    val standardAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber) as StandardAddressCheckRequest
+    val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
 
     var resident = Resident(
       forename = addResidentRequest.forename,
@@ -142,7 +142,7 @@ class AddressService(
       dateOfBirth = addResidentRequest.dateOfBirth,
       age = addResidentRequest.age,
       isMainResident = addResidentRequest.isMainResident,
-      standardAddressCheckRequest = standardAddressCheckRequest,
+      standardAddressCheckRequest = addressCheckRequest,
     )
     resident = residentRepository.save(resident)
     return resident.toSummary()
@@ -168,6 +168,14 @@ class AddressService(
       throw EntityNotFoundException(
         "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
+    }
+    return curfewAddressCheckRequest
+  }
+
+  private fun getStandardAddressCheckRequest(requestId: Long, prisonNumber: String): StandardAddressCheckRequest {
+    val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
+    if (curfewAddressCheckRequest !is StandardAddressCheckRequest) {
+      error("$requestId is not a a valid Standard Address Check Request id")
     }
     return curfewAddressCheckRequest
   }
