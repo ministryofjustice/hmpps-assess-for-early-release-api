@@ -60,6 +60,16 @@ class StaffResource(
           ),
         ],
       ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Could not find staff with username",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
     ],
   )
   fun getStaffDetailsByUsername(@RequestParam(name = "username") username: String) =

@@ -31,7 +31,7 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
     return communityApiResponse
   }
 
-  fun getStaffDetailsByUsername(username: String): User {
+  fun getStaffDetailsByUsername(username: String): User? {
     val communityApiResponse = communityApiClient
       .post()
       .uri("/staff")
@@ -39,8 +39,15 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
       .bodyValue(username)
       .retrieve()
       .bodyToMono(typeReference<User>())
+      .onErrorResume {
+        when {
+          it is WebClientResponseException && it.statusCode == HttpStatus.NOT_FOUND -> {
+            Mono.empty()
+          }
+          else -> Mono.error(it)
+        }
+      }
       .block()
     return communityApiResponse
-      ?: error("Unexpected null response from API")
   }
 }

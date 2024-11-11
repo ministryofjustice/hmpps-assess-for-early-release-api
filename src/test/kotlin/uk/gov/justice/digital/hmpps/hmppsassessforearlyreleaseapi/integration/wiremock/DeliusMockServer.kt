@@ -62,4 +62,11 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
         ),
     )
   }
+
+  fun stubPostStaffDetailsByUsernameDataNotFound() {
+    stubFor(
+      get(urlEqualTo("/staff"))
+        .willReturn(aResponse().withStatus(404)),
+    )
+  }
 }
