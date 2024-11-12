@@ -21,4 +21,7 @@ data class OffenderSummary(
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val hdced: LocalDate,
+
+  @Schema(description = "The full name of the probation practitioner responsible for this offender", example = "Mark Coombes")
+  val probationPractitioner: String? = null,
 )

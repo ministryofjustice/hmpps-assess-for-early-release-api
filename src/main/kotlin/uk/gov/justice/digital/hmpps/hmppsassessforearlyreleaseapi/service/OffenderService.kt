@@ -5,10 +5,12 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -23,6 +25,7 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 
 @Service
 class OffenderService(
+  private val assessmentRepository: AssessmentRepository,
   private val offenderRepository: OffenderRepository,
   private val prisonerSearchService: PrisonerSearchService,
   private val probationService: ProbationService,
@@ -34,6 +37,25 @@ class OffenderService(
     val offenders = offenderRepository.findByPrisonIdAndStatus(prisonCode, OffenderStatus.NOT_STARTED)
     return offenders.map {
       OffenderSummary(it.prisonNumber, it.bookingId, it.forename, it.surname, it.hdced)
+    }
+  }
+
+  @Transactional
+  fun getComCaseload(staffId: Long): List<OffenderSummary> {
+    val assessments = assessmentRepository.findByResponsibleComStaffIdentifierAndStatusIn(
+      staffId,
+      listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
+    )
+    return assessments.map { assessment ->
+      val offender = assessment.offender
+      OffenderSummary(
+        offender.prisonNumber,
+        offender.bookingId,
+        offender.forename,
+        offender.surname,
+        offender.hdced,
+        assessment.responsibleCom?.fullName,
+      )
     }
   }
 
@@ -119,15 +141,16 @@ class OffenderService(
       offender.surname != prisoner.lastName ||
       offender.dateOfBirth != prisoner.dateOfBirth
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
-    CommunityOffenderManager(
-      staffIdentifier = offenderManager.id,
-      username = offenderManager.username,
-      email = offenderManager.email,
-      forename = offenderManager.name.forename,
-      surname = offenderManager.name.surname,
-    ),
-  )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
+    staffRepository.save(
+      CommunityOffenderManager(
+        staffIdentifier = offenderManager.id,
+        username = offenderManager.username,
+        email = offenderManager.email,
+        forename = offenderManager.name.forename,
+        surname = offenderManager.name.surname,
+      ),
+    )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
