@@ -10,13 +10,18 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
@@ -27,6 +32,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 import java.time.LocalDate
 
 class OffenderServiceTest {
+  private val assessmentRepository = mock<AssessmentRepository>()
   private val offenderRepository = mock<OffenderRepository>()
   private val prisonerSearchService = mock<PrisonerSearchService>()
   private val probationService = mock<ProbationService>()
@@ -35,12 +41,50 @@ class OffenderServiceTest {
 
   private val service: OffenderService =
     OffenderService(
+      assessmentRepository,
       offenderRepository,
       prisonerSearchService,
       probationService,
       staffRepository,
       telemetryClient,
     )
+
+  @Test
+  fun `should get the case admin case load`() {
+    val offender1 = anOffender()
+    val offender2 =
+      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, hdced = offender1.hdced.plusWeeks(12))
+    whenever(offenderRepository.findByPrisonIdAndStatus(PRISON_ID, OffenderStatus.NOT_STARTED)).thenReturn(
+      listOf(
+        offender1,
+        offender2,
+      ),
+    )
+
+    val caseload = service.getCaseAdminCaseload(PRISON_ID)
+    assertThat(caseload.size).isEqualTo(2)
+    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(offender1.bookingId, offender2.bookingId)
+  }
+
+  @Test
+  fun `should get the com case load`() {
+    val assessment1 =
+      anOffender().currentAssessment().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
+    whenever(
+      assessmentRepository.findByResponsibleComStaffIdentifierAndStatusIn(
+        STAFF_ID,
+        listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
+      ),
+    ).thenReturn(listOf(assessment1, assessment2))
+
+    val caseload = service.getComCaseload(STAFF_ID)
+    assertThat(caseload.size).isEqualTo(2)
+    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
+      assessment1.offender.bookingId,
+      assessment2.offender.bookingId,
+    )
+  }
 
   @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {

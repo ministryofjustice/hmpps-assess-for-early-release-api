@@ -13,6 +13,7 @@ import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.convertToTitleCase
 import java.time.LocalDateTime
 
 @Entity
@@ -41,6 +42,9 @@ abstract class Staff(
 
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
+  val fullName
+    get() = "$forename $surname".convertToTitleCase()
+
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, username: $username)"
 }
