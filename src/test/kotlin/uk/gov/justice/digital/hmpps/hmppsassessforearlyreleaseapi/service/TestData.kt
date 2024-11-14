@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PR
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -126,12 +127,14 @@ object TestData {
     location = PRISON_NAME,
     status = AssessmentStatus.NOT_STARTED,
     policyVersion = "1.0",
-    tasks = listOf(
-      TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
-      TaskProgress(name = ENTER_CURFEW_ADDRESS, progress = LOCKED),
-      TaskProgress(name = REVIEW_APPLICATION_AND_SEND_FOR_DECISION, progress = LOCKED),
-      TaskProgress(name = PREPARE_FOR_RELEASE, progress = LOCKED),
-      TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
+    tasks = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
+        TaskProgress(name = ENTER_CURFEW_ADDRESS, progress = LOCKED),
+        TaskProgress(name = REVIEW_APPLICATION_AND_SEND_FOR_DECISION, progress = LOCKED),
+        TaskProgress(name = PREPARE_FOR_RELEASE, progress = LOCKED),
+        TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
+      ),
     ),
   )
 

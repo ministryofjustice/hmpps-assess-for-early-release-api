@@ -96,7 +96,12 @@ class EligibilityAndSuitabilityService(
       val criterion = policyService.getCriterion(assessmentEntity.policyVersion, criterionType, answer.code)
       val criterionMet = criterion.isMet(answer.answers)
 
-      assessmentEntity.addOrReplaceEligibilityCriterionResult(criterionType, criterion.code, criterionMet, answer.answers)
+      assessmentEntity.addOrReplaceEligibilityCriterionResult(
+        criterionType,
+        criterion.code,
+        criterionMet,
+        answer.answers,
+      )
       assessmentEntity.changeStatus(assessmentLifecycleService.eligibilityAnswerSubmitted(currentAssessment))
       assessmentRepository.save(assessmentEntity)
     }
@@ -115,7 +120,9 @@ class EligibilityAndSuitabilityService(
       location = prison,
       status = assessmentEntity.status,
       policyVersion = assessmentEntity.policyVersion,
-      tasks = assessmentEntity.status.tasks().map { TaskProgress(it.task, it.status(assessmentEntity)) },
+      tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
+        tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
+      },
     )
   }
 }

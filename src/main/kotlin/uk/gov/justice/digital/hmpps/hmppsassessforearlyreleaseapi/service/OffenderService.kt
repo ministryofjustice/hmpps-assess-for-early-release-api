@@ -68,11 +68,15 @@ class OffenderService(
       crd = prisoner.conditionalReleaseDate,
     )
 
-    var assessment = Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
     val communityOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)?.let {
       staffRepository.findByStaffIdentifier(it.id) ?: createCommunityOffenderManager(it)
     }
-    assessment = assessment.copy(responsibleCom = communityOffenderManager)
+
+    val assessment = Assessment(
+      offender = offender,
+      policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+      responsibleCom = communityOffenderManager,
+    )
 
     offender.assessments.add(assessment)
     offenderRepository.save(offender)
@@ -119,15 +123,16 @@ class OffenderService(
       offender.surname != prisoner.lastName ||
       offender.dateOfBirth != prisoner.dateOfBirth
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
-    CommunityOffenderManager(
-      staffIdentifier = offenderManager.id,
-      username = offenderManager.username,
-      email = offenderManager.email,
-      forename = offenderManager.name.forename,
-      surname = offenderManager.name.surname,
-    ),
-  )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
+    staffRepository.save(
+      CommunityOffenderManager(
+        staffIdentifier = offenderManager.id,
+        username = offenderManager.username,
+        email = offenderManager.email,
+        forename = offenderManager.name.forename,
+        surname = offenderManager.name.surname,
+      ),
+    )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
