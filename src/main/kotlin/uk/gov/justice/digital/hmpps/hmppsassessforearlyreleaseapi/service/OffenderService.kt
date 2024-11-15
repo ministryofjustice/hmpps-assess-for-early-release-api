@@ -90,11 +90,15 @@ class OffenderService(
       crd = prisoner.conditionalReleaseDate,
     )
 
-    var assessment = Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
     val communityOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)?.let {
       staffRepository.findByStaffIdentifier(it.id) ?: createCommunityOffenderManager(it)
     }
-    assessment = assessment.copy(responsibleCom = communityOffenderManager)
+
+    val assessment = Assessment(
+      offender = offender,
+      policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+      responsibleCom = communityOffenderManager,
+    )
 
     offender.assessments.add(assessment)
     offenderRepository.save(offender)

@@ -1,14 +1,20 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CREATE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.COMPLETE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 
 enum class AssessmentStatus {
   NOT_STARTED {
@@ -17,12 +23,14 @@ enum class AssessmentStatus {
       TIMED_OUT,
     )
 
-    override fun tasks() = setOf(
-      TaskProgress.Fixed(ASSESS_ELIGIBILITY, READY_TO_START),
-      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
-      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
-      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, READY_TO_START),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
     )
   },
 
@@ -33,12 +41,14 @@ enum class AssessmentStatus {
       TIMED_OUT,
     )
 
-    override fun tasks() = setOf(
-      TaskProgress.Fixed(ASSESS_ELIGIBILITY, IN_PROGRESS),
-      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
-      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
-      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, IN_PROGRESS),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
     )
   },
 
@@ -51,16 +61,34 @@ enum class AssessmentStatus {
         OPTED_OUT,
       )
 
-    override fun tasks() = setOf(
-      TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
-      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, READY_TO_START),
-      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
-      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, READY_TO_START),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
     )
   },
 
   AWAITING_ADDRESS_AND_RISK_CHECKS {
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, COMPLETE),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
+      PROBATION_COM to listOf(
+        TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, READY_TO_START),
+        TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
+        TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
+        TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
+      ),
+    )
+
     override fun transitions() =
       transitions(
         ADDRESS_AND_RISK_CHECKS_IN_PROGRESS,
@@ -71,6 +99,22 @@ enum class AssessmentStatus {
   },
 
   ADDRESS_AND_RISK_CHECKS_IN_PROGRESS {
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, COMPLETE),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
+      PROBATION_COM to listOf(
+        TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, IN_PROGRESS),
+        TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
+        TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
+        TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
+      ),
+    )
+
     override fun transitions() =
       transitions(
         AWAITING_PRE_DECISION_CHECKS,
@@ -176,12 +220,14 @@ enum class AssessmentStatus {
         TIMED_OUT,
       )
 
-    override fun tasks() = setOf(
-      TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
-      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
-      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
-      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
     )
   },
 
@@ -194,7 +240,7 @@ enum class AssessmentStatus {
   },
 
   TIMED_OUT {
-    override fun transitions() = (AssessmentStatus.values().toSet() - RELEASED_ON_HDC).map { Transition(it) }.toSet()
+    override fun transitions() = (entries.toSet() - RELEASED_ON_HDC).map { Transition(it) }.toSet()
   },
 
   POSTPONED {
@@ -224,12 +270,14 @@ enum class AssessmentStatus {
         TIMED_OUT,
       )
 
-    override fun tasks() = setOf(
-      TaskProgress.Fixed(ASSESS_ELIGIBILITY, LOCKED),
-      TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, IN_PROGRESS),
-      TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-      TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
-      TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(ASSESS_ELIGIBILITY, LOCKED),
+        TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, IN_PROGRESS),
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
+        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
     )
   },
 
@@ -241,7 +289,7 @@ enum class AssessmentStatus {
 
   open fun transitions(): Set<Transition> = emptySet()
 
-  open fun tasks(): Set<TaskProgress> = emptySet()
+  open fun tasks(): Map<UserRole, List<TaskProgress>> = emptyMap()
 }
 
 fun transitions(vararg states: AssessmentStatus) = states.map { Transition(to = it) }.toSet()

@@ -69,7 +69,9 @@ class AssessmentService(
       location = prisonName,
       status = currentAssessment.status,
       policyVersion = currentAssessment.policyVersion,
-      tasks = currentAssessment.status.tasks().map { TaskProgress(it.task, it.status(currentAssessment)) },
+      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
+        tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
+      },
     )
   }
 

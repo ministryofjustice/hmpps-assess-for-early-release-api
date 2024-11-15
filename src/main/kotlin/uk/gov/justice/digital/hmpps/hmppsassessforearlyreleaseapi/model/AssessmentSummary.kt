@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
@@ -38,5 +39,5 @@ data class AssessmentSummary(
   val policyVersion: String,
 
   @Schema(description = "The status of tasks that make up this assessment")
-  val tasks: List<TaskProgress>,
+  val tasks: Map<UserRole, List<TaskProgress>>,
 )
