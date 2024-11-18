@@ -6,9 +6,12 @@ spring:
     show-sql: true
 
 hmpps:
+  auth:
+    token:
+      url: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token"
   delius:
     api:
-      url: "https://cvl-probation-mock.hmpps.service.justice.gov.uk"
+      url: "https://create-and-vary-a-licence-and-delius-dev.hmpps.service.justice.gov.uk"
   prisonersearch:
     api:
       url: "https://prisoner-search-dev.prison.service.justice.gov.uk"
@@ -17,7 +20,7 @@ hmpps:
       url: "https://prison-register-dev.hmpps.service.justice.gov.uk"
   probationsearch:
     api:
-      url: "https://cvl-probation-mock.hmpps.service.justice.gov.uk"
+      url: "https://probation-offender-search-dev.hmpps.service.justice.gov.uk"
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4666
