@@ -52,7 +52,7 @@ class StaffResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should return staff details with a username`() {
-      deliusMockServer.stubPostStaffDetailsByUsername()
+      deliusMockServer.stubGettStaffDetailsByUsername(USERNAME)
 
       val comUserDetails = webTestClient.get()
         .uri(GET_STAFF_DETAILS_BY_USERNAME_URL)
