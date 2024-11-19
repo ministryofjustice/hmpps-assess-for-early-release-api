@@ -33,10 +33,9 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
 
   fun getStaffDetailsByUsername(username: String): User? {
     val communityApiResponse = communityApiClient
-      .post()
-      .uri("/staff")
+      .get()
+      .uri("/staff/{username}", username)
       .accept(MediaType.APPLICATION_JSON)
-      .bodyValue(username)
       .retrieve()
       .bodyToMono(typeReference<User>())
       .onErrorResume {

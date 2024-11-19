@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.w
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.post
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 
 private const val DELIUS_WIREMOCK_PORT = 8091
@@ -37,9 +36,9 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
     )
   }
 
-  fun stubPostStaffDetailsByUsername() {
+  fun stubGettStaffDetailsByUsername(username: String = "com-user") {
     stubFor(
-      post(urlEqualTo("/staff"))
+      get(urlEqualTo("/staff/$username"))
         .willReturn(
           aResponse().withHeader(
             "Content-Type",
