@@ -28,7 +28,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
 class EligibilityAndSuitabilityServiceTest {
   private val assessmentService = mock<AssessmentService>()
-  private val assessmentLifecycleService = mock<AssessmentLifecycleService>()
   private val assessmentRepository = mock<AssessmentRepository>()
 
   private val service =
@@ -36,7 +35,6 @@ class EligibilityAndSuitabilityServiceTest {
       PolicyService(),
       assessmentService,
       assessmentRepository,
-      assessmentLifecycleService,
     )
 
   @Nested
@@ -204,9 +202,9 @@ class EligibilityAndSuitabilityServiceTest {
       val anAssessmentWithEligibilityProgress =
         anAssessmentWithEligibilityProgress().copy(assessmentEntity = anOffender().currentAssessment())
 
-      whenever(assessmentLifecycleService.eligibilityAnswerSubmitted(anAssessmentWithEligibilityProgress)).thenReturn(
-        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
-      )
+//      whenever(assessmentLifecycleService.eligibilityAnswerSubmitted(anAssessmentWithEligibilityProgress)).thenReturn(
+//        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+//      )
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
         anAssessmentWithEligibilityProgress,
