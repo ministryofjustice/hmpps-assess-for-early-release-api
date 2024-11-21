@@ -5,12 +5,16 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
@@ -27,7 +31,6 @@ class EligibilityAndSuitabilityService(
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
   private val assessmentRepository: AssessmentRepository,
-  private val assessmentLifecycleService: AssessmentLifecycleService,
 ) {
 
   companion object {
@@ -102,7 +105,13 @@ class EligibilityAndSuitabilityService(
         criterionMet,
         answer.answers,
       )
-      assessmentEntity.changeStatus(assessmentLifecycleService.eligibilityAnswerSubmitted(currentAssessment))
+      val event = when (currentAssessment.calculateAggregateEligibilityStatus()) {
+        ELIGIBLE -> AssessmentLifecycleEvent.CompleteEligibilityAndSuitability
+        INELIGIBLE -> AssessmentLifecycleEvent.FailEligibilityAndSuitability
+        IN_PROGRESS -> AssessmentLifecycleEvent.StartEligibilityAndSuitability
+        NOT_STARTED -> error("Assessment: ${assessmentEntity.id} is in an unexpected state: ${assessmentEntity.status}")
+      }
+      assessmentEntity.performTransition(event)
       assessmentRepository.save(assessmentEntity)
     }
   }
@@ -118,9 +127,9 @@ class EligibilityAndSuitabilityService(
       hdced = offender.hdced,
       crd = offender.crd,
       location = prison,
-      status = assessmentEntity.status,
+      status = assessmentEntity.status.label,
       policyVersion = assessmentEntity.policyVersion,
-      tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
+      tasks = assessmentEntity.status.label.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
       },
     )

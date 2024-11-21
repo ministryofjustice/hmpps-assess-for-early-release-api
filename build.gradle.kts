@@ -43,13 +43,14 @@ detekt {
 }
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.0.7")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.0.8")
   implementation("org.springframework.security:spring-security-config:6.3.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("io.opentelemetry:opentelemetry-api:1.40.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
   implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.8.2")
+  implementation("com.tinder.statemachine:statemachine:0.2.0")
 
   // Database dependencies
   runtimeOnly("org.flywaydb:flyway-database-postgresql")

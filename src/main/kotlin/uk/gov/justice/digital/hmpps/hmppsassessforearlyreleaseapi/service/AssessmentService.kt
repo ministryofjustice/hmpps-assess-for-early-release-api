@@ -6,6 +6,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
@@ -29,7 +31,6 @@ class AssessmentService(
   private val prisonRegisterService: PrisonRegisterService,
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
-  private val assessmentLifecycleService: AssessmentLifecycleService,
 ) {
 
   companion object {
@@ -67,9 +68,9 @@ class AssessmentService(
       hdced = offender.hdced,
       crd = offender.crd,
       location = prisonName,
-      status = currentAssessment.status,
+      status = currentAssessment.status.label,
       policyVersion = currentAssessment.policyVersion,
-      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
+      tasks = currentAssessment.status.label.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
     )
@@ -77,31 +78,22 @@ class AssessmentService(
 
   @Transactional
   fun optOut(prisonNumber: String) {
-    val assessmentWithEligibilityProgress = getCurrentAssessment(prisonNumber)
-    val newStatus = assessmentLifecycleService.optOut(assessmentWithEligibilityProgress)
-    val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
-
-    assessmentEntity.changeStatus(newStatus)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(OptOut)
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun optBackIn(prisonNumber: String) {
-    val assessmentWithEligibilityProgress = getCurrentAssessment(prisonNumber)
-    val newStatus = assessmentLifecycleService.optBackIn(assessmentWithEligibilityProgress)
-    val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
-
-    assessmentEntity.changeStatus(newStatus)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(OptBackIn)
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitAssessmentForAddressChecks(prisonNumber: String) {
-    val assessmentWithEligibilityProgress = getCurrentAssessment(prisonNumber)
-    val newStatus = assessmentLifecycleService.submitAssessmentForAddressChecks(assessmentWithEligibilityProgress)
-    val assessmentEntity = assessmentWithEligibilityProgress.assessmentEntity
-
-    assessmentEntity.changeStatus(newStatus)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(OptBackIn)
     assessmentRepository.save(assessmentEntity)
   }
 

@@ -1,9 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import com.tinder.StateMachine.Transition.Invalid
+import com.tinder.StateMachine.Transition.Valid
+import jakarta.persistence.AttributeOverride
+import jakarta.persistence.AttributeOverrides
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -29,8 +33,12 @@ data class Assessment(
   val offender: Offender,
 
   @NotNull
-  @Enumerated(EnumType.STRING)
-  var status: AssessmentStatus = AssessmentStatus.NOT_STARTED,
+  @Embedded
+  @AttributeOverrides(
+    AttributeOverride(name = "status", column = Column(name = "status")),
+    AttributeOverride(name = "previousStatus", column = Column(name = "previous_status")),
+  )
+  var status: AssessmentState = AssessmentState.NotStarted,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
@@ -89,16 +97,32 @@ data class Assessment(
     currentResults.add(criteria)
   }
 
-  fun changeStatus(newStatus: AssessmentStatus) {
-    if (status != newStatus) {
-      assessmentEvents.add(
-        StatusChangedEvent(
-          assessment = this,
-          changes = StatusChange(before = status, after = newStatus),
-        ),
-      )
-      status = newStatus
-      lastUpdatedTimestamp = LocalDateTime.now()
+  private fun Any.label() = this::class.simpleName
+
+  fun performTransition(
+    event: AssessmentLifecycleEvent,
+  ): AssessmentState {
+    val currentStatus = this.status
+    val transition = assessmentStateMachine.with { initialState(currentStatus) }.transition(event)
+    return when (transition) {
+      is Invalid -> {
+        error("Fail to transition Assessment: '${this.id}', triggered by '${transition.event.label()}' from '${transition.fromState.label()}'")
+      }
+
+      is Valid -> {
+        log.info("Transitioned Assessment: '${this.id}', triggered by event: '${transition.event.label()}' from '${transition.fromState.label()}' to '${transition.toState.label()}'")
+        if (currentStatus != transition.fromState) {
+          assessmentEvents.add(
+            StatusChangedEvent(
+              assessment = this,
+              changes = StatusChange(before = transition.fromState.label, after = transition.toState.label),
+            ),
+          )
+          status = transition.toState
+          lastUpdatedTimestamp = LocalDateTime.now()
+        }
+        transition.toState
+      }
     }
   }
 }

@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
@@ -36,10 +35,9 @@ class AssessmentServiceTest {
   private val prisonRegisterService = mock<PrisonRegisterService>()
   private val offenderRepository = mock<OffenderRepository>()
   private val assessmentRepository = mock<AssessmentRepository>()
-  private val assessmentLifecycleService = mock<AssessmentLifecycleService>()
 
   private val service =
-    AssessmentService(PolicyService(), prisonRegisterService, offenderRepository, assessmentRepository, assessmentLifecycleService)
+    AssessmentService(PolicyService(), prisonRegisterService, offenderRepository, assessmentRepository)
 
   @Test
   fun `should get an offenders current assessment`() {
@@ -68,7 +66,7 @@ class AssessmentServiceTest {
     val anOffender = anOffenderWithSomeProgress()
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-    whenever(assessmentLifecycleService.optOut(anyOrNull())).thenReturn(OPTED_OUT)
+//    whenever(assessmentLifecycleService.optOut(anyOrNull())).thenReturn(OPTED_OUT)
 
     service.optOut(PRISON_NUMBER)
 
@@ -82,7 +80,7 @@ class AssessmentServiceTest {
     val anOffender = anOffenderWithSomeProgress()
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-    whenever(assessmentLifecycleService.optBackIn(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
+//    whenever(assessmentLifecycleService.optBackIn(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
 
     service.optBackIn(PRISON_NUMBER)
 
@@ -98,11 +96,11 @@ class AssessmentServiceTest {
     val anOffender = anOffender()
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender.copy())
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
+//    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
 
-    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)).thenReturn(
-      AWAITING_ADDRESS_AND_RISK_CHECKS,
-    )
+//    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)).thenReturn(
+//      AWAITING_ADDRESS_AND_RISK_CHECKS,
+//    )
 
     service.submitAssessmentForAddressChecks(PRISON_NUMBER)
 
