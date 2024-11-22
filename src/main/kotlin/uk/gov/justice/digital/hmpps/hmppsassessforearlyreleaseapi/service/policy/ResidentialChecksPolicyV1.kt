@@ -9,7 +9,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Section
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 
-
 val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   version = ResidentialChecksPolicyVersion.V1,
   tasks = listOf(
