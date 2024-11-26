@@ -22,8 +22,13 @@ data class ResidentialChecksView(
 data class ResidentialChecksTaskProgress(
   @Schema(description = "The unique code to identify this task", example = "address-details-and-informed-consent")
   val code: String,
-  @Schema(description = "The name of the check as it would appear in a task list", example = "Address details and informed consent")
+
+  @Schema(
+    description = "The name of the check as it would appear in a task list",
+    example = "Address details and informed consent",
+  )
   val taskName: String,
+
   @Schema(description = "Status of this criterion for a specific case", example = "NOT_STARTED")
   val status: ResidentialChecksTaskStatus,
 )
