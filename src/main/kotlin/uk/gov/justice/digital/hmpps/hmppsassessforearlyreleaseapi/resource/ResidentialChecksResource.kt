@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Reside
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class ResidentialChecksResource(private val residentialChecksService: ResidentialChecksService) {
-  @GetMapping("/offender/{prisonNumber}/current-assessment/residential-checks")
+  @GetMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/residential-checks")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
     summary = "Returns the residential checks for an offender's current assessment",
@@ -71,6 +71,6 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
       ),
     ],
   )
-  fun getResidentialChecksView(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    residentialChecksService.getResidentialChecksView(prisonNumber)
+  fun getResidentialChecksView(@Parameter(required = true) @PathVariable prisonNumber: String, @Parameter(required = true) @PathVariable requestId: Long) =
+    residentialChecksService.getResidentialChecksView(prisonNumber, requestId)
 }

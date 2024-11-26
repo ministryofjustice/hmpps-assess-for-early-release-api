@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 class ResidentialChecksService(
   private val assessmentService: AssessmentService,
 ) {
-  fun getResidentialChecksView(prisonNumber: String): ResidentialChecksView {
+  fun getResidentialChecksView(prisonNumber: String, addressCheckRequestId: Long): ResidentialChecksView {
     val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
 
     val tasks = RESIDENTIAL_CHECKS_POLICY_V1.tasks.map { task ->

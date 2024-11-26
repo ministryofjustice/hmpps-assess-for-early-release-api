@@ -7,10 +7,11 @@ import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import java.nio.charset.StandardCharsets
 
-private const val GET_RESIDENTIAL_CHECKS_VIEW_URL = "/offender/$PRISON_NUMBER/current-assessment/residential-checks"
+private const val GET_RESIDENTIAL_CHECKS_VIEW_URL = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/residential-checks"
 
 class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
