@@ -1,0 +1,70 @@
+{
+  "assessmentSummary": {
+    "forename": "FIRST-1",
+    "surname": "LAST-1",
+    "dateOfBirth": "1978-03-20",
+    "prisonNumber": "A1234AA",
+    "hdced": "2020-10-25",
+    "crd": "2020-11-14",
+    "location": "Birmingham (HMP)",
+    "status": "ELIGIBLE_AND_SUITABLE",
+    "policyVersion": "1.0",
+    "tasks": {
+      "PRISON_CA": [
+        {
+          "name": "ASSESS_ELIGIBILITY",
+          "progress": "COMPLETE"
+        },
+        {
+          "name": "ENTER_CURFEW_ADDRESS",
+          "progress": "READY_TO_START"
+        },
+        {
+          "name": "REVIEW_APPLICATION_AND_SEND_FOR_DECISION",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "PREPARE_FOR_RELEASE",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "PRINT_LICENCE",
+          "progress": "LOCKED"
+        }
+      ]
+    }
+  },
+  "overallStatus": "NOT_STARTED",
+  "tasks": [
+    {
+      "code": "address-details-and-informed-consent",
+      "taskName": "Address details and informed consent",
+      "status": "NOT_STARTED"
+    },
+    {
+      "code": "police-check",
+      "taskName": "Police check",
+      "status": "NOT_STARTED"
+    },
+    {
+      "code": "children-services-check",
+      "taskName": "Children's services check",
+      "status": "NOT_STARTED"
+    },
+    {
+      "code": "assess-this-persons-risk",
+      "taskName": "Assess this person's risk",
+      "status": "NOT_STARTED"
+    },
+    {
+      "code": "suitability-decision",
+      "taskName": "Suitability decision",
+      "status": "NOT_STARTED"
+    },
+    {
+      "code": "make-a-risk-management-decision",
+      "taskName": "Make a risk management decision",
+      "status": "NOT_STARTED"
+    }
+  ]
+}

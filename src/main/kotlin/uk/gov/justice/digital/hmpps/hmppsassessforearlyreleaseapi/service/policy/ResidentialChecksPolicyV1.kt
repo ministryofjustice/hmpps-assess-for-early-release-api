@@ -6,13 +6,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksPolicy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksPolicyVersion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksTask
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Section
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 
 val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   version = ResidentialChecksPolicyVersion.V1,
   tasks = listOf(
-    Task(
+    ResidentialChecksTask(
       code = "address-details-and-informed-consent",
       name = "Address details and informed consent",
       sections = listOf(
@@ -68,7 +68,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         ),
       ),
     ),
-    Task(
+    ResidentialChecksTask(
       code = "police-check",
       name = "Police check",
       sections = listOf(
@@ -106,7 +106,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         ),
       ),
     ),
-    Task(
+    ResidentialChecksTask(
       code = "children-services-check",
       name = "Children's services check",
       sections = listOf(
@@ -144,7 +144,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         ),
       ),
     ),
-    Task(
+    ResidentialChecksTask(
       code = "assess-this-persons-risk",
       name = "Assess this person's risk",
       sections = listOf(
@@ -197,7 +197,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         ),
       ),
     ),
-    Task(
+    ResidentialChecksTask(
       code = "suitability-decision",
       name = "Suitability decision",
       sections = listOf(
@@ -244,7 +244,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         ),
       ),
     ),
-    Task(
+    ResidentialChecksTask(
       code = "make-a-risk-management-decision",
       name = "Make a risk management decision",
       sections = listOf(
