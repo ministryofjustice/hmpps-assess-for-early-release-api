@@ -11,10 +11,10 @@ class CommunityOffenderManager(
   val staffIdentifier: Long,
   username: String?,
   email: String?,
-  forename: String,
-  surname: String,
+  forename: String?,
+  surname: String?,
   lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-) : Staff(
+)  : Creator, Staff(
   id = id,
   kind = StaffKind.COMMUNITY_OFFENDER_MANAGER,
   username = username,
@@ -23,6 +23,21 @@ class CommunityOffenderManager(
   surname = surname,
   lastUpdatedTimestamp = lastUpdatedTimestamp,
 ) {
-  @Override
-  override fun toString(): String = this::class.simpleName + "(id: $id, username: $username)"
+  fun copy(
+    id: Long = this.id,
+    staffIdentifier: Long = this.staffIdentifier,
+    username: String? = this.username,
+    email: String? = this.email,
+    forename: String? = this.forename,
+    surname: String? = this.surname,
+    lastUpdatedTimestamp: LocalDateTime = this.lastUpdatedTimestamp,
+  ) = CommunityOffenderManager(
+    id = id,
+    staffIdentifier = staffIdentifier,
+    username = username,
+    email = email,
+    forename = forename,
+    surname = surname,
+    lastUpdatedTimestamp = lastUpdatedTimestamp,
+  )
 }

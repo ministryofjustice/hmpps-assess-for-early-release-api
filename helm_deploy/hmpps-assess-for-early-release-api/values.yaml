@@ -51,6 +51,10 @@ generic-service:
       HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_QUEUE_NAME: "sqs_name"
     hmpps-assess-for-early-release-domain-events-sqs-dl-instance-output:
       HMPPS_SQS_QUEUES_DOMAINEVENTSQUEUE_DLQ_NAME: "sqs_name"
+    hmpps-assess-for-early-release-probation-events-sqs-instance-output:
+      HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_QUEUE_NAME: "sqs_name"
+    hmpps-assess-for-early-release-probation-events-sqs-dl-instance-output:
+        HMPPS_SQS_QUEUES_HMPPSOFFENDERQUEUE_DLQ_NAME: "sqs_name"
 
   allowlist:
     groups:

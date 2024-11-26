@@ -36,9 +36,9 @@ abstract class Staff(
 
   val email: String?,
 
-  val forename: String,
+  val forename: String?,
 
-  val surname: String,
+  val surname: String?,
 
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {

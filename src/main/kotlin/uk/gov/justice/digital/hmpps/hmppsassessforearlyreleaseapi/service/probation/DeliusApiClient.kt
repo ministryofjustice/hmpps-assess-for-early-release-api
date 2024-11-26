@@ -49,4 +49,14 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
       .block()
     return communityApiResponse
   }
+
+  fun assignDeliusRole(username: String) {
+    communityApiClient
+      .put()
+      .uri("/users/{username}/roles", username)
+      .accept(MediaType.APPLICATION_JSON)
+      .retrieve()
+      .bodyToMono(Void::class.java)
+      .block()
+  }
 }

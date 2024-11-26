@@ -13,11 +13,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 class ProbationServiceTest {
   private val deliusApiClient = mock<DeliusApiClient>()
   private val probationSearchApiClient = mock<ProbationSearchApiClient>()
+  private val staffService = mock<StaffService>()
 
   private val service: ProbationService =
     ProbationService(
       deliusApiClient,
       probationSearchApiClient,
+      staffService,
     )
 
   @Test
