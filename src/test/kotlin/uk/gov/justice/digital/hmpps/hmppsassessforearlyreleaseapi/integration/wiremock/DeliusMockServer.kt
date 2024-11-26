@@ -36,7 +36,7 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
     )
   }
 
-  fun stubGettStaffDetailsByUsername(username: String = "com-user") {
+  fun stubGetStaffDetailsByUsername(username: String = "com-user") {
     stubFor(
       get(urlEqualTo("/staff/$username"))
         .willReturn(

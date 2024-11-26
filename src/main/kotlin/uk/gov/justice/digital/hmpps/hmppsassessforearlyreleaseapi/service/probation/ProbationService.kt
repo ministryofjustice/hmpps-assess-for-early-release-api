@@ -11,7 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StaffS
 class ProbationService(
   private val deliusApiClient: DeliusApiClient,
   private val probationSearchApiClient: ProbationSearchApiClient,
-  private val StaffService: StaffService,
+  private val staffService: StaffService,
 ) {
   fun getCurrentResponsibleOfficer(prisonNumber: String): DeliusOffenderManager? {
     val deliusRecord = probationSearchApiClient.searchForPersonOnProbation(prisonNumber)
@@ -37,7 +37,7 @@ class ProbationService(
         // Assign the com role to the user if they do not have it already
         deliusApiClient.assignDeliusRole(newCom.username.trim().uppercase())
 
-        this.StaffService.updateComDetails(
+        staffService.updateComDetails(
           UpdateCom(
             staffIdentifier = newCom.id,
             staffUsername = newCom.username,
