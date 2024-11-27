@@ -1,5 +1,3 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.Probation
-
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.opentelemetry.api.trace.SpanKind
@@ -38,7 +36,7 @@ class ProbationOffenderEventListener(
 
     when (eventType) {
       OFFENDER_MANAGER_CHANGED -> {
-        val ( crn) = mapper.readValue(message, HMPPSReceiveProbationEvent::class.java)
+        val (crn) = mapper.readValue(message, HMPPSReceiveProbationEvent::class.java)
         probationService.offenderManagerChanged(crn)
       }
 

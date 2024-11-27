@@ -14,7 +14,7 @@ class CommunityOffenderManager(
   forename: String?,
   surname: String?,
   lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-)  : Creator, Staff(
+) : Creator, Staff(
   id = id,
   kind = StaffKind.COMMUNITY_OFFENDER_MANAGER,
   username = username,

@@ -67,7 +67,7 @@ class ProbationServiceTest {
     assertThat(output.out).contains("responsible officer code for crn $crn is ${aDeliusOffenderManager.code}")
     assertThat(output.out).doesNotContain("newCom not found for crn: $crn")
     assertThat(deliusApiClient.getOffenderManager(crn)).isEqualTo(aDeliusOffenderManager)
-    aDeliusOffenderManager.username?.let { verify(deliusApiClient).assignDeliusRole(it) }
+    aDeliusOffenderManager.username?.trim()?.let { verify(deliusApiClient).assignDeliusRole(it.uppercase()) }
     aDeliusOffenderManager.username?.let {
         UpdateCom(
           staffIdentifier = aDeliusOffenderManager.id,

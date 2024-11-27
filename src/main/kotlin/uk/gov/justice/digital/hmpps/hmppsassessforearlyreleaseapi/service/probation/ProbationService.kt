@@ -44,7 +44,7 @@ class ProbationService(
             staffEmail = newCom.email,
             forename = newCom.name.forename,
             surname = newCom.name.surname,
-          )
+          ),
         )
       }
     } else {
