@@ -11,7 +11,7 @@ enum class ResidentialChecksStatus {
   SUITABLE,
 }
 
-enum class TaskStatus {
+enum class ResidentialChecksTaskStatus {
   NOT_STARTED,
   IN_PROGRESS,
   UNSUITABLE,
@@ -48,19 +48,19 @@ data class Section(
   val questions: List<Question>,
 )
 
-data class Task(
+data class ResidentialChecksTask(
   val code: String,
   val name: String,
   val sections: List<Section>,
 )
 
 data class ResidentialChecks(
-  val tasks: List<Task>,
+  val tasks: List<ResidentialChecksTask>,
   val overallStatus: ResidentialChecksStatus,
   val version: ResidentialChecksPolicyVersion,
 )
 
 data class ResidentialChecksPolicy(
   val version: ResidentialChecksPolicyVersion,
-  val tasks: List<Task>,
+  val tasks: List<ResidentialChecksTask>,
 )
