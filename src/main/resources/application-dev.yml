@@ -30,7 +30,7 @@ hmpps.sqs:
       dlqName: domainevents-queue-dlq
       subscribeTopicId: domainevents
     hmppsoffenderqueue:
-      queueName: hmppsoffender_queue
+      queueName: hmppsoffender-queue
       dlqName: hmppsoffender-queue-dlq
       subscribeTopicId: hmppsoffender
   topics:

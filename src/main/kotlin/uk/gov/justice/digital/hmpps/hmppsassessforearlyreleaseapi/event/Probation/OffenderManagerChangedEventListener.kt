@@ -5,21 +5,19 @@ import io.opentelemetry.instrumentation.annotations.WithSpan
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 
-fun interface EventProcessingCompleteHandler {
+fun interface OffenderEventProcessingCompleteHandler {
   fun complete()
 }
 
-val NO_OP = EventProcessingCompleteHandler { }
+val NO_OP = OffenderEventProcessingCompleteHandler { }
 
 @Service
-class ProbationOffenderEventListener(
-  private val done: EventProcessingCompleteHandler = NO_OP,
+class OffenderManagerChangedEventListener(
+  private val done: OffenderEventProcessingCompleteHandler = NO_OP,
   private val probationService: ProbationService,
   private val mapper: ObjectMapper,
-  private val transferPrisonerService: TransferPrisonService,
 ) {
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)

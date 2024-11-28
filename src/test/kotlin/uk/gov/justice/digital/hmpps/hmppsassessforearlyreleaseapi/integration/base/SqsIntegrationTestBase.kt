@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base
 
+import OffenderEventProcessingCompleteHandler
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -30,6 +31,9 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   @MockBean
   lateinit var done: EventProcessingCompleteHandler
 
+  @MockBean
+  lateinit var hmppsOffenderDone: OffenderEventProcessingCompleteHandler
+
   protected val domainEventsTopic by lazy {
     hmppsQueueService.findByTopicId("domainevents")
       ?: throw MissingQueueException("HmppsTopic domainevents not found")
@@ -39,14 +43,29 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
 
   protected val mergeOffenderQueue by lazy { hmppsQueueService.findByQueueId("domaineventsqueue") as HmppsQueue }
 
+  protected val hmppsOffenderTopic by lazy {
+    hmppsQueueService.findByTopicId("hmppsoffender")
+      ?: throw MissingQueueException("HmppsTopic hmppsoffender not found")
+  }
+  protected val hmppsOffenderTopicSnsClient by lazy { hmppsOffenderTopic.snsClient }
+  protected val hmppsOffenderTopicArn by lazy { hmppsOffenderTopic.arn }
+
+  protected val updateComQueue by lazy { hmppsQueueService.findByQueueId("hmppsoffenderqueue") as HmppsQueue }
+
   @BeforeEach
   fun cleanQueue() {
     mergeOffenderQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(mergeOffenderQueue.queueUrl).build())
     await untilCallTo { mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get() } matches { it == 0 }
+
+    updateComQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(updateComQueue.queueUrl).build())
+    await untilCallTo { updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get() } matches { it == 0 }
   }
 
   fun getNumberOfMessagesCurrentlyOnQueue(): Int? =
     mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get()
+
+  fun getNumberOfMessagesCurrentlyOnUpdateComQueue(): Int? =
+    updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get()
 
   companion object {
     private val localStackContainer = LocalStackContainer.instance
