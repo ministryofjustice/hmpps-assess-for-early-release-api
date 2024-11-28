@@ -18,17 +18,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.EligibilityAndSuitabilityService.Companion.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithNoProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 
 class EligibilityAndSuitabilityServiceTest {
   private val assessmentService = mock<AssessmentService>()
-  private val assessmentLifecycleService = mock<AssessmentLifecycleService>()
   private val assessmentRepository = mock<AssessmentRepository>()
 
   private val service =
@@ -36,7 +38,6 @@ class EligibilityAndSuitabilityServiceTest {
       PolicyService(),
       assessmentService,
       assessmentRepository,
-      assessmentLifecycleService,
     )
 
   @Nested
@@ -45,7 +46,7 @@ class EligibilityAndSuitabilityServiceTest {
     fun `for existing unstarted offender`() {
       val anOffender = anOffender()
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress(),
+        anAssessmentWithNoProgress(),
       )
 
       val caseView = service.getCaseView(PRISON_NUMBER)
@@ -69,20 +70,14 @@ class EligibilityAndSuitabilityServiceTest {
   inner class GetSuitabilityCriterionView {
     @Test
     fun `for a started offender`() {
-      val anAssessmentWithEligibilityProgress = anAssessmentWithEligibilityProgress()
+      val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        eligibilityProgress = Progress.none(),
+        suitabilityProgress = Progress.specifyByIndex(0 to PASSED),
+      )
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress.copy(
-          suitabilityProgress = {
-            anAssessmentWithEligibilityProgress.suitabilityProgress().mapIndexed { i, it ->
-              if (i == 0) {
-                it.copy(status = SUITABLE, questions = listOf(it.questions[0].copy(answer = true)))
-              } else {
-                it
-              }
-            }
-          },
-        ),
+        anAssessmentWithEligibilityProgress,
       )
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
@@ -91,10 +86,7 @@ class EligibilityAndSuitabilityServiceTest {
       val criterionView = service.getSuitabilityCriterionView(PRISON_NUMBER, criterion1.code)
 
       assertThat(criterionView.assessmentSummary).isEqualTo(
-        anAssessmentSummary().copy(
-          hdced = anAssessmentWithEligibilityProgress.offender.hdced,
-          crd = anAssessmentWithEligibilityProgress.offender.crd,
-        ),
+        anAssessmentWithEligibilityProgress.toSummary(),
       )
 
       assertThat(criterionView.criterion).isEqualTo(
@@ -136,20 +128,14 @@ class EligibilityAndSuitabilityServiceTest {
   inner class GetEligibilityCriterionView {
     @Test
     fun `for a started offender`() {
-      val anAssessmentWithEligibilityProgress = anAssessmentWithEligibilityProgress()
+      val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        eligibilityProgress = Progress.specifyByIndex(0 to PASSED),
+        suitabilityProgress = Progress.none(),
+      )
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress.copy(
-          eligibilityProgress = {
-            anAssessmentWithEligibilityProgress.eligibilityProgress().mapIndexed { i, it ->
-              if (i == 0) {
-                it.copy(status = ELIGIBLE, questions = listOf(it.questions[0].copy(answer = true)))
-              } else {
-                it
-              }
-            }
-          },
-        ),
+        anAssessmentWithEligibilityProgress,
       )
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
@@ -158,10 +144,7 @@ class EligibilityAndSuitabilityServiceTest {
       val criterionView = service.getEligibilityCriterionView(PRISON_NUMBER, criterion1.code)
 
       assertThat(criterionView.assessmentSummary).isEqualTo(
-        anAssessmentSummary().copy(
-          hdced = anAssessmentWithEligibilityProgress.offender.hdced,
-          crd = anAssessmentWithEligibilityProgress.offender.crd,
-        ),
+        anAssessmentWithEligibilityProgress.toSummary(),
       )
 
       assertThat(criterionView.criterion).isEqualTo(
@@ -201,16 +184,9 @@ class EligibilityAndSuitabilityServiceTest {
   inner class SaveAnswer {
     @Test
     fun `for existing unstarted offender`() {
-      val anAssessmentWithEligibilityProgress =
-        anAssessmentWithEligibilityProgress().copy(assessmentEntity = anOffender().currentAssessment())
+      val assessment = anAssessmentWithNoProgress()
 
-      whenever(assessmentLifecycleService.eligibilityAnswerSubmitted(anAssessmentWithEligibilityProgress)).thenReturn(
-        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
-      )
-
-      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress,
-      )
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
 
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
@@ -218,10 +194,10 @@ class EligibilityAndSuitabilityServiceTest {
       val criterionChecks = CriterionCheck(
         code = criterion.code,
         type = CriteriaType.ELIGIBILITY,
-        answers = mapOf(question.name to true),
+        answers = mapOf(question.name to false),
       )
 
-      assertThat(anAssessmentWithEligibilityProgress.assessmentEntity.eligibilityCheckResults).isEmpty()
+      assertThat(assessment.assessmentEntity.eligibilityCheckResults).isEmpty()
 
       service.saveAnswer(PRISON_NUMBER, criterionChecks)
 
@@ -233,10 +209,10 @@ class EligibilityAndSuitabilityServiceTest {
         with(firstValue.eligibilityCheckResults.first()) {
           assertThat(criterionCode).isEqualTo(criterion.code)
           assertThat(criterionType).isEqualTo(ELIGIBILITY)
-          assertThat(criterionMet).isEqualTo(false)
+          assertThat(criterionMet).isEqualTo(true)
           assertThat(criterionVersion).isEqualTo(firstValue.policyVersion)
-          assertThat(assessment).isEqualTo(firstValue)
-          assertThat(questionAnswers).isEqualTo(mapOf(question.name to true))
+          assertThat(assessment.assessmentEntity).isEqualTo(firstValue)
+          assertThat(questionAnswers).isEqualTo(mapOf(question.name to false))
         }
       }
     }
