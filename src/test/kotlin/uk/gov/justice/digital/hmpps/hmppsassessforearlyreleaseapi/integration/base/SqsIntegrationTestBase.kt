@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base
 
-import OffenderEventProcessingCompleteHandler
+import ProbationEventProcessingCompleteHandler
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -32,7 +32,7 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   lateinit var done: EventProcessingCompleteHandler
 
   @MockBean
-  lateinit var hmppsOffenderDone: OffenderEventProcessingCompleteHandler
+  lateinit var hmppsOffenderDone: ProbationEventProcessingCompleteHandler
 
   protected val domainEventsTopic by lazy {
     hmppsQueueService.findByTopicId("domainevents")

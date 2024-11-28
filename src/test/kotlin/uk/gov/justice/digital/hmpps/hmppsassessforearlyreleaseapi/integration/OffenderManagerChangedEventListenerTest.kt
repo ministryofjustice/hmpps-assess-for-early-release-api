@@ -81,7 +81,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
           ),
         )
         .build(),
-    ).get()
+    )
   }
 
   private companion object {
