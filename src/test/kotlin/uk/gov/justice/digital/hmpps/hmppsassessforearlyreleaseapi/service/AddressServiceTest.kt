@@ -7,6 +7,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
@@ -18,7 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.util.Optional
@@ -48,10 +49,9 @@ class AddressServiceTest {
   fun `should get all check requests linked to an assessment`() {
     val addressCheckRequest = aStandardAddressCheckRequest()
     val casCheckRequest = aCasCheckRequest()
-    val assessment = anAssessmentWithEligibilityProgress()
-    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(
-      assessment,
-    )
+    val assessment = anAssessmentWithCompleteEligibilityChecks(status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
     whenever(curfewAddressCheckRequestRepository.findByAssessment(assessment.assessmentEntity)).thenReturn(
       listOf(
         addressCheckRequest,

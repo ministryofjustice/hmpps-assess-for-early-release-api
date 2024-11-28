@@ -10,6 +10,8 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -23,10 +25,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffenderWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import java.time.LocalDate
@@ -63,24 +67,26 @@ class AssessmentServiceTest {
 
   @Test
   fun `should opt-out an offender`() {
-    val anOffender = anOffenderWithSomeProgress()
-    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    val offender = anAssessmentWithCompleteEligibilityChecks(status = AWAITING_ADDRESS_AND_RISK_CHECKS).offender
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-//    whenever(assessmentLifecycleService.optOut(anyOrNull())).thenReturn(OPTED_OUT)
 
     service.optOut(PRISON_NUMBER)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(OPTED_OUT)
+    assertThat(assessmentCaptor.value.previousStatus).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
   }
 
   @Test
   fun `should opt-in an offender`() {
-    val anOffender = anOffenderWithSomeProgress()
-    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    val assessment =
+      anAssessmentWithCompleteEligibilityChecks(status = OPTED_OUT, previousStatus = AWAITING_ADDRESS_AND_RISK_CHECKS)
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-//    whenever(assessmentLifecycleService.optBackIn(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
 
     service.optBackIn(PRISON_NUMBER)
 
@@ -91,24 +97,17 @@ class AssessmentServiceTest {
 
   @Test
   fun `should submit an assessment`() {
-    val assessment = anAssessmentWithEligibilityProgress()
-
     val anOffender = anOffender()
-    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender.copy())
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
-//    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(anyOrNull())).thenReturn(AWAITING_ADDRESS_AND_RISK_CHECKS)
+    anOffender.currentAssessment().status = ELIGIBLE_AND_SUITABLE
 
-//    whenever(assessmentLifecycleService.submitAssessmentForAddressChecks(assessment)).thenReturn(
-//      AWAITING_ADDRESS_AND_RISK_CHECKS,
-//    )
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.submitAssessmentForAddressChecks(PRISON_NUMBER)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
-    assertThat(assessmentCaptor.value)
-      .extracting("status")
-      .isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
+    assertThat(assessmentCaptor.value.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
   }
 
   @Nested
@@ -123,30 +122,34 @@ class AssessmentServiceTest {
 
       assertThat(currentAssessment.assessmentEntity).isEqualTo(anOffender.currentAssessment())
 
-      val eligibilityProgress = currentAssessment.eligibilityProgress()
+      val eligibilityProgress = currentAssessment.getEligibilityProgress()
       assertThat(eligibilityProgress).hasSize(11)
       assertThat(eligibilityProgress).allMatch { it.status == NOT_STARTED }
 
-      val suitabilityProgress = currentAssessment.suitabilityProgress()
+      val suitabilityProgress = currentAssessment.getSuitabilityProgress()
       assertThat(suitabilityProgress).hasSize(7)
       assertThat(suitabilityProgress).allMatch { it.status == SuitabilityStatus.NOT_STARTED }
     }
 
     @Test
     fun `for an offender with some progress`() {
-      val offender = anOffenderWithSomeProgress()
+      val assessment = anAssessmentWithSomeProgress(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        eligibilityProgress = Progress.specifyByIndex(0 to PASSED),
+        suitabilityProgress = Progress.specifyByIndex(0 to PASSED),
+      )
 
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
       whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      val eligibilityProgress = currentAssessment.eligibilityProgress()
+      val eligibilityProgress = currentAssessment.getEligibilityProgress()
       assertThat(eligibilityProgress).hasSize(11)
       assertThat(eligibilityProgress).filteredOn { it.status == NOT_STARTED }.hasSize(10)
       assertThat(eligibilityProgress).filteredOn { it.status == ELIGIBLE }.hasSize(1)
 
-      val suitabilityProgress = currentAssessment.suitabilityProgress()
+      val suitabilityProgress = currentAssessment.getSuitabilityProgress()
       assertThat(suitabilityProgress).hasSize(7)
       assertThat(suitabilityProgress).filteredOn { it.status == SuitabilityStatus.NOT_STARTED }.hasSize(6)
       assertThat(suitabilityProgress).filteredOn { it.status == SuitabilityStatus.SUITABLE }.hasSize(1)
@@ -157,15 +160,19 @@ class AssessmentServiceTest {
   inner class GetSuitabilityCriterionView {
     @Test
     fun `for existing unstarted offender`() {
-      val anOffender = anOffenderWithSomeProgress()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+      val offender = anAssessmentWithSomeProgress(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        suitabilityProgress = Progress.specifyByIndex(0 to PASSED),
+      ).offender
+
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
       whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
 
       val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      assertThat(assessment.suitabilityProgress().find { it.code === criterion1.code }).isEqualTo(
+      assertThat(assessment.getSuitabilityProgress().find { it.code === criterion1.code }).isEqualTo(
         SuitabilityCriterionProgress(
           code = criterion1.code,
           taskName = criterion1.name,
@@ -187,15 +194,19 @@ class AssessmentServiceTest {
   inner class GetEligibilityCriterionView {
     @Test
     fun `for existing unstarted offender`() {
-      val anOffender = anOffenderWithSomeProgress()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+      val offender = anAssessmentWithSomeProgress(
+        ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        eligibilityProgress = Progress.specifyByIndex(0 to PASSED),
+      ).offender
+
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
       whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
 
       val assessment = service.getCurrentAssessment(PRISON_NUMBER)
 
-      assertThat(assessment.eligibilityProgress().find { it.code === criterion1.code }).isEqualTo(
+      assertThat(assessment.getEligibilityProgress().find { it.code === criterion1.code }).isEqualTo(
         EligibilityCriterionProgress(
           code = criterion1.code,
           taskName = criterion1.name,

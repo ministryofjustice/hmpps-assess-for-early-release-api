@@ -35,19 +35,36 @@ class EligibilityAndSuitabilityService(
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+
+    fun AssessmentWithEligibilityProgress.toSummary() = with(this) {
+      AssessmentSummary(
+        forename = offender.forename,
+        surname = offender.surname,
+        dateOfBirth = offender.dateOfBirth,
+        prisonNumber = offender.prisonNumber,
+        hdced = offender.hdced,
+        crd = offender.crd,
+        location = prison,
+        status = assessmentEntity.status,
+        policyVersion = assessmentEntity.policyVersion,
+        tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
+          tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
+        },
+      )
+    }
   }
 
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
     val assessment = assessmentService.getCurrentAssessment(prisonNumber)
 
-    val eligibility = assessment.eligibilityProgress()
+    val eligibility = assessment.getEligibilityProgress()
     val eligibilityStatus = eligibility.toStatus()
-    val suitability = assessment.suitabilityProgress()
+    val suitability = assessment.getSuitabilityProgress()
     val suitabilityStatus = suitability.toStatus()
 
     return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = createAssessmentSummary(assessment),
+      assessmentSummary = assessment.toSummary(),
       overallStatus = assessment.calculateAggregateEligibilityStatus(),
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
@@ -65,11 +82,11 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val eligibilityProgress = currentAssessment.eligibilityProgress().dropWhile { it.code != code }.take(2)
+    val eligibilityProgress = currentAssessment.getEligibilityProgress().dropWhile { it.code != code }.take(2)
     if (eligibilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
-      assessmentSummary = createAssessmentSummary(currentAssessment),
+      assessmentSummary = currentAssessment.toSummary(),
       criterion = eligibilityProgress[0],
       nextCriterion = eligibilityProgress.getOrNull(1),
     )
@@ -78,11 +95,11 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val suitabilityProgress = currentAssessment.suitabilityProgress().dropWhile { it.code != code }.take(2)
+    val suitabilityProgress = currentAssessment.getSuitabilityProgress().dropWhile { it.code != code }.take(2)
     if (suitabilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(
-      assessmentSummary = createAssessmentSummary(currentAssessment),
+      assessmentSummary = currentAssessment.toSummary(),
       criterion = suitabilityProgress[0],
       nextCriterion = suitabilityProgress.getOrNull(1),
     )
@@ -105,8 +122,9 @@ class EligibilityAndSuitabilityService(
         criterionMet,
         answer.answers,
       )
+
       val event = when (currentAssessment.calculateAggregateEligibilityStatus()) {
-        ELIGIBLE -> AssessmentLifecycleEvent.CompleteEligibilityAndSuitability
+        ELIGIBLE -> AssessmentLifecycleEvent.PassEligibilityAndSuitability
         INELIGIBLE -> AssessmentLifecycleEvent.FailEligibilityAndSuitability
         IN_PROGRESS -> AssessmentLifecycleEvent.StartEligibilityAndSuitability
         NOT_STARTED -> error("Assessment: ${assessmentEntity.id} is in an unexpected state: ${assessmentEntity.status}")
@@ -114,24 +132,5 @@ class EligibilityAndSuitabilityService(
       assessmentEntity.performTransition(event)
       assessmentRepository.save(assessmentEntity)
     }
-  }
-
-  private fun createAssessmentSummary(
-    assessmentWithEligibilityProgress: AssessmentWithEligibilityProgress,
-  ) = with(assessmentWithEligibilityProgress) {
-    AssessmentSummary(
-      forename = offender.forename,
-      surname = offender.surname,
-      dateOfBirth = offender.dateOfBirth,
-      prisonNumber = offender.prisonNumber,
-      hdced = offender.hdced,
-      crd = offender.crd,
-      location = prison,
-      status = assessmentEntity.status.label,
-      policyVersion = assessmentEntity.policyVersion,
-      tasks = assessmentEntity.status.label.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
-      },
-    )
   }
 }

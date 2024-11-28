@@ -10,7 +10,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentState
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
@@ -70,8 +69,8 @@ class OffenderServiceTest {
   @Test
   fun `should get the com case load`() {
     val assessment1 =
-      anOffender().currentAssessment().copy(status = AssessmentState.AddressAndRiskChecksInProgress)
-    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentState.AwaitingAddressAndRiskChecks)
+      anOffender().currentAssessment().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     whenever(
       assessmentRepository.findByResponsibleComStaffIdentifierAndStatusIn(
         STAFF_ID,

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
@@ -249,7 +250,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
       val assessment = assessmentRepository.findByOffender(offender)
-      assertThat(assessment.first().status).isEqualTo(NOT_STARTED)
+      assertThat(assessment.first().status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     }
 
     @Test

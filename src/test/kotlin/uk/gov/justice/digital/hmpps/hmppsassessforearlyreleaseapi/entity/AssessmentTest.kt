@@ -2,6 +2,15 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.PassEligibilityAndSuitability
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.StartEligibilityAndSuitability
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 
@@ -68,30 +77,42 @@ class AssessmentTest {
         ),
       )
   }
-//
-//  @Test
-//  fun `records status changes`() {
-//    val assessment = Assessment(offender = anOffender())
-//
-//    assessment.changeStatus(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
-//    assessment.changeStatus(ELIGIBLE_AND_SUITABLE)
-//
-//    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
-//
-//    assertThat(statusChangeEvents).containsExactly(
-//      StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
-//      StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE),
-//    )
-//  }
-//
-//  @Test
-//  fun `does not record status change when status has not changed`() {
-//    val assessment = Assessment(offender = anOffender(), status = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
-//
-//    assessment.changeStatus(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
-//    assessment.changeStatus(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
-//    assessment.changeStatus(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
-//
-//    assertThat(assessment.assessmentEvents).isEmpty()
-//  }
+
+  @Test
+  fun `records status changes`() {
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
+
+    assessment.performTransition(StartEligibilityAndSuitability)
+    assessment.performTransition(PassEligibilityAndSuitability)
+
+    assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
+    assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
+
+    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    assertThat(statusChangeEvents).containsExactly(
+      StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
+      StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE),
+    )
+  }
+
+  @Test
+  fun `returns to previous state`() {
+    val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE)
+
+    assessment.performTransition(OptOut)
+
+    assertThat(assessment.status).isEqualTo(OPTED_OUT)
+    assertThat(assessment.previousStatus).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
+
+    assessment.performTransition(OptBackIn)
+
+    assertThat(assessment.status).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
+    assertThat(assessment.previousStatus).isEqualTo(OPTED_OUT)
+
+    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    assertThat(statusChangeEvents).containsExactly(
+      StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT),
+      StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE),
+    )
+  }
 }
