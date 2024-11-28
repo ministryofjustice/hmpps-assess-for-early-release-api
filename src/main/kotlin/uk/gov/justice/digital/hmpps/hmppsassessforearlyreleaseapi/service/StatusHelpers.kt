@@ -35,8 +35,8 @@ object StatusHelpers {
     this.filter { it.status == INELIGIBLE }.map { it.taskName }
 
   fun AssessmentWithEligibilityProgress.calculateAggregateEligibilityStatus(): EligibilityStatus {
-    val eligibility = eligibilityProgress()
-    val suitability = suitabilityProgress()
+    val eligibility = getEligibilityProgress()
+    val suitability = getSuitabilityProgress()
 
     val ineligible = eligibility.any { it.status == INELIGIBLE }
     val unsuitable = suitability.any { it.status == UNSUITABLE }

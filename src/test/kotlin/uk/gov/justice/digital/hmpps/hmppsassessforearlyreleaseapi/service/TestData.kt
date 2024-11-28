@@ -4,18 +4,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChange
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
@@ -27,15 +25,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
@@ -53,6 +52,7 @@ object TestData {
   const val PRISON_ID = "AFG"
   const val PRISON_NAME = "Birmingham (HMP)"
   const val STAFF_ID = 629L
+  const val ADDRESS_REQUEST_ID = 1L
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
     val offender = Offender(
@@ -68,46 +68,6 @@ object TestData {
     offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
     return offender
   }
-
-  fun anOffenderWithSomeProgress() =
-    anOffender().let {
-      val currentAssessment = it.currentAssessment()
-      val eligibilityCriteria = POLICY_1_0.eligibilityCriteria.first()
-      val suitabilityCriteria = POLICY_1_0.suitabilityCriteria.first()
-      val assessment = currentAssessment.copy(
-        assessmentEvents = mutableListOf(
-          StatusChangedEvent(
-            assessment = currentAssessment,
-            changes = StatusChange(before = AssessmentStatus.NOT_STARTED, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
-          ),
-          StatusChangedEvent(
-            assessment = currentAssessment,
-            changes = StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, ELIGIBLE_AND_SUITABLE),
-          ),
-        ),
-        eligibilityCheckResults = mutableSetOf(
-          EligibilityCheckResult(
-            assessment = currentAssessment,
-            criterionCode = eligibilityCriteria.code,
-            criterionType = ELIGIBILITY,
-            criterionMet = true,
-            id = 1,
-            criterionVersion = POLICY_1_0.code,
-            questionAnswers = mapOf(eligibilityCriteria.questions.first().name to true),
-          ),
-          EligibilityCheckResult(
-            assessment = currentAssessment,
-            criterionCode = suitabilityCriteria.code,
-            criterionType = SUITABILITY,
-            criterionMet = true,
-            id = 1,
-            criterionVersion = POLICY_1_0.code,
-            questionAnswers = mapOf(suitabilityCriteria.questions.first().name to true),
-          ),
-        ),
-      )
-      it.copy(assessments = mutableSetOf(assessment))
-    }
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,
@@ -127,7 +87,7 @@ object TestData {
     hdced = LocalDate.of(2020, 10, 25),
     crd = LocalDate.of(2022, 3, 21),
     location = PRISON_NAME,
-    status = AssessmentStatus.NOT_STARTED,
+    status = NOT_STARTED,
     policyVersion = "1.0",
     tasks = mapOf(
       PRISON_CA to listOf(
@@ -140,77 +100,119 @@ object TestData {
     ),
   )
 
-  fun anEligibilityCheckDetails() = EligibilityCriterionProgress(
-    code = "code-1",
-    taskName = "task-1",
-    questions = listOf(Question("question-1", answer = true)),
+  fun anEligibilityCheckDetails(n: Int) = EligibilityCriterionProgress(
+    code = "code-$n",
+    taskName = "task-$n",
+    questions = listOf(Question("question-$n", answer = true)),
     status = ELIGIBLE,
   )
 
-  fun anSuitabilityCheckDetails() = SuitabilityCriterionProgress(
-    code = "code-1",
-    taskName = "task-1",
-    questions = listOf(Question("question-1", answer = true)),
+  fun anSuitabilityCheckDetails(n: Int) = SuitabilityCriterionProgress(
+    code = "code-$n",
+    taskName = "task-$n",
+    questions = listOf(Question("question-$n", answer = true)),
     status = SUITABLE,
   )
 
-  fun anAssessmentWithEligibilityProgress() = AssessmentWithEligibilityProgress(
-    offender = anOffenderWithSomeProgress(),
-    assessmentEntity = anOffenderWithSomeProgress().currentAssessment(),
-    prison = "Birmingham (HMP)",
-    eligibilityProgress = {
-      POLICY_1_0.eligibilityCriteria.map {
-        EligibilityCriterionProgress(
-          code = it.code,
-          taskName = it.name,
-          status = NOT_STARTED,
-          questions = it.questions.map { question ->
-            Question(
-              text = question.text,
-              hint = question.hint,
-              name = question.name,
-              answer = null,
+  enum class ResultType { PASSED, FAILED }
+
+  interface Progress {
+    fun contains(index: Int): Boolean
+    operator fun get(index: Int): ResultType?
+
+    companion object {
+      fun specifyByIndex(vararg results: Pair<Int, ResultType>): Progress = object : Progress {
+        private val map = results.toMap()
+        override fun contains(index: Int) = map.containsKey(index)
+        override fun get(index: Int) = map[index]
+      }
+
+      fun none(): Progress = object : Progress {
+        override fun contains(index: Int) = false
+        override fun get(index: Int) = null
+      }
+
+      fun allSuccessful(): Progress = object : Progress {
+        override fun contains(index: Int) = true
+        override fun get(index: Int) = PASSED
+      }
+    }
+  }
+
+  fun anAssessmentWithSomeProgress(
+    status: AssessmentStatus,
+    previousStatus: AssessmentStatus? = null,
+    eligibilityProgress: Progress = Progress.none(),
+    suitabilityProgress: Progress = Progress.none(),
+  ): AssessmentWithEligibilityProgress {
+    val offender = anOffender()
+    val assessment = offender.currentAssessment()
+    assessment.status = status
+    assessment.previousStatus = previousStatus
+    assessment.eligibilityCheckResults.clear()
+    assessment.eligibilityCheckResults.addAll(
+      POLICY_1_0.eligibilityCriteria
+        .flatMapIndexed { i, criterion ->
+          listOfNotNull(
+            when {
+              !eligibilityProgress.contains(i) -> null
+              eligibilityProgress[i] == PASSED -> criterion.toPassedResult(ELIGIBILITY, assessment)
+              eligibilityProgress[i] == FAILED -> criterion.toFailedResult(ELIGIBILITY, assessment)
+              else -> null
+            },
+          )
+        } +
+        POLICY_1_0.suitabilityCriteria
+          .flatMapIndexed { i, criterion ->
+            listOfNotNull(
+              when {
+                !suitabilityProgress.contains(i) -> null
+                suitabilityProgress[i] == PASSED -> criterion.toPassedResult(SUITABILITY, assessment)
+                suitabilityProgress[i] == FAILED -> criterion.toFailedResult(SUITABILITY, assessment)
+                else -> null
+              },
             )
           },
-        )
-      }
-    },
-    suitabilityProgress = {
-      POLICY_1_0.suitabilityCriteria.map {
-        SuitabilityCriterionProgress(
-          code = it.code,
-          taskName = it.name,
-          status = SuitabilityStatus.NOT_STARTED,
-          questions = it.questions.map { question ->
-            Question(
-              text = question.text,
-              hint = question.hint,
-              name = question.name,
-              answer = null,
-            )
-          },
-        )
-      }
-    },
+    )
+
+    return AssessmentWithEligibilityProgress(
+      prison = "Birmingham (HMP)",
+      policy = POLICY_1_0,
+      assessmentEntity = assessment,
+    )
+  }
+
+  fun anAssessmentWithNoProgress() =
+    anAssessmentWithSomeProgress(NOT_STARTED, null, Progress.none(), Progress.none())
+
+  fun anAssessmentWithCompleteEligibilityChecks(status: AssessmentStatus, previousStatus: AssessmentStatus? = null) =
+    anAssessmentWithSomeProgress(status, previousStatus, Progress.allSuccessful(), Progress.allSuccessful())
+
+  private fun Criterion.toPassedResult(
+    type: CriterionType,
+    assessment: Assessment,
+  ): EligibilityCheckResult = EligibilityCheckResult(
+    assessment = assessment,
+    criterionCode = this.code,
+    criterionType = type,
+    criterionMet = true,
+    id = 1,
+    criterionVersion = POLICY_1_0.code,
+    questionAnswers = this.questions.associate { it.name to true },
   )
 
-  fun anAssessmentWithChecksComplete() =
-    anAssessmentWithEligibilityProgress().copy(
-      eligibilityProgress = {
-        anAssessmentWithEligibilityProgress().eligibilityProgress().map {
-          it.copy(
-            status = ELIGIBLE,
-          )
-        }
-      },
-      suitabilityProgress = {
-        anAssessmentWithEligibilityProgress().suitabilityProgress().map {
-          it.copy(
-            status = SUITABLE,
-          )
-        }
-      },
-    )
+  private fun Criterion.toFailedResult(
+    type: CriterionType,
+    assessment: Assessment,
+  ): EligibilityCheckResult = EligibilityCheckResult(
+    assessment = assessment,
+    criterionCode = this.code,
+    criterionType = type,
+    criterionMet = false,
+    id = 1,
+    criterionVersion = POLICY_1_0.code,
+    questionAnswers = this.questions.associate { it.name to false },
+  )
 
   private fun anAddress() = Address(
     uprn = "200010019924",

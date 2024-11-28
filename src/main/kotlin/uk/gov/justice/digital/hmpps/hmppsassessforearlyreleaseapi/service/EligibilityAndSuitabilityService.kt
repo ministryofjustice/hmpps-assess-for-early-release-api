@@ -5,12 +5,16 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
@@ -27,24 +31,40 @@ class EligibilityAndSuitabilityService(
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
   private val assessmentRepository: AssessmentRepository,
-  private val assessmentLifecycleService: AssessmentLifecycleService,
 ) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+
+    fun AssessmentWithEligibilityProgress.toSummary() = with(this) {
+      AssessmentSummary(
+        forename = offender.forename,
+        surname = offender.surname,
+        dateOfBirth = offender.dateOfBirth,
+        prisonNumber = offender.prisonNumber,
+        hdced = offender.hdced,
+        crd = offender.crd,
+        location = prison,
+        status = assessmentEntity.status,
+        policyVersion = assessmentEntity.policyVersion,
+        tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
+          tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
+        },
+      )
+    }
   }
 
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
     val assessment = assessmentService.getCurrentAssessment(prisonNumber)
 
-    val eligibility = assessment.eligibilityProgress()
+    val eligibility = assessment.getEligibilityProgress()
     val eligibilityStatus = eligibility.toStatus()
-    val suitability = assessment.suitabilityProgress()
+    val suitability = assessment.getSuitabilityProgress()
     val suitabilityStatus = suitability.toStatus()
 
     return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = createAssessmentSummary(assessment),
+      assessmentSummary = assessment.toSummary(),
       overallStatus = assessment.calculateAggregateEligibilityStatus(),
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
@@ -62,11 +82,11 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val eligibilityProgress = currentAssessment.eligibilityProgress().dropWhile { it.code != code }.take(2)
+    val eligibilityProgress = currentAssessment.getEligibilityProgress().dropWhile { it.code != code }.take(2)
     if (eligibilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
-      assessmentSummary = createAssessmentSummary(currentAssessment),
+      assessmentSummary = currentAssessment.toSummary(),
       criterion = eligibilityProgress[0],
       nextCriterion = eligibilityProgress.getOrNull(1),
     )
@@ -75,11 +95,11 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val suitabilityProgress = currentAssessment.suitabilityProgress().dropWhile { it.code != code }.take(2)
+    val suitabilityProgress = currentAssessment.getSuitabilityProgress().dropWhile { it.code != code }.take(2)
     if (suitabilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(
-      assessmentSummary = createAssessmentSummary(currentAssessment),
+      assessmentSummary = currentAssessment.toSummary(),
       criterion = suitabilityProgress[0],
       nextCriterion = suitabilityProgress.getOrNull(1),
     )
@@ -102,27 +122,15 @@ class EligibilityAndSuitabilityService(
         criterionMet,
         answer.answers,
       )
-      assessmentEntity.changeStatus(assessmentLifecycleService.eligibilityAnswerSubmitted(currentAssessment))
+
+      val event = when (currentAssessment.calculateAggregateEligibilityStatus()) {
+        ELIGIBLE -> AssessmentLifecycleEvent.PassEligibilityAndSuitability
+        INELIGIBLE -> AssessmentLifecycleEvent.FailEligibilityAndSuitability
+        IN_PROGRESS -> AssessmentLifecycleEvent.StartEligibilityAndSuitability
+        NOT_STARTED -> error("Assessment: ${assessmentEntity.id} is in an unexpected state: ${assessmentEntity.status}")
+      }
+      assessmentEntity.performTransition(event)
       assessmentRepository.save(assessmentEntity)
     }
-  }
-
-  private fun createAssessmentSummary(
-    assessmentWithEligibilityProgress: AssessmentWithEligibilityProgress,
-  ) = with(assessmentWithEligibilityProgress) {
-    AssessmentSummary(
-      forename = offender.forename,
-      surname = offender.surname,
-      dateOfBirth = offender.dateOfBirth,
-      prisonNumber = offender.prisonNumber,
-      hdced = offender.hdced,
-      crd = offender.crd,
-      location = prison,
-      status = assessmentEntity.status,
-      policyVersion = assessmentEntity.policyVersion,
-      tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
-      },
-    )
   }
 }

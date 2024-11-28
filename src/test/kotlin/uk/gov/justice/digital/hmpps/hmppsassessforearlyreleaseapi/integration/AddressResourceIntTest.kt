@@ -24,13 +24,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
 private const val UPRN = "200010019924"
-private const val PRISON_NUMBER = TestData.PRISON_NUMBER
-private const val ADDRESS_REQUEST_ID = 1L
 private const val GET_ADDRESSES_FOR_POSTCODE_URL = "/addresses?postcode=$POSTCODE"
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
