@@ -52,7 +52,6 @@ class ProbationService(
     }
   }
 
-
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }

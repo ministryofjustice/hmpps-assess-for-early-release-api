@@ -77,7 +77,7 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
       put(urlEqualTo("/users/${username.trim().uppercase()}/roles"))
         .willReturn(
           aResponse()
-            .withStatus(200)
+            .withStatus(200),
         ),
     )
   }

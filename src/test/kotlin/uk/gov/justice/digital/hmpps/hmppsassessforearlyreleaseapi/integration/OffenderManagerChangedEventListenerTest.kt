@@ -22,7 +22,7 @@ private const val STAFF_IDENTIFIER = 125L
 private const val STAFF_USERNAME = "a-com"
 private const val OLD_STAFF_EMAIL = "a-com@justice.gov.uk"
 private const val NEW_STAFF_EMAIL = "staff-code-1-com@justice.gov.uk"
-private const val CRN= "X123456"
+private const val CRN = "X123456"
 
 class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
@@ -38,10 +38,12 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/an-staff.sql",
   )
   fun `probation received event should update staff`() {
-    assertThat(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
-      STAFF_IDENTIFIER,
-      STAFF_USERNAME,
-    ).first()?.email).isEqualTo(OLD_STAFF_EMAIL)
+    assertThat(
+      staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
+        STAFF_IDENTIFIER,
+        STAFF_USERNAME,
+      ).first()?.email,
+    ).isEqualTo(OLD_STAFF_EMAIL)
 
     deliusMockServer.stubGetOffenderManager(CRN)
     deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
@@ -67,7 +69,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
   }
 
   private fun publishHmppsOffenderEventMessage(
-    event: HMPPSReceiveProbationEvent
+    event: HMPPSReceiveProbationEvent,
   ) {
     val jsonMessage = jsonString(event)
     publishHmppsOffenderEventMessage(jsonMessage, OFFENDER_MANAGER_CHANGED)

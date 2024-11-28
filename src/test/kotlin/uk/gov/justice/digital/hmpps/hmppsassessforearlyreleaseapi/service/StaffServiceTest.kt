@@ -54,9 +54,9 @@ class StaffServiceTest {
         )
 
       val comDetails = aUpdateCom.copy(
-          staffIdentifier = 3000,
-          staffUsername = "jbloggs",
-          staffEmail = "jbloggs123@probation.gov.uk",
+        staffIdentifier = 3000,
+        staffUsername = "jbloggs",
+        staffEmail = "jbloggs123@probation.gov.uk",
       )
 
       service.updateComDetails(comDetails)
