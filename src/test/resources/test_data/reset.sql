@@ -7,3 +7,4 @@ delete from address;
 delete from eligibility_check_result;
 delete from assessment;
 delete from offender;
+delete from staff;

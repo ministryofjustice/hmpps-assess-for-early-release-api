@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base
 
-import ProbationEventProcessingCompleteHandler
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilCallTo
@@ -13,6 +12,7 @@ import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.EventProcessingCompleteHandler
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.ProbationEventProcessingCompleteHandler
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.IntegrationTestBase

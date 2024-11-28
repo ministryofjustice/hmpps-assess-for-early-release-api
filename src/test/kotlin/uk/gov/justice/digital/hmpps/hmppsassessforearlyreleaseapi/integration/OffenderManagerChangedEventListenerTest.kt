@@ -1,7 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
-import HMPPSReceiveProbationEvent
-import OffenderManagerChangedEventListener.Companion.OFFENDER_MANAGER_CHANGED
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
 import org.awaitility.kotlin.untilAsserted
@@ -13,19 +11,22 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.HMPPSReceiveProbationEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.OffenderManagerChangedEventListener.Companion.OFFENDER_MANAGER_CHANGED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import java.time.Duration
 
-private const val STAFF_IDENTIFIER = 2000L
+private const val STAFF_IDENTIFIER = 125L
 private const val STAFF_USERNAME = "a-com"
 private const val OLD_STAFF_EMAIL = "a-com@justice.gov.uk"
+private const val NEW_STAFF_EMAIL = "staff-code-1-com@justice.gov.uk"
+private const val CRN= "X123456"
 
 class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
   @Autowired
-
   lateinit var staffRepository: StaffRepository
 
   private val awaitAtMost30Secs
@@ -42,10 +43,10 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
       STAFF_USERNAME,
     ).first()?.email).isEqualTo(OLD_STAFF_EMAIL)
 
-    deliusMockServer.stubGetOffenderManager()
+    deliusMockServer.stubGetOffenderManager(CRN)
+    deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
 
-    val crn = "X123456"
-    val event = HMPPSReceiveProbationEvent(crn = crn)
+    val event = HMPPSReceiveProbationEvent(crn = CRN)
 
     publishHmppsOffenderEventMessage(event)
 
@@ -56,10 +57,13 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       OFFENDER_MANAGER_CHANGED,
       mapOf(
-        "crn" to crn,
+        "crn" to CRN,
       ),
       null,
     )
+
+    assertThat(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(STAFF_IDENTIFIER, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
+    assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
 
   private fun publishHmppsOffenderEventMessage(

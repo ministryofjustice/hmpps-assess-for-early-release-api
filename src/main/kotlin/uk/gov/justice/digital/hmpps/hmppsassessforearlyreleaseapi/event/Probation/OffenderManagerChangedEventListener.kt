@@ -1,3 +1,5 @@
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.awspring.cloud.sqs.annotation.SqsListener
 import io.opentelemetry.api.trace.SpanKind

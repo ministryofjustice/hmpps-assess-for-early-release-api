@@ -92,10 +92,3 @@ os:
     api:
       url: "https://api.os.uk/search/places/v1"
       key: ${os.places.api.key}
-
-logging:
-  level:
-    root: DEBUG
-    software.amazon.awssdk: DEBUG
-
-
