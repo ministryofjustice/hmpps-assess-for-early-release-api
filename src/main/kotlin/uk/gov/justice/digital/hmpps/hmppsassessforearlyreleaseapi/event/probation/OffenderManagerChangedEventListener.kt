@@ -31,7 +31,7 @@ class OffenderManagerChangedEventListener(
   @WithSpan(value = "hmpps-assess-for-early-release-probation-event-queue", kind = SpanKind.SERVER)
   fun onProbationOffenderEvent(requestJson: String) {
     val (message, messageAttributes) = mapper.readValue(requestJson, HMPPSMessage::class.java)
-    val eventType = messageAttributes.eventType.value
+    val eventType = messageAttributes.eventType.Value
     log.info("Received message $message, type $eventType")
 
     when (eventType) {
@@ -48,13 +48,13 @@ class OffenderManagerChangedEventListener(
   }
 }
 
-data class HMPPSEventType(val value: String, val type: String)
+data class HMPPSEventType(val Value: String, val Type: String)
 
 data class HMPPSMessageAttributes(val eventType: HMPPSEventType)
 
 data class HMPPSMessage(
-  val message: String,
-  val messageAttributes: HMPPSMessageAttributes,
+  val Message: String,
+  val MessageAttributes: HMPPSMessageAttributes,
 )
 
 data class HMPPSReceiveProbationEvent(

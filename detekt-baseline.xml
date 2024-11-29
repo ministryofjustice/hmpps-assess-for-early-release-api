@@ -2,6 +2,10 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Type: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Value: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSMessage$val Message: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSMessage$val MessageAttributes: HMPPSMessageAttributes</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Type: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Value: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val Message: String</ID>
