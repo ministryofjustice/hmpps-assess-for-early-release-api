@@ -5,12 +5,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import org.springframework.boot.test.system.CapturedOutput
 import org.springframework.boot.test.system.OutputCaptureExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
@@ -55,11 +53,9 @@ class ProbationServiceTest {
   @Test
   fun `should log newCom code if there are offenders matching crn`(output: CapturedOutput) {
     val aDeliusOffenderManager = aDeliusOffenderManager()
-    val aCommunityOffenderManager = aCommunityOffenderManager(aDeliusOffenderManager)
     val crn = "X12345"
 
     whenever(deliusApiClient.getOffenderManager(crn)).thenReturn(aDeliusOffenderManager)
-    whenever(staffService.updateComDetails(any())).thenReturn(aCommunityOffenderManager)
 
     service.offenderManagerChanged(crn)
 

@@ -6,8 +6,10 @@ import org.awaitility.kotlin.untilAsserted
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.kotlin.verify
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.system.OutputCaptureExtension
 import org.springframework.test.context.jdbc.Sql
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
@@ -24,6 +26,7 @@ private const val OLD_STAFF_EMAIL = "a-com@justice.gov.uk"
 private const val NEW_STAFF_EMAIL = "staff-code-1-com@justice.gov.uk"
 private const val CRN = "X123456"
 
+@ExtendWith(OutputCaptureExtension::class)
 class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
   @Autowired
@@ -59,12 +62,52 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       OFFENDER_MANAGER_CHANGED,
       mapOf(
-        "crn" to CRN,
+        "STAFF-IDENTIFIER" to STAFF_IDENTIFIER.toString(),
+        "USERNAME" to STAFF_USERNAME.uppercase(),
+        "EMAIL" to NEW_STAFF_EMAIL,
+        "FORENAME" to "Jimmy",
+        "SURNAME" to "Vivers",
       ),
       null,
     )
 
     assertThat(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(STAFF_IDENTIFIER, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
+    assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/an-staff.sql",
+  )
+  fun `should create a new staff record`() {
+    val staffIdentifier = 135L
+    assertThat(staffRepository.findByStaffIdentifier(staffIdentifier)).isNull()
+
+    deliusMockServer.stubGetOffenderManager(CRN, 135)
+    deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
+
+    val event = HMPPSReceiveProbationEvent(crn = CRN)
+
+    publishHmppsOffenderEventMessage(event)
+
+    awaitAtMost30Secs untilAsserted {
+      verify(hmppsOffenderDone).complete()
+    }
+
+    verify(telemetryClient).trackEvent(
+      OFFENDER_MANAGER_CHANGED,
+      mapOf(
+        "STAFF-IDENTIFIER" to staffIdentifier.toString(),
+        "USERNAME" to STAFF_USERNAME.uppercase(),
+        "EMAIL" to NEW_STAFF_EMAIL,
+        "FORENAME" to "Jimmy",
+        "SURNAME" to "Vivers",
+      ),
+      null,
+    )
+
+    assertThat(staffRepository.findByStaffIdentifier(staffIdentifier)).isNotNull()
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
 

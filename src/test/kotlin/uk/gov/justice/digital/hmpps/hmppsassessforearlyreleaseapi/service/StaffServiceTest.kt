@@ -1,9 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
@@ -20,8 +22,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 class StaffServiceTest {
   private val staffRepository = mock<StaffRepository>()
 
+  private val telemetryClient = Mockito.mock<TelemetryClient>()
+
   private val service =
-    StaffService(staffRepository)
+    StaffService(staffRepository, telemetryClient)
 
   @BeforeEach
   fun reset() {
@@ -114,7 +118,7 @@ class StaffServiceTest {
           any(),
           any(),
         ),
-      ).thenReturn(null)
+      ).thenReturn(emptyList())
 
       val comDetails = aUpdateCom.copy(
         staffIdentifier = 3000,

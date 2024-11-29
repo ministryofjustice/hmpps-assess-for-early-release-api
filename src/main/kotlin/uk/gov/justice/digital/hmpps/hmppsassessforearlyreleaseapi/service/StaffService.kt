@@ -1,10 +1,11 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Staff
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.OffenderManagerChangedEventListener.Companion.OFFENDER_MANAGER_CHANGED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import java.time.LocalDateTime
@@ -12,6 +13,7 @@ import java.time.LocalDateTime
 @Service
 class StaffService(
   private val staffRepository: StaffRepository,
+  private val telemetryClient: TelemetryClient,
 ) {
 
   companion object {
@@ -25,14 +27,14 @@ class StaffService(
    * the new username and or staffId.
    */
   @Transactional
-  fun updateComDetails(comDetails: UpdateCom): Staff? {
-    val comResult = this.staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
+  fun updateComDetails(comDetails: UpdateCom) {
+    val comResult = staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
       comDetails.staffIdentifier,
       comDetails.staffUsername,
     )
 
     if (comResult.isNullOrEmpty()) {
-      return this.staffRepository.saveAndFlush(
+      staffRepository.saveAndFlush(
         CommunityOffenderManager(
           username = comDetails.staffUsername.uppercase(),
           staffIdentifier = comDetails.staffIdentifier,
@@ -41,33 +43,55 @@ class StaffService(
           surname = comDetails.surname,
         ),
       )
-    }
 
-    if (comResult.count() > 1) {
-      log.warn(
-        "More then one COM record found for staffId {} username {}",
-        comDetails.staffIdentifier,
-        comDetails.staffUsername,
-      )
-    }
-
-    val com = comResult.first() as CommunityOffenderManager
-
-    // only update entity if data is different
-    if (com.isUpdate(comDetails)) {
-      return this.staffRepository.saveAndFlush(
-        com.copy(
-          staffIdentifier = comDetails.staffIdentifier,
-          username = comDetails.staffUsername.uppercase(),
-          email = comDetails.staffEmail,
-          forename = comDetails.forename,
-          surname = comDetails.surname,
-          lastUpdatedTimestamp = LocalDateTime.now(),
+      telemetryClient.trackEvent(
+        OFFENDER_MANAGER_CHANGED,
+        mapOf(
+          "STAFF-IDENTIFIER" to comDetails.staffIdentifier.toString(),
+          "USERNAME" to comDetails.staffUsername.uppercase(),
+          "EMAIL" to comDetails.staffEmail,
+          "FORENAME" to comDetails.forename,
+          "SURNAME" to comDetails.surname,
         ),
+        null,
       )
-    }
+    } else {
+      if (comResult.count() > 1) {
+        log.warn(
+          "More then one COM record found for staffId {} username {}",
+          comDetails.staffIdentifier,
+          comDetails.staffUsername,
+        )
+      }
 
-    return com
+      val com = comResult.first() as CommunityOffenderManager
+
+      // only update entity if data is different
+      if (com.isUpdate(comDetails)) {
+        staffRepository.saveAndFlush(
+          com.copy(
+            staffIdentifier = comDetails.staffIdentifier,
+            username = comDetails.staffUsername.uppercase(),
+            email = comDetails.staffEmail,
+            forename = comDetails.forename,
+            surname = comDetails.surname,
+            lastUpdatedTimestamp = LocalDateTime.now(),
+          ),
+        )
+
+        telemetryClient.trackEvent(
+          OFFENDER_MANAGER_CHANGED,
+          mapOf(
+            "STAFF-IDENTIFIER" to comDetails.staffIdentifier.toString(),
+            "USERNAME" to comDetails.staffUsername.uppercase(),
+            "EMAIL" to comDetails.staffEmail,
+            "FORENAME" to comDetails.forename,
+            "SURNAME" to comDetails.surname,
+          ),
+          null,
+        )
+      }
+    }
   }
 
   private fun CommunityOffenderManager.isUpdate(comDetails: UpdateCom) =
