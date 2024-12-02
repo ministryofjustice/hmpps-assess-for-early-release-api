@@ -29,6 +29,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -266,6 +267,7 @@ object TestData {
     Name(forename = "forename", surname = "surname"),
     team = Team(code = "team 1", "a tgeam"),
     provider = Provider(code = "probationArea-code-1", description = "probationArea-description-1"),
+    username = "username",
   )
 
   fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) =
@@ -276,4 +278,14 @@ object TestData {
       forename = deliusOffenderManager.name.forename,
       surname = deliusOffenderManager.name.surname,
     )
+
+  fun aUpdateCom(deliusOffenderManager: DeliusOffenderManager) = deliusOffenderManager.username?.let {
+    UpdateCom(
+      staffIdentifier = deliusOffenderManager.id,
+      staffUsername = it,
+      staffEmail = deliusOffenderManager.email,
+      forename = deliusOffenderManager.name.forename,
+      surname = deliusOffenderManager.name.surname,
+    )
+  }
 }

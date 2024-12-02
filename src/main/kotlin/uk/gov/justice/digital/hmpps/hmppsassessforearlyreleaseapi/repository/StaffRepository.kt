@@ -8,4 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Staff
 @Repository
 interface StaffRepository : JpaRepository<Staff, Long> {
   fun findByStaffIdentifier(staffIdentifier: Long): CommunityOffenderManager?
+
+  fun findByStaffIdentifierOrUsernameIgnoreCase(staffIdentifier: Long, username: String): List<CommunityOffenderManager?>
 }
