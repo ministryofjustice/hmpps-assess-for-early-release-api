@@ -10,5 +10,5 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 interface AssessmentRepository : JpaRepository<Assessment, Long> {
   fun findByOffender(offender: Offender): List<Assessment>
 
-  fun findByResponsibleComStaffIdentifierAndStatusIn(staffId: Long, status: List<AssessmentStatus>): List<Assessment>
+  fun findByResponsibleComStaffCodeAndStatusIn(staffCode: String, status: List<AssessmentStatus>): List<Assessment>
 }

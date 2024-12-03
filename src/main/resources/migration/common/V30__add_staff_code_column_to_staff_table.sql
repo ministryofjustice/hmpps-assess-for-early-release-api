@@ -1,0 +1,1 @@
+ALTER TABLE staff ADD COLUMN staff_code VARCHAR(10) NOT NULL;

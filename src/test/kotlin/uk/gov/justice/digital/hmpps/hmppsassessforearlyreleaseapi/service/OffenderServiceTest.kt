@@ -21,7 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
@@ -72,13 +72,13 @@ class OffenderServiceTest {
       anOffender().currentAssessment().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     whenever(
-      assessmentRepository.findByResponsibleComStaffIdentifierAndStatusIn(
-        STAFF_ID,
+      assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(
+        STAFF_CODE,
         listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
       ),
     ).thenReturn(listOf(assessment1, assessment2))
 
-    val caseload = service.getComCaseload(STAFF_ID)
+    val caseload = service.getComCaseload(STAFF_CODE)
     assertThat(caseload.size).isEqualTo(2)
     assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
       assessment1.offender.bookingId,
@@ -133,10 +133,10 @@ class OffenderServiceTest {
     val communityOffenderManagerCaptor = ArgumentCaptor.forClass(CommunityOffenderManager::class.java)
     verify(staffRepository).save(communityOffenderManagerCaptor.capture())
     assertThat(communityOffenderManagerCaptor.value)
-      .extracting("staffIdentifier", "username", "email", "forename", "surname")
+      .extracting("staffCode", "username", "email", "forename", "surname")
       .isEqualTo(
         listOf(
-          communityOffenderManager.staffIdentifier,
+          communityOffenderManager.staffCode,
           communityOffenderManager.username,
           communityOffenderManager.email,
           communityOffenderManager.forename,
@@ -167,7 +167,7 @@ class OffenderServiceTest {
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
 
     val communityOffenderManager = aCommunityOffenderManager(offenderManager)
-    whenever(staffRepository.findByStaffIdentifier(offenderManager.id)).thenReturn(communityOffenderManager)
+    whenever(staffRepository.findByStaffCode(offenderManager.code)).thenReturn(communityOffenderManager)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 

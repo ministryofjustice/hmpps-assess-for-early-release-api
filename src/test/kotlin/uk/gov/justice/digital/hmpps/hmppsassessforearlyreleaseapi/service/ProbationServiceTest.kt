@@ -65,7 +65,7 @@ class ProbationServiceTest {
     aDeliusOffenderManager.username?.trim()?.let { verify(deliusApiClient).assignDeliusRole(it.uppercase()) }
     aDeliusOffenderManager.username?.let {
       UpdateCom(
-        staffIdentifier = aDeliusOffenderManager.id,
+        staffCode = aDeliusOffenderManager.code,
         staffUsername = it,
         staffEmail = aDeliusOffenderManager.email,
         forename = aDeliusOffenderManager.name.forename,

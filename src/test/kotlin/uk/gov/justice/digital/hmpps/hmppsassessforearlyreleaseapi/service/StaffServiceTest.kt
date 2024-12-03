@@ -41,16 +41,16 @@ class StaffServiceTest {
       val aCommunityOffenderManager = aCommunityOffenderManager(aDeliusOffenderManager)
       val aUpdateCom = aUpdateCom(aDeliusOffenderManager)!!
       val expectedCom = aCommunityOffenderManager.copy(
-        staffIdentifier = 3000,
+        staffCode = "STAFF1",
         username = "JBLOGGS",
         email = "jbloggs123@probation.gov.uk",
       )
 
-      whenever(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(any(), any()))
+      whenever(staffRepository.findByStaffCodeOrUsernameIgnoreCase(any(), any()))
         .thenReturn(
           listOf(
             expectedCom.copy(
-              staffIdentifier = 2000,
+              staffCode = "STAFF1",
               username = "joebloggs",
               email = "jbloggs@probation.gov.uk",
             ),
@@ -58,7 +58,7 @@ class StaffServiceTest {
         )
 
       val comDetails = aUpdateCom.copy(
-        staffIdentifier = 3000,
+        staffCode = "STAFF1",
         staffUsername = "jbloggs",
         staffEmail = "jbloggs123@probation.gov.uk",
       )
@@ -66,7 +66,7 @@ class StaffServiceTest {
       service.updateComDetails(comDetails)
 
       argumentCaptor<CommunityOffenderManager>().apply {
-        verify(staffRepository, times(1)).findByStaffIdentifierOrUsernameIgnoreCase(3000, "jbloggs")
+        verify(staffRepository, times(1)).findByStaffCodeOrUsernameIgnoreCase("STAFF1", "jbloggs")
         verify(staffRepository, times(1)).saveAndFlush(capture())
 
         assertThat(firstValue).usingRecursiveComparison().ignoringFields("lastUpdatedTimestamp")
@@ -80,24 +80,24 @@ class StaffServiceTest {
       val aCommunityOffenderManager = aCommunityOffenderManager(aDeliusOffenderManager)
       val aUpdateCom = aUpdateCom(aDeliusOffenderManager)!!
 
-      whenever(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(any(), any()))
+      whenever(staffRepository.findByStaffCodeOrUsernameIgnoreCase(any(), any()))
         .thenReturn(
           listOf(
             aCommunityOffenderManager.copy(
-              staffIdentifier = 2000,
+              staffCode = "STAFF1",
               username = "joebloggs",
             ),
           ),
         )
 
       val comDetails = aUpdateCom.copy(
-        staffIdentifier = 2000,
+        staffCode = "STAFF1",
         staffUsername = "JOEBLOGGS",
       )
 
       service.updateComDetails(comDetails)
 
-      verify(staffRepository, times(1)).findByStaffIdentifierOrUsernameIgnoreCase(2000, "JOEBLOGGS")
+      verify(staffRepository, times(1)).findByStaffCodeOrUsernameIgnoreCase("STAFF1", "JOEBLOGGS")
       verify(staffRepository, times(0)).saveAndFlush(any())
     }
 
@@ -108,20 +108,20 @@ class StaffServiceTest {
       val aUpdateCom = aUpdateCom(aDeliusOffenderManager)!!
 
       val expectedCom = aCommunityOffenderManager.copy(
-        staffIdentifier = 3000,
+        staffCode = "STAFF1",
         username = "JBLOGGS",
         email = "jbloggs123@probation.gov.uk",
       )
 
       whenever(
-        staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
+        staffRepository.findByStaffCodeOrUsernameIgnoreCase(
           any(),
           any(),
         ),
       ).thenReturn(emptyList())
 
       val comDetails = aUpdateCom.copy(
-        staffIdentifier = 3000,
+        staffCode = "STAFF1",
         staffUsername = "jbloggs",
         staffEmail = "jbloggs123@probation.gov.uk",
       )
@@ -129,7 +129,7 @@ class StaffServiceTest {
       service.updateComDetails(comDetails)
 
       argumentCaptor<CommunityOffenderManager>().apply {
-        verify(staffRepository, times(1)).findByStaffIdentifierOrUsernameIgnoreCase(3000, "jbloggs")
+        verify(staffRepository, times(1)).findByStaffCodeOrUsernameIgnoreCase("STAFF1", "jbloggs")
         verify(staffRepository, times(1)).saveAndFlush(capture())
 
         assertThat(firstValue).usingRecursiveComparison().ignoringFields("id", "lastUpdatedTimestamp")
@@ -138,22 +138,22 @@ class StaffServiceTest {
     }
 
     @Test
-    fun `updates existing COM with new staffIdentifier`() {
+    fun `updates existing COM with new staffCode`() {
       val aDeliusOffenderManager = aDeliusOffenderManager()
       val aCommunityOffenderManager = aCommunityOffenderManager(aDeliusOffenderManager)
       val aUpdateCom = aUpdateCom(aDeliusOffenderManager)!!
 
       val expectedCom = aCommunityOffenderManager.copy(
-        staffIdentifier = 2001,
+        staffCode = "STAFF1",
         username = "JOEBLOGGS",
         email = "jbloggs123@probation.gov.uk",
       )
 
-      whenever(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(any(), any()))
+      whenever(staffRepository.findByStaffCodeOrUsernameIgnoreCase(any(), any()))
         .thenReturn(
           listOf(
             aCommunityOffenderManager.copy(
-              staffIdentifier = 2000,
+              staffCode = "STAFF1",
               username = "JOEBLOGGS",
               email = "jbloggs@probation.gov.uk",
             ),
@@ -161,7 +161,7 @@ class StaffServiceTest {
         )
 
       val comDetails = aUpdateCom.copy(
-        staffIdentifier = 2001,
+        staffCode = "STAFF1",
         staffUsername = "JOEBLOGGS",
         staffEmail = "jbloggs123@probation.gov.uk",
       )
@@ -169,7 +169,7 @@ class StaffServiceTest {
       service.updateComDetails(comDetails)
 
       argumentCaptor<CommunityOffenderManager>().apply {
-        verify(staffRepository, times(1)).findByStaffIdentifierOrUsernameIgnoreCase(2001, "JOEBLOGGS")
+        verify(staffRepository, times(1)).findByStaffCodeOrUsernameIgnoreCase("STAFF1", "JOEBLOGGS")
         verify(staffRepository, times(1)).saveAndFlush(capture())
 
         assertThat(firstValue).usingRecursiveComparison().ignoringFields("lastUpdatedTimestamp")

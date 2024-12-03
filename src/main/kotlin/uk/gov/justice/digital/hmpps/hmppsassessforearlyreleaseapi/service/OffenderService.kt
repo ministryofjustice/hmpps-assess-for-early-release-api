@@ -41,9 +41,9 @@ class OffenderService(
   }
 
   @Transactional
-  fun getComCaseload(staffId: Long): List<OffenderSummary> {
-    val assessments = assessmentRepository.findByResponsibleComStaffIdentifierAndStatusIn(
-      staffId,
+  fun getComCaseload(staffCode: String): List<OffenderSummary> {
+    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(
+      staffCode,
       listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
     )
     return assessments.map { assessment ->
@@ -91,7 +91,7 @@ class OffenderService(
     )
 
     val communityOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)?.let {
-      staffRepository.findByStaffIdentifier(it.id) ?: createCommunityOffenderManager(it)
+      staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
     }
 
     val assessment = Assessment(
@@ -148,7 +148,7 @@ class OffenderService(
   private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
     staffRepository.save(
       CommunityOffenderManager(
-        staffIdentifier = offenderManager.id,
+        staffCode = offenderManager.code,
         username = offenderManager.username,
         email = offenderManager.email,
         forename = offenderManager.name.forename,

@@ -51,7 +51,7 @@ object TestData {
   const val SURNAME = "Smith"
   const val PRISON_ID = "AFG"
   const val PRISON_NAME = "Birmingham (HMP)"
-  const val STAFF_ID = 629L
+  const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
@@ -272,7 +272,7 @@ object TestData {
 
   fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) =
     CommunityOffenderManager(
-      staffIdentifier = deliusOffenderManager.id,
+      staffCode = deliusOffenderManager.code,
       username = deliusOffenderManager.username,
       email = deliusOffenderManager.email,
       forename = deliusOffenderManager.name.forename,
@@ -281,7 +281,7 @@ object TestData {
 
   fun aUpdateCom(deliusOffenderManager: DeliusOffenderManager) = deliusOffenderManager.username?.let {
     UpdateCom(
-      staffIdentifier = deliusOffenderManager.id,
+      staffCode = deliusOffenderManager.code,
       staffUsername = it,
       staffEmail = deliusOffenderManager.email,
       forename = deliusOffenderManager.name.forename,
