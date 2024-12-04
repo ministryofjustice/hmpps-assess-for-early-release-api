@@ -79,7 +79,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("eligibility-and-suitability-view"), true)
+        .expectBody().json(serializedContent("eligibility-and-suitability-view"))
     }
   }
 
@@ -144,7 +144,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("eligibility-criterion-view"), true)
+        .expectBody().json(serializedContent("eligibility-criterion-view"))
     }
   }
 
@@ -209,7 +209,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("suitability-criterion-view"), true)
+        .expectBody().json(serializedContent("suitability-criterion-view"))
     }
   }
 

@@ -71,6 +71,67 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
       ),
     ],
   )
-  fun getResidentialChecksView(@Parameter(required = true) @PathVariable prisonNumber: String, @Parameter(required = true) @PathVariable requestId: Long) =
+  fun getResidentialChecksView(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+  ) =
     residentialChecksService.getResidentialChecksView(prisonNumber, requestId)
+
+  @GetMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/residential-checks/tasks/{taskCode}")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @Operation(
+    summary = "Returns details of a residential checks task for an address check request",
+    description = "Returns details of a residential checks task for an address check request",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns details of the residential check task with the specified code for the specified address check request",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ResidentialChecksView::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "An address check request with provided id and prison number does not exist",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getResidentialChecksTask(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+    @Parameter(required = true) @PathVariable taskCode: String,
+  ) =
+    residentialChecksService.getResidentialChecksTask(prisonNumber, requestId, taskCode)
 }

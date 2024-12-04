@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksTaskStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 
 @Schema(
   description = "A view on the progress of the residential checks for an assessment",
@@ -30,5 +30,5 @@ data class ResidentialChecksTaskProgress(
   val taskName: String,
 
   @Schema(description = "Status of this criterion for a specific case", example = "NOT_STARTED")
-  val status: ResidentialChecksTaskStatus,
+  val status: TaskStatus,
 )
