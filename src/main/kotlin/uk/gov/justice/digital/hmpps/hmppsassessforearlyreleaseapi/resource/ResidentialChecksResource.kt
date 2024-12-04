@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentialChecksTaskView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentialChecksView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.ResidentialChecksService
 
@@ -92,7 +93,7 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ResidentialChecksView::class),
+            schema = Schema(implementation = ResidentialChecksTaskView::class),
           ),
         ],
       ),
