@@ -48,7 +48,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
       ).first()?.email,
     ).isEqualTo(OLD_STAFF_EMAIL)
 
-    deliusMockServer.stubGetOffenderManager(code = STAFF_CODE)
+    deliusMockServer.stubGetOffenderManager(CRN, STAFF_CODE)
     deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
 
     val event = HMPPSReceiveProbationEvent(crn = CRN)
@@ -84,7 +84,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     val newStaffCode = "STAFF2"
     assertThat(staffRepository.findByStaffCode(newStaffCode)).isNull()
 
-    deliusMockServer.stubGetOffenderManager(code = newStaffCode)
+    deliusMockServer.stubGetOffenderManager(CRN, newStaffCode)
     deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
 
     val event = HMPPSReceiveProbationEvent(crn = CRN)

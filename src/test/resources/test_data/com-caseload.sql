@@ -1,8 +1,8 @@
-insert into staff (id, staff_identifier, staff_code, forename, surname, username, email, kind)
-values (1, 49, 'STAFF1', 'a', 'com', 'a-com', 'a-com@justice.gov.uk', 'COMMUNITY_OFFENDER_MANAGER');
+insert into staff (id, staff_code, forename, surname, username, email, kind)
+values (1, 'STAFF1', 'a', 'com', 'a-com', 'a-com@justice.gov.uk', 'COMMUNITY_OFFENDER_MANAGER');
 
-insert into staff (id, staff_identifier, staff_code, forename, surname, username, email, kind)
-values (2, 792, 'STAFF2', 'another', 'com', 'another-com', 'another-com@justice.gov.uk', 'COMMUNITY_OFFENDER_MANAGER');
+insert into staff (id, staff_code, forename, surname, username, email, kind)
+values (2, 'STAFF2', 'another', 'com', 'another-com', 'another-com@justice.gov.uk', 'COMMUNITY_OFFENDER_MANAGER');
 
 insert into offender(booking_id, prison_number, prison_id, forename, surname, date_of_birth, hdced, crd, status)
 values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', '2020-10-25 ', '2020-11-14', 'NOT_STARTED'),
