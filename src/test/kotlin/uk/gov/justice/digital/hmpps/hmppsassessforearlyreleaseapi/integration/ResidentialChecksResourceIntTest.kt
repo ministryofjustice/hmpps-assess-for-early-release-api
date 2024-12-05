@@ -62,7 +62,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("residential-checks-view"))
+        .expectBody().json(serializedContent("residential-checks-view"), true)
     }
   }
 
@@ -111,7 +111,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("residential-checks-task"))
+        .expectBody().json(serializedContent("residential-checks-task"), true)
     }
   }
 
