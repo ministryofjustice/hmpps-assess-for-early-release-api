@@ -1,0 +1,107 @@
+{
+  "assessmentSummary": {
+    "forename": "FIRST-1",
+    "surname": "LAST-1",
+    "dateOfBirth": "1978-03-20",
+    "prisonNumber": "A1234AA",
+    "hdced": "2020-10-25",
+    "crd": "2020-11-14",
+    "location": "Birmingham (HMP)",
+    "status": "ELIGIBLE_AND_SUITABLE",
+    "policyVersion": "1.0",
+    "tasks": {
+      "PRISON_CA": [
+        {
+          "name": "ASSESS_ELIGIBILITY",
+          "progress": "COMPLETE"
+        },
+        {
+          "name": "ENTER_CURFEW_ADDRESS",
+          "progress": "READY_TO_START"
+        },
+        {
+          "name": "REVIEW_APPLICATION_AND_SEND_FOR_DECISION",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "PREPARE_FOR_RELEASE",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "PRINT_LICENCE",
+          "progress": "LOCKED"
+        }
+      ]
+    }
+  },
+  "taskConfig": {
+    "code": "assess-this-persons-risk",
+    "name": "Assess this person's risk",
+    "sections": [
+      {
+        "header": "Risk management information",
+        "hintText": null,
+        "questions": [
+          {
+            "code": "pom-prison-behaviour-information",
+            "text": "What information has the POM provided about the behaviour of {offenderForename} while in prison?",
+            "hintText": "Find out if there are any concerns about them being released on HDC or if there have been any changes to their level of risk.",
+            "input": {
+              "type": "TEXT",
+              "options": null
+            }
+          },
+          {
+            "code": "mental-health-treatment-needs",
+            "text": "Does {offenderForename} need any mental health treatment to help manage risk?",
+            "hintText": "If so, it should be considered as part of your risk management planning actions.",
+            "input": {
+              "type": "RADIO",
+              "options": [
+                {
+                  "value": "Yes"
+                },
+                {
+                  "value": "No"
+                }
+              ]
+            }
+          },
+          {
+            "code": "is-there-a-vlo-officer-for-case",
+            "text": "Is there a victim liaison officer (VLO) for this case?",
+            "hintText": null,
+            "input": {
+              "type": "RADIO",
+              "options": [
+                {
+                  "value": "Yes"
+                },
+                {
+                  "value": "No"
+                }
+              ]
+            }
+          },
+          {
+            "code": "information-that-cannot-be-disclosed-to-offender",
+            "text": "Is there any information that cannot be disclosed to {offenderForename}?",
+            "hintText": null,
+            "input": {
+              "type": "RADIO",
+              "options": [
+                {
+                  "value": "Yes"
+                },
+                {
+                  "value": "No"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "taskStatus": "NOT_STARTED"
+}

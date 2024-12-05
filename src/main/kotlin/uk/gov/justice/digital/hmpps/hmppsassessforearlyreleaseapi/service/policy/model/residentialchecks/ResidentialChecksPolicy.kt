@@ -1,6 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks
 
-enum class ResidentialChecksPolicyVersion {
+enum class PolicyVersion {
   V1,
 }
 
@@ -11,7 +11,7 @@ enum class ResidentialChecksStatus {
   SUITABLE,
 }
 
-enum class ResidentialChecksTaskStatus {
+enum class TaskStatus {
   NOT_STARTED,
   IN_PROGRESS,
   UNSUITABLE,
@@ -35,7 +35,7 @@ data class Input(
   val options: List<Option>? = null,
 )
 
-data class Question(
+data class TaskQuestion(
   val code: String,
   val text: String,
   val hintText: String? = null,
@@ -45,22 +45,16 @@ data class Question(
 data class Section(
   val header: String? = null,
   val hintText: String? = null,
-  val questions: List<Question>,
+  val questions: List<TaskQuestion>,
 )
 
-data class ResidentialChecksTask(
+data class Task(
   val code: String,
   val name: String,
   val sections: List<Section>,
 )
 
-data class ResidentialChecks(
-  val tasks: List<ResidentialChecksTask>,
-  val overallStatus: ResidentialChecksStatus,
-  val version: ResidentialChecksPolicyVersion,
-)
-
 data class ResidentialChecksPolicy(
-  val version: ResidentialChecksPolicyVersion,
-  val tasks: List<ResidentialChecksTask>,
+  val version: PolicyVersion,
+  val tasks: List<Task>,
 )
