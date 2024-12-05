@@ -35,7 +35,7 @@ data class Input(
   val options: List<Option>? = null,
 )
 
-data class Question(
+data class TaskQuestion(
   val code: String,
   val text: String,
   val hintText: String? = null,
@@ -45,7 +45,7 @@ data class Question(
 data class Section(
   val header: String? = null,
   val hintText: String? = null,
-  val questions: List<Question>,
+  val questions: List<TaskQuestion>,
 )
 
 data class Task(

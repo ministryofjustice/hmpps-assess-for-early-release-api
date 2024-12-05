@@ -4,10 +4,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.InputType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Option
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksPolicy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Section
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskQuestion
 
 val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   version = PolicyVersion.V1,
@@ -18,7 +18,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
       sections = listOf(
         Section(
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "connected-to-an-electricity-supply",
               text = "Is the address connected to an electricity supply?",
               input = Input(
@@ -34,7 +34,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         Section(
           header = "Informed consent",
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "have-you-visited-this-address-in-person",
               text = "Have you visited this address in person?",
               hintText = "It is not mandatory to do so.",
@@ -46,7 +46,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "main-occupier-given-consent",
               text = "Has the main occupier given informed consent for {offenderForename} to be released here?",
               hintText = """
@@ -79,7 +79,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
             child wellbeing risks of releasing this person to the proposed address.
           """.trimIndent(),
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "date-police-information-requested",
               text = "Enter the date that you requested this information",
               hintText = "For example, 31 3 1980",
@@ -87,7 +87,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 type = InputType.DATE,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "date-police-sent-information",
               text = "Enter the date that the police sent this information",
               hintText = "For example, 31 3 1980",
@@ -95,7 +95,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 type = InputType.DATE,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "police-information-summary",
               text = "Summarise the information the police provided",
               input = Input(
@@ -117,7 +117,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
             child wellbeing risks of releasing this person to the proposed address.
           """.trimIndent(),
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "date-children-services-information-requested",
               text = "Enter the date that you requested this information",
               hintText = "For example, 31 3 1980",
@@ -125,7 +125,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 type = InputType.DATE,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "date-children-services-information-sent",
               text = "Enter the date that children's services sent this information",
               hintText = "For example, 31 3 1980",
@@ -133,7 +133,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 type = InputType.DATE,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "children-services-information-summary",
               text = "Summarise the information children's services provided",
               input = Input(
@@ -151,7 +151,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         Section(
           header = "Risk management information",
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "pom-prison-behaviour-information",
               text = "What information has the POM provided about the behaviour of {offenderForename} while in prison?",
               hintText = "Find out if there are any concerns about them being released on HDC or if there have been any changes to their level of risk.",
@@ -159,7 +159,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 type = InputType.TEXT,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "mental-health-treatment-needs",
               text = "Does {offenderForename} need any mental health treatment to help manage risk?",
               hintText = "If so, it should be considered as part of your risk management planning actions.",
@@ -171,7 +171,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "is-there-a-vlo-officer-for-case",
               text = "Is there a victim liaison officer (VLO) for this case?",
               input = Input(
@@ -182,7 +182,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "information-that-cannot-be-disclosed-to-offender",
               text = "Is there any information that cannot be disclosed to {offenderForename}?",
               input = Input(
@@ -204,7 +204,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
         Section(
           header = "Suitability decision",
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "69b608d0-35e1-44ea-9982-84d1cf6c0045",
               text = "Is this address suitable for {offenderForename} to be released to?",
               input = Input(
@@ -215,14 +215,14 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "e7ac8d33-fc04-4660-9d0e-bf121acf703f",
               text = "Add information to support your decision",
               input = Input(
                 type = InputType.TEXT,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "084edb2b-a52b-4723-b425-0069719fd5f9",
               text = "Do you need to add any more information about {offenderForename} or the proposed address for the monitoring contractor?",
               input = Input(
@@ -233,7 +233,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "cf8ffa01-6c3e-4710-875b-cff5b14e5c95",
               text = "Add more information",
               input = Input(
@@ -250,7 +250,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
       sections = listOf(
         Section(
           questions = listOf(
-            Question(
+            TaskQuestion(
               code = "can-offender-be-managed-safely",
               text = "Can {offenderForename} be managed safely in the community if they are released to the proposed address or CAS area?",
               input = Input(
@@ -261,14 +261,14 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 ),
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "information-to-support-decision",
               text = "Add information to support your decision",
               input = Input(
                 type = InputType.TEXT,
               ),
             ),
-            Question(
+            TaskQuestion(
               code = "any-risk-management-planning-actions-needed",
               text = "Are any risk management planning actions needed prior to release before the address or CAS area can be suitable?",
               input = Input(

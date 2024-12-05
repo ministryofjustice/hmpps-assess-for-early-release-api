@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
 import java.time.LocalDateTime
 
-// TODO : check with Andy illegal state transition?
 @Entity
 @Table(name = "assessment")
 data class Assessment(
