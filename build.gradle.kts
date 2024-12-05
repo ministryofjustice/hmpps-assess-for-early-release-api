@@ -2,7 +2,7 @@ plugins {
   id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.0.8"
   kotlin("plugin.spring") version "2.0.10"
   kotlin("plugin.jpa") version "2.0.10"
-  id("io.gitlab.arturbosch.detekt") version "1.23.6"
+  id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 configurations {
@@ -49,7 +49,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
   implementation("io.opentelemetry:opentelemetry-api:1.40.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.6.0")
-  implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.8.2")
+  implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.9.0")
   implementation("com.tinder.statemachine:statemachine:0.2.0")
 
   // Database dependencies
