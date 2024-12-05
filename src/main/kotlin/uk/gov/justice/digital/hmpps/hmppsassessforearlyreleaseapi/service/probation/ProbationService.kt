@@ -39,7 +39,7 @@ class ProbationService(
 
         staffService.updateComDetails(
           UpdateCom(
-            staffIdentifier = newCom.id,
+            staffCode = newCom.code,
             staffUsername = newCom.username,
             staffEmail = newCom.email,
             forename = newCom.name.forename,

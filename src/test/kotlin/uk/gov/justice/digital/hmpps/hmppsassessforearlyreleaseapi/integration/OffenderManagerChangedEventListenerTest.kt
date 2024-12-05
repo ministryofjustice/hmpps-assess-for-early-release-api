@@ -20,7 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import java.time.Duration
 
-private const val STAFF_IDENTIFIER = 125L
+private const val STAFF_CODE = "STAFF1"
 private const val STAFF_USERNAME = "a-com"
 private const val OLD_STAFF_EMAIL = "a-com@justice.gov.uk"
 private const val NEW_STAFF_EMAIL = "staff-code-1-com@justice.gov.uk"
@@ -42,13 +42,13 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
   )
   fun `probation received event should update staff`() {
     assertThat(
-      staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
-        STAFF_IDENTIFIER,
+      staffRepository.findByStaffCodeOrUsernameIgnoreCase(
+        STAFF_CODE,
         STAFF_USERNAME,
       ).first()?.email,
     ).isEqualTo(OLD_STAFF_EMAIL)
 
-    deliusMockServer.stubGetOffenderManager(CRN)
+    deliusMockServer.stubGetOffenderManager(CRN, STAFF_CODE)
     deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
 
     val event = HMPPSReceiveProbationEvent(crn = CRN)
@@ -62,7 +62,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       OFFENDER_MANAGER_CHANGED,
       mapOf(
-        "STAFF-IDENTIFIER" to STAFF_IDENTIFIER.toString(),
+        "STAFF-CODE" to STAFF_CODE,
         "USERNAME" to STAFF_USERNAME.uppercase(),
         "EMAIL" to NEW_STAFF_EMAIL,
         "FORENAME" to "Jimmy",
@@ -71,7 +71,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
       null,
     )
 
-    assertThat(staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(STAFF_IDENTIFIER, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
+    assertThat(staffRepository.findByStaffCodeOrUsernameIgnoreCase(STAFF_CODE, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
 
@@ -81,10 +81,10 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/an-staff.sql",
   )
   fun `should create a new staff record`() {
-    val staffIdentifier = 135L
-    assertThat(staffRepository.findByStaffIdentifier(staffIdentifier)).isNull()
+    val newStaffCode = "STAFF2"
+    assertThat(staffRepository.findByStaffCode(newStaffCode)).isNull()
 
-    deliusMockServer.stubGetOffenderManager(CRN, 135)
+    deliusMockServer.stubGetOffenderManager(CRN, newStaffCode)
     deliusMockServer.stubPutAssignDeliusRole(STAFF_USERNAME.trim().uppercase())
 
     val event = HMPPSReceiveProbationEvent(crn = CRN)
@@ -98,7 +98,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
     verify(telemetryClient).trackEvent(
       OFFENDER_MANAGER_CHANGED,
       mapOf(
-        "STAFF-IDENTIFIER" to staffIdentifier.toString(),
+        "STAFF-CODE" to newStaffCode,
         "USERNAME" to STAFF_USERNAME.uppercase(),
         "EMAIL" to NEW_STAFF_EMAIL,
         "FORENAME" to "Jimmy",
@@ -107,7 +107,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
       null,
     )
 
-    assertThat(staffRepository.findByStaffIdentifier(staffIdentifier)).isNotNull()
+    assertThat(staffRepository.findByStaffCode(newStaffCode)).isNotNull()
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
 

@@ -22,14 +22,14 @@ class StaffService(
 
   /**
    * Check if record already exists. If so, check if any of the details have changed before performing an update.
-   * Check if the username and staffId do not match. This should not happen, unless a Delius account is updated to point
-   * at another linked account using the staffId. In this scenario, we should update the existing record to reflect
-   * the new username and or staffId.
+   * Check if the username and staffCode do not match. This should not happen, unless a Delius account is updated to point
+   * at another linked account using the staffCode. In this scenario, we should update the existing record to reflect
+   * the new username and or staffCode.
    */
   @Transactional
   fun updateComDetails(comDetails: UpdateCom) {
-    val comResult = staffRepository.findByStaffIdentifierOrUsernameIgnoreCase(
-      comDetails.staffIdentifier,
+    val comResult = staffRepository.findByStaffCodeOrUsernameIgnoreCase(
+      comDetails.staffCode,
       comDetails.staffUsername,
     )
 
@@ -37,7 +37,7 @@ class StaffService(
       staffRepository.saveAndFlush(
         CommunityOffenderManager(
           username = comDetails.staffUsername.uppercase(),
-          staffIdentifier = comDetails.staffIdentifier,
+          staffCode = comDetails.staffCode,
           email = comDetails.staffEmail,
           forename = comDetails.forename,
           surname = comDetails.surname,
@@ -47,7 +47,7 @@ class StaffService(
       telemetryClient.trackEvent(
         OFFENDER_MANAGER_CHANGED,
         mapOf(
-          "STAFF-IDENTIFIER" to comDetails.staffIdentifier.toString(),
+          "STAFF-CODE" to comDetails.staffCode,
           "USERNAME" to comDetails.staffUsername.uppercase(),
           "EMAIL" to comDetails.staffEmail,
           "FORENAME" to comDetails.forename,
@@ -58,8 +58,8 @@ class StaffService(
     } else {
       if (comResult.count() > 1) {
         log.warn(
-          "More then one COM record found for staffId {} username {}",
-          comDetails.staffIdentifier,
+          "More then one COM record found for staffCode {} username {}",
+          comDetails.staffCode,
           comDetails.staffUsername,
         )
       }
@@ -70,7 +70,7 @@ class StaffService(
       if (com.isUpdate(comDetails)) {
         staffRepository.saveAndFlush(
           com.copy(
-            staffIdentifier = comDetails.staffIdentifier,
+            staffCode = comDetails.staffCode,
             username = comDetails.staffUsername.uppercase(),
             email = comDetails.staffEmail,
             forename = comDetails.forename,
@@ -82,7 +82,7 @@ class StaffService(
         telemetryClient.trackEvent(
           OFFENDER_MANAGER_CHANGED,
           mapOf(
-            "STAFF-IDENTIFIER" to comDetails.staffIdentifier.toString(),
+            "STAFF-CODE" to comDetails.staffCode,
             "USERNAME" to comDetails.staffUsername.uppercase(),
             "EMAIL" to comDetails.staffEmail,
             "FORENAME" to comDetails.forename,
@@ -99,5 +99,5 @@ class StaffService(
       (comDetails.surname != this.surname) ||
       (comDetails.staffEmail != this.email) ||
       (!comDetails.staffUsername.equals(this.username, ignoreCase = true)) ||
-      (comDetails.staffIdentifier != this.staffIdentifier)
+      (comDetails.staffCode != this.staffCode)
 }

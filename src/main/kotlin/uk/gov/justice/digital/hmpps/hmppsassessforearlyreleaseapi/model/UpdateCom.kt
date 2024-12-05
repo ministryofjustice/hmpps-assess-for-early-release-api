@@ -6,9 +6,9 @@ import jakarta.validation.constraints.NotNull
 @Schema(description = "Request object for updating the COM responsible for an offender")
 data class UpdateCom(
 
-  @Schema(description = "The unique identifier of the COM, retrieved from Delius", example = "22003829")
+  @Schema(description = "The unique code of the COM, retrieved from Delius", example = "22003829")
   @field:NotNull
-  val staffIdentifier: Long,
+  val staffCode: String,
 
   @Schema(description = "The Delius username for the COM", example = "jbloggs")
   @field:NotNull

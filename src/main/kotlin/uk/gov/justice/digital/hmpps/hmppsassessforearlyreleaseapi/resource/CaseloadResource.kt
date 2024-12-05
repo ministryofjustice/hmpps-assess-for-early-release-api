@@ -68,7 +68,7 @@ class CaseloadResource(
   fun getCaseAdminCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
     offenderService.getCaseAdminCaseload(prisonCode)
 
-  @GetMapping("/probation/community-offender-manager/staff-id/{staffId}/caseload")
+  @GetMapping("/probation/community-offender-manager/staff-code/{staffCode}/caseload")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
     summary = "Returns the caseload for a community offender manager.",
@@ -109,6 +109,6 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getComCaseload(@Parameter(required = true) @PathVariable staffId: Long) =
-    offenderService.getComCaseload(staffId)
+  fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) =
+    offenderService.getComCaseload(staffCode)
 }

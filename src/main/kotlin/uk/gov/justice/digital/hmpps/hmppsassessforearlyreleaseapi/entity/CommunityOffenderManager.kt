@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 @DiscriminatorValue(value = "COMMUNITY_OFFENDER_MANAGER")
 class CommunityOffenderManager(
   id: Long = -1,
-  val staffIdentifier: Long,
+  val staffCode: String,
   username: String?,
   email: String?,
   forename: String?,
@@ -25,7 +25,7 @@ class CommunityOffenderManager(
 ) {
   fun copy(
     id: Long = this.id,
-    staffIdentifier: Long = this.staffIdentifier,
+    staffCode: String = this.staffCode,
     username: String? = this.username,
     email: String? = this.email,
     forename: String? = this.forename,
@@ -33,7 +33,7 @@ class CommunityOffenderManager(
     lastUpdatedTimestamp: LocalDateTime = this.lastUpdatedTimestamp,
   ) = CommunityOffenderManager(
     id = id,
-    staffIdentifier = staffIdentifier,
+    staffCode = staffCode,
     username = username,
     email = email,
     forename = forename,

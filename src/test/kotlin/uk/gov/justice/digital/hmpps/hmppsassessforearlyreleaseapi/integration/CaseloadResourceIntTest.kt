@@ -12,9 +12,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 
 private const val PRISON_CODE = "BMI"
-private const val STAFF_ID = 49
+private const val STAFF_CODE = "STAFF1"
 private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
-private const val GET_COM_CASELOAD_URL = "/probation/community-offender-manager/staff-id/$STAFF_ID/caseload"
+private const val GET_COM_CASELOAD_URL = "/probation/community-offender-manager/staff-code/$STAFF_CODE/caseload"
 
 class CaseloadResourceIntTest : SqsIntegrationTestBase() {
 

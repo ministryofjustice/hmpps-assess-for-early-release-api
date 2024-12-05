@@ -23,7 +23,7 @@ class ProbationSearchMockServer : WireMockServer(PROBATION_SEARCH_WIREMOCK_PORT)
                  "offenderManagers": [
                     {
                      "active": true,
-                     "staff": { "code": "staff-code-1"}
+                     "staff": { "code": "STAFF1"}
                     } 
                  ]
                 }
