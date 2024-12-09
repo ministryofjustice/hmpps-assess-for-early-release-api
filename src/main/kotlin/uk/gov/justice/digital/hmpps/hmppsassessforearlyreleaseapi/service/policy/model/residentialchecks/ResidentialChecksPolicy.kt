@@ -31,6 +31,7 @@ data class Option(
 )
 
 data class Input(
+  val name: String,
   val type: InputType,
   val options: List<Option>? = null,
 )
