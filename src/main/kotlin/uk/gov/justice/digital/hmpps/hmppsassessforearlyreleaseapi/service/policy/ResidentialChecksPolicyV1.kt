@@ -22,6 +22,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "connected-to-an-electricity-supply",
               text = "Is the address connected to an electricity supply?",
               input = Input(
+                name = "electricity-supply",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -39,6 +40,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Have you visited this address in person?",
               hintText = "It is not mandatory to do so.",
               input = Input(
+                name = "visited-address",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("I have visited this address and spoken to the main occupier"),
@@ -57,6 +59,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 </ul>
               """.trimIndent(),
               input = Input(
+                name = "main-occupier-consent",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -84,6 +87,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Enter the date that you requested this information",
               hintText = "For example, 31 3 1980",
               input = Input(
+                name = "police-information-requested",
                 type = InputType.DATE,
               ),
             ),
@@ -92,6 +96,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Enter the date that the police sent this information",
               hintText = "For example, 31 3 1980",
               input = Input(
+                name = "police-information-sent",
                 type = InputType.DATE,
               ),
             ),
@@ -99,6 +104,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "police-information-summary",
               text = "Summarise the information the police provided",
               input = Input(
+                name = "police-information-summary",
                 type = InputType.TEXT,
               ),
             ),
@@ -122,6 +128,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Enter the date that you requested this information",
               hintText = "For example, 31 3 1980",
               input = Input(
+                name = "children-services-information-requested",
                 type = InputType.DATE,
               ),
             ),
@@ -130,6 +137,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Enter the date that children's services sent this information",
               hintText = "For example, 31 3 1980",
               input = Input(
+                name = "children-services-information-sent",
                 type = InputType.DATE,
               ),
             ),
@@ -137,6 +145,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "children-services-information-summary",
               text = "Summarise the information children's services provided",
               input = Input(
+                name = "children-services-information-summary",
                 type = InputType.TEXT,
               ),
             ),
@@ -156,6 +165,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "What information has the POM provided about the behaviour of {offenderForename} while in prison?",
               hintText = "Find out if there are any concerns about them being released on HDC or if there have been any changes to their level of risk.",
               input = Input(
+                name = "pom-prison-behaviour-information",
                 type = InputType.TEXT,
               ),
             ),
@@ -164,6 +174,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Does {offenderForename} need any mental health treatment to help manage risk?",
               hintText = "If so, it should be considered as part of your risk management planning actions.",
               input = Input(
+                name = "mental-health-treatment-needs",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -175,6 +186,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "is-there-a-vlo-officer-for-case",
               text = "Is there a victim liaison officer (VLO) for this case?",
               input = Input(
+                name = "vlo-officer-for-case",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -186,6 +198,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "information-that-cannot-be-disclosed-to-offender",
               text = "Is there any information that cannot be disclosed to {offenderForename}?",
               input = Input(
+                name = "information-that-cannot-be-disclosed",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -208,6 +221,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "69b608d0-35e1-44ea-9982-84d1cf6c0045",
               text = "Is this address suitable for {offenderForename} to be released to?",
               input = Input(
+                name = "address-suitable",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -219,6 +233,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "e7ac8d33-fc04-4660-9d0e-bf121acf703f",
               text = "Add information to support your decision",
               input = Input(
+                name = "address-suitable-information",
                 type = InputType.TEXT,
               ),
             ),
@@ -226,6 +241,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "084edb2b-a52b-4723-b425-0069719fd5f9",
               text = "Do you need to add any more information about {offenderForename} or the proposed address for the monitoring contractor?",
               input = Input(
+                name = "additional-information-for-monitoring-contractor",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -237,6 +253,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "cf8ffa01-6c3e-4710-875b-cff5b14e5c95",
               text = "Add more information",
               input = Input(
+                name = "more-information",
                 type = InputType.TEXT,
               ),
             ),
@@ -254,6 +271,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "can-offender-be-managed-safely",
               text = "Can {offenderForename} be managed safely in the community if they are released to the proposed address or CAS area?",
               input = Input(
+                name = "offender-managed-safely",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),
@@ -265,6 +283,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "information-to-support-decision",
               text = "Add information to support your decision",
               input = Input(
+                name = "information-to-support-decision",
                 type = InputType.TEXT,
               ),
             ),
@@ -272,7 +291,12 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "any-risk-management-planning-actions-needed",
               text = "Are any risk management planning actions needed prior to release before the address or CAS area can be suitable?",
               input = Input(
-                type = InputType.TEXT,
+                name = "risk-management-planning-actions-needed",
+                type = InputType.RADIO,
+                options = listOf(
+                  Option("Yes"),
+                  Option("No"),
+                ),
               ),
             ),
           ),
