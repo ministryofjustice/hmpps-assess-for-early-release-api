@@ -111,4 +111,48 @@ class CaseloadResource(
   )
   fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) =
     offenderService.getComCaseload(staffCode)
+
+  @GetMapping("/prison/{prisonCode}/decision-maker/caseload")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @Operation(
+    summary = "Returns the caseload for a decision maker within a prison",
+    description = "Returns a list of offenders that requires approval",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns a list of offenders that requires approval",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
+    offenderService.getDecisionMakerCaseload(prisonCode)
 }

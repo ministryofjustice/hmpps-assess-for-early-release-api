@@ -87,6 +87,39 @@ class OffenderServiceTest {
   }
 
   @Test
+  fun `should get the decision maker case load`() {
+    val assessment1 =
+      anOffender().currentAssessment().copy(status = AssessmentStatus.APPROVED)
+    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_DECISION)
+    whenever(
+      assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(
+        PRISON_ID,
+        listOf(
+          AssessmentStatus.AWAITING_DECISION,
+          AssessmentStatus.AWAITING_REFUSAL,
+          AssessmentStatus.APPROVED,
+          AssessmentStatus.REFUSED,
+          AssessmentStatus.OPTED_OUT,
+          AssessmentStatus.TIMED_OUT,
+          AssessmentStatus.POSTPONED,
+        ),
+      ),
+    ).thenReturn(
+      listOf(
+        assessment1,
+        assessment2,
+      ),
+    )
+
+    val caseload = service.getDecisionMakerCaseload(PRISON_ID)
+    assertThat(caseload.size).isEqualTo(2)
+    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
+      assessment1.offender.bookingId,
+      assessment2.offender.bookingId,
+    )
+  }
+
+  @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {
     val hdced = LocalDate.now().plusDays(6)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)

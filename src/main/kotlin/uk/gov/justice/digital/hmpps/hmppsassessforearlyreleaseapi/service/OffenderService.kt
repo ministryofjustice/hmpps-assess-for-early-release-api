@@ -59,6 +59,31 @@ class OffenderService(
     }
   }
 
+  @Transactional
+  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
+    val decisionMakerStatuses = listOf(
+      AssessmentStatus.AWAITING_DECISION,
+      AssessmentStatus.AWAITING_REFUSAL,
+      AssessmentStatus.APPROVED,
+      AssessmentStatus.REFUSED,
+      AssessmentStatus.OPTED_OUT,
+      AssessmentStatus.TIMED_OUT,
+      AssessmentStatus.POSTPONED,
+    )
+    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, decisionMakerStatuses)
+    return assessments.map { assessment ->
+      val offender = assessment.offender
+      OffenderSummary(
+        offender.prisonNumber,
+        offender.bookingId,
+        offender.forename,
+        offender.surname,
+        offender.hdced,
+        assessment.responsibleCom?.fullName,
+      )
+    }
+  }
+
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonerSearchService.searchPrisonersByNomisIds(listOf(nomisId))
     if (prisoners.isEmpty()) {
