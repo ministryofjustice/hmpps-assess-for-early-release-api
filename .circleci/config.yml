@@ -1,12 +1,7 @@
 version: 2.1
-
 orbs:
   hmpps: ministryofjustice/hmpps@10
-
 parameters:
-  alerts-slack-channel:
-    type: string
-    default: cvl_alerts_security
   releases-slack-channel:
     type: string
     default: the_elephants_devs
@@ -19,7 +14,6 @@ parameters:
   postgres-version:
     type: string
     default: "16.3"
-
 jobs:
   validate:
     executor:
@@ -41,24 +35,23 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
-
   integration-test:
     docker:
-       - image: cimg/openjdk:<< pipeline.parameters.java-version >>
-       - image: localstack/localstack:<< pipeline.parameters.localstack-version >>
-         environment:
-            - SERVICES: sns,sqs
-            - ES_PORT_EXTERNAL: 4571
-            - DEBUG: ${DEBUG- }
-            - DOCKER_HOST: unix:///var/run/docker.sock
-            - AWS_EXECUTION_ENV: True
-            - PERSISTENCE: 1
-       - image: postgres:<< pipeline.parameters.postgres-version >>
-         environment:
-            - POSTGRES_USER: afer
-            - POSTGRES_PASSWORD: dummy
-            - POSTGRES_DB: afer-test-db
-            - PGPORT: 5433
+      - image: cimg/openjdk:<< pipeline.parameters.java-version >>
+      - image: localstack/localstack:<< pipeline.parameters.localstack-version >>
+        environment:
+          - SERVICES: sns,sqs
+          - ES_PORT_EXTERNAL: 4571
+          - DEBUG: ${DEBUG- }
+          - DOCKER_HOST: unix:///var/run/docker.sock
+          - AWS_EXECUTION_ENV: True
+          - PERSISTENCE: 1
+      - image: postgres:<< pipeline.parameters.postgres-version >>
+        environment:
+          - POSTGRES_USER: afer
+          - POSTGRES_PASSWORD: dummy
+          - POSTGRES_DB: afer-test-db
+          - PGPORT: 5433
     steps:
       - run:
           command: |
@@ -86,7 +79,6 @@ jobs:
           path: build/test-results
       - store_artifacts:
           path: build/reports/tests
-
 workflows:
   version: 2
   build-test-and-deploy:
@@ -160,45 +152,3 @@ workflows:
           requires:
             - request-prod-approval
           helm_timeout: 5m
-
-  security:
-    triggers:
-      - schedule:
-          cron: "4 6 * * 1-5"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - hmpps/gradle_owasp_dependency_check:
-          cache_key: "v2_0"
-          jdk_tag: "21.0"
-          slack_channel: << pipeline.parameters.alerts-slack-channel >>
-          context:
-            - hmpps-common-vars
-      - hmpps/trivy_latest_scan:
-          slack_channel: << pipeline.parameters.alerts-slack-channel >>
-          context:
-            - hmpps-common-vars
-      - hmpps/veracode_pipeline_scan:
-          jdk_tag: "21.0"
-          slack_channel: << pipeline.parameters.alerts-slack-channel >>
-          context:
-            - veracode-credentials
-            - hmpps-common-vars
-  security-weekly:
-    triggers:
-      - schedule:
-          cron: "17 6 * * 1"
-          filters:
-            branches:
-              only:
-                - main
-    jobs:
-      - hmpps/veracode_policy_scan:
-          slack_channel: << pipeline.parameters.alerts-slack-channel >>
-          context:
-            - veracode-credentials
-            - hmpps-common-vars
-
-
