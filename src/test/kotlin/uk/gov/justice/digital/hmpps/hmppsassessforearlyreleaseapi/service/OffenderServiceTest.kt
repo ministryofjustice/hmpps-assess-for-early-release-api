@@ -11,9 +11,10 @@ import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -54,7 +55,7 @@ class OffenderServiceTest {
     val offender1 = anOffender()
     val offender2 =
       offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, hdced = offender1.hdced.plusWeeks(12))
-    whenever(offenderRepository.findByPrisonIdAndStatus(PRISON_ID, OffenderStatus.NOT_STARTED)).thenReturn(
+    whenever(offenderRepository.findByPrisonIdAndStatusIn(PRISON_ID, getStatusesForRole(UserRole.PRISON_CA))).thenReturn(
       listOf(
         offender1,
         offender2,
@@ -74,7 +75,7 @@ class OffenderServiceTest {
     whenever(
       assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(
         STAFF_CODE,
-        listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
+        getStatusesForRole(UserRole.PROBATION_COM),
       ),
     ).thenReturn(listOf(assessment1, assessment2))
 
@@ -94,15 +95,7 @@ class OffenderServiceTest {
     whenever(
       assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(
         PRISON_ID,
-        listOf(
-          AssessmentStatus.AWAITING_DECISION,
-          AssessmentStatus.AWAITING_REFUSAL,
-          AssessmentStatus.APPROVED,
-          AssessmentStatus.REFUSED,
-          AssessmentStatus.OPTED_OUT,
-          AssessmentStatus.TIMED_OUT,
-          AssessmentStatus.POSTPONED,
-        ),
+        getStatusesForRole(UserRole.PRISON_DM),
       ),
     ).thenReturn(
       listOf(
