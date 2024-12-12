@@ -11,7 +11,7 @@ hmpps:
       url: "https://sign-in-dev.hmpps.service.justice.gov.uk/auth/oauth/token"
   delius:
     api:
-      url: "https://create-and-vary-a-licence-and-delius-dev.hmpps.service.justice.gov.uk"
+      url: "https://assess-for-early-release-and-delius-dev.hmpps.service.justice.gov.uk"
   prisonersearch:
     api:
       url: "https://prisoner-search-dev.prison.service.justice.gov.uk"

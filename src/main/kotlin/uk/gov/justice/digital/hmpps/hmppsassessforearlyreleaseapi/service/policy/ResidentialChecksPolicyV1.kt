@@ -14,7 +14,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   tasks = listOf(
     Task(
       code = "address-details-and-informed-consent",
-      name = "Address details and informed consent",
+      name = "Check if a curfew address is suitable",
       sections = listOf(
         Section(
           questions = listOf(
@@ -73,7 +73,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
     ),
     Task(
       code = "police-check",
-      name = "Police check",
+      name = "Police checks",
       sections = listOf(
         Section(
           header = "Police checks",
@@ -215,7 +215,6 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
       name = "Suitability decision",
       sections = listOf(
         Section(
-          header = "Suitability decision",
           questions = listOf(
             TaskQuestion(
               code = "69b608d0-35e1-44ea-9982-84d1cf6c0045",
