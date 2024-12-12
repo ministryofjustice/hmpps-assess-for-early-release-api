@@ -38,12 +38,12 @@
   "tasks": [
     {
       "code": "address-details-and-informed-consent",
-      "taskName": "Address details and informed consent",
+      "taskName": "Check if a curfew address is suitable",
       "status": "NOT_STARTED"
     },
     {
       "code": "police-check",
-      "taskName": "Police check",
+      "taskName": "Police checks",
       "status": "NOT_STARTED"
     },
     {

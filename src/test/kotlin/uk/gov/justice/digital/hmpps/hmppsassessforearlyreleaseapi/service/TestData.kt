@@ -53,7 +53,7 @@ object TestData {
   const val PRISON_NAME = "Birmingham (HMP)"
   const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
-  const val RESIDENTIAL_CHECK_TASK_CODE = "address-details-and-informed-consent"
+  const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
     val offender = Offender(
