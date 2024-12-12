@@ -5,10 +5,10 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.OffenderStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
@@ -34,7 +34,7 @@ class OffenderService(
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
-    val offenders = offenderRepository.findByPrisonIdAndStatus(prisonCode, OffenderStatus.NOT_STARTED)
+    val offenders = offenderRepository.findByPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_CA))
     return offenders.map {
       OffenderSummary(it.prisonNumber, it.bookingId, it.forename, it.surname, it.hdced)
     }
@@ -42,10 +42,7 @@ class OffenderService(
 
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummary> {
-    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(
-      staffCode,
-      listOf(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS, AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS),
-    )
+    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
     return assessments.map { assessment ->
       val offender = assessment.offender
       OffenderSummary(
@@ -61,16 +58,7 @@ class OffenderService(
 
   @Transactional
   fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
-    val decisionMakerStatuses = listOf(
-      AssessmentStatus.AWAITING_DECISION,
-      AssessmentStatus.AWAITING_REFUSAL,
-      AssessmentStatus.APPROVED,
-      AssessmentStatus.REFUSED,
-      AssessmentStatus.OPTED_OUT,
-      AssessmentStatus.TIMED_OUT,
-      AssessmentStatus.POSTPONED,
-    )
-    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, decisionMakerStatuses)
+    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
     return assessments.map { assessment ->
       val offender = assessment.offender
       OffenderSummary(

@@ -48,7 +48,7 @@ data class Offender(
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  val status: OffenderStatus = OffenderStatus.NOT_STARTED,
+  val status: AssessmentStatus = AssessmentStatus.NOT_STARTED,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
