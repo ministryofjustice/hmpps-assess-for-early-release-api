@@ -1,17 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.PassEligibilityAndSuitability
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.StartEligibilityAndSuitability
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 
 class AssessmentTest {
@@ -82,8 +84,9 @@ class AssessmentTest {
   fun `records status changes`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
 
-    assessment.performTransition(StartEligibilityAndSuitability)
-    assessment.performTransition(PassEligibilityAndSuitability)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS))
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS))
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE))
 
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
@@ -114,5 +117,20 @@ class AssessmentTest {
       StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT),
       StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE),
     )
+  }
+
+  @Test
+  fun `handles error side effect`() {
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
+
+    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE)) }
+      .isInstanceOf(IllegalStateException::class.java)
+      .hasMessage("Unable to transition to Eligible from NOT_STARTED directly")
+
+    assertThat(assessment.status).isEqualTo(NOT_STARTED)
+    assertThat(assessment.previousStatus).isNull()
+
+    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    assertThat(statusChangeEvents).isEmpty()
   }
 }

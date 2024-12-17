@@ -111,6 +111,10 @@ data class Assessment(
       }
 
       is Valid -> {
+        transition.sideEffect
+          ?.takeIf { it is SideEffect.Error }
+          ?.run { error((this as SideEffect.Error).message) }
+
         log.info("Transitioning Assessment: '${this.id}', triggered by event: '${transition.event.label()}' from '${transition.fromState.label()}' to '${transition.toState.label()}'")
         if (currentStatus != transition.toState) {
           assessmentEvents.add(
