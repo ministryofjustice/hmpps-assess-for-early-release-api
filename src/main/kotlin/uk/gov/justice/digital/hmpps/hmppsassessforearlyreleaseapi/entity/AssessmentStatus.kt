@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 
 enum class AssessmentStatus {
   NOT_STARTED {
@@ -351,10 +352,13 @@ abstract class AssessmentState {
   }
 }
 
+sealed interface SideEffect {
+  data class Error(val message: String) : SideEffect
+}
+
 sealed class AssessmentLifecycleEvent {
-  object StartEligibilityAndSuitability : AssessmentLifecycleEvent()
-  object PassEligibilityAndSuitability : AssessmentLifecycleEvent()
-  object FailEligibilityAndSuitability : AssessmentLifecycleEvent()
+  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) :
+    AssessmentLifecycleEvent()
   object SubmitForAddressChecks : AssessmentLifecycleEvent()
   object StartAddressChecks : AssessmentLifecycleEvent()
   object CompleteAddressChecks : AssessmentLifecycleEvent()
@@ -370,15 +374,17 @@ sealed class AssessmentLifecycleEvent {
 }
 
 val assessmentStateMachine =
-  StateMachine.create<AssessmentState, AssessmentLifecycleEvent, Unit> {
+  StateMachine.create<AssessmentState, AssessmentLifecycleEvent, SideEffect> {
     initialState(AssessmentState.NotStarted)
 
     state<AssessmentState.NotStarted> {
-      on<AssessmentLifecycleEvent.StartEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibilityAndSuitabilityInProgress)
-      }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> transitionTo(AssessmentState.EligibilityAndSuitabilityInProgress)
+          EligibilityStatus.ELIGIBLE -> dontTransition(SideEffect.Error("Unable to transition to Eligible from ${this.status} directly"))
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Timeout> {
         transitionTo(AssessmentState.TimedOut)
@@ -386,11 +392,13 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.EligibilityAndSuitabilityInProgress> {
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
-      }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> transitionTo(AssessmentState.EligibleAndSuitable)
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Timeout> {
         transitionTo(AssessmentState.TimedOut)
@@ -398,6 +406,14 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.EligibleAndSuitable> {
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> transitionTo(AssessmentState.EligibilityAndSuitabilityInProgress)
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
+      }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingAddressAndRiskChecks)
       }
@@ -413,8 +429,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.StartAddressChecks> {
         transitionTo(AssessmentState.AddressAndRiskChecksInProgress)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Timeout> {
         transitionTo(AssessmentState.TimedOut)
@@ -443,8 +464,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.SubmitForDecision> {
         transitionTo(AssessmentState.AwaitingDecision)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Postpone> {
         transitionTo(AssessmentState.Postponed)
@@ -464,8 +490,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.Refuse> {
         transitionTo(AssessmentState.Refused)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Postpone> {
         transitionTo(AssessmentState.Postponed)
@@ -482,8 +513,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingPreReleaseChecks)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Postpone> {
         transitionTo(AssessmentState.Postponed)
@@ -500,8 +536,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.CompleteAddressChecks> {
         transitionTo(AssessmentState.PassedPreReleaseChecks)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Postpone> {
         transitionTo(AssessmentState.Postponed)
@@ -518,8 +559,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.ReleaseOnHDC> {
         transitionTo(AssessmentState.ReleasedOnHDC)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Postpone> {
         transitionTo(AssessmentState.Postponed)
@@ -533,14 +579,16 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.AddressUnsuitable> {
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
-      }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingRefusal)
       }
-      on<AssessmentLifecycleEvent.FailEligibilityAndSuitability> {
-        transitionTo(AssessmentState.IneligibleOrUnsuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.Timeout> {
         transitionTo(AssessmentState.TimedOut)
@@ -557,8 +605,13 @@ val assessmentStateMachine =
       on<AssessmentLifecycleEvent.Refuse> {
         transitionTo(AssessmentState.Refused)
       }
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
+          EligibilityStatus.IN_PROGRESS -> dontTransition()
+          EligibilityStatus.ELIGIBLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingAddressAndRiskChecks)
@@ -566,11 +619,13 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.IneligibleOrUnsuitable> {
-      on<AssessmentLifecycleEvent.StartEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibilityAndSuitabilityInProgress)
-      }
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
+      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
+        when (it.eligibilityStatus) {
+          EligibilityStatus.INELIGIBLE -> dontTransition()
+          EligibilityStatus.IN_PROGRESS -> transitionTo(AssessmentState.EligibilityAndSuitabilityInProgress)
+          EligibilityStatus.ELIGIBLE -> transitionTo(AssessmentState.EligibleAndSuitable)
+          else -> error("Unexpected eligibility status: $it")
+        }
       }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingAddressAndRiskChecks)
@@ -605,18 +660,12 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.Refused> {
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
-      }
       on<AssessmentLifecycleEvent.Timeout> {
         transitionTo(AssessmentState.TimedOut)
       }
     }
 
     state<AssessmentState.TimedOut> {
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
-      }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingAddressAndRiskChecks)
       }
@@ -665,9 +714,6 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.OptedOut> {
-      on<AssessmentLifecycleEvent.PassEligibilityAndSuitability> {
-        transitionTo(AssessmentState.EligibleAndSuitable)
-      }
       on<AssessmentLifecycleEvent.SubmitForAddressChecks> {
         transitionTo(AssessmentState.AwaitingAddressAndRiskChecks)
       }
@@ -706,6 +752,7 @@ val assessmentStateMachine =
 sealed interface TaskProgress {
   val task: Task
   val status: (assessment: Assessment) -> TaskStatus
+
   class Fixed(override val task: Task, status: TaskStatus) : TaskProgress {
     override val status: (assessment: Assessment) -> TaskStatus = { status }
   }
