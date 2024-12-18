@@ -29,7 +29,7 @@ class SuitabilityDecisionTaskAnswers(
     "addressCheckRequest=${addressCheckRequest.id}, " +
     "addressSuitable=${answers.addressSuitable}, " +
     "addressSuitableInformation=${answers.addressSuitableInformation}, " +
-    "additionInformationNeeded=${answers.additionInformationNeeded}, " +
+    "additionalInformationNeeded=${answers.additionalInformationNeeded}, " +
     "moreInformation=${answers.moreInformation}, " +
     ")"
 }
@@ -37,7 +37,7 @@ class SuitabilityDecisionTaskAnswers(
 data class SuitabilityDecisionAnswers(
   val addressSuitable: Boolean,
   val addressSuitableInformation: String,
-  val additionInformationNeeded: Boolean,
+  val additionalInformationNeeded: Boolean,
   val moreInformation: String,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(

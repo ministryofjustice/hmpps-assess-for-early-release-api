@@ -56,11 +56,11 @@ class ResidentialChecksService(
 
   fun saveResidentialChecksTaskAnswers(
     prisonNumber: String,
-    requestId: Long,
+    addressCheckRequestId: Long,
     saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest,
   ): ResidentialChecksTaskAnswersSummary {
     val taskVersion = PolicyVersion.V1.name
-    val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+    val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(addressCheckRequestId)
 
     val entity = transformToAnswersEntity(
       addressCheckRequest!!,
@@ -72,7 +72,7 @@ class ResidentialChecksService(
     val answersEntity = residentialChecksTaskAnswerRepository.save(entity)
     return ResidentialChecksTaskAnswersSummary(
       answersId = answersEntity.id,
-      addressCheckRequestId = requestId,
+      addressCheckRequestId = addressCheckRequestId,
       taskCode = answersEntity.taskCode,
       answers = saveTaskAnswersRequest.answers,
       taskVersion = answersEntity.taskVersion,

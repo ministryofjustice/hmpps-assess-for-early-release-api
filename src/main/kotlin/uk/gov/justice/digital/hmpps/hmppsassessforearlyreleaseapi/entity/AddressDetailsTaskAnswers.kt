@@ -28,14 +28,14 @@ class AddressDetailsTaskAnswers(
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
     "electricitySupply=${answers.electricitySupply}, " +
-    "addressVisited=${answers.addressVisited}, " +
+    "visitedAddress=${answers.visitedAddress}, " +
     "mainOccupierConsentGiven=${answers.mainOccupierConsentGiven}, " +
     ")"
 }
 
 data class AddressDetailsAnswers(
   val electricitySupply: Boolean,
-  val addressVisited: Boolean,
+  val visitedAddress: Boolean,
   val mainOccupierConsentGiven: Boolean,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(

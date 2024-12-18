@@ -29,15 +29,15 @@ class ChildrenServicesChecksTaskAnswers(
   override fun toString(): String = "ChildrenServicesTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
-    "dateRequested=${answers.dateRequested}, " +
-    "dateSent=${answers.dateSent}, " +
+    "informationRequested=${answers.informationRequested}, " +
+    "informationSent=${answers.informationSent}, " +
     "informationSummary=${answers.informationSummary}, " +
     ")"
 }
 
 data class ChildrenServicesChecksAnswers(
-  val dateRequested: LocalDate,
-  val dateSent: LocalDate,
+  val informationRequested: LocalDate,
+  val informationSent: LocalDate,
   val informationSummary: String,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(

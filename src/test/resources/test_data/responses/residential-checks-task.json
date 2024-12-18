@@ -47,7 +47,7 @@
             "text": "What information has the POM provided about the behaviour of {offenderForename} while in prison?",
             "hintText": "Find out if there are any concerns about them being released on HDC or if there have been any changes to their level of risk.",
             "input": {
-              "name": "pom-prison-behaviour-information",
+              "name": "pomPrisonBehaviourInformation",
               "type": "TEXT",
               "options": null
             }
@@ -57,7 +57,7 @@
             "text": "Does {offenderForename} need any mental health treatment to help manage risk?",
             "hintText": "If so, it should be considered as part of your risk management planning actions.",
             "input": {
-              "name": "mental-health-treatment-needs",
+              "name": "mentalHealthTreatmentNeeds",
               "type": "RADIO",
               "options": [
                 {
@@ -74,7 +74,7 @@
             "text": "Is there a victim liaison officer (VLO) for this case?",
             "hintText": null,
             "input": {
-              "name": "vlo-officer-for-case",
+              "name": "vloOfficerForCase",
               "type": "RADIO",
               "options": [
                 {
@@ -91,7 +91,7 @@
             "text": "Is there any information that cannot be disclosed to {offenderForename}?",
             "hintText": null,
             "input": {
-              "name": "information-that-cannot-be-disclosed",
+              "name": "informationThatCannotBeDisclosed",
               "type": "RADIO",
               "options": [
                 {

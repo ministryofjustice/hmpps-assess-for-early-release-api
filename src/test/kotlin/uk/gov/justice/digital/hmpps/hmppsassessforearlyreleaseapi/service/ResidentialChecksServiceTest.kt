@@ -8,6 +8,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
@@ -74,17 +75,15 @@ class ResidentialChecksServiceTest {
 
   @Test
   fun `should save residential checks task answers`() {
-//    val addressDetailsTaskAnswers =
-//      AddressDetailsTaskAnswers(
-//        1,
-//        2,
-//        AddressDetailsAnswers(
-//          electricitySupply = true,
-//          addressVisited = false,
-//          mainOccupierConsentGiven = true,
-//        ),
-//      )
+    val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
+      taskCode = "make-a-risk-management-decision",
+      answers = mapOf("can-offender-be-managed-safely" to "yes"),
+    )
 
-//    residentialChecksService.saveResidentialChecksTaskAnswers(addressDetailsTaskAnswers)
+//    residentialChecksService.saveResidentialChecksTaskAnswers(
+//      PRISON_NUMBER,
+//      ADDRESS_REQUEST_ID,
+//      saveTaskAnswersRequest,
+//    )
   }
 }

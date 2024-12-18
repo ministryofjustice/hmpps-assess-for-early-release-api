@@ -27,10 +27,10 @@ class AssessPersonsRiskTaskAnswers(
   override fun toString(): String = "AssessPersonsRiskTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
-    "infoRequested=${answers.pomPrisonBehaviourInformation}, " +
-    "informationSent=${answers.mentalHealthTreatmentNeeds}, " +
-    "informationSummary=${answers.mentalHealthTreatmentNeeds}, " +
-    "informationSummary=${answers.infoThatCannotBeDisclosedToOffender}, " +
+    "pomPrisonBehaviourInformation=${answers.pomPrisonBehaviourInformation}, " +
+    "mentalHealthTreatmentNeeds=${answers.mentalHealthTreatmentNeeds}, " +
+    "vloOfficerForCase=${answers.vloOfficerForCase}, " +
+    "informationThatCannotBeDisclosed=${answers.informationThatCannotBeDisclosed}, " +
     ")"
 }
 
@@ -38,7 +38,7 @@ data class AssessPersonsRiskAnswers(
   val pomPrisonBehaviourInformation: String,
   val mentalHealthTreatmentNeeds: Boolean,
   val vloOfficerForCase: Boolean,
-  val infoThatCannotBeDisclosedToOffender: Boolean,
+  val informationThatCannotBeDisclosed: Boolean,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,

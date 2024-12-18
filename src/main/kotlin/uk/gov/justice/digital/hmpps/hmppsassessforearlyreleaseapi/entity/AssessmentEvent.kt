@@ -38,7 +38,7 @@ abstract class AssessmentEvent(
   val assessment: Assessment,
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "eventType", insertable = false, updatable = false)
+  @Column(name = "event_type", insertable = false, updatable = false)
   var eventType: AssessmentEventType,
 
   val eventTime: LocalDateTime = LocalDateTime.now(),

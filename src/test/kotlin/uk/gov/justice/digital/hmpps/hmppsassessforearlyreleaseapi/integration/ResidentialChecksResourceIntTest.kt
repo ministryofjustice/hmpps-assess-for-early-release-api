@@ -136,11 +136,10 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
       val addressDetailsTaskAnswersRequest =
         SaveResidentialChecksTaskAnswersRequest(
-          1,
           taskCode = "address-details-and-informed-consent",
           answers = mapOf(
             "electricitySupply" to true,
-            "addressVisited" to false,
+            "visitedAddress" to false,
             "mainOccupierConsentGiven" to true,
           ),
         )
