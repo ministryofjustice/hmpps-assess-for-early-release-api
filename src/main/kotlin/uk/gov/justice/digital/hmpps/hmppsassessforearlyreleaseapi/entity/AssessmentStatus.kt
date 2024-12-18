@@ -2,11 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import com.tinder.StateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.APPROVE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONFIRM_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CREATE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.OPT_IN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
@@ -126,6 +129,12 @@ enum class AssessmentStatus {
   },
 
   AWAITING_DECISION {
+    override fun tasks() = mapOf(
+      PRISON_DM to listOf(
+        TaskProgress.Fixed(CONFIRM_RELEASE, READY_TO_START),
+        TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
+      ),
+    )
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -134,6 +143,11 @@ enum class AssessmentStatus {
   },
 
   APPROVED {
+    override fun tasks() = mapOf(
+      PRISON_DM to listOf(
+        TaskProgress.Fixed(APPROVE_LICENCE, READY_TO_START),
+      ),
+    )
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -166,6 +180,12 @@ enum class AssessmentStatus {
   },
 
   AWAITING_REFUSAL {
+    override fun tasks() = mapOf(
+      PRISON_DM to listOf(
+        TaskProgress.Fixed(CONFIRM_RELEASE, READY_TO_START),
+        TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
+      ),
+    )
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -198,6 +218,12 @@ enum class AssessmentStatus {
     )
   },
   TIMED_OUT {
+    override fun tasks() = mapOf(
+      PRISON_DM to listOf(
+        TaskProgress.Fixed(CONFIRM_RELEASE, LOCKED),
+        TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
+      ),
+    )
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -221,6 +247,11 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
         TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
+      ),
+      PRISON_DM to listOf(
+        TaskProgress.Fixed(CONFIRM_RELEASE, LOCKED),
+        TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
+        TaskProgress.Fixed(OPT_IN, LOCKED),
       ),
     )
     override val visibleToRole = mapOf(
