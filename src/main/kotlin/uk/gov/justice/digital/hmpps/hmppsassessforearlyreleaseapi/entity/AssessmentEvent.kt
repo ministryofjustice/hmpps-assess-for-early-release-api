@@ -15,7 +15,7 @@ import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import software.amazon.awssdk.annotations.NotNull
+import jakarta.validation.constraints.NotNull
 import java.time.LocalDateTime
 import java.util.Objects
 
@@ -26,7 +26,7 @@ enum class AssessmentEventType {
 @Entity
 @Table(name = "assessment_event")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "eventType", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorColumn(name = "event_type", discriminatorType = DiscriminatorType.STRING)
 abstract class AssessmentEvent(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,7 +53,5 @@ abstract class AssessmentEvent(
     return true
   }
 
-  override fun hashCode(): Int {
-    return Objects.hash(id)
-  }
+  override fun hashCode(): Int = Objects.hash(id)
 }

@@ -1,11 +1,15 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
@@ -14,7 +18,18 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
 class ResidentialChecksServiceTest {
   private val assessmentService = mock<AssessmentService>()
-  private val residentialChecksService: ResidentialChecksService = ResidentialChecksService(assessmentService)
+  private val curfewAddressCheckRequestRepository = mock<CurfewAddressCheckRequestRepository>()
+  private val residentialChecksTaskAnswerRepository = mock<ResidentialChecksTaskAnswerRepository>()
+  private val objectMapper = jacksonObjectMapper().registerModule(
+    JavaTimeModule(),
+  )
+
+  private val residentialChecksService: ResidentialChecksService = ResidentialChecksService(
+    assessmentService,
+    curfewAddressCheckRequestRepository,
+    residentialChecksTaskAnswerRepository,
+    objectMapper,
+  )
 
   @Test
   fun `should get the status of the residential checks for an assessment`() {
@@ -25,7 +40,7 @@ class ResidentialChecksServiceTest {
     assertThat(residentialChecksView.assessmentSummary).isEqualTo(anAssessmentSummary())
     assertThat(residentialChecksView.overallStatus).isEqualTo(ResidentialChecksStatus.NOT_STARTED)
     assertThat(residentialChecksView.tasks).hasSize(6)
-    assertThat(residentialChecksView.tasks).allMatch({ it.status == TaskStatus.NOT_STARTED })
+    assertThat(residentialChecksView.tasks).allMatch { it.status == TaskStatus.NOT_STARTED }
   }
 
   @Test
@@ -55,5 +70,21 @@ class ResidentialChecksServiceTest {
         taskCode,
       )
     }
+  }
+
+  @Test
+  fun `should save residential checks task answers`() {
+//    val addressDetailsTaskAnswers =
+//      AddressDetailsTaskAnswers(
+//        1,
+//        2,
+//        AddressDetailsAnswers(
+//          electricitySupply = true,
+//          addressVisited = false,
+//          mainOccupierConsentGiven = true,
+//        ),
+//      )
+
+//    residentialChecksService.saveResidentialChecksTaskAnswers(addressDetailsTaskAnswers)
   }
 }
