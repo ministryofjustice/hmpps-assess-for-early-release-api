@@ -43,7 +43,7 @@ data class ChildrenServicesChecksAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "CHILDREN_SERVICES_CHECK",
+    taskCode = "children-services-check",
     taskVersion = taskVersion,
   )
 }

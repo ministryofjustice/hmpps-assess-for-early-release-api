@@ -5,7 +5,9 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
@@ -13,9 +15,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
+import java.util.Optional
 
 class ResidentialChecksServiceTest {
   private val assessmentService = mock<AssessmentService>()
@@ -77,13 +81,28 @@ class ResidentialChecksServiceTest {
   fun `should save residential checks task answers`() {
     val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
       taskCode = "make-a-risk-management-decision",
-      answers = mapOf("can-offender-be-managed-safely" to "yes"),
+      answers = mapOf(
+        "canOffenderBeManagedSafely" to true,
+        "informationToSupportDecision" to "info",
+        "riskManagementPlanningActionsNeeded" to false,
+      ),
     )
 
-//    residentialChecksService.saveResidentialChecksTaskAnswers(
-//      PRISON_NUMBER,
-//      ADDRESS_REQUEST_ID,
-//      saveTaskAnswersRequest,
-//    )
+    whenever(curfewAddressCheckRequestRepository.findById(ADDRESS_REQUEST_ID)).thenReturn(
+      Optional.of(
+        aStandardAddressCheckRequest(),
+      ),
+    )
+    whenever(residentialChecksTaskAnswerRepository.save(any())).thenAnswer { it.arguments[0] }
+
+    val answersSummary = residentialChecksService.saveResidentialChecksTaskAnswers(
+      PRISON_NUMBER,
+      ADDRESS_REQUEST_ID,
+      saveTaskAnswersRequest,
+    )
+
+    verify(curfewAddressCheckRequestRepository).findById(ADDRESS_REQUEST_ID)
+    assertThat(answersSummary.addressCheckRequestId).isEqualTo(ADDRESS_REQUEST_ID)
+    assertThat(answersSummary.taskCode).isEqualTo(saveTaskAnswersRequest.taskCode)
   }
 }

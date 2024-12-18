@@ -43,7 +43,7 @@ data class AssessPersonsRiskAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "ASSESS_THIS_PERSONS_RISK",
+    taskCode = "assess-this-persons-risk",
     taskVersion = taskVersion,
   )
 }

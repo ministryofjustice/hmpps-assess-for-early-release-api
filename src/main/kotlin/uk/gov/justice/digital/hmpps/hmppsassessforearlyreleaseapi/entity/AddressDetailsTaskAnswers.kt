@@ -41,7 +41,7 @@ data class AddressDetailsAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "ADDRESS_DETAILS_AND_INFORMED_CONSENT",
+    taskCode = "address-details-and-informed-consent",
     taskVersion = taskVersion,
   )
 }

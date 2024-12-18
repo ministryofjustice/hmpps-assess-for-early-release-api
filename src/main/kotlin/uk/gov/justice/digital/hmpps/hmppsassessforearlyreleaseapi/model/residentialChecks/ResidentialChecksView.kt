@@ -5,9 +5,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 
-@Schema(
-  description = "A view on the progress of the residential checks for an assessment",
-)
+@Schema(description = "A view on the progress of the residential checks for an assessment")
 data class ResidentialChecksView(
   @Schema(description = "A summary of an offender's current assessment")
   val assessmentSummary: AssessmentSummary,

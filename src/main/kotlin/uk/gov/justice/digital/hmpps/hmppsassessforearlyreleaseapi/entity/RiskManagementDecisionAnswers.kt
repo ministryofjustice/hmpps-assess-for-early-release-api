@@ -24,26 +24,24 @@ class RiskManagementDecisionTaskAnswers(
   taskVersion = taskVersion,
   answerType = MAKE_A_RISK_MANAGEMENT_DECISION,
 ) {
-  override fun toString(): String = "SuitabilityDecision(" +
+  override fun toString(): String = "RiskManagementDecisionTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
-    "addressSuitable=${answers.addressSuitable}, " +
-    "addressSuitableInformation=${answers.addressSuitableInformation}, " +
-    "additionInformationNeeded=${answers.additionInformationNeeded}, " +
-    "moreInformation=${answers.moreInformation}, " +
+    "canOffenderBeManagedSafely=${answers.canOffenderBeManagedSafely}, " +
+    "informationToSupportDecision=${answers.informationToSupportDecision}, " +
+    "riskManagementPlanningActionsNeeded=${answers.riskManagementPlanningActionsNeeded}" +
     ")"
 }
 
 data class RiskManagementDecisionAnswers(
-  val addressSuitable: Boolean,
-  val addressSuitableInformation: String,
-  val additionInformationNeeded: Boolean,
-  val moreInformation: String,
+  val canOffenderBeManagedSafely: Boolean,
+  val informationToSupportDecision: String,
+  val riskManagementPlanningActionsNeeded: Boolean,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = RiskManagementDecisionTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "MAKE_A_RISK_MANAGEMENT_DECISION",
+    taskCode = "make-a-risk-management-decision",
     taskVersion = taskVersion,
   )
 }

@@ -270,7 +270,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               code = "can-offender-be-managed-safely",
               text = "Can {offenderForename} be managed safely in the community if they are released to the proposed address or CAS area?",
               input = Input(
-                name = "offenderManagedSafely",
+                name = "canOffenderBeManagedSafely",
                 type = InputType.RADIO,
                 options = listOf(
                   Option("Yes"),

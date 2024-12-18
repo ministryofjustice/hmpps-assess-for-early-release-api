@@ -43,7 +43,7 @@ data class SuitabilityDecisionAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "SUITABILITY_DECISION",
+    taskCode = "suitability-decision",
     taskVersion = taskVersion,
   )
 }

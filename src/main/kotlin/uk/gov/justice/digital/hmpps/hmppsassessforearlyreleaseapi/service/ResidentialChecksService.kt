@@ -7,8 +7,12 @@ import org.springframework.stereotype.Service
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessPersonsRiskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ChildrenServicesChecksAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PoliceChecksAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.RiskManagementDecisionAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.SuitabilityDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskAnswersSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
@@ -28,6 +32,15 @@ class ResidentialChecksService(
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
   private val objectMapper: ObjectMapper,
 ) {
+  private val taskCodeToAnswersClass = mapOf(
+    "address-details-and-informed-consent" to AddressDetailsAnswers::class.java,
+    "assess-this-persons-risk" to AssessPersonsRiskAnswers::class.java,
+    "children-services-check" to ChildrenServicesChecksAnswers::class.java,
+    "make-a-risk-management-decision" to RiskManagementDecisionAnswers::class.java,
+    "police-check" to PoliceChecksAnswers::class.java,
+    "suitability-decision" to SuitabilityDecisionAnswers::class.java,
+  )
+
   fun getResidentialChecksView(prisonNumber: String, addressCheckRequestId: Long): ResidentialChecksView {
     val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
 
@@ -61,9 +74,10 @@ class ResidentialChecksService(
   ): ResidentialChecksTaskAnswersSummary {
     val taskVersion = PolicyVersion.V1.name
     val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(addressCheckRequestId)
+      ?: throw EntityNotFoundException("Cannot find an address check request with id $addressCheckRequestId")
 
     val entity = transformToAnswersEntity(
-      addressCheckRequest!!,
+      addressCheckRequest,
       saveTaskAnswersRequest.taskCode,
       taskVersion,
       saveTaskAnswersRequest.answers,
@@ -79,18 +93,13 @@ class ResidentialChecksService(
     )
   }
 
-  val taskCodeClassMap = mapOf(
-    "address-details-and-informed-consent" to AddressDetailsAnswers::class.java,
-    "assess-persons-risk" to AssessPersonsRiskAnswers::class.java,
-  )
-
   private fun transformToAnswersEntity(
     addressCheckRequest: CurfewAddressCheckRequest,
     taskCode: String,
     taskVersion: String,
     answers: Map<String, Any>,
   ): ResidentialChecksTaskAnswer {
-    val taskCodeClass = taskCodeClassMap[taskCode] ?: throw EntityNotFoundException("Invalid task code: $taskCode")
+    val taskCodeClass = taskCodeToAnswersClass[taskCode] ?: throw EntityNotFoundException("Invalid task code: $taskCode")
 
     val taskAnswers = objectMapper.convertValue(
       answers,
