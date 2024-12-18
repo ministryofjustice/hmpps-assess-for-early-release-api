@@ -125,7 +125,49 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class SaveSaveResidentialChecksTaskAnswers {
+  inner class SaveResidentialChecksTaskAnswers {
+    private val saveResidentialChecksTaskAnswersRequest =
+      SaveResidentialChecksTaskAnswersRequest(
+        taskCode = "address-details-and-informed-consent",
+        answers = mapOf(
+          "electricitySupply" to true,
+          "visitedAddress" to false,
+          "mainOccupierConsentGiven" to true,
+        ),
+      )
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .headers(setAuthorisation())
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
     @Sql(
       "classpath:test_data/reset.sql",
       "classpath:test_data/a-standard-address-check-request.sql",
@@ -134,20 +176,10 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     fun `should save residential checks task answers`() {
       prisonRegisterMockServer.stubGetPrisons()
 
-      val addressDetailsTaskAnswersRequest =
-        SaveResidentialChecksTaskAnswersRequest(
-          taskCode = "address-details-and-informed-consent",
-          answers = mapOf(
-            "electricitySupply" to true,
-            "visitedAddress" to false,
-            "mainOccupierConsentGiven" to true,
-          ),
-        )
-
       webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(addressDetailsTaskAnswersRequest)
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
         .exchange()
         .expectStatus()
         .isCreated
