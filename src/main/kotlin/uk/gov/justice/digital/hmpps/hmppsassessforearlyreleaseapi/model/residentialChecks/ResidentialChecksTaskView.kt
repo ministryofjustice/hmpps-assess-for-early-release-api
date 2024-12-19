@@ -1,6 +1,7 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 

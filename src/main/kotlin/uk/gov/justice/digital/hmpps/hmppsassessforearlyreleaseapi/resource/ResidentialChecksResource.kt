@@ -7,15 +7,22 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentialChecksTaskView
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentialChecksView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskAnswersSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.ResidentialChecksService
 
 @RestController
@@ -135,4 +142,62 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
     @Parameter(required = true) @PathVariable taskCode: String,
   ) =
     residentialChecksService.getResidentialChecksTask(prisonNumber, requestId, taskCode)
+
+  @PostMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/residential-checks/answers")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @Operation(
+    summary = "Saves answers for a residential checks task.",
+    description = "Save the answers for a residential checks task.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "201",
+        description = "The task answers have been saved.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ResidentialChecksTaskAnswersSummary::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "An address check request with the specified request id does not exist for the provided offender",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun <T> saveResidentialChecksTaskAnswers(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+    @Valid @RequestBody taskAnswers: SaveResidentialChecksTaskAnswersRequest,
+  ): ResidentialChecksTaskAnswersSummary = residentialChecksService.saveResidentialChecksTaskAnswers(prisonNumber, requestId, taskAnswers)
 }
