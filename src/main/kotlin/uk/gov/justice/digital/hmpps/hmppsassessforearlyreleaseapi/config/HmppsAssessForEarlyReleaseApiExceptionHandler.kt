@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
-import java.net.URI
 
 @RestControllerAdvice
 class HmppsAssessForEarlyReleaseApiExceptionHandler {
@@ -88,11 +87,12 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
   @ExceptionHandler(TaskAnswersValidationException::class)
   fun handleTaskAnswersValidationException(exception: TaskAnswersValidationException): ProblemDetail {
     val problemDetail = ProblemDetail.forStatus(BAD_REQUEST)
-    problemDetail.title = "Resource Not Found"
+    problemDetail.title = "Invalid task answers"
     problemDetail.detail = exception.message
-    problemDetail.instance = URI.create("/resource/not-found")
-    problemDetail.type = URI.create("https://example.com/not-found")
-//    problemDetail.setProperty("taskCode", exception.taskCode)
+    problemDetail.setProperty("taskCode", exception.taskCode)
+    for (error in exception.errors.fieldErrors) {
+      problemDetail.setProperty(error.field, error.defaultMessage)
+    }
     return problemDetail
   }
 

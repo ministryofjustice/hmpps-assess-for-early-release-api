@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -7,6 +8,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDetailsAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDetailsTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
@@ -183,10 +186,12 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isCreated
 
-      val answers = residentialChecksTaskAnswerRepository.findAll()
-      println(answers.first())
-      // TODO: asserts and check response json
-//      println(answers[1])
+      val answers = residentialChecksTaskAnswerRepository.findAll().first()
+      assertThat(answers).isNotNull
+      assertThat(answers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
+      assertThat(answers).isInstanceOf(AddressDetailsTaskAnswers::class.java)
+      val addressDetailsTaskAnswers = answers as AddressDetailsTaskAnswers
+      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = true, visitedAddress = false, mainOccupierConsentGiven = true))
     }
 
     @Sql(
@@ -199,14 +204,14 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         {
           "taskCode" : "assess-this-persons-risk",
           "answers" : {
-            "pomPrisonBehaviourInformation" : "abcde",
+            "pomPrisonBehaviourInformation" : "${"x".repeat(1001)}",
             "vloOfficerForCase": true,
             "informationThatCannotBeDisclosed": false
           }
         }
       """.trimIndent()
 
-      val response = webTestClient.post()
+      webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .header(HttpHeaders.CONTENT_TYPE, "application/json")
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -214,10 +219,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isBadRequest
-        .expectBody()
-        .returnResult()
-
-      println(String(response.responseBody))
+        .expectBody().json(serializedContent("invalid-task-answers-response"), true)
     }
   }
 
