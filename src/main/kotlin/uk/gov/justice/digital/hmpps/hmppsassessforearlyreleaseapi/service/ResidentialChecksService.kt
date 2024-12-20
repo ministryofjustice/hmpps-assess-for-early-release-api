@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.EntityNotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessPersonsRiskAnswers
@@ -13,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PoliceC
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.SuitabilityDecisionAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskAnswersSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
@@ -31,6 +33,7 @@ class ResidentialChecksService(
   private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
   private val objectMapper: ObjectMapper,
+  private val validator: Validator,
 ) {
   private val taskCodeToAnswersClass = mapOf(
     "address-details-and-informed-consent" to AddressDetailsAnswers::class.java,
@@ -106,7 +109,11 @@ class ResidentialChecksService(
       taskCodeClass,
     )
 
-//    validator.validate();
+    val validationErrors = validator.validateObject(taskAnswers)
+    if (validationErrors.hasErrors()) {
+      throw TaskAnswersValidationException(taskCode, validationErrors)
+    }
+
     return taskAnswers.createTaskAnswersEntity(addressCheckRequest, taskVersion)
   }
 }

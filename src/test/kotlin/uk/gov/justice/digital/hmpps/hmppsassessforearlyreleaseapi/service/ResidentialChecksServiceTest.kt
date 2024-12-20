@@ -9,6 +9,8 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import org.springframework.validation.SimpleErrors
+import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
@@ -28,12 +30,14 @@ class ResidentialChecksServiceTest {
   private val objectMapper = jacksonObjectMapper().registerModule(
     JavaTimeModule(),
   )
+  private val validator = mock<Validator>()
 
   private val residentialChecksService: ResidentialChecksService = ResidentialChecksService(
     assessmentService,
     curfewAddressCheckRequestRepository,
     residentialChecksTaskAnswerRepository,
     objectMapper,
+    validator,
   )
 
   @Test
@@ -94,6 +98,7 @@ class ResidentialChecksServiceTest {
       ),
     )
     whenever(residentialChecksTaskAnswerRepository.save(any())).thenAnswer { it.arguments[0] }
+    whenever(validator.validateObject(any())).thenReturn(SimpleErrors("RiskManagementDecisionAnswers"))
 
     val answersSummary = residentialChecksService.saveResidentialChecksTaskAnswers(
       PRISON_NUMBER,

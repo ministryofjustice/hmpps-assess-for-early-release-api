@@ -4,6 +4,9 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.ASSESS_THIS_PERSONS_RISK
 
@@ -35,10 +38,19 @@ class AssessPersonsRiskTaskAnswers(
 }
 
 data class AssessPersonsRiskAnswers(
-  val pomPrisonBehaviourInformation: String,
-  val mentalHealthTreatmentNeeds: Boolean,
-  val vloOfficerForCase: Boolean,
-  val informationThatCannotBeDisclosed: Boolean,
+  @field:NotNull
+  @field:NotBlank
+  @field:Size(min = 1, max = 1000)
+  val pomPrisonBehaviourInformation: String?,
+
+  @field:NotNull
+  val mentalHealthTreatmentNeeds: Boolean?,
+
+  @field:NotNull
+  val vloOfficerForCase: Boolean?,
+
+  @field:NotNull
+  val informationThatCannotBeDisclosed: Boolean?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,

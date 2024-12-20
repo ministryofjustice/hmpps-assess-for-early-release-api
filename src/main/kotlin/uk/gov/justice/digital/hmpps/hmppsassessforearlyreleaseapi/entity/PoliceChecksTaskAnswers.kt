@@ -4,6 +4,9 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Past
+import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.POLICE_CHECK
 import java.time.LocalDate
@@ -35,8 +38,14 @@ class PoliceChecksTaskAnswers(
 }
 
 data class PoliceChecksAnswers(
+  @field:Past
   val informationRequested: LocalDate,
+
+  @field:Past
   val informationSent: LocalDate,
+
+  @field:NotBlank
+  @field:Size(min = 1, max = 1000)
   val informationSummary: String,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = PoliceChecksTaskAnswers(

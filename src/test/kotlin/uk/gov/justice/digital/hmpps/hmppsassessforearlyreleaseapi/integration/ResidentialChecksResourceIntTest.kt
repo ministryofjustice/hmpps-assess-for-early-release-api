@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -174,8 +175,6 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should save residential checks task answers`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -186,7 +185,39 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
       val answers = residentialChecksTaskAnswerRepository.findAll()
       println(answers.first())
+      // TODO: asserts and check response json
 //      println(answers[1])
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should validate task answers`() {
+      val invalidSaveAnswersRequestJson = """
+        {
+          "taskCode" : "assess-this-persons-risk",
+          "answers" : {
+            "pomPrisonBehaviourInformation" : "abcde",
+            "vloOfficerForCase": true,
+            "informationThatCannotBeDisclosed": false
+          }
+        }
+      """.trimIndent()
+
+      val response = webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .header(HttpHeaders.CONTENT_TYPE, "application/json")
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(invalidSaveAnswersRequestJson)
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+        .expectBody()
+        .returnResult()
+
+      println(String(response.responseBody))
     }
   }
 
