@@ -4,6 +4,9 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.MAKE_A_RISK_MANAGEMENT_DECISION
 
@@ -34,9 +37,16 @@ class RiskManagementDecisionTaskAnswers(
 }
 
 data class RiskManagementDecisionAnswers(
-  val canOffenderBeManagedSafely: Boolean,
-  val informationToSupportDecision: String,
-  val riskManagementPlanningActionsNeeded: Boolean,
+  @NotNull
+  val canOffenderBeManagedSafely: Boolean?,
+
+  @NotNull
+  @NotBlank
+  @Size(min = 1, max = 1000)
+  val informationToSupportDecision: String?,
+
+  @NotNull
+  val riskManagementPlanningActionsNeeded: Boolean?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = RiskManagementDecisionTaskAnswers(
     answers = this,

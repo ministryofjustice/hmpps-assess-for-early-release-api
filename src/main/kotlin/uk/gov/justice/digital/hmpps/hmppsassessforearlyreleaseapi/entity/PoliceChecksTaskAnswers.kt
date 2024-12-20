@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
@@ -38,15 +39,17 @@ class PoliceChecksTaskAnswers(
 }
 
 data class PoliceChecksAnswers(
+  @JsonFormat(pattern = "yyyy-MM-dd")
   @field:Past
-  val informationRequested: LocalDate,
+  val informationRequested: LocalDate?,
 
+  @JsonFormat(pattern = "yyyy-MM-dd")
   @field:Past
-  val informationSent: LocalDate,
+  val informationSent: LocalDate?,
 
   @field:NotBlank
   @field:Size(min = 1, max = 1000)
-  val informationSummary: String,
+  val informationSummary: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = PoliceChecksTaskAnswers(
     answers = this,

@@ -4,6 +4,9 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.SUITABILITY_DECISION
 
@@ -35,10 +38,21 @@ class SuitabilityDecisionTaskAnswers(
 }
 
 data class SuitabilityDecisionAnswers(
-  val addressSuitable: Boolean,
-  val addressSuitableInformation: String,
+  @NotNull
+  val addressSuitable: Boolean?,
+
+  @NotNull
+  @NotBlank
+  @Size(min = 1, max = 1000)
+  val addressSuitableInformation: String?,
+
+  @NotNull
   val additionalInformationNeeded: Boolean,
-  val moreInformation: String,
+
+  @NotNull
+  @NotBlank
+  @Size(min = 1, max = 1000)
+  val moreInformation: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(
     answers = this,
