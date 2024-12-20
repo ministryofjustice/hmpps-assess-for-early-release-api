@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
@@ -6,14 +6,13 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.ADDRESS_DETAILS_AND_INFORMED_CONSENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 
 @Entity
-@DiscriminatorValue(value = "ADDRESS_DETAILS_AND_INFORMED_CONSENT")
+@DiscriminatorValue(value = "address-details-and-informed-consent")
 class AddressDetailsTaskAnswers(
   id: Long = -1L,
   addressCheckRequest: CurfewAddressCheckRequest,
-  taskCode: String,
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
@@ -21,9 +20,8 @@ class AddressDetailsTaskAnswers(
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
-  taskCode = taskCode,
+  taskCode = ResidentialChecksTaskAnswerType.ADDRESS_DETAILS_AND_INFORMED_CONSENT.taskCode,
   taskVersion = taskVersion,
-  answerType = ADDRESS_DETAILS_AND_INFORMED_CONSENT,
 ) {
   override fun toString(): String = "AddressDetailsTaskAnswers(" +
     "id=$id, " +
@@ -47,7 +45,6 @@ data class AddressDetailsAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "address-details-and-informed-consent",
     taskVersion = taskVersion,
   )
 }
