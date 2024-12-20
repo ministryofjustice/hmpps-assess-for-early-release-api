@@ -13,7 +13,6 @@ import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
@@ -21,11 +20,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
-import java.util.Optional
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 
 class ResidentialChecksServiceTest {
+  private val addressService = mock<AddressService>()
   private val assessmentService = mock<AssessmentService>()
-  private val curfewAddressCheckRequestRepository = mock<CurfewAddressCheckRequestRepository>()
   private val residentialChecksTaskAnswerRepository = mock<ResidentialChecksTaskAnswerRepository>()
   private val objectMapper = jacksonObjectMapper().registerModule(
     JavaTimeModule(),
@@ -33,8 +32,8 @@ class ResidentialChecksServiceTest {
   private val validator = mock<Validator>()
 
   private val residentialChecksService: ResidentialChecksService = ResidentialChecksService(
+    addressService,
     assessmentService,
-    curfewAddressCheckRequestRepository,
     residentialChecksTaskAnswerRepository,
     objectMapper,
     validator,
@@ -92,10 +91,8 @@ class ResidentialChecksServiceTest {
       ),
     )
 
-    whenever(curfewAddressCheckRequestRepository.findById(ADDRESS_REQUEST_ID)).thenReturn(
-      Optional.of(
-        aStandardAddressCheckRequest(),
-      ),
+    whenever(addressService.getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)).thenReturn(
+      aStandardAddressCheckRequest(),
     )
     whenever(residentialChecksTaskAnswerRepository.save(any())).thenAnswer { it.arguments[0] }
     whenever(validator.validateObject(any())).thenReturn(SimpleErrors("RiskManagementDecisionAnswers"))
@@ -106,7 +103,7 @@ class ResidentialChecksServiceTest {
       saveTaskAnswersRequest,
     )
 
-    verify(curfewAddressCheckRequestRepository).findById(ADDRESS_REQUEST_ID)
+    verify(addressService).getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)
     assertThat(answersSummary.addressCheckRequestId).isEqualTo(ADDRESS_REQUEST_ID)
     assertThat(answersSummary.taskCode).isEqualTo(saveTaskAnswersRequest.taskCode)
   }

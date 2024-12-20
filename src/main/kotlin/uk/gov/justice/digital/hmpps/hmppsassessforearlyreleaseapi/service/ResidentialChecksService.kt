@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import jakarta.persistence.EntityNotFoundException
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
@@ -20,17 +19,17 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 
 @Service
 class ResidentialChecksService(
+  private val addressService: AddressService,
   private val assessmentService: AssessmentService,
-  private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
   private val objectMapper: ObjectMapper,
   private val validator: Validator,
@@ -76,8 +75,7 @@ class ResidentialChecksService(
     saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest,
   ): ResidentialChecksTaskAnswersSummary {
     val taskVersion = PolicyVersion.V1.name
-    val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(addressCheckRequestId)
-      ?: throw EntityNotFoundException("Cannot find an address check request with id $addressCheckRequestId")
+    val addressCheckRequest = addressService.getCurfewAddressCheckRequest(addressCheckRequestId, prisonNumber)
 
     val entity = transformToAnswersEntity(
       addressCheckRequest,

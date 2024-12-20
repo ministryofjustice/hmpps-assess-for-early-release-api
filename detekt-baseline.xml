@@ -23,7 +23,6 @@
     <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
     <ID>TooManyFunctions:AddressService.kt$AddressService</ID>
     <ID>UnusedParameter:ResidentialChecksService.kt$ResidentialChecksService$addressCheckRequestId: Long</ID>
-    <ID>UnusedParameter:ResidentialChecksService.kt$ResidentialChecksService$prisonNumber: String</ID>
     <ID>UnusedParameter:ResidentialChecksService.kt$ResidentialChecksService$requestId: Long</ID>
   </CurrentIssues>
 </SmellBaseline>

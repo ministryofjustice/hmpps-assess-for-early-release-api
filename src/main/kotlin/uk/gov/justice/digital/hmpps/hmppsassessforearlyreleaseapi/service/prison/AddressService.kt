@@ -41,8 +41,7 @@ class AddressService(
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
   private val residentRepository: ResidentRepository,
 ) {
-  fun getAddressesForPostcode(postcode: String): List<AddressSummary> =
-    osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
+  fun getAddressesForPostcode(postcode: String): List<AddressSummary> = osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
 
   @Transactional
   fun getAddressForUprn(uprn: String): AddressSummary {
@@ -85,8 +84,7 @@ class AddressService(
   }
 
   @Transactional
-  fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary =
-    getStandardAddressCheckRequest(requestId, prisonNumber).toSummary()
+  fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary = getStandardAddressCheckRequest(requestId, prisonNumber).toSummary()
 
   @Transactional
   fun addCasCheckRequest(
@@ -159,7 +157,7 @@ class AddressService(
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
   }
 
-  private fun getCurfewAddressCheckRequest(requestId: Long, prisonNumber: String): CurfewAddressCheckRequest {
+  fun getCurfewAddressCheckRequest(requestId: Long, prisonNumber: String): CurfewAddressCheckRequest {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw EntityNotFoundException("Cannot find curfew address check request with id: $requestId")
@@ -180,19 +178,18 @@ class AddressService(
     return curfewAddressCheckRequest
   }
 
-  private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary =
-    AddressSummary(
-      uprn = this.uprn,
-      firstLine = this.getAddressFirstLine(),
-      secondLine = this.locality,
-      town = this.postTown,
-      county = this.county,
-      postcode = this.postcode,
-      country = this.countryDescription.split("\\s+".toRegex()).last(),
-      xcoordinate = this.xCoordinate,
-      ycoordinate = this.yCoordinate,
-      addressLastUpdated = this.lastUpdateDate,
-    )
+  private fun OsPlacesApiDPA.toAddressSummary(): AddressSummary = AddressSummary(
+    uprn = this.uprn,
+    firstLine = this.getAddressFirstLine(),
+    secondLine = this.locality,
+    town = this.postTown,
+    county = this.county,
+    postcode = this.postcode,
+    country = this.countryDescription.split("\\s+".toRegex()).last(),
+    xcoordinate = this.xCoordinate,
+    ycoordinate = this.yCoordinate,
+    addressLastUpdated = this.lastUpdateDate,
+  )
 
   private fun Address.toAddressSummary() = AddressSummary(
     uprn = this.uprn,
@@ -207,45 +204,41 @@ class AddressService(
     addressLastUpdated = this.addressLastUpdated,
   )
 
-  private fun StandardAddressCheckRequest.toSummary(): StandardAddressCheckRequestSummary =
-    StandardAddressCheckRequestSummary(
-      requestId = this.id,
-      caAdditionalInfo = this.caAdditionalInfo,
-      ppAdditionalInfo = this.ppAdditionalInfo,
-      preferencePriority = this.preferencePriority,
-      dateRequested = this.dateRequested,
-      status = this.status,
-      address = this.address.toAddressSummary(),
-      residents = this.residents.map { it.toSummary() },
-    )
+  private fun StandardAddressCheckRequest.toSummary(): StandardAddressCheckRequestSummary = StandardAddressCheckRequestSummary(
+    requestId = this.id,
+    caAdditionalInfo = this.caAdditionalInfo,
+    ppAdditionalInfo = this.ppAdditionalInfo,
+    preferencePriority = this.preferencePriority,
+    dateRequested = this.dateRequested,
+    status = this.status,
+    address = this.address.toAddressSummary(),
+    residents = this.residents.map { it.toSummary() },
+  )
 
-  private fun CasCheckRequest.toSummary(): CasCheckRequestSummary =
-    CasCheckRequestSummary(
-      requestId = this.id,
-      caAdditionalInfo = this.caAdditionalInfo,
-      ppAdditionalInfo = this.ppAdditionalInfo,
-      preferencePriority = this.preferencePriority,
-      dateRequested = this.dateRequested,
-      status = this.status,
-      allocatedAddress = this.allocatedAddress?.toAddressSummary(),
-    )
+  private fun CasCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(
+    requestId = this.id,
+    caAdditionalInfo = this.caAdditionalInfo,
+    ppAdditionalInfo = this.ppAdditionalInfo,
+    preferencePriority = this.preferencePriority,
+    dateRequested = this.dateRequested,
+    status = this.status,
+    allocatedAddress = this.allocatedAddress?.toAddressSummary(),
+  )
 
-  private fun Resident.toSummary(): ResidentSummary =
-    ResidentSummary(
-      residentId = this.id,
-      forename = this.forename,
-      surname = this.surname,
-      phoneNumber = this.phoneNumber,
-      relation = this.relation,
-      dateOfBirth = this.dateOfBirth,
-      age = this.age,
-      isMainResident = this.isMainResident,
-    )
+  private fun Resident.toSummary(): ResidentSummary = ResidentSummary(
+    residentId = this.id,
+    forename = this.forename,
+    surname = this.surname,
+    phoneNumber = this.phoneNumber,
+    relation = this.relation,
+    dateOfBirth = this.dateOfBirth,
+    age = this.age,
+    isMainResident = this.isMainResident,
+  )
 
-  private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary =
-    when (this) {
-      is StandardAddressCheckRequest -> this.toSummary()
-      is CasCheckRequest -> this.toSummary()
-      else -> error("Cannot transform request type of ${this::class.simpleName} to a check request summary")
-    }
+  private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {
+    is StandardAddressCheckRequest -> this.toSummary()
+    is CasCheckRequest -> this.toSummary()
+    else -> error("Cannot transform request type of ${this::class.simpleName} to a check request summary")
+  }
 }
