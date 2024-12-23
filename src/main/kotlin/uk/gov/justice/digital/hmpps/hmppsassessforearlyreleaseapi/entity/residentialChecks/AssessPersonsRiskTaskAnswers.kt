@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
@@ -8,14 +8,13 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.ASSESS_THIS_PERSONS_RISK
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 
 @Entity
-@DiscriminatorValue(value = "ASSESS_THIS_PERSONS_RISK")
+@DiscriminatorValue(value = "assess-this-persons-risk")
 class AssessPersonsRiskTaskAnswers(
   id: Long = -1L,
   addressCheckRequest: CurfewAddressCheckRequest,
-  taskCode: String,
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
@@ -23,9 +22,8 @@ class AssessPersonsRiskTaskAnswers(
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
-  taskCode = taskCode,
+  taskCode = ResidentialChecksTaskAnswerType.ASSESS_THIS_PERSONS_RISK.taskCode,
   taskVersion = taskVersion,
-  answerType = ASSESS_THIS_PERSONS_RISK,
 ) {
   override fun toString(): String = "AssessPersonsRiskTaskAnswers(" +
     "id=$id, " +
@@ -55,7 +53,6 @@ data class AssessPersonsRiskAnswers(
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "assess-this-persons-risk",
     taskVersion = taskVersion,
   )
 }

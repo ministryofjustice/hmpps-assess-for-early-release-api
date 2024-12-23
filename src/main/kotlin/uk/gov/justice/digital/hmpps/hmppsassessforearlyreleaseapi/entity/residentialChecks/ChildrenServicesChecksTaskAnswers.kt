@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
@@ -6,30 +6,30 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Past
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.ResidentialChecksTaskAnswerType.POLICE_CHECK
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import java.time.LocalDate
 
 @Entity
-@DiscriminatorValue(value = "POLICE_CHECK")
-class PoliceChecksTaskAnswers(
+@DiscriminatorValue(value = "children-services-check")
+class ChildrenServicesChecksTaskAnswers(
   id: Long = -1L,
   addressCheckRequest: CurfewAddressCheckRequest,
-  taskCode: String,
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: PoliceChecksAnswers,
+  val answers: ChildrenServicesChecksAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
-  taskCode = taskCode,
+  taskCode = ResidentialChecksTaskAnswerType.CHILDREN_SERVICES_CHECK.taskCode,
   taskVersion = taskVersion,
-  answerType = POLICE_CHECK,
 ) {
-  override fun toString(): String = "PoliceChecksTaskAnswers(" +
+
+  override fun toString(): String = "ChildrenServicesTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
     "informationRequested=${answers.informationRequested}, " +
@@ -38,7 +38,7 @@ class PoliceChecksTaskAnswers(
     ")"
 }
 
-data class PoliceChecksAnswers(
+data class ChildrenServicesChecksAnswers(
   @JsonFormat(pattern = "yyyy-MM-dd")
   @field:Past
   val informationRequested: LocalDate?,
@@ -47,14 +47,14 @@ data class PoliceChecksAnswers(
   @field:Past
   val informationSent: LocalDate?,
 
-  @field:NotBlank
-  @field:Size(min = 1, max = 1000)
+  @NotNull
+  @NotBlank
+  @Size(min = 1, max = 1000)
   val informationSummary: String?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = PoliceChecksTaskAnswers(
+  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
-    taskCode = "police-check",
     taskVersion = taskVersion,
   )
 }
