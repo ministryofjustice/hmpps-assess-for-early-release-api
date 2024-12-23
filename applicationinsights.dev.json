@@ -42,6 +42,17 @@
           }
         ],
         "percentage": 0
+      },
+      {
+        "telemetryType": "exception",
+        "attributes": [
+          {
+            "key": "exception.type",
+            "value": "java.util.concurrent.CompletionException",
+            "matchType": "strict"
+          }
+        ],
+        "percentage": 10
       }
     ]
   }
