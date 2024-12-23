@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.0"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.1"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.7"
@@ -42,12 +42,14 @@ detekt {
   baseline = file("$projectDir/detekt-baseline.xml") // a way of suppressing issues before introducing detekt
 }
 
+ext["hibernate.version"] = "6.5.3.Final"
+ext["logback.version"] = "1.5.14"
+
 dependencies {
   implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.1.0")
   implementation("org.springframework.security:spring-security-config:6.3.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-  implementation("io.opentelemetry:opentelemetry-api:1.45.0")
   implementation("io.opentelemetry.instrumentation:opentelemetry-instrumentation-annotations:2.10.0")
   implementation("io.hypersistence:hypersistence-utils-hibernate-63:3.9.0")
   implementation("com.tinder.statemachine:statemachine:0.2.0")
@@ -57,7 +59,7 @@ dependencies {
   runtimeOnly("org.postgresql:postgresql:42.7.4")
 
   // SQS/SNS dependencies
-  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.1")
+  implementation("uk.gov.justice.service.hmpps:hmpps-sqs-spring-boot-starter:5.2.2")
 
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
