@@ -13,7 +13,14 @@ generic-service:
     HMPPS_PRISONREGISTER_API_URL: "https://prison-register.hmpps.service.justice.gov.uk"
     HMPPS_PROBATIONSEARCH_API_URL: "https://probation-offender-search.hmpps.service.justice.gov.uk"
     OS_PLACES_API_URL: "https://api.os.uk/search/places/v1"
-    GOTENBERG_API_URL: "http://assess-for-early-release-gotenberg/forms/chromium/convert/html"
+    GOTENBERG_API_URL: "http://hmpps-assess-for-early-release-gotenberg"
+
+gotenberg:
+  replicaCount: 2
+  env:
+    GOOGLE_CHROME_IGNORE_CERTIFICATE_ERRORS: 1
+    DISABLE_UNOCONV: 1
+    DEFAULT_WAIT_TIMEOUT: 30
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack
 # See https://user-guide.cloud-platform.service.justice.gov.uk/documentation/monitoring-an-app/how-to-create-alarms.html#creating-your-own-custom-alerts

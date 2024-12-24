@@ -2,14 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
-import org.springframework.web.client.RestTemplate
-import org.springframework.web.client.HttpClientErrorException
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestTemplate
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.nio.charset.StandardCharsets
@@ -39,10 +39,16 @@ class PdfService(
     headers.contentType = MediaType.MULTIPART_FORM_DATA
 
     val body = LinkedMultiValueMap<String, Any>()
-    body.add("files", HttpEntity(htmlContent.toByteArray(StandardCharsets.UTF_8), HttpHeaders().apply {
-      contentType = MediaType.TEXT_HTML
-      setContentDispositionFormData("files", "index.html")
-    }))
+    body.add(
+      "files",
+      HttpEntity(
+        htmlContent.toByteArray(StandardCharsets.UTF_8),
+        HttpHeaders().apply {
+          contentType = MediaType.TEXT_HTML
+          setContentDispositionFormData("files", "index.html")
+        },
+      ),
+    )
     body.add("paperWidth", "8.27")
     body.add("paperHeight", "11.69")
     body.add("marginTop", "1")
@@ -54,9 +60,9 @@ class PdfService(
 
     return try {
       val response: ResponseEntity<ByteArray> = restTemplate.postForEntity(
-        gotenbergHost,
+        "$gotenbergHost/forms/chromium/convert/html",
         requestEntity,
-        ByteArray::class.java
+        ByteArray::class.java,
       )
       response.body
     } catch (e: HttpClientErrorException) {
