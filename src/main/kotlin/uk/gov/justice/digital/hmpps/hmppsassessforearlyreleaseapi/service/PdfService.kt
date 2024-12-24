@@ -5,6 +5,8 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.RestTemplate
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.nio.charset.StandardCharsets
