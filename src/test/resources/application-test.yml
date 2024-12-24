@@ -41,6 +41,9 @@ hmpps:
     api:
       url: http://localhost:8094
 
+  gotenberg:
+    api:
+      url: "http://localhost:3002/forms/chromium/convert/html"
 
 hmpps.sqs:
   provider: localstack

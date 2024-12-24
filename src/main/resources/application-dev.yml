@@ -21,6 +21,11 @@ hmpps:
   probationsearch:
     api:
       url: "https://probation-offender-search-dev.hmpps.service.justice.gov.uk"
+
+gotenberg:
+  api:
+    url: "http://localhost:3002/forms/chromium/convert/html"
+
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4666
