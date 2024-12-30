@@ -78,8 +78,7 @@ class AddressResource(private val addressService: AddressService) {
       ),
     ],
   )
-  fun getAddressesForPostcode(@RequestParam(name = "postcode") postcode: String) =
-    addressService.getAddressesForPostcode(postcode)
+  fun getAddressesForPostcode(@RequestParam(name = "postcode") postcode: String) = addressService.getAddressesForPostcode(postcode)
 
   @GetMapping("/address/uprn/{uprn}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -122,8 +121,7 @@ class AddressResource(private val addressService: AddressService) {
       ),
     ],
   )
-  fun getAddressForUprn(@PathVariable(name = "uprn") uprn: String) =
-    addressService.getAddressForUprn(uprn)
+  fun getAddressForUprn(@PathVariable(name = "uprn") uprn: String) = addressService.getAddressForUprn(uprn)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -223,8 +221,7 @@ class AddressResource(private val addressService: AddressService) {
       ),
     ],
   )
-  fun getStandardAddressCheckRequest(@PathVariable(name = "prisonNumber") prisonNumber: String, @PathVariable(name = "requestId") requestId: Long) =
-    addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
+  fun getStandardAddressCheckRequest(@PathVariable(name = "prisonNumber") prisonNumber: String, @PathVariable(name = "requestId") requestId: Long) = addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/cas-check-request")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -381,8 +378,7 @@ class AddressResource(private val addressService: AddressService) {
       ),
     ],
   )
-  fun getAddressCheckRequestsForAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    addressService.getCheckRequestsForAssessment(prisonNumber)
+  fun getAddressCheckRequestsForAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) = addressService.getCheckRequestsForAssessment(prisonNumber)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}/resident")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

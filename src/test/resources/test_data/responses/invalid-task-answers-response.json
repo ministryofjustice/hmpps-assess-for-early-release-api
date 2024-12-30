@@ -1,0 +1,9 @@
+{
+  "type": "about:blank",
+  "title": "Invalid task answers",
+  "status": 400,
+  "instance": "/offender/A1234AA/current-assessment/address-request/1/residential-checks/answers",
+  "taskCode": "assess-this-persons-risk",
+  "mentalHealthTreatmentNeeds": "must not be null",
+  "pomPrisonBehaviourInformation": "size must be between 1 and 1000"
+}

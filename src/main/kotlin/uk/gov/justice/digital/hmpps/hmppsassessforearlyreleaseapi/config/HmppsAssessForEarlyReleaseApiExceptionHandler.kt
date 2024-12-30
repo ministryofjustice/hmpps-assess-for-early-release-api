@@ -7,12 +7,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.HttpStatus.NOT_FOUND
+import org.springframework.http.ProblemDetail
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
 
 @RestControllerAdvice
 class HmppsAssessForEarlyReleaseApiExceptionHandler {
@@ -81,6 +83,18 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.warn("Could not find entity", e) }
+
+  @ExceptionHandler(TaskAnswersValidationException::class)
+  fun handleTaskAnswersValidationException(exception: TaskAnswersValidationException): ProblemDetail {
+    val problemDetail = ProblemDetail.forStatus(BAD_REQUEST)
+    problemDetail.title = "Invalid task answers"
+    problemDetail.detail = exception.message
+    problemDetail.setProperty("taskCode", exception.taskCode)
+    for (error in exception.errors.fieldErrors) {
+      problemDetail.setProperty(error.field, error.defaultMessage)
+    }
+    return problemDetail
+  }
 
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
