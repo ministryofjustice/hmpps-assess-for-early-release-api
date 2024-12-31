@@ -75,7 +75,6 @@ dependencies {
   testImplementation("org.awaitility:awaitility-kotlin:4.2.2")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("io.projectreactor:reactor-test")
-  testImplementation("com.squareup.okhttp3:mockwebserver:4.9.3")
   testImplementation("io.swagger.parser.v3:swagger-parser:2.1.24") {
     exclude(group = "io.swagger.core.v3")
   }
