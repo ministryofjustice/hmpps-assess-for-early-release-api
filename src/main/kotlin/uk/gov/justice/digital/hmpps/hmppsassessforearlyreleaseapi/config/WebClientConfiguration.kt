@@ -9,7 +9,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction
-import org.springframework.web.client.RestTemplate
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
@@ -26,6 +25,7 @@ class WebClientConfiguration(
   @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String,
   @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String,
   @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
+  @Value("\${gotenberg.api.url}") private val gotenbergHost: String,
 ) {
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient =
@@ -122,7 +122,14 @@ class WebClientConfiguration(
     ).build()
 
   @Bean
-  fun restTemplate(): RestTemplate {
-    return RestTemplate()
-  }
+  fun gotenbergClient(): WebClient = WebClient.builder()
+    .baseUrl(gotenbergHost)
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer ->
+          configurer.defaultCodecs()
+            .maxInMemorySize(-1)
+        }
+        .build(),
+    ).build()
 }

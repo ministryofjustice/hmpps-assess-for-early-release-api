@@ -1,24 +1,18 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GotenbergMockServer
 
 private const val TITLE = "title"
 private const val MESSAGE = "MESSAGE"
 private const val GET_PDF_URL = "/pdf?title=$TITLE&message=$MESSAGE"
 
-class PdfResourceIntTest : SqsIntegrationTestBase() {
-
-  @Autowired
-  override lateinit var webTestClient: WebTestClient
+class FormResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class GetStaffDetailsByUsername {
@@ -54,7 +48,8 @@ class PdfResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return pdf`() {
       val pdfBytes = "PDF_BYTES".toByteArray()
-      mockWebServer.enqueue(MockResponse().setBody("PDF_BYTES").addHeader("Content-Type", "application/pdf"))
+
+      gotenbergMockServer.stubPostPdf(pdfBytes)
 
       val result = webTestClient.get()
         .uri(GET_PDF_URL)
@@ -66,22 +61,36 @@ class PdfResourceIntTest : SqsIntegrationTestBase() {
 
       assertThat(result).isEqualTo(pdfBytes)
     }
+
+    @Test
+    fun `should handle 500 error`() {
+      val errorMessage = "500 Internal Server Error from POST http://localhost:3001/forms/chromium/convert/html"
+
+      gotenbergMockServer.stubPostPdfBadRequest()
+
+      webTestClient.get()
+        .uri(GET_PDF_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus().isEqualTo(500)
+        .expectBody()
+        .jsonPath("$.developerMessage").isEqualTo(errorMessage)
+    }
   }
 
   private companion object {
-    private lateinit var mockWebServer: MockWebServer
+    private val gotenbergMockServer = GotenbergMockServer()
 
-    @BeforeAll
     @JvmStatic
-    fun setUp() {
-      mockWebServer = MockWebServer()
-      mockWebServer.start(3002)
+    @BeforeAll
+    fun startMocks() {
+      gotenbergMockServer.start()
     }
 
-    @AfterAll
     @JvmStatic
-    fun tearDown() {
-      mockWebServer.shutdown()
+    @AfterAll
+    fun stopMocks() {
+      gotenbergMockServer.stop()
     }
   }
 }

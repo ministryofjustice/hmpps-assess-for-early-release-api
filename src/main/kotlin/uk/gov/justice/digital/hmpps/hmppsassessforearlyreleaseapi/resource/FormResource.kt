@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PdfSer
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class PdfResource(
+class FormResource(
   private val pdfService: PdfService,
 ) {
   @GetMapping("/pdf")
@@ -68,6 +68,11 @@ class PdfResource(
             schema = Schema(implementation = ErrorResponse::class),
           ),
         ],
+      ),
+      ApiResponse(
+        responseCode = "500",
+        description = "Unexpected error occurred while converting HTML to PDF",
+        content = [Content(mediaType = "application/json", schema = Schema(implementation = ErrorResponse::class))],
       ),
     ],
   )

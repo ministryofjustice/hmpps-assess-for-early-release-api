@@ -64,10 +64,6 @@ dependencies {
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
-  // OkHttp
-  implementation("com.squareup.okhttp3:okhttp:4.9.3")
-  implementation("com.squareup.okio:okio:2.10.0")
-
   // Thymeleaf
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 

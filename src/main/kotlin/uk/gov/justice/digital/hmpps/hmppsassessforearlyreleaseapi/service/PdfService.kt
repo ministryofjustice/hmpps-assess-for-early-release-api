@@ -1,29 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.RestTemplate
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.nio.charset.StandardCharsets
 
 @Service
-class PdfService(
-  private val templateEngine: TemplateEngine,
-  private val restTemplate: RestTemplate,
-  @Value("\${gotenberg.api.url}") private val gotenbergHost: String,
-) {
-
-  companion object {
-    private val log = LoggerFactory.getLogger(this::class.java)
-  }
+class PdfService(private val templateEngine: TemplateEngine, private val gotenbergApiClient: GotenbergApiClient) {
 
   fun generateHtml(title: String, message: String): String {
     val context = Context()
@@ -58,16 +45,6 @@ class PdfService(
 
     val requestEntity = HttpEntity(body, headers)
 
-    return try {
-      val response: ResponseEntity<ByteArray> = restTemplate.postForEntity(
-        "$gotenbergHost/forms/chromium/convert/html",
-        requestEntity,
-        ByteArray::class.java,
-      )
-      response.body
-    } catch (e: HttpClientErrorException) {
-      log.error("Error converting HTML to PDF", e)
-      null
-    }
+    return gotenbergApiClient.convertHtmlToPdf(requestEntity)
   }
 }
