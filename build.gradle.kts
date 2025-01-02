@@ -1,5 +1,5 @@
 plugins {
-  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.1"
+  id("uk.gov.justice.hmpps.gradle-spring-boot") version "6.1.2"
   kotlin("plugin.spring") version "2.0.21"
   kotlin("plugin.jpa") version "2.0.21"
   id("io.gitlab.arturbosch.detekt") version "1.23.7"
@@ -46,7 +46,7 @@ ext["hibernate.version"] = "6.5.3.Final"
 ext["logback.version"] = "1.5.14"
 
 dependencies {
-  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.1.0")
+  implementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter:1.1.1")
   implementation("org.springframework.security:spring-security-config:6.3.2")
   implementation("org.springframework.boot:spring-boot-starter-webflux")
   implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -67,7 +67,7 @@ dependencies {
   // Thymeleaf
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.0")
+  testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.10.0")
   testImplementation("com.h2database:h2")
   testImplementation("org.testcontainers:postgresql:1.20.4")
