@@ -25,6 +25,7 @@ class WebClientConfiguration(
   @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String,
   @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String,
   @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
+  @Value("\${gotenberg.api.url}") private val gotenbergHost: String,
 ) {
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient =
@@ -111,6 +112,18 @@ class WebClientConfiguration(
   @Bean
   fun osPlacesClient(): WebClient = WebClient.builder()
     .baseUrl(osPlacesApiUrl)
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer ->
+          configurer.defaultCodecs()
+            .maxInMemorySize(-1)
+        }
+        .build(),
+    ).build()
+
+  @Bean
+  fun gotenbergClient(): WebClient = WebClient.builder()
+    .baseUrl(gotenbergHost)
     .exchangeStrategies(
       ExchangeStrategies.builder()
         .codecs { configurer ->

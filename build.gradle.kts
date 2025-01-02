@@ -64,6 +64,9 @@ dependencies {
   // OpenAPI
   implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
 
+  // Thymeleaf
+  implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.10.0")
   testImplementation("com.h2database:h2")

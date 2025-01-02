@@ -44,6 +44,19 @@ services:
       timeout: 5s
       retries: 5
 
+  gotenberg:
+    image: gotenberg/gotenberg:8.0.0
+    networks:
+      - hmpps
+    container_name: gotenberg
+    ports:
+      - "3002:3000"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
 volumes:
   pgdata:
 

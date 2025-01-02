@@ -62,3 +62,38 @@ generic-service:
 
 generic-prometheus-alerts:
   targetApplication: hmpps-assess-for-early-release-api
+
+gotenberg:
+  nameOverride: gotenberg
+  replicaCount: 2
+
+  image:
+    repository: thecodingmachine/gotenberg
+    tag: 8.0.0
+    port: 3000
+
+  ingress:
+    enabled: false
+
+  livenessProbe:
+    httpGet:
+      path: /health
+    periodSeconds: 30
+    initialDelaySeconds: 60
+    timeoutSeconds: 20
+    failureThreshold: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+    periodSeconds: 20
+    initialDelaySeconds: 60
+    timeoutSeconds: 30
+    failureThreshold: 15
+
+  podSecurityContext:
+    fsGroup: 1001
+
+  securityContext:
+    runAsUser: 1001
+    runAsNonRoot: true

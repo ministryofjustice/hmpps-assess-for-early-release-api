@@ -41,6 +41,9 @@ hmpps:
     api:
       url: http://localhost:8094
 
+gotenberg:
+  api:
+    url: http://localhost:3001
 
 hmpps.sqs:
   provider: localstack
