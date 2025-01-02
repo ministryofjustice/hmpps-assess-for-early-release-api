@@ -21,7 +21,7 @@ services:
       - test-pgdata:/var/lib/postgresql/data
 
   gotenberg:
-    image: gotenberg/gotenberg:7
+    image: gotenberg/gotenberg:8.0.0
     networks:
       - hmpps
     container_name: gotenberg
