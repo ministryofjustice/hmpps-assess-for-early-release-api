@@ -2,9 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>Sample PDF</title>
+<!--  <link rel="stylesheet" href="http://localhost:8080/static/css/style.css" th:href="@{http://localhost:8080/static/css/style.css}">-->
+<!--  <link rel="stylesheet" type="text/css" th:href="@{classpath/css/style.css}">-->
+<!--  <link rel="stylesheet" th:href="@{/css/style.css}"/>-->
 </head>
 <body>
-<h1 th:text="${title}">Title</h1>
-<p th:text="${message}">Message</p>
+  <h1 th:text="${title}">Title</h1>
+  <p th:text="${message}">Message</p>
 </body>
 </html>
+AFER-Render-css-and-images-to-PDF-generation
