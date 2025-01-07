@@ -2,13 +2,9 @@
 # The dev profile is for running the API service locally against a postgres database (5432).
 #
 spring:
-  mvc:
-      static-path-pattern: /resources/**
+
   jpa:
     show-sql: true
-  web:
-    resources:
-      static-locations: classpath:/static/
 
 hmpps:
   auth:
@@ -30,6 +26,9 @@ hmpps:
 gotenberg:
   api:
     url: "http://hmpps-assess-for-early-release-gotenberg"
+
+assessments:
+    url: "https://assess-for-early-release-dev.hmpps.service.justice.gov.uk"
 
 hmpps.sqs:
   provider: localstack

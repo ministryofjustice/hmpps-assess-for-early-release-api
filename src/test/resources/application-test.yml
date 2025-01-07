@@ -15,10 +15,6 @@ spring:
     init:
       continue-on-error: true
 
-  web:
-    resources:
-      static-locations: classpath:/static/
-
 server:
   shutdown: immediate
 
@@ -48,6 +44,9 @@ hmpps:
 gotenberg:
   api:
     url: http://localhost:3001
+
+assessments:
+  url: http://host.docker.internal:8089
 
 hmpps.sqs:
   provider: localstack
