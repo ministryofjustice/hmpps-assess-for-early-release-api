@@ -15,10 +15,6 @@ spring:
     init:
       continue-on-error: true
 
-  web:
-    resources:
-      static-locations: classpath:/static/
-
 server:
   shutdown: immediate
 

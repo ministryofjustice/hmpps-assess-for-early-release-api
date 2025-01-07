@@ -3,11 +3,6 @@ info.app:
   version: 1.0
 
 spring:
-  mvc:
-    static-path-pattern: /resources/**
-  web:
-    resources:
-      static-locations: classpath:/static/
 
   application:
     name: hmpps-assess-for-early-release-api
