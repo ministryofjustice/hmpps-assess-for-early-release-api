@@ -41,7 +41,6 @@ class PdfService(
         },
       ),
     )
-
     body.add("paperWidth", "8.27")
     body.add("paperHeight", "11.69")
     body.add("marginTop", "1")

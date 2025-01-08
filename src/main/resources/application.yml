@@ -3,7 +3,6 @@ info.app:
   version: 1.0
 
 spring:
-
   application:
     name: hmpps-assess-for-early-release-api
   codec:
