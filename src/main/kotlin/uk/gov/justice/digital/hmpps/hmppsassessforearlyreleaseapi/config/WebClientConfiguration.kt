@@ -14,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient
 import uk.gov.justice.hmpps.kotlin.auth.healthWebClient
 import java.time.Duration
 
-
 private const val HMPPS_AUTH = "hmpps-auth"
 
 @Configuration

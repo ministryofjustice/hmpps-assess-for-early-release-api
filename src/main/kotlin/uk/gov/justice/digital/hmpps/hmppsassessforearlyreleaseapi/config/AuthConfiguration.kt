@@ -5,11 +5,11 @@ import org.springframework.context.annotation.Configuration
 import uk.gov.justice.hmpps.kotlin.auth.dsl.ResourceServerConfigurationCustomizer
 
 @Configuration
-  class AuthConfiguration {
-    @Bean
-    fun resourceServerCustomizer() = ResourceServerConfigurationCustomizer {
-      unauthorizedRequestPaths {
-        addPaths = setOf("/css/**", "/images/**")
-      }
+class AuthConfiguration {
+  @Bean
+  fun resourceServerCustomizer() = ResourceServerConfigurationCustomizer {
+    unauthorizedRequestPaths {
+      addPaths = setOf("/css/**", "/images/**")
     }
   }
+}

@@ -10,7 +10,6 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import java.nio.charset.StandardCharsets
 
-
 @Service
 class PdfService(
   private val templateEngine: TemplateEngine,

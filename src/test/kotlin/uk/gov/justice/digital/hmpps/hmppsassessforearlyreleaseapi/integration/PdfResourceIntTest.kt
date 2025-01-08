@@ -63,35 +63,19 @@ class PdfResourceIntTest : SqsIntegrationTestBase() {
     }
   }
 
-//  @Configuration
-//  class TestConfig {
-//
-//    @Bean
-//    fun templateEngine(): TemplateEngine {
-//      val templateResolver = ClassLoaderTemplateResolver()
-//      templateResolver.prefix = "templates/"
-//      templateResolver.suffix = ".html"
-//      templateResolver.setTemplateMode("HTML")
-//      templateResolver.characterEncoding = "UTF-8"
-//      val templateEngine = TemplateEngine()
-//      templateEngine.setTemplateResolver(templateResolver)
-//      return templateEngine
-//    }
-//  }
-
   private companion object {
-      private val gotenbergMockServer = GotenbergMockServer()
+    private val gotenbergMockServer = GotenbergMockServer()
 
-      @JvmStatic
-      @BeforeAll
-      fun startMocks() {
-        gotenbergMockServer.start()
-      }
+    @JvmStatic
+    @BeforeAll
+    fun startMocks() {
+      gotenbergMockServer.start()
+    }
 
-      @JvmStatic
-      @AfterAll
-      fun stopMocks() {
-        gotenbergMockServer.stop()
-      }
+    @JvmStatic
+    @AfterAll
+    fun stopMocks() {
+      gotenbergMockServer.stop()
+    }
   }
 }
