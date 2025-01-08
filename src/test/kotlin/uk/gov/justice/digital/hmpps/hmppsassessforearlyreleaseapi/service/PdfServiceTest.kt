@@ -6,6 +6,7 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Value
 import org.thymeleaf.TemplateEngine
 
 class PdfServiceTest {
