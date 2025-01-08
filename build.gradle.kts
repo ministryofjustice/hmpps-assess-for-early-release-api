@@ -67,7 +67,6 @@ dependencies {
   // Thymeleaf
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf:3.1.2")
 
-
   testImplementation("uk.gov.justice.service.hmpps:hmpps-kotlin-spring-boot-starter-test:1.1.1")
   testImplementation("org.wiremock:wiremock-standalone:3.10.0")
   testImplementation("com.h2database:h2")
