@@ -26,6 +26,9 @@ gotenberg:
   api:
     url: "http://hmpps-assess-for-early-release-gotenberg"
 
+assessments:
+    url: "http://host.docker.internal:8089"
+
 hmpps.sqs:
   provider: localstack
   localstackUrl: http://localhost:4666

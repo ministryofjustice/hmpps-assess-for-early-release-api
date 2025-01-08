@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
@@ -10,12 +11,16 @@ import org.thymeleaf.context.Context
 import java.nio.charset.StandardCharsets
 
 @Service
-class PdfService(private val templateEngine: TemplateEngine, private val gotenbergApiClient: GotenbergApiClient) {
-
+class PdfService(
+  private val templateEngine: TemplateEngine,
+  private val gotenbergApiClient: GotenbergApiClient,
+  @Value("\${assessments.url}") private val assessmentsUrl: String,
+) {
   fun generateHtml(title: String, message: String): String {
     val context = Context()
     context.setVariable("title", title)
     context.setVariable("message", message)
+    context.setVariable("assessmentsUrl", assessmentsUrl)
     return templateEngine.process("sample", context)
   }
 

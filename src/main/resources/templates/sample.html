@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
 <head>
   <title>Sample PDF</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
 </head>
 <body>
-<h1 th:text="${title}">Title</h1>
-<p th:text="${message}">Message</p>
+  <h1 th:text="${title}">Title</h1>
+  <p th:text="${message}">Message</p>
+  <img th:src="${assessmentsUrl} + '/images/hmpps_logo_small.png'"  alt="img"/>
 </body>
 </html>
