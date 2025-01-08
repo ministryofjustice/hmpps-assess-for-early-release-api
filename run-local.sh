@@ -47,7 +47,6 @@ export OS_PLACES_API_KEY=$(kubectl -n hmpps-assess-for-early-release-dev get sec
 export SYSTEM_CLIENT_ID=$(kubectl -n hmpps-assess-for-early-release-dev get secrets hmpps-assess-for-early-release-api -o json  | jq -r '.data.SYSTEM_CLIENT_ID | @base64d')
 export SYSTEM_CLIENT_SECRET=$(kubectl -n hmpps-assess-for-early-release-dev get secrets hmpps-assess-for-early-release-api -o json  | jq -r '.data.SYSTEM_CLIENT_SECRET | @base64d')
 export GOTENBERG_API_URL=http://localhost:3002
-export ASSESSMENTS_URL=http://host.docker.internal:8089
 
 # Provide URLs to other local container-based dependent services
 # Match with ports defined in docker-compose.yml
