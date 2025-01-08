@@ -25,7 +25,7 @@ class PdfServiceTest {
   fun `generatePdf should return PDF bytes`() {
     val title = "Test Title"
     val message = "Test Message"
-    val htmlContent = "<html><body><h1>$title</h1><p>$message</p></body></html>"
+    val htmlContent = "<html><head><link rel=\"stylesheet\" th:href=\"${assessmentsUrl} + '/css/style.css'\"></head><body><h1>$title</h1><p>$message</p></body></html>"
 
     whenever(templateEngine.process(eq("sample"), any())).thenReturn(htmlContent)
     whenever(gotenbergClient.convertHtmlToPdf(any())).thenReturn("PDF_BYTES".toByteArray())
