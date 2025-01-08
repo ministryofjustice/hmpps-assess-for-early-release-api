@@ -24,7 +24,7 @@ hmpps:
 
 gotenberg:
   api:
-    url: "http://hmpps-assess-for-early-release-gotenberg"
+    url: "http://localhost:3002"
 
 assessments:
     url: "http://host.docker.internal:8089"
