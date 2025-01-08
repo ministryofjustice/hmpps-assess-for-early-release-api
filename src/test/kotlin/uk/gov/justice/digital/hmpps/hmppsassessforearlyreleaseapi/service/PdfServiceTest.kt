@@ -6,17 +6,20 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.whenever
+import org.springframework.beans.factory.annotation.Value
 import org.thymeleaf.TemplateEngine
 
 class PdfServiceTest {
 
   private var templateEngine = mock<TemplateEngine>()
   private val gotenbergClient = mock<GotenbergApiClient>()
+  private val assessmentsUrl = "http://host.docker.internal:8089"
 
   private val service: PdfService =
     PdfService(
       templateEngine,
       gotenbergClient,
+      assessmentsUrl,
     )
 
   @Test
