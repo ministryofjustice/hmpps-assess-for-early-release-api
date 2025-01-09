@@ -33,7 +33,6 @@ generic-service:
     GOTENBERG_API_URL: "http://hmpps-assess-for-early-release-api-gotenberg"
     ASSESSMENTS_URL: "http://hmpps-assess-for-early-release-api"
 
-
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
   #   [name of kubernetes secret]:
