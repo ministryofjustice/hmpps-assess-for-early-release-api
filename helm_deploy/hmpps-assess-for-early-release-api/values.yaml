@@ -31,7 +31,8 @@ generic-service:
     APPLICATIONINSIGHTS_CONFIGURATION_FILE: applicationinsights.json
     DB_SSL_ENABLED: "true"
     GOTENBERG_API_URL: "http://hmpps-assess-for-early-release-api-gotenberg"
-    ASSESSMENTS_URL: "http://assess-for-early-release-api"
+    ASSESSMENTS_URL: "http://hmpps-assess-for-early-release-api"
+
 
   # Pre-existing kubernetes secrets to load as environment variables in the deployment.
   # namespace_secrets:
