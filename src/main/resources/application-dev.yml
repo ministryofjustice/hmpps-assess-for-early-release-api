@@ -2,13 +2,8 @@
 # The dev profile is for running the API service locally against a postgres database (5432).
 #
 spring:
-  mvc:
-      static-path-pattern: /resources/**
   jpa:
     show-sql: true
-  web:
-    resources:
-      static-locations: classpath:/static/
 
 hmpps:
   auth:
