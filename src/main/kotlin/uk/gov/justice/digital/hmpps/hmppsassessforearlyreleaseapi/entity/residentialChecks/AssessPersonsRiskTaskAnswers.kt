@@ -36,19 +36,19 @@ class AssessPersonsRiskTaskAnswers(
 }
 
 data class AssessPersonsRiskAnswers(
-  @field:NotNull
-  @field:NotBlank
-  @field:Size(min = 1, max = 1000)
+  @field:NotNull(message = "Enter information provided by the POM about behaviour in prison")
+  @field:NotBlank(message = "Enter information provided by the POM about behaviour in prison")
+  @field:Size(max = 1000, message = "Please enter a maximum of 1000 characters")
   val pomPrisonBehaviourInformation: String?,
 
-  @field:NotNull
-  val mentalHealthTreatmentNeeds: Boolean?,
+  @field:NotNull(message = "Select if the person has mental health treatment needs")
+  val mentalHealthTreatmentNeeds: String?,
 
-  @field:NotNull
-  val vloOfficerForCase: Boolean?,
+  @field:NotNull(message = "Select if there is a VLO officer for the case")
+  val vloOfficerForCase: String?,
 
-  @field:NotNull
-  val informationThatCannotBeDisclosed: Boolean?,
+  @field:NotNull(message = "Select if there is information that cannot be disclosed")
+  val informationThatCannotBeDisclosed: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,

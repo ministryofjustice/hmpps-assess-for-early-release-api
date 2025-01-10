@@ -7,6 +7,6 @@ data class SaveResidentialChecksTaskAnswersRequest(
   @Schema(description = "The task code for these answers relate to")
   val taskCode: String,
 
-  @Schema(description = "A map of answer codes to answer values")
+  @Schema(description = "A map of answer codes to answer values", implementation = Map::class, ref = "#/components/schemas/MapStringAny")
   val answers: Map<String, Any>,
 )

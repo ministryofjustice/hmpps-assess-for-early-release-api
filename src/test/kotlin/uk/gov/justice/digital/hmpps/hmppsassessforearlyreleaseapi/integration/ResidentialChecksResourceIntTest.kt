@@ -134,9 +134,9 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       SaveResidentialChecksTaskAnswersRequest(
         taskCode = "address-details-and-informed-consent",
         answers = mapOf(
-          "electricitySupply" to true,
-          "visitedAddress" to false,
-          "mainOccupierConsentGiven" to true,
+          "electricitySupply" to "Yes",
+          "visitedAddress" to "No",
+          "mainOccupierConsentGiven" to "Yes",
         ),
       )
 
@@ -191,7 +191,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       assertThat(answers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
       assertThat(answers).isInstanceOf(AddressDetailsTaskAnswers::class.java)
       val addressDetailsTaskAnswers = answers as AddressDetailsTaskAnswers
-      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = true, visitedAddress = false, mainOccupierConsentGiven = true))
+      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = "Yes", visitedAddress = "No", mainOccupierConsentGiven = "Yes"))
     }
 
     @Sql(

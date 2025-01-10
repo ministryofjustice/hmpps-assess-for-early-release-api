@@ -25,6 +25,7 @@ import org.springframework.context.expression.BeanFactoryResolver
 import org.springframework.expression.spel.SpelEvaluationException
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
+import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
 
@@ -98,7 +99,27 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   }
 
   @Bean
-  fun openAPICustomiser(): OpenApiCustomizer = OpenApiCustomizer {
+  fun openAPICustomizer(): OpenApiCustomizer = OpenApiCustomizer {
+    val mapSchema = Schema<Any>().apply {
+      type = "object"
+      additionalProperties = Schema<Any>().apply {
+        type = "string"
+      }
+    }
+    it.components.addSchemas("MapStringAny", mapSchema)
+
+    it.components
+      .addSchemas(
+        "Map",
+        Schema<ErrorResponse>().properties(
+          mapOf(
+            "status" to Schema<Int>().type("number").example(HttpStatus.BAD_REQUEST.value()),
+            "userMessage" to Schema<String>().type("string").example("Validation failure: No query parameters specified."),
+            "developerMessage" to Schema<String>().type("string").example("No query parameters specified."),
+          ),
+        ),
+      )
+
     it.components.schemas.forEach { (_, schema: Schema<*>) ->
       val properties = schema.properties ?: mutableMapOf()
       for (propertyName in properties.keys) {

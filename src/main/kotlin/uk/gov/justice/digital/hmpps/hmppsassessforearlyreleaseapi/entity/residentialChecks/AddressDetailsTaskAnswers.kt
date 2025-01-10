@@ -33,14 +33,14 @@ class AddressDetailsTaskAnswers(
 }
 
 data class AddressDetailsAnswers(
-  @field:NotNull
-  val electricitySupply: Boolean?,
+  @field:NotNull(message = "Select if the address is connected to an electricity supply")
+  val electricitySupply: String?,
 
-  @field:NotNull
-  val visitedAddress: Boolean?,
+  @field:NotNull(message = "Select if you have visited the address")
+  val visitedAddress: String?,
 
-  @field:NotNull
-  val mainOccupierConsentGiven: Boolean?,
+  @field:NotNull(message = "Select if the main occupier has given consent for the offender to be released")
+  val mainOccupierConsentGiven: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
     answers = this,

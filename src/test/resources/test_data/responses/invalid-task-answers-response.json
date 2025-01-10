@@ -4,6 +4,6 @@
   "status": 400,
   "instance": "/offender/A1234AA/current-assessment/address-request/1/residential-checks/answers",
   "taskCode": "assess-this-persons-risk",
-  "mentalHealthTreatmentNeeds": "must not be null",
-  "pomPrisonBehaviourInformation": "size must be between 1 and 1000"
+  "mentalHealthTreatmentNeeds": "Select if the person has mental health treatment needs",
+  "pomPrisonBehaviourInformation": "Please enter a maximum of 1000 characters"
 }
