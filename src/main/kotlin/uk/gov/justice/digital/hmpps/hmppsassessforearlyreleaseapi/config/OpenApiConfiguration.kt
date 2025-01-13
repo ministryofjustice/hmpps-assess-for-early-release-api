@@ -25,7 +25,6 @@ import org.springframework.context.expression.BeanFactoryResolver
 import org.springframework.expression.spel.SpelEvaluationException
 import org.springframework.expression.spel.standard.SpelExpressionParser
 import org.springframework.expression.spel.support.StandardEvaluationContext
-import org.springframework.http.HttpStatus
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.method.HandlerMethod
 
@@ -37,28 +36,25 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   private lateinit var context: ApplicationContext
 
   @Bean
-  fun customOpenAPI(): OpenAPI {
-    return OpenAPI().servers(
-      listOf(
-        Server().url("https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk")
-          .description("Development"),
-        Server().url("http://localhost:8089").description("Local"),
-      ),
-    ).info(
-      Info().title("Assess for early release API").version(version)
-        .description("API for the Assess for early release product. NB: Not intended for general use")
-        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
-    ).components(
-      Components().addSecuritySchemes(
-        "assess-for-early-release-admin-role",
-        SecurityScheme().addBearerJwtRequirement("ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN"),
-      ),
-    ).addSecurityItem(SecurityRequirement().addList("assess-for-early-release-admin-role", listOf("read", "write")))
-  }
+  fun customOpenAPI(): OpenAPI = OpenAPI().servers(
+    listOf(
+      Server().url("https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk")
+        .description("Development"),
+      Server().url("http://localhost:8089").description("Local"),
+    ),
+  ).info(
+    Info().title("Assess for early release API").version(version)
+      .description("API for the Assess for early release product. NB: Not intended for general use")
+      .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
+  ).components(
+    Components().addSecuritySchemes(
+      "assess-for-early-release-admin-role",
+      SecurityScheme().addBearerJwtRequirement("ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN"),
+    ),
+  ).addSecurityItem(SecurityRequirement().addList("assess-for-early-release-admin-role", listOf("read", "write")))
 
-  private fun SecurityScheme.addBearerJwtRequirement(role: String): SecurityScheme =
-    type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").`in`(SecurityScheme.In.HEADER)
-      .name("Authorization").description("A HMPPS Auth access token with the `$role` role.")
+  private fun SecurityScheme.addBearerJwtRequirement(role: String): SecurityScheme = type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").`in`(SecurityScheme.In.HEADER)
+    .name("Authorization").description("A HMPPS Auth access token with the `$role` role.")
 
   @Bean
   fun preAuthorizeCustomizer(): OperationCustomizer {
@@ -107,18 +103,6 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
       }
     }
     it.components.addSchemas("MapStringAny", mapSchema)
-
-    it.components
-      .addSchemas(
-        "Map",
-        Schema<ErrorResponse>().properties(
-          mapOf(
-            "status" to Schema<Int>().type("number").example(HttpStatus.BAD_REQUEST.value()),
-            "userMessage" to Schema<String>().type("string").example("Validation failure: No query parameters specified."),
-            "developerMessage" to Schema<String>().type("string").example("No query parameters specified."),
-          ),
-        ),
-      )
 
     it.components.schemas.forEach { (_, schema: Schema<*>) ->
       val properties = schema.properties ?: mutableMapOf()
