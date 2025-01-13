@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.junit.Test
 
-
 class InitialiseDatabase : IntegrationTestBase() {
 
   @Test
