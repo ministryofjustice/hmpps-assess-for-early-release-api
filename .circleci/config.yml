@@ -95,11 +95,7 @@ workflows:
           name: helm_lint
       - hmpps/database_schema_report:
           schema: "public"
-          initialise_database: "./gradlew check"
-          filters:
-            branches:
-              only:
-                - main
+          initialise_database: "./gradlew initialiseDatabase"
       - hmpps/build_multiplatform_docker:
           name: build_docker
           filters:

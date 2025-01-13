@@ -100,6 +100,10 @@ tasks {
       },
     )
   }
+
+  register("initialiseDatabase", Test::class) {
+    include("**/InitialiseDatabase.class")
+  }
 }
 
 configurations.matching { it.name == "detekt" }.all {
