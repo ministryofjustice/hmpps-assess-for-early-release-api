@@ -7,7 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.VisitedAddress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
 
 @Entity
 @DiscriminatorValue(value = "address-details-and-informed-consent")
