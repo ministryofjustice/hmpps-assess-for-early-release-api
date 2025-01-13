@@ -36,17 +36,18 @@ class SuitabilityDecisionTaskAnswers(
 }
 
 data class SuitabilityDecisionAnswers(
-  @NotNull(message = "Select if the address is suitable for the offender to be released")
-  val addressSuitable: String?,
+  @field:NotNull(message = "Select if the address is suitable for the offender to be released")
+  val addressSuitable: Boolean?,
 
-  @NotNull(message = "Enter information to support the decision")
-  @NotBlank(message = "Enter information to support the decision")
-  @Size(min = 1, max = 1000, message = "Enter a maximum of 1000 characters")
+  @field:NotNull(message = "Enter information to support the decision")
+  @field:NotBlank(message = "Enter information to support the decision")
+  @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val addressSuitableInformation: String?,
 
-  @NotNull(message = "Select if you need to add more information")
-  val additionalInformationNeeded: String,
+  @field:NotNull(message = "Select if you need to add more information")
+  val additionalInformationNeeded: Boolean?,
 
+  @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val moreInformation: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(

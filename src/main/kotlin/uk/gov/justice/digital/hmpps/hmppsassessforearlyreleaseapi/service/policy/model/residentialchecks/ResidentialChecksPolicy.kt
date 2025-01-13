@@ -18,6 +18,11 @@ enum class TaskStatus {
   SUITABLE,
 }
 
+enum class DataType {
+  STRING,
+  BOOLEAN,
+}
+
 enum class InputType {
   TEXT,
   RADIO,
@@ -27,13 +32,15 @@ enum class InputType {
 }
 
 data class Option(
-  val value: String,
+  val text: String,
+  val value: String = text,
 )
 
 data class Input(
   val name: String,
   val type: InputType,
   val options: List<Option>? = null,
+  val dataType: DataType = DataType.STRING,
 )
 
 data class TaskQuestion(

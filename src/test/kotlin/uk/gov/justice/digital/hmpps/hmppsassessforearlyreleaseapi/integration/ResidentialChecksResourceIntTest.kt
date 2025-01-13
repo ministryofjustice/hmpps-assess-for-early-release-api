@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Res
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.RESIDENTIAL_CHECK_TASK_CODE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.VisitedAddress
 import java.nio.charset.StandardCharsets
 
 private const val GET_RESIDENTIAL_CHECKS_VIEW_URL =
@@ -134,9 +135,9 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       SaveResidentialChecksTaskAnswersRequest(
         taskCode = "address-details-and-informed-consent",
         answers = mapOf(
-          "electricitySupply" to "Yes",
-          "visitedAddress" to "No",
-          "mainOccupierConsentGiven" to "Yes",
+          "electricitySupply" to "true",
+          "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
+          "mainOccupierConsentGiven" to "true",
         ),
       )
 
@@ -191,7 +192,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       assertThat(answers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
       assertThat(answers).isInstanceOf(AddressDetailsTaskAnswers::class.java)
       val addressDetailsTaskAnswers = answers as AddressDetailsTaskAnswers
-      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = "Yes", visitedAddress = "No", mainOccupierConsentGiven = "Yes"))
+      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = true, visitedAddress = VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER, mainOccupierConsentGiven = true))
     }
 
     @Sql(

@@ -99,7 +99,7 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     val mapSchema = Schema<Any>().apply {
       type = "object"
       additionalProperties = Schema<Any>().apply {
-        type = "string"
+        oneOf = listOf(Schema<Any>().apply { type = "string" }, Schema<Any>().apply { type = "boolean" })
       }
     }
     it.components.addSchemas("MapStringAny", mapSchema)

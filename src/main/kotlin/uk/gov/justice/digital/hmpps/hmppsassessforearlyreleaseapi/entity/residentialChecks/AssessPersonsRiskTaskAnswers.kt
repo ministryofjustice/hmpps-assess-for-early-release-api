@@ -42,13 +42,13 @@ data class AssessPersonsRiskAnswers(
   val pomPrisonBehaviourInformation: String?,
 
   @field:NotNull(message = "Select if the person has mental health treatment needs")
-  val mentalHealthTreatmentNeeds: String?,
+  val mentalHealthTreatmentNeeds: Boolean?,
 
   @field:NotNull(message = "Select if there is a VLO officer for the case")
-  val vloOfficerForCase: String?,
+  val vloOfficerForCase: Boolean?,
 
   @field:NotNull(message = "Select if there is information that cannot be disclosed")
-  val informationThatCannotBeDisclosed: String?,
+  val informationThatCannotBeDisclosed: Boolean?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,

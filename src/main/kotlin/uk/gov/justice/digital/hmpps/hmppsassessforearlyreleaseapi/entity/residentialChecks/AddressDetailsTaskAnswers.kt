@@ -7,6 +7,7 @@ import jakarta.persistence.Entity
 import jakarta.validation.constraints.NotNull
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.VisitedAddress
 
 @Entity
 @DiscriminatorValue(value = "address-details-and-informed-consent")
@@ -34,13 +35,13 @@ class AddressDetailsTaskAnswers(
 
 data class AddressDetailsAnswers(
   @field:NotNull(message = "Select if the address is connected to an electricity supply")
-  val electricitySupply: String?,
+  val electricitySupply: Boolean?,
 
   @field:NotNull(message = "Select if you have visited the address")
-  val visitedAddress: String?,
+  val visitedAddress: VisitedAddress?,
 
   @field:NotNull(message = "Select if the main occupier has given consent for the offender to be released")
-  val mainOccupierConsentGiven: String?,
+  val mainOccupierConsentGiven: Boolean?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
     answers = this,

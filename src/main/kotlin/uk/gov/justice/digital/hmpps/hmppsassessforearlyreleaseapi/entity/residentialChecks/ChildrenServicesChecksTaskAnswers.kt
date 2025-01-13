@@ -49,9 +49,9 @@ data class ChildrenServicesChecksAnswers(
   @field:Past(message = "Enter a valid date in the future that the information was sent")
   val informationSent: LocalDate?,
 
-  @NotNull(message = "Enter a summary of the information received")
-  @NotBlank(message = "Enter a summary of the information received")
-  @Size(max = 1000, message = "Enter a maximum of 1000 characters")
+  @field:NotNull(message = "Enter a summary of the information received")
+  @field:NotBlank(message = "Enter a summary of the information received")
+  @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val informationSummary: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
