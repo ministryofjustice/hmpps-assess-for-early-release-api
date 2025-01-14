@@ -6,6 +6,6 @@ class InitialiseDatabase : IntegrationTestBase() {
 
   @Test
   fun `initialises database`() {
-    println("Database has been initialised by IntegrationTestBase")
+    log.info("Database has been initialised by IntegrationTestBase")
   }
 }

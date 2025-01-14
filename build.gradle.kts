@@ -34,13 +34,6 @@ tasks.named<Test>("test") {
   }
 }
 
-tasks.named<Test>("initialiseDatabase") {
-  useJUnitPlatform()
-  filter {
-    includeTestsMatching("*.InitialiseDatabase.*")
-  }
-}
-
 detekt {
   source.setFrom("$projectDir/src/main")
   buildUponDefaultConfig = true // preconfigure defaults
@@ -106,6 +99,10 @@ tasks {
         it is TaskProvider<*> && it.name == "detekt"
       },
     )
+  }
+
+  register("initialiseDatabase", Test::class) {
+    include("**/InitialiseDatabase.class")
   }
 }
 
