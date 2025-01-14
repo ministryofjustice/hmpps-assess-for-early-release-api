@@ -100,7 +100,7 @@ workflows:
           password: "dummy"
           initialise_database: "./gradlew initialiseDatabase"
           requires:
-            - build_docker
+            - integration-test
       - hmpps/build_multiplatform_docker:
           name: build_docker
           filters:
