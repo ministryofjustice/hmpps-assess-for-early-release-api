@@ -62,9 +62,6 @@ kotlin {
 }
 
 tasks {
-  task<Test>("initialiseDatabase") {
-    include("**/InitialiseDatabaseTest.class")
-  }
 
   task<Test>("integrationTest") {
     description = "Integration tests"
@@ -86,6 +83,10 @@ tasks {
     filter {
       excludeTestsMatching("*.integration.*")
     }
+  }
+
+  task<Test>("initialiseDatabase") {
+    include("**/InitialiseDatabaseTest.class")
   }
 
   withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
