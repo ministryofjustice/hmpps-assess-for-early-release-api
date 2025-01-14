@@ -9,8 +9,6 @@ configurations {
   testImplementation { exclude(group = "org.junit.vintage") }
 }
 
-
-
 detekt {
   source.setFrom("$projectDir/src/main")
   buildUponDefaultConfig = true // preconfigure defaults
