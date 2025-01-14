@@ -97,7 +97,7 @@ workflows:
           database_name: "afer-test-db"
           user: "afer"
           password: "dummy"
-          initialise_database: "./gradlew initialiseDatabase"
+#          initialise_database: "./gradlew initialiseDatabase"
       - hmpps/build_multiplatform_docker:
           name: build_docker
           filters:
