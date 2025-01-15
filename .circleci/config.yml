@@ -73,7 +73,7 @@ jobs:
           name: Generate database schema report
           command: |
             java -jar /tmp/schemaspy.jar \
-              -t pgsql \
+              -t pgsql11 \
               -dp /tmp/postgres-driver.jar \
               -db afer-test-db \
               -host localhost \
