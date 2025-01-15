@@ -17,8 +17,9 @@ parameters:
 jobs:
   validate:
     executor:
-      name: hmpps/java
-      tag: << pipeline.parameters.java-version >>
+      name: hmpps/java_postgres
+      jdk_tag: << pipeline.parameters.java-version >>
+      postgres_tag: << pipeline.parameters.postgres-version >>
     steps:
       - checkout
       - restore_cache:
