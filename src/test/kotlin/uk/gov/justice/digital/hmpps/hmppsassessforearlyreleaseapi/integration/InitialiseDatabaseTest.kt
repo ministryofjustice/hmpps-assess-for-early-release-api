@@ -1,8 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 
-class InitialiseDatabaseTest {
+class InitialiseDatabaseTest: SqsIntegrationTestBase() {
 
   @Test
   fun `initialises database`() {
