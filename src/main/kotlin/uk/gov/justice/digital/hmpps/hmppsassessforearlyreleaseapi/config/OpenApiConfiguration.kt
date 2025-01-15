@@ -36,28 +36,25 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   private lateinit var context: ApplicationContext
 
   @Bean
-  fun customOpenAPI(): OpenAPI {
-    return OpenAPI().servers(
-      listOf(
-        Server().url("https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk")
-          .description("Development"),
-        Server().url("http://localhost:8089").description("Local"),
-      ),
-    ).info(
-      Info().title("Assess for early release API").version(version)
-        .description("API for the Assess for early release product. NB: Not intended for general use")
-        .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
-    ).components(
-      Components().addSecuritySchemes(
-        "assess-for-early-release-admin-role",
-        SecurityScheme().addBearerJwtRequirement("ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN"),
-      ),
-    ).addSecurityItem(SecurityRequirement().addList("assess-for-early-release-admin-role", listOf("read", "write")))
-  }
+  fun customOpenAPI(): OpenAPI = OpenAPI().servers(
+    listOf(
+      Server().url("https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk")
+        .description("Development"),
+      Server().url("http://localhost:8089").description("Local"),
+    ),
+  ).info(
+    Info().title("Assess for early release API").version(version)
+      .description("API for the Assess for early release product. NB: Not intended for general use")
+      .contact(Contact().name("HMPPS Digital Studio").email("feedback@digital.justice.gov.uk")),
+  ).components(
+    Components().addSecuritySchemes(
+      "assess-for-early-release-admin-role",
+      SecurityScheme().addBearerJwtRequirement("ROLE_ASSESS_FOR_EARLY_RELEASE_ADMIN"),
+    ),
+  ).addSecurityItem(SecurityRequirement().addList("assess-for-early-release-admin-role", listOf("read", "write")))
 
-  private fun SecurityScheme.addBearerJwtRequirement(role: String): SecurityScheme =
-    type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").`in`(SecurityScheme.In.HEADER)
-      .name("Authorization").description("A HMPPS Auth access token with the `$role` role.")
+  private fun SecurityScheme.addBearerJwtRequirement(role: String): SecurityScheme = type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT").`in`(SecurityScheme.In.HEADER)
+    .name("Authorization").description("A HMPPS Auth access token with the `$role` role.")
 
   @Bean
   fun preAuthorizeCustomizer(): OperationCustomizer {
@@ -98,7 +95,15 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
   }
 
   @Bean
-  fun openAPICustomiser(): OpenApiCustomizer = OpenApiCustomizer {
+  fun openAPICustomizer(): OpenApiCustomizer = OpenApiCustomizer {
+    val mapSchema = Schema<Any>().apply {
+      type = "object"
+      additionalProperties = Schema<Any>().apply {
+        oneOf = listOf(Schema<Any>().apply { type = "string" }, Schema<Any>().apply { type = "boolean" })
+      }
+    }
+    it.components.addSchemas("MapStringAny", mapSchema)
+
     it.components.schemas.forEach { (_, schema: Schema<*>) ->
       val properties = schema.properties ?: mutableMapOf()
       for (propertyName in properties.keys) {

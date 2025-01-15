@@ -195,7 +195,7 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
       ),
     ],
   )
-  fun <T> saveResidentialChecksTaskAnswers(
+  fun saveResidentialChecksTaskAnswers(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
     @Valid @RequestBody taskAnswers: SaveResidentialChecksTaskAnswersRequest,

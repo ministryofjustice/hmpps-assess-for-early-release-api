@@ -35,15 +35,15 @@ class RiskManagementDecisionTaskAnswers(
 }
 
 data class RiskManagementDecisionAnswers(
-  @NotNull
+  @field:NotNull(message = "Select if the offender can be managed safely in the community")
   val canOffenderBeManagedSafely: Boolean?,
 
-  @NotNull
-  @NotBlank
-  @Size(min = 1, max = 1000)
+  @field:NotNull(message = "Enter information to support the decision")
+  @field:NotBlank(message = "Enter information to support the decision")
+  @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val informationToSupportDecision: String?,
 
-  @NotNull
+  @field:NotNull(message = "Select if any risk management planning actions are needed")
   val riskManagementPlanningActionsNeeded: Boolean?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = RiskManagementDecisionTaskAnswers(

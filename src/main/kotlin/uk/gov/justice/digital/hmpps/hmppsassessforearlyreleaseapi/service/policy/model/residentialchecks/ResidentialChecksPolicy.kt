@@ -18,6 +18,11 @@ enum class TaskStatus {
   SUITABLE,
 }
 
+enum class DataType {
+  STRING,
+  BOOLEAN,
+}
+
 enum class InputType {
   TEXT,
   RADIO,
@@ -27,13 +32,15 @@ enum class InputType {
 }
 
 data class Option(
-  val value: String,
+  val text: String,
+  val value: String = text,
 )
 
 data class Input(
   val name: String,
   val type: InputType,
   val options: List<Option>? = null,
+  val dataType: DataType = DataType.STRING,
 )
 
 data class TaskQuestion(
@@ -59,3 +66,8 @@ data class ResidentialChecksPolicy(
   val version: PolicyVersion,
   val tasks: List<Task>,
 )
+
+enum class VisitedAddress {
+  I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER,
+  I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER,
+}

@@ -40,16 +40,18 @@ class ChildrenServicesChecksTaskAnswers(
 
 data class ChildrenServicesChecksAnswers(
   @JsonFormat(pattern = "yyyy-MM-dd")
-  @field:Past
+  @field:NotNull(message = "Enter a valid date in the future that you requested information")
+  @field:Past(message = "Enter a valid date in the future that you requested information")
   val informationRequested: LocalDate?,
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  @field:Past
+  @field:NotNull(message = "Enter a valid date in the future that the information was sent")
+  @field:Past(message = "Enter a valid date in the future that the information was sent")
   val informationSent: LocalDate?,
 
-  @NotNull
-  @NotBlank
-  @Size(min = 1, max = 1000)
+  @field:NotNull(message = "Enter a summary of the information received")
+  @field:NotBlank(message = "Enter a summary of the information received")
+  @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val informationSummary: String?,
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
