@@ -27,7 +27,7 @@ class AddressDetailsTaskAnswers(
   override fun toAnswersMap(): Map<String, Any?> = mapOf(
     "electricitySupply" to answers.electricitySupply,
     "visitedAddress" to answers.visitedAddress,
-     "mainOccupierConsentGiven" to answers.mainOccupierConsentGiven,
+    "mainOccupierConsentGiven" to answers.mainOccupierConsentGiven,
   )
 
   override fun getAnswers(): AnswerPayload = answers
