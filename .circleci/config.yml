@@ -145,8 +145,10 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
-      - hmpps/database_schema_report:
-          initialise_database: "./gradlew initialiseDatabase"
+      - generate_database_schema:
+          filters:
+            tags:
+              ignore: /.*/
       - validate:
           filters:
             tags:
