@@ -49,8 +49,8 @@ jobs:
           - PERSISTENCE: 1
       - image: postgres:<< pipeline.parameters.postgres-version >>
         environment:
-          - POSTGRES_USER: root
-          - POSTGRES_PASSWORD: dev
+          - POSTGRES_USER: afer
+          - POSTGRES_PASSWORD: dummy
           - POSTGRES_DB: afer-test-db
           - PGPORT: 5433
     steps:
@@ -85,8 +85,10 @@ workflows:
   build-test-and-deploy:
     jobs:
       - hmpps/database_schema_report:
-          schema: "public"
-          initialise_database: "./gradlew check"
+          schema: "afer-test-db"
+          user: "afer"
+          password: "dummy"
+          initialise_database: "./gradlew initialiseDatabase"
       - validate:
           filters:
             tags:

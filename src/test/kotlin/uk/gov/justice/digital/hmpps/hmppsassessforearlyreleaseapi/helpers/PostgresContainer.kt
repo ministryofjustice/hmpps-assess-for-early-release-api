@@ -7,8 +7,8 @@ import java.net.ServerSocket
 
 object PostgresContainer {
   private const val DB_NAME = "afer-test-db"
-  const val DB_USERNAME = "root"
-  const val DB_PASSWORD = "dev"
+  const val DB_USERNAME = "afer"
+  const val DB_PASSWORD = "dummy"
   private const val DB_DEFAULT_PORT = 5433
   const val DB_DEFAULT_URL = "jdbc:postgresql://localhost:$DB_DEFAULT_PORT/$DB_NAME?sslmode=prefer"
 
