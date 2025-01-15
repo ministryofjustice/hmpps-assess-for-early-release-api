@@ -39,7 +39,7 @@ jobs:
 
   generate_database_schema:
     executor:
-      name: java_postgres
+      name: hmpps/java_postgres
       jdk_tag: "21.0"
       postgres_tag: "16.1"
     docker:
