@@ -30,4 +30,7 @@ data class ResidentialChecksTaskProgress(
 
   @Schema(description = "Status of this criterion for a specific case", example = "NOT_STARTED")
   val status: TaskStatus,
+
+  @Schema(description = "A map of answer codes to answer values", implementation = Map::class, ref = "#/components/schemas/MapStringAny")
+  val answers: Map<String, Any?>,
 )

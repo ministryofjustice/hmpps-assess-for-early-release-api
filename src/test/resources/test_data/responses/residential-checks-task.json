@@ -117,5 +117,6 @@
       }
     ]
   },
-  "taskStatus": "NOT_STARTED"
+  "taskStatus": "NOT_STARTED",
+  "answers": {}
 }

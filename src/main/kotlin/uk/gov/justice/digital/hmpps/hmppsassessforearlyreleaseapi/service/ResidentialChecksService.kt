@@ -4,8 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.stereotype.Service
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AnswerPayload
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswerType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskAnswersSummary
@@ -31,11 +30,17 @@ class ResidentialChecksService(
   fun getResidentialChecksView(prisonNumber: String, addressCheckRequestId: Long): ResidentialChecksView {
     val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
 
+    val taskAnswersForAddressCheck =
+      residentialChecksTaskAnswerRepository.findByAddressCheckRequestId(addressCheckRequestId)
+
     val tasks = RESIDENTIAL_CHECKS_POLICY_V1.tasks.map { task ->
+      val taskAnswers = taskAnswersForAddressCheck.find { it.taskCode == task.code }
+      val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
       ResidentialChecksTaskProgress(
         code = task.code,
         taskName = task.name,
         status = TaskStatus.NOT_STARTED,
+        answers = answersMap,
       )
     }
 
@@ -47,10 +52,14 @@ class ResidentialChecksService(
     val task = RESIDENTIAL_CHECKS_POLICY_V1.tasks.find { it.code == taskCode }
       ?: throw NoResourceFoundException("$taskCode is not a valid task code")
 
+    val taskAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(requestId, taskCode)
+    val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
+
     return ResidentialChecksTaskView(
       assessmentSummary = currentAssessment,
       taskConfig = task,
       taskStatus = TaskStatus.NOT_STARTED,
+      answers = answersMap,
     )
   }
 
@@ -62,41 +71,43 @@ class ResidentialChecksService(
     val taskVersion = PolicyVersion.V1.name
     val addressCheckRequest = addressService.getCurfewAddressCheckRequest(addressCheckRequestId, prisonNumber)
 
-    val entity = transformToAnswersEntity(
-      addressCheckRequest,
+    val answers = getTaskAnswers(saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
+    validateTaskAnswers(saveTaskAnswersRequest.taskCode, answers)
+
+    val existingAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(
+      addressCheckRequestId,
       saveTaskAnswersRequest.taskCode,
-      taskVersion,
-      saveTaskAnswersRequest.answers,
     )
 
-    val answersEntity = residentialChecksTaskAnswerRepository.save(entity)
+    if (existingAnswers != null) {
+      residentialChecksTaskAnswerRepository.save(existingAnswers.updateAnswers(answers))
+    } else {
+      residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, taskVersion))
+    }
+
     return ResidentialChecksTaskAnswersSummary(
-      answersId = answersEntity.id,
       addressCheckRequestId = addressCheckRequestId,
-      taskCode = answersEntity.taskCode,
+      taskCode = saveTaskAnswersRequest.taskCode,
       answers = saveTaskAnswersRequest.answers,
-      taskVersion = answersEntity.taskVersion,
+      taskVersion = taskVersion,
     )
   }
 
-  private fun transformToAnswersEntity(
-    addressCheckRequest: CurfewAddressCheckRequest,
+  private fun getTaskAnswers(
     taskCode: String,
-    taskVersion: String,
     answers: Map<String, Any>,
-  ): ResidentialChecksTaskAnswer {
+  ): AnswerPayload {
     val taskCodeClass = ResidentialChecksTaskAnswerType.getByTaskCode(taskCode).taskAnswerClass
-
-    val taskAnswers = objectMapper.convertValue(
+    return objectMapper.convertValue(
       answers,
       taskCodeClass,
     )
+  }
 
-    val validationErrors = validator.validateObject(taskAnswers)
+  private fun validateTaskAnswers(taskCode: String, answers: AnswerPayload) {
+    val validationErrors = validator.validateObject(answers)
     if (validationErrors.hasErrors()) {
       throw TaskAnswersValidationException(taskCode, validationErrors)
     }
-
-    return taskAnswers.createTaskAnswersEntity(addressCheckRequest, taskVersion)
   }
 }

@@ -17,13 +17,26 @@ class AddressDetailsTaskAnswers(
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: AddressDetailsAnswers,
+  var answers: AddressDetailsAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.ADDRESS_DETAILS_AND_INFORMED_CONSENT.taskCode,
   taskVersion = taskVersion,
 ) {
+  override fun toAnswersMap(): Map<String, Any?> = mapOf(
+    "electricitySupply" to answers.electricitySupply,
+    "visitedAddress" to answers.visitedAddress,
+    "mainOccupierConsentGiven" to answers.mainOccupierConsentGiven,
+  )
+
+  override fun getAnswers(): AnswerPayload = answers
+
+  override fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer {
+    this.answers = answers as AddressDetailsAnswers
+    return this
+  }
+
   override fun toString(): String = "AddressDetailsTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
@@ -43,7 +56,10 @@ data class AddressDetailsAnswers(
   @field:NotNull(message = "Select if the main occupier has given consent for the offender to be released")
   val mainOccupierConsentGiven: Boolean?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
+  override fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer = AddressDetailsTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
     taskVersion = taskVersion,

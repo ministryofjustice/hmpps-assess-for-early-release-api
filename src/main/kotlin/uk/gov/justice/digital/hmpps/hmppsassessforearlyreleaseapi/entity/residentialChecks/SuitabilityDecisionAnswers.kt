@@ -18,13 +18,27 @@ class SuitabilityDecisionTaskAnswers(
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: SuitabilityDecisionAnswers,
+  var answers: SuitabilityDecisionAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.SUITABILITY_DECISION.taskCode,
   taskVersion = taskVersion,
 ) {
+  override fun toAnswersMap(): Map<String, Any?> = mapOf(
+    "addressSuitable" to answers.addressSuitable,
+    "addressSuitableInformation" to answers.addressSuitableInformation,
+    "additionalInformationNeeded" to answers.additionalInformationNeeded,
+    "moreInformation" to answers.moreInformation,
+  )
+
+  override fun getAnswers(): AnswerPayload = answers
+
+  override fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer {
+    this.answers = answers as SuitabilityDecisionAnswers
+    return this
+  }
+
   override fun toString(): String = "SuitabilityDecision(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
@@ -50,7 +64,10 @@ data class SuitabilityDecisionAnswers(
   @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val moreInformation: String?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(
+  override fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer = SuitabilityDecisionTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
     taskVersion = taskVersion,

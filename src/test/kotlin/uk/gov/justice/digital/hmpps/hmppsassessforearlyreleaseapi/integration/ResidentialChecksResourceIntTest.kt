@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
@@ -190,9 +189,57 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       val answers = residentialChecksTaskAnswerRepository.findAll().first()
       assertThat(answers).isNotNull
       assertThat(answers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
-      assertThat(answers).isInstanceOf(AddressDetailsTaskAnswers::class.java)
-      val addressDetailsTaskAnswers = answers as AddressDetailsTaskAnswers
-      assertThat(addressDetailsTaskAnswers.answers).isEqualTo(AddressDetailsAnswers(electricitySupply = true, visitedAddress = VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER, mainOccupierConsentGiven = true))
+      assertThat(answers.getAnswers()).isEqualTo(
+        AddressDetailsAnswers(
+          electricitySupply = true,
+          visitedAddress = VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER,
+          mainOccupierConsentGiven = true,
+        ),
+      )
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should update existing residential checks task answers`() {
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isCreated
+
+      var answersEntities = residentialChecksTaskAnswerRepository.findAll()
+      assertThat(answersEntities).size().isEqualTo(1)
+      var taskAnswers = answersEntities.first()
+      assertThat(taskAnswers).isNotNull
+      assertThat(taskAnswers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
+      assertThat(taskAnswers.toAnswersMap()["electricitySupply"]).isEqualTo(true)
+
+      val newAnswers = mapOf(
+        "electricitySupply" to "false",
+        "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
+        "mainOccupierConsentGiven" to "false",
+      )
+      val newSaveAnswersRequest = saveResidentialChecksTaskAnswersRequest.copy(answers = newAnswers)
+
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(newSaveAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isCreated
+
+      answersEntities = residentialChecksTaskAnswerRepository.findAll()
+      assertThat(answersEntities).size().isEqualTo(1)
+      taskAnswers = answersEntities.first()
+      assertThat(taskAnswers).isNotNull
+      assertThat(taskAnswers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
+      assertThat(taskAnswers.toAnswersMap()["electricitySupply"]).isEqualTo(false)
     }
 
     @Sql(
@@ -224,9 +271,10 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     }
   }
 
-  private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
-    StandardCharsets.UTF_8,
-  ).readText()
+  private fun serializedContent(name: String) =
+    this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
+      StandardCharsets.UTF_8,
+    ).readText()
 
   private companion object {
     val prisonRegisterMockServer = PrisonRegisterMockServer()
