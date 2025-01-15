@@ -33,6 +33,13 @@ enum class ResidentialChecksTaskAnswerType(val taskCode: String, val taskAnswerC
   }
 }
 
+sealed interface AnswerPayload {
+  fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer
+}
+
 @Entity
 @Table(name = "residential_checks_task_answer")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -59,12 +66,9 @@ abstract class ResidentialChecksTaskAnswer(
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
-  val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-)
-
-sealed interface AnswerPayload {
-  fun createTaskAnswersEntity(
-    addressCheckRequest: CurfewAddressCheckRequest,
-    taskVersion: String,
-  ): ResidentialChecksTaskAnswer
+  var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
+) {
+  abstract fun getAnswers(): AnswerPayload
+  abstract fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer
+  abstract fun toAnswersMap(): Map<String, Any?>
 }

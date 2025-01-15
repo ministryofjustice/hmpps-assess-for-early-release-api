@@ -67,7 +67,7 @@ data class ResidentialChecksPolicy(
   val tasks: List<Task>,
 )
 
-enum class VisitedAddress {
-  I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER,
-  I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER,
+enum class VisitedAddress(val displayText: String) {
+  I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER("I have visited this address and spoken to the main occupier"),
+  I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER("I have not visited the address but I have spoken to the main occupier"),
 }

@@ -21,13 +21,25 @@ class ChildrenServicesChecksTaskAnswers(
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: ChildrenServicesChecksAnswers,
+  var answers: ChildrenServicesChecksAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.CHILDREN_SERVICES_CHECK.taskCode,
   taskVersion = taskVersion,
 ) {
+  override fun toAnswersMap(): Map<String, Any?> = mapOf(
+    "informationRequested" to answers.informationRequested,
+    "informationSent" to answers.informationSent,
+    "informationSummary" to answers.informationSummary,
+  )
+
+  override fun getAnswers(): AnswerPayload = answers
+
+  override fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer {
+    this.answers = answers as ChildrenServicesChecksAnswers
+    return this
+  }
 
   override fun toString(): String = "ChildrenServicesTaskAnswers(" +
     "id=$id, " +
@@ -54,7 +66,10 @@ data class ChildrenServicesChecksAnswers(
   @field:Size(max = 1000, message = "Enter a maximum of 1000 characters")
   val informationSummary: String?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
+  override fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer = ChildrenServicesChecksTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
     taskVersion = taskVersion,

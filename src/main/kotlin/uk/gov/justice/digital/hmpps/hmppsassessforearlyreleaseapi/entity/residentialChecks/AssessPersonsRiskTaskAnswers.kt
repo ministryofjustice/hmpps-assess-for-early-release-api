@@ -18,13 +18,27 @@ class AssessPersonsRiskTaskAnswers(
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: AssessPersonsRiskAnswers,
+  var answers: AssessPersonsRiskAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.ASSESS_THIS_PERSONS_RISK.taskCode,
   taskVersion = taskVersion,
 ) {
+  override fun toAnswersMap(): Map<String, Any?> = mapOf(
+    "pomPrisonBehaviourInformation" to answers.pomPrisonBehaviourInformation,
+    "mentalHealthTreatmentNeeds" to answers.mentalHealthTreatmentNeeds,
+    "vloOfficerForCase" to answers.vloOfficerForCase,
+    "informationThatCannotBeDisclosed" to answers.informationThatCannotBeDisclosed,
+  )
+
+  override fun getAnswers(): AnswerPayload = answers
+
+  override fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer {
+    this.answers = answers as AssessPersonsRiskAnswers
+    return this
+  }
+
   override fun toString(): String = "AssessPersonsRiskTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
@@ -50,7 +64,10 @@ data class AssessPersonsRiskAnswers(
   @field:NotNull(message = "Select if there is information that cannot be disclosed")
   val informationThatCannotBeDisclosed: Boolean?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
+  override fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
     taskVersion = taskVersion,

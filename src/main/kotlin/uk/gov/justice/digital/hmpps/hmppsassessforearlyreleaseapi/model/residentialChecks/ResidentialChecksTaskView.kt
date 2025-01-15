@@ -17,4 +17,7 @@ data class ResidentialChecksTaskView(
 
   @Schema(description = "The current status of the task")
   val taskStatus: TaskStatus,
+
+  @Schema(description = "A map of answer codes to answer values", implementation = Map::class, ref = "#/components/schemas/MapStringAny")
+  val answers: Map<String, Any?>,
 )

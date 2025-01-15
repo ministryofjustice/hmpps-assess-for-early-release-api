@@ -18,13 +18,26 @@ class RiskManagementDecisionTaskAnswers(
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val answers: RiskManagementDecisionAnswers,
+  var answers: RiskManagementDecisionAnswers,
 ) : ResidentialChecksTaskAnswer(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.MAKE_A_RISK_MANAGEMENT_DECISION.taskCode,
   taskVersion = taskVersion,
 ) {
+  override fun toAnswersMap(): Map<String, Any?> = mapOf(
+    "canOffenderBeManagedSafely" to answers.canOffenderBeManagedSafely,
+    "informationToSupportDecision" to answers.informationToSupportDecision,
+    "riskManagementPlanningActionsNeeded" to answers.riskManagementPlanningActionsNeeded,
+  )
+
+  override fun getAnswers(): AnswerPayload = answers
+
+  override fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer {
+    this.answers = answers as RiskManagementDecisionAnswers
+    return this
+  }
+
   override fun toString(): String = "RiskManagementDecisionTaskAnswers(" +
     "id=$id, " +
     "addressCheckRequest=${addressCheckRequest.id}, " +
@@ -46,7 +59,10 @@ data class RiskManagementDecisionAnswers(
   @field:NotNull(message = "Select if any risk management planning actions are needed")
   val riskManagementPlanningActionsNeeded: Boolean?,
 ) : AnswerPayload {
-  override fun createTaskAnswersEntity(addressCheckRequest: CurfewAddressCheckRequest, taskVersion: String): ResidentialChecksTaskAnswer = RiskManagementDecisionTaskAnswers(
+  override fun createTaskAnswersEntity(
+    addressCheckRequest: CurfewAddressCheckRequest,
+    taskVersion: String,
+  ): ResidentialChecksTaskAnswer = RiskManagementDecisionTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
     taskVersion = taskVersion,

@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "The answers to a residential checks task.")
 data class ResidentialChecksTaskAnswersSummary(
-  @Schema(description = "A unique identifier for this set of task answers")
-  val answersId: Long,
-
   @Schema(description = "A unique identifier the address check request associated with these answers")
   val addressCheckRequestId: Long,
 
