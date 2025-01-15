@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Section
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskQuestion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
 
 val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   version = PolicyVersion.V1,
@@ -45,8 +46,8 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "visitedAddress",
                 type = InputType.RADIO,
                 options = listOf(
-                  Option("I have visited this address and spoken to the main occupier", "I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER"),
-                  Option("I have not visited the address but I have spoken to the main occupier", "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER"),
+                  Option(VisitedAddress.I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER.displayText, VisitedAddress.I_HAVE_VISITED_THIS_ADDRESS_AND_SPOKEN_TO_THE_MAIN_OCCUPIER.name),
+                  Option(VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER.displayText, VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER.name),
                 ),
               ),
             ),
