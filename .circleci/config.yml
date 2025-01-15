@@ -86,7 +86,7 @@ workflows:
     jobs:
       - hmpps/database_schema_report:
           database_name: "afer-test-db"
-          initialise_database: "./gradlew initialiseDatabase"
+          initialise_database: "./gradlew check"
       - validate:
           filters:
             tags:
