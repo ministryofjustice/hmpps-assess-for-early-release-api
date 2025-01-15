@@ -95,6 +95,9 @@ workflows:
           name: helm_lint
       - hmpps/database_schema_report:
           schema: "public"
+          user: "afer"
+          password: "afer"
+          database_name: "afer-db"
           initialise_database: "./gradlew initialiseDatabase"
       - hmpps/build_multiplatform_docker:
           name: build_docker
