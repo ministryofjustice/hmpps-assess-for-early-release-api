@@ -85,8 +85,7 @@ workflows:
   build-test-and-deploy:
     jobs:
       - hmpps/database_schema_report:
-          database_name: "afer-test-db"
-          port: "5433"
+          schema: "afer-test"
           initialise_database: "./gradlew check"
       - validate:
           filters:
