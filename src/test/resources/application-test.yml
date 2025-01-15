@@ -73,4 +73,4 @@ os:
 
 database:
   schema:
-    name: afer-test
+    name: afertest
