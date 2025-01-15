@@ -75,10 +75,9 @@ jobs:
             java -jar /tmp/schemaspy.jar \
               -t pgsql \
               -dp /tmp/postgres-driver.jar \
-              -db  afer-test-db \
+              -db afer-test-db \
               -host localhost \
               -port 5433 \
-              -s public \
               -vizjs \
               -u root \
               -p dev \
