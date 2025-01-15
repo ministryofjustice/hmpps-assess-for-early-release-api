@@ -66,6 +66,8 @@ jobs:
       - hmpps/wait_till_ready_postgres:
           port: 5433
       - hmpps/wait_till_ready
+      - hmpps/database_schema_report:
+          initialise_database: "./gradlew initialiseDatabase"
       - restore_cache:
           keys:
             - gradle-{{ checksum "build.gradle.kts" }}
@@ -84,8 +86,6 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
-      - hmpps/database_schema_report:
-          initialise_database: "./gradlew initialiseDatabase"
       - validate:
           filters:
             tags:
