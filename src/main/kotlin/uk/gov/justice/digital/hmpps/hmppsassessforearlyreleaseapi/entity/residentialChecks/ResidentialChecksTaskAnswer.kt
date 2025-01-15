@@ -66,7 +66,7 @@ abstract class ResidentialChecksTaskAnswer(
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
-  val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
+  var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
   abstract fun getAnswers(): AnswerPayload
   abstract fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer

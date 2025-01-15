@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
+import java.time.LocalDateTime
 
 @Service
 class ResidentialChecksService(
@@ -80,7 +81,9 @@ class ResidentialChecksService(
     )
 
     if (existingAnswers != null) {
-      residentialChecksTaskAnswerRepository.save(existingAnswers.updateAnswers(answers))
+      val updatedAnswers = existingAnswers.updateAnswers(answers)
+      updatedAnswers.lastUpdatedTimestamp = LocalDateTime.now()
+      residentialChecksTaskAnswerRepository.save(updatedAnswers)
     } else {
       residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, taskVersion))
     }
