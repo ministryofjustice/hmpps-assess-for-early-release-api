@@ -77,8 +77,8 @@ jobs:
               -dp /tmp/postgres-driver.jar \
               -db  afer-test-db \
               -host localhost \
-              -port 5432 \
-              -s afer-test-db \
+              -port 5433 \
+              -s public \
               -vizjs \
               -u afer \
               -p dummy \
