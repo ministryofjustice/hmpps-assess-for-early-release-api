@@ -95,6 +95,7 @@ workflows:
           name: helm_lint
       - hmpps/database_schema_report:
           port: "5433"
+          schema_name: "public"
           database_name: "afer-test-db"
           user: "afer"
           password: "dummy"
