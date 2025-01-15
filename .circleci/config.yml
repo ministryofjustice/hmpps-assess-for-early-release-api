@@ -68,7 +68,7 @@ jobs:
           command: curl -L https://jdbc.postgresql.org/download/postgresql-42.7.3.jar --output /tmp/postgres-driver.jar
       - run:
           name: Execute a command to initialise the database schema
-          command: ./gradlew initialiseDatabaseTest
+          command: ./gradlew initialiseDatabase
       - run:
           name: Generate database schema report
           command: |
