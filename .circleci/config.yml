@@ -18,28 +18,6 @@ orbs:
         default: "16.1"
 
     jobs:
-      executors:
-        default_executor:
-          docker:
-            - image: cimg/openjdk:<< pipeline.parameters.jdk-version >>
-            - image: localstack/localstack:<< pipeline.parameters.localstack-version >>
-              environment:
-                - SERVICES: sns,sqs
-                - ES_PORT_EXTERNAL: 4571
-                - DEBUG: ${DEBUG- }
-                - DOCKER_HOST: unix:///var/run/docker.sock
-                - AWS_EXECUTION_ENV: True
-                - PERSISTENCE: 1
-            - image: postgres:<< pipeline.parameters.postgres-version >>
-              environment:
-                - POSTGRES_USER: root
-                - POSTGRES_PASSWORD: dev
-                - POSTGRES_DB: postgres
-          environment:
-            _JAVA_OPTIONS: -Xmx512m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=1
-          working_directory: ~/app
-          resource_class: medium
-
       database_schema_report:
         description: >
           Job to generate a schema report for a postgres database using schemaspy. Runs against postgres in docker
@@ -48,7 +26,26 @@ orbs:
         parameters:
           executor:
             type: executor
-            default: default_executor
+            default:
+              docker:
+                - image: cimg/openjdk:<< pipeline.parameters.jdk-version >>
+                - image: localstack/localstack:<< pipeline.parameters.localstack-version >>
+                  environment:
+                    - SERVICES: sns,sqs
+                    - ES_PORT_EXTERNAL: 4571
+                    - DEBUG: ${DEBUG- }
+                    - DOCKER_HOST: unix:///var/run/docker.sock
+                    - AWS_EXECUTION_ENV: True
+                    - PERSISTENCE: 1
+                - image: postgres:<< pipeline.parameters.postgres-version >>
+                  environment:
+                    - POSTGRES_USER: root
+                    - POSTGRES_PASSWORD: dev
+                    - POSTGRES_DB: postgres
+              environment:
+                _JAVA_OPTIONS: -Xmx512m -XX:ParallelGCThreads=2 -XX:ConcGCThreads=2 -Djava.util.concurrent.ForkJoinPool.common.parallelism=2 -Dorg.gradle.daemon=false -Dkotlin.compiler.execution.strategy=in-process -Dorg.gradle.workers.max=1
+              working_directory: ~/app
+              resource_class: medium
             description: The executor to use for this job
           initialise_database:
             type: string
