@@ -85,7 +85,7 @@ workflows:
           database_name: afer-test-db
           user: afer
           password: dummy
-          port: "5433"
+          port: 5433
           initialise_database: "./gradlew initialiseDatabase"
       - validate:
           filters:
