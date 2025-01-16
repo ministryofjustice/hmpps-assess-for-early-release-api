@@ -79,7 +79,7 @@ orbs:
                   -u << parameters.user >> \
                   -p << parameters.password >> \
                   -o /tmp/schemaspy \
-                  -I (pg_|flyway).*
+                  -I flyway.*
           - run:
               name: generate index file
               command: |
