@@ -52,6 +52,7 @@ orbs:
           excludeTablesRegex:
             type: string
             default: "(pg_|flyway).*"
+            description: Regular expression to exclude tables from the schema report
         executor: << parameters.executor >>
         steps:
           - checkout
