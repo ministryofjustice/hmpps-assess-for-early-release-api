@@ -39,7 +39,7 @@
     {
       "config": {
         "code": "address-details-and-informed-consent",
-        "name": "Check if a curfew address is suitable",
+        "name": "Address details and informed consent",
         "sections": [
           {
             "header": null,

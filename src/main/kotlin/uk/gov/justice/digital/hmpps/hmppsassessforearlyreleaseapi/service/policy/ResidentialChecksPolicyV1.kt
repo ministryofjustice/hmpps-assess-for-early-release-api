@@ -15,7 +15,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   tasks = listOf(
     Task(
       code = "address-details-and-informed-consent",
-      name = "Check if a curfew address is suitable",
+      name = "Address details and informed consent",
       sections = listOf(
         Section(
           questions = listOf(
