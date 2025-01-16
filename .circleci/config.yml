@@ -8,10 +8,11 @@ orbs:
 
     executors:
       default_executor:
-        name: java_localstack_postgres
-        jdk_tag: "21.0"
-        localstack_tag: "3.0"
-        postgres_tag: "16.1"
+        executor:
+          name: java_localstack_postgres
+          jdk_tag: "21.0"
+          localstack_tag: "3.0"
+          postgres_tag: "16.1"
 
     jobs:
       database_schema_report:
