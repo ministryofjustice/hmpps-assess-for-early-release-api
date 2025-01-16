@@ -104,6 +104,21 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     }
     it.components.addSchemas("MapStringAny", mapSchema)
 
+    val problemDetailSchema = Schema<Any>().apply {
+      type = "object"
+      properties = mapOf(
+        "type" to Schema<Any>().apply { type = "string" },
+        "title" to Schema<Any>().apply { type = "string" },
+        "status" to Schema<Any>().apply { type = "integer" },
+        "detail" to Schema<Any>().apply { type = "string" },
+        "instance" to Schema<Any>().apply { type = "string" },
+      )
+      additionalProperties = Schema<Any>().apply {
+        oneOf = listOf(Schema<Any>().apply { type = "string" }, Schema<Any>().apply { type = "number" }, Schema<Any>().apply { type = "boolean" })
+      }
+    }
+    it.components.addSchemas("ProblemDetail", problemDetailSchema)
+
     it.components.schemas.forEach { (_, schema: Schema<*>) ->
       val properties = schema.properties ?: mutableMapOf()
       for (propertyName in properties.keys) {

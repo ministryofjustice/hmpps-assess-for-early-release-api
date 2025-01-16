@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.DataType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Input
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.InputType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Option
@@ -25,11 +24,10 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               text = "Is the address connected to an electricity supply?",
               input = Input(
                 name = "electricitySupply",
-                dataType = DataType.BOOLEAN,
                 type = InputType.RADIO,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -63,11 +61,10 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               """.trimIndent(),
               input = Input(
                 name = "mainOccupierConsentGiven",
-                dataType = DataType.BOOLEAN,
                 type = InputType.RADIO,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -180,10 +177,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "mentalHealthTreatmentNeeds",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -193,10 +189,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "vloOfficerForCase",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -206,10 +201,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "informationThatCannotBeDisclosed",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -229,10 +223,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "addressSuitable",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -250,10 +243,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "additionalInformationNeeded",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -281,10 +273,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "canOffenderBeManagedSafely",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),
@@ -302,10 +293,9 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
               input = Input(
                 name = "riskManagementPlanningActionsNeeded",
                 type = InputType.RADIO,
-                dataType = DataType.BOOLEAN,
                 options = listOf(
-                  Option("Yes"),
-                  Option("No"),
+                  Option("Yes", "true"),
+                  Option("No", "false"),
                 ),
               ),
             ),

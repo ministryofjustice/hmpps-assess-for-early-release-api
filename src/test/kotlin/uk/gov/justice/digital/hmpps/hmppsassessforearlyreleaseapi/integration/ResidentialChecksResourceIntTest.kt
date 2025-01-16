@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
+import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -75,7 +76,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("residential-checks-view"), true)
+        .expectBody().json(serializedContent("residential-checks-view"), JsonCompareMode.STRICT)
     }
   }
 
@@ -124,7 +125,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("residential-checks-task"), true)
+        .expectBody().json(serializedContent("residential-checks-task"), JsonCompareMode.STRICT)
     }
   }
 
@@ -267,7 +268,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isBadRequest
-        .expectBody().json(serializedContent("invalid-task-answers-response"), true)
+        .expectBody().json(serializedContent("invalid-task-answers-response"), JsonCompareMode.STRICT)
     }
   }
 
