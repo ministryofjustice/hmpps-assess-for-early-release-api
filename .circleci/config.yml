@@ -58,6 +58,7 @@ orbs:
             type: string
             default: "42.7.3"
             description: Postgres driver version
+
         executor: << parameters.executor >>
         steps:
           - checkout
