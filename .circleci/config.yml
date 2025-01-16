@@ -6,17 +6,6 @@ orbs:
     orbs:
       hmpps: ministryofjustice/hmpps@10
 
-    parameters:
-      postgres_tag:
-        type: string
-        default: "16.1"
-      jdk_tag:
-        type: string
-        default: "21.0"
-      localstack_tag:
-        type: string
-        default: "3.0.2"
-
     executors:
       default_executor:
         docker:
@@ -33,6 +22,7 @@ orbs:
             environment:
               - POSTGRES_USER: root
               - POSTGRES_PASSWORD: dev
+              - POSTGRES_DB: postgres
 
     jobs:
       database_schema_report:
@@ -222,7 +212,7 @@ workflows:
   build-test-and-deploy:
     jobs:
       - test-orb/database_schema_report:
-#          executor: my-postgres
+          executor: my-postgres
           database_name: afer-test-db
           user: afer
           password: dummy
