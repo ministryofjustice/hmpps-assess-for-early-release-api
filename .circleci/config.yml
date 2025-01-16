@@ -1,6 +1,7 @@
 version: 2.1
 orbs:
   hmpps: ministryofjustice/hmpps@10
+
 parameters:
   releases-slack-channel:
     type: string
@@ -14,6 +15,7 @@ parameters:
   postgres-version:
     type: string
     default: "16.3"
+
 jobs:
   validate:
     executor:
@@ -36,22 +38,15 @@ jobs:
       - store_artifacts:
           path: build/reports/tests
   integration-test:
-    docker:
-      - image: cimg/openjdk:<< pipeline.parameters.java-version >>
-      - image: localstack/localstack:<< pipeline.parameters.localstack-version >>
-        environment:
-          - SERVICES: sns,sqs
-          - ES_PORT_EXTERNAL: 4571
-          - DEBUG: ${DEBUG- }
-          - DOCKER_HOST: unix:///var/run/docker.sock
-          - AWS_EXECUTION_ENV: True
-          - PERSISTENCE: 1
-      - image: postgres:<< pipeline.parameters.postgres-version >>
-        environment:
-          - POSTGRES_USER: afer
-          - POSTGRES_PASSWORD: dummy
-          - POSTGRES_DB: afer-test-db
-          - PGPORT: 5433
+    executor:
+      name: hmpps/java_localstack_postgres_with_db_name
+      jdk_tag: << pipeline.parameters.java-version >>
+      localstack_tag: << pipeline.parameters.localstack-version >>
+      postgres_tag: << pipeline.parameters.postgres-version >>
+      postgres_db: afer-test-db
+      postgres_username: afer
+      postgres_password: dummy
+      postgres_port: 5433
     steps:
       - run:
           command: |
@@ -83,6 +78,15 @@ workflows:
   version: 2
   build-test-and-deploy:
     jobs:
+      - hmpps/database_schema_report:
+          jdk_tag: << pipeline.parameters.java-version >>
+          localstack_tag: << pipeline.parameters.localstack-version >>
+          postgres_tag: << pipeline.parameters.postgres-version >>
+          database_name: afer-test-db
+          user: afer
+          password: dummy
+          port: 5433
+          initialise_database: "./gradlew initialiseDatabase"
       - validate:
           filters:
             tags:

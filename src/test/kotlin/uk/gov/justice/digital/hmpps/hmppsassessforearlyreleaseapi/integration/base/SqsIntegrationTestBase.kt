@@ -6,10 +6,10 @@ import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.EventProcessingCompleteHandler
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.ProbationEventProcessingCompleteHandler
@@ -28,10 +28,10 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
   @Autowired
   private lateinit var hmppsQueueService: HmppsQueueService
 
-  @MockBean
+  @MockitoBean
   lateinit var done: EventProcessingCompleteHandler
 
-  @MockBean
+  @MockitoBean
   lateinit var hmppsOffenderDone: ProbationEventProcessingCompleteHandler
 
   protected val domainEventsTopic by lazy {
