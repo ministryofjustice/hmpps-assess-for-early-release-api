@@ -15,6 +15,9 @@ spring:
     init:
       continue-on-error: true
 
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres?currentSchema=afer&user=root&password=dev&stringtype=unspecified
+
 server:
   shutdown: immediate
 
