@@ -6,6 +6,13 @@ orbs:
     orbs:
       hmpps: ministryofjustice/hmpps@10
 
+    executors:
+      default_executor:
+        name: java_localstack_postgres
+        jdk_tag: "21.0"
+        localstack_tag: "3.0"
+        postgres_tag: "16.1"
+
     jobs:
       database_schema_report:
         description: >
@@ -15,7 +22,7 @@ orbs:
         parameters:
           executor:
             type: executor
-            default: java_localstack_postgres
+            default: default_executor
             description: The executor to use for this job
           initialise_database:
             type: string
@@ -194,7 +201,7 @@ workflows:
   build-test-and-deploy:
     jobs:
       - test-orb/database_schema_report:
-          executor: my-postgres
+#          executor: my-postgres
           database_name: afer-test-db
           user: afer
           password: dummy
