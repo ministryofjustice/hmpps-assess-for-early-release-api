@@ -87,6 +87,10 @@ workflows:
           password: dummy
           port: 5433
           initialise_database: "./gradlew initialiseDatabase"
+          filters:
+            branches:
+              only:
+                - main
       - validate:
           filters:
             tags:
