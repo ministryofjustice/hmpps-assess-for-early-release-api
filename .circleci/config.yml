@@ -49,10 +49,10 @@ orbs:
             type: string
             default: "42.7.3"
             description: Postgres driver version
-#          excludeTablesRegex:
-#            type: string
-#            default: "(pg_|flyway).*"
-#            description: Regular expression to exclude tables from the schema report
+          excludeTablesRegex:
+            type: string
+            default: "flyway.*"
+            description: Regular expression to exclude tables from the schema report
         executor: << parameters.executor >>
         steps:
           - checkout
@@ -79,7 +79,7 @@ orbs:
                   -u << parameters.user >> \
                   -p << parameters.password >> \
                   -o /tmp/schemaspy \
-                  -I flyway.*
+                  -I << parameters.excludeTablesRegex >>
           - run:
               name: generate index file
               command: |
