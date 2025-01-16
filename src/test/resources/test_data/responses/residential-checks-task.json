@@ -49,8 +49,7 @@
             "input": {
               "name": "pomPrisonBehaviourInformation",
               "type": "TEXT",
-              "options": null,
-              "dataType": "STRING"
+              "options": null
             }
           },
           {
@@ -63,14 +62,13 @@
               "options": [
                 {
                   "text": "Yes",
-                  "value": "Yes"
+                  "value": "true"
                 },
                 {
                   "text": "No",
-                  "value": "No"
+                  "value": "false"
                 }
-              ],
-              "dataType": "BOOLEAN"
+              ]
             }
           },
           {
@@ -83,14 +81,13 @@
               "options": [
                 {
                   "text": "Yes",
-                  "value": "Yes"
+                  "value": "true"
                 },
                 {
                   "text": "No",
-                  "value": "No"
+                  "value": "false"
                 }
-              ],
-              "dataType": "BOOLEAN"
+              ]
             }
           },
           {
@@ -103,14 +100,13 @@
               "options": [
                 {
                   "text": "Yes",
-                  "value": "Yes"
+                  "value": "true"
                 },
                 {
                   "text": "No",
-                  "value": "No"
+                  "value": "false"
                 }
-              ],
-              "dataType": "BOOLEAN"
+              ]
             }
           }
         ]

@@ -38,9 +38,8 @@ class ResidentialChecksService(
       val taskAnswers = taskAnswersForAddressCheck.find { it.taskCode == task.code }
       val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
       ResidentialChecksTaskProgress(
-        code = task.code,
-        taskName = task.name,
         status = TaskStatus.NOT_STARTED,
+        config = task,
         answers = answersMap,
       )
     }
@@ -54,6 +53,7 @@ class ResidentialChecksService(
       ?: throw NoResourceFoundException("$taskCode is not a valid task code")
 
     val taskAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(requestId, taskCode)
+
     val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
 
     return ResidentialChecksTaskView(

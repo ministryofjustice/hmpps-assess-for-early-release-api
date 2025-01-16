@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
+import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
@@ -79,7 +80,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("eligibility-and-suitability-view"), true)
+        .expectBody().json(serializedContent("eligibility-and-suitability-view"), JsonCompareMode.STRICT)
     }
   }
 
@@ -144,7 +145,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("eligibility-criterion-view"), true)
+        .expectBody().json(serializedContent("eligibility-criterion-view"), JsonCompareMode.STRICT)
     }
   }
 
@@ -209,7 +210,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody().json(serializedContent("suitability-criterion-view"), true)
+        .expectBody().json(serializedContent("suitability-criterion-view"), JsonCompareMode.STRICT)
     }
   }
 
