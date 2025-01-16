@@ -17,15 +17,11 @@ orbs:
         type: string
         default: "3.0.2"
 
-        <<pipeline:
-          parameters:
-            localstack_tag>>:
-
     executors:
       default_executor:
         docker:
-          - image: cimg/openjdk:<<pipeline:parameters:jdk_tag>>
-          - image: localstack/localstack:<<pipeline:parameters:localstack_tag>>
+          - image: cimg/openjdk:21.0
+          - image: localstack/localstack:3.0.2
             environment:
               - SERVICES: sns,sqs
               - ES_PORT_EXTERNAL: 4571
@@ -33,7 +29,7 @@ orbs:
               - DOCKER_HOST: unix:///var/run/docker.sock
               - AWS_EXECUTION_ENV: True
               - PERSISTENCE: 1
-          - image: postgres:<<pipeline:parameters:postgres_tag>>
+          - image: postgres:16.1
             environment:
               - POSTGRES_USER: root
               - POSTGRES_PASSWORD: dev
