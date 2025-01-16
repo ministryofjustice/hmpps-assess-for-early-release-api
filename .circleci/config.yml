@@ -6,17 +6,6 @@ orbs:
     orbs:
       hmpps: ministryofjustice/hmpps@10
 
-    parameters:
-      jdk-version:
-        type: string
-        default: "21.0"
-      localstack-version:
-        type: string
-        default: "3.0.2"
-      postgres-version:
-        type: string
-        default: "16.1"
-
     executors:
       default_executor:
         docker:
