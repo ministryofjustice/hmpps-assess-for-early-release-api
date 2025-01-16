@@ -46,7 +46,7 @@ jobs:
       postgres_db: afer-test-db
       postgres_username: afer
       postgres_password: dummy
-      postgres_port: "5433"
+      postgres_port: 5433
     steps:
       - run:
           command: |
