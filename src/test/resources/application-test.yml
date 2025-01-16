@@ -74,6 +74,3 @@ os:
       url: http://localhost:8099
       key: "os-places-api-key"
 
-database:
-  schema:
-    name: afertest
