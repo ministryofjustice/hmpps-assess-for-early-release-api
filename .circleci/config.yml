@@ -49,6 +49,9 @@ orbs:
             type: string
             default: "42.7.3"
             description: Postgres driver version
+          excludeTablesRegex:
+            type: string
+            default: "(pg_|flyway).*"
         executor: << parameters.executor >>
         steps:
           - checkout
@@ -75,7 +78,7 @@ orbs:
                   -u << parameters.user >> \
                   -p << parameters.password >> \
                   -o /tmp/schemaspy \
-                  -I flyway_schema_history
+                  -I << parameters.excludeTablesRegex >>
           - run:
               name: generate index file
               command: |
