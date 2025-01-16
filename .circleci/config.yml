@@ -11,17 +11,17 @@ orbs:
           Job to generate a schema report for a postgres database using schemaspy. Runs against postgres in docker
           An HTML report is generated and is available on the artifacts tab of the circleci job
 
-        default_executor:
-          name: java_localstack_postgres
-          jdk_tag: "21.0"
-          localstack_tag: "3.0"
-          postgres_tag: "16.1"
+#        default_executor:
+#          name: java_localstack_postgres
+#          jdk_tag: "21.0"
+#          localstack_tag: "3.0"
+#          postgres_tag: "16.1"
 
         parameters:
           executor:
             type: executor
-            default: default_executor
-            description: The executor to use for this job
+#            default: default_executor
+#            description: The executor to use for this job
           initialise_database:
             type: string
             default: "./gradlew check"
@@ -199,7 +199,7 @@ workflows:
   build-test-and-deploy:
     jobs:
       - test-orb/database_schema_report:
-#          executor: my-postgres
+          executor: my-postgres
           database_name: afer-test-db
           user: afer
           password: dummy
