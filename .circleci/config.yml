@@ -6,13 +6,37 @@ orbs:
     orbs:
       hmpps: ministryofjustice/hmpps@10
 
+    parameters:
+      postgres_tag:
+        type: string
+        default: "16.1"
+      jdk_tag:
+        type: string
+        default: "21.0"
+      localstack_tag:
+        type: string
+        default: "3.0.2"
+
+        <<pipeline:
+          parameters:
+            localstack_tag>>:
+
     executors:
       default_executor:
-        executor:
-          name: java_localstack_postgres
-          jdk_tag: "21.0"
-          localstack_tag: "3.0"
-          postgres_tag: "16.1"
+        docker:
+          - image: cimg/openjdk:<<pipeline:parameters:jdk_tag>>
+          - image: localstack/localstack:<<pipeline:parameters:localstack_tag>>
+            environment:
+              - SERVICES: sns,sqs
+              - ES_PORT_EXTERNAL: 4571
+              - DEBUG: ${DEBUG- }
+              - DOCKER_HOST: unix:///var/run/docker.sock
+              - AWS_EXECUTION_ENV: True
+              - PERSISTENCE: 1
+          - image: postgres:<<pipeline:parameters:postgres_tag>>
+            environment:
+              - POSTGRES_USER: root
+              - POSTGRES_PASSWORD: dev
 
     jobs:
       database_schema_report:
