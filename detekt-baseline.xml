@@ -10,6 +10,7 @@
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Value: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val Message: String</ID>
     <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val MessageAttributes: HMPPSMessageAttributes</ID>
+    <ID>CyclomaticComplexMethod:OpenApiConfiguration.kt$OpenApiConfiguration$@Bean fun openAPICustomizer(): OpenApiCustomizer</ID>
     <ID>LongMethod:StaffService.kt$StaffService$@Transactional fun updateComDetails(comDetails: UpdateCom)</ID>
     <ID>LongParameterList:AddressService.kt$AddressService$( private val addressRepository: AddressRepository, private val assessmentService: AssessmentService, private val casCheckRequestRepository: CasCheckRequestRepository, private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository, private val offenderRepository: OffenderRepository, private val osPlacesApiClient: OsPlacesApiClient, private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository, private val residentRepository: ResidentRepository, )</ID>
     <ID>LongParameterList:CasCheckRequest.kt$CasCheckRequest$( id: Long = -1, caAdditionalInfo: String? = null, ppAdditionalInfo: String? = null, dateRequested: LocalDateTime = LocalDateTime.now(), preferencePriority: AddressPreferencePriority, status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS, assessment: Assessment, @ManyToOne @JoinColumn(name = "allocated_address_id", referencedColumnName = "id") val allocatedAddress: Address? = null, )</ID>
@@ -21,7 +22,5 @@
     <ID>LongParameterList:WebClientConfiguration.kt$WebClientConfiguration$( @Value("\${api.health-timeout:2s}") val healthTimeout: Duration, @Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String, @Value("\${hmpps.delius.api.url}") private val deliusApiUrl: String, @Value("\${hmpps.prisonregister.api.url}") private val prisonRegisterApiUrl: String, @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String, @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String, @Value("\${os.places.api.url}") private val osPlacesApiUrl: String, @Value("\${gotenberg.api.url}") private val gotenbergHost: String, )</ID>
     <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
     <ID>TooManyFunctions:AddressService.kt$AddressService</ID>
-    <ID>UnusedParameter:ResidentialChecksService.kt$ResidentialChecksService$addressCheckRequestId: Long</ID>
-    <ID>UnusedParameter:ResidentialChecksService.kt$ResidentialChecksService$requestId: Long</ID>
   </CurrentIssues>
 </SmellBaseline>
