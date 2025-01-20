@@ -396,7 +396,7 @@ class AddressResource(private val addressService: AddressService) {
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = ResidentSummary::class),
+            array = ArraySchema(schema = Schema(implementation = ResidentSummary::class)),
           ),
         ],
       ),
@@ -435,8 +435,8 @@ class AddressResource(private val addressService: AddressService) {
   fun addStandardAddressCheckRequestResident(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-    @Valid @RequestBody addResidentRequest: AddResidentRequest,
-  ) = addressService.addResident(prisonNumber, requestId, addResidentRequest)
+    @Valid @RequestBody addResidentsRequest: List<AddResidentRequest>,
+  ) = addressService.addResidents(prisonNumber, requestId, addResidentsRequest)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/case-admin-additional-information")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

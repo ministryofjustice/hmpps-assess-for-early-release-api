@@ -179,7 +179,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   fun `should add a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
 
-    val addResidentRequest = AddResidentRequest(
+    val addMainResident = AddResidentRequest(
       forename = "Joshua",
       surname = "Cook",
       phoneNumber = "07739754284",
@@ -189,15 +189,29 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    val residentSummary = addressService.addResident(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, addResidentRequest)
+    val addOtherResident = AddResidentRequest(
+      forename = "Tom",
+      surname = "Cook",
+      phoneNumber = "07739759898",
+      relation = "Brother",
+      dateOfBirth = LocalDate.now().minusYears(24),
+      age = 24,
+      isMainResident = false,
+    )
+
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident))
     assertThat(residentSummary).isNotNull
 
     val dbResident = residentRepository.findAll().first()
     assertThat(dbResident).isNotNull
-    assertThat(dbResident.forename).isEqualTo(addResidentRequest.forename)
-    assertThat(dbResident.surname).isEqualTo(addResidentRequest.surname)
-    assertThat(dbResident.isMainResident).isEqualTo(addResidentRequest.isMainResident)
-    assertThat(dbResident.relation).isEqualTo(addResidentRequest.relation)
+    assertThat(dbResident.forename).isEqualTo(addMainResident.forename)
+    assertThat(dbResident.surname).isEqualTo(addMainResident.surname)
+    assertThat(dbResident.isMainResident).isEqualTo(addMainResident.isMainResident)
+    assertThat(dbResident.relation).isEqualTo(addMainResident.relation)
+
+    val dbOtherResident = residentRepository.findAll().last()
+    assertThat(dbOtherResident).isNotNull
+    assertThat(dbOtherResident.isMainResident).isFalse()
   }
 
   @Sql(
@@ -219,7 +233,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    assertThrows<EntityNotFoundException> { addressService.addResident(prisonNumber, standardAddressCheckRequest.id, addResidentRequest) }
+    assertThrows<EntityNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest)) }
   }
 
   private companion object {
