@@ -493,19 +493,23 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isCreated
-        .expectBody(object : ParameterizedTypeReference<ResidentSummary>() {})
+        .expectBody(object : ParameterizedTypeReference<List<ResidentSummary>>() {})
         .returnResult().responseBody!!
 
-      assertThat(residentSummary.forename).isEqualTo(forename)
-      assertThat(residentSummary.surname).isEqualTo(surname)
-      assertThat(residentSummary.phoneNumber).isEqualTo(phoneNumber)
-      assertThat(residentSummary.relation).isEqualTo(relation)
-      assertThat(residentSummary.dateOfBirth).isEqualTo(dateOfBirth)
-      assertThat(residentSummary.isMainResident).isEqualTo(isMainResident)
+      assertThat(residentSummary.first().forename).isEqualTo(forename)
+      assertThat(residentSummary.first().surname).isEqualTo(surname)
+      assertThat(residentSummary.first().phoneNumber).isEqualTo(phoneNumber)
+      assertThat(residentSummary.first().relation).isEqualTo(relation)
+      assertThat(residentSummary.first().dateOfBirth).isEqualTo(dateOfBirth)
+      assertThat(residentSummary.first().isMainResident).isEqualTo(isMainResident)
+      assertThat(residentSummary.last().isMainResident).isFalse()
     }
 
-    private fun anAddResidentRequest(): AddResidentRequest =
-      AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true)
+    private fun anAddResidentRequest(): List<AddResidentRequest> =
+      listOf(
+        AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true),
+        AddResidentRequest(forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false),
+      )
   }
 
   @Nested
