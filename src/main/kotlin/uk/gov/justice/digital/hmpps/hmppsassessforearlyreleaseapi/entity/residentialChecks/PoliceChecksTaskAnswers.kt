@@ -18,6 +18,7 @@ import java.time.LocalDate
 class PoliceChecksTaskAnswers(
   id: Long = -1L,
   addressCheckRequest: CurfewAddressCheckRequest,
+  criterionMet: Boolean,
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
@@ -26,6 +27,7 @@ class PoliceChecksTaskAnswers(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.POLICE_CHECK.taskCode,
+  criterionMet = criterionMet,
   taskVersion = taskVersion,
 ) {
   override fun toAnswersMap(): Map<String, Any?> = mapOf(
@@ -67,10 +69,12 @@ data class PoliceChecksAnswers(
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(
     addressCheckRequest: CurfewAddressCheckRequest,
+    criterionMet: Boolean,
     taskVersion: String,
   ): ResidentialChecksTaskAnswer = PoliceChecksTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
+    criterionMet = criterionMet,
     taskVersion = taskVersion,
   )
 }

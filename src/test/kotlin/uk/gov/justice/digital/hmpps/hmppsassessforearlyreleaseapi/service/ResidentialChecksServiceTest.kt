@@ -6,16 +6,19 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aRiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
@@ -43,12 +46,27 @@ class ResidentialChecksServiceTest {
   fun `should get the status of the residential checks for an assessment`() {
     whenever(assessmentService.getCurrentAssessmentSummary(PRISON_NUMBER)).thenReturn(anAssessmentSummary())
 
+    whenever(residentialChecksTaskAnswerRepository.findByAddressCheckRequestId(ADDRESS_REQUEST_ID)).thenReturn(
+      listOf(
+        aRiskManagementDecisionTaskAnswers(
+          criterionMet = true,
+        ),
+      ),
+    )
+
     val residentialChecksView = residentialChecksService.getResidentialChecksView(PRISON_NUMBER, ADDRESS_REQUEST_ID)
 
     assertThat(residentialChecksView.assessmentSummary).isEqualTo(anAssessmentSummary())
     assertThat(residentialChecksView.overallStatus).isEqualTo(ResidentialChecksStatus.NOT_STARTED)
     assertThat(residentialChecksView.tasks).hasSize(6)
-    assertThat(residentialChecksView.tasks).allMatch { it.status == TaskStatus.NOT_STARTED }
+    residentialChecksView.tasks.forEach { task ->
+      val expectedStatus = if (task.config.code == "make-a-risk-management-decision") {
+        TaskStatus.SUITABLE
+      } else {
+        TaskStatus.NOT_STARTED
+      }
+      assertThat(task.status).isEqualTo(expectedStatus)
+    }
   }
 
   @Test
@@ -56,13 +74,17 @@ class ResidentialChecksServiceTest {
     val taskCode = "assess-this-persons-risk"
     val assessmentSummary = anAssessmentSummary()
     whenever(assessmentService.getCurrentAssessmentSummary(PRISON_NUMBER)).thenReturn(assessmentSummary)
-
+    whenever(residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(ADDRESS_REQUEST_ID, taskCode)).thenReturn(
+      aRiskManagementDecisionTaskAnswers(
+        criterionMet = false,
+      ),
+    )
     val residentialChecksTaskView =
       residentialChecksService.getResidentialChecksTask(PRISON_NUMBER, ADDRESS_REQUEST_ID, taskCode)
 
     assertThat(residentialChecksTaskView.assessmentSummary).isEqualTo(assessmentSummary)
     assertThat(residentialChecksTaskView.taskConfig.code).isEqualTo(taskCode)
-    assertThat(residentialChecksTaskView.taskStatus).isEqualTo(TaskStatus.NOT_STARTED)
+    assertThat(residentialChecksTaskView.taskStatus).isEqualTo(TaskStatus.UNSUITABLE)
   }
 
   @Test
@@ -85,7 +107,7 @@ class ResidentialChecksServiceTest {
     val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
       taskCode = "make-a-risk-management-decision",
       answers = mapOf(
-        "canOffenderBeManagedSafely" to true,
+        "canOffenderBeManagedSafely" to false,
         "informationToSupportDecision" to "info",
         "riskManagementPlanningActionsNeeded" to false,
       ),
@@ -106,5 +128,16 @@ class ResidentialChecksServiceTest {
     verify(addressService).getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)
     assertThat(answersSummary.addressCheckRequestId).isEqualTo(ADDRESS_REQUEST_ID)
     assertThat(answersSummary.taskCode).isEqualTo(saveTaskAnswersRequest.taskCode)
+    argumentCaptor<ResidentialChecksTaskAnswer> {
+      verify(residentialChecksTaskAnswerRepository).save(capture())
+      with(firstValue) {
+        assertThat(taskCode).isEqualTo(saveTaskAnswersRequest.taskCode)
+        assertThat(toAnswersMap()).isEqualTo(saveTaskAnswersRequest.answers)
+        assertThat(criterionMet).isFalse()
+        assertThat(taskVersion).isEqualTo("V1")
+        assertThat(createdTimestamp).isNotNull()
+        assertThat(lastUpdatedTimestamp).isNotNull()
+      }
+    }
   }
 }

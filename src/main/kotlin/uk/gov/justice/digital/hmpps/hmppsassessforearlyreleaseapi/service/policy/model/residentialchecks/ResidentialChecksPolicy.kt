@@ -1,5 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+
 enum class PolicyVersion {
   V1,
 }
@@ -37,11 +39,17 @@ data class Input(
   val options: List<Option>? = null,
 )
 
+fun interface CriterionMet {
+  fun evaluate(answer: Any?): Boolean
+}
+
 data class TaskQuestion(
   val code: String,
   val text: String,
   val hintText: String? = null,
   val input: Input,
+  @JsonIgnore
+  val criterionMet: CriterionMet,
 )
 
 data class Section(

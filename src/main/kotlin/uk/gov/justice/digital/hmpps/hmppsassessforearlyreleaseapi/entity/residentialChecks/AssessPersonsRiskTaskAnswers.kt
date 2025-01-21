@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewA
 class AssessPersonsRiskTaskAnswers(
   id: Long = -1L,
   addressCheckRequest: CurfewAddressCheckRequest,
+  criterionMet: Boolean,
   taskVersion: String,
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
@@ -23,6 +24,7 @@ class AssessPersonsRiskTaskAnswers(
   id = id,
   addressCheckRequest = addressCheckRequest,
   taskCode = ResidentialChecksTaskAnswerType.ASSESS_THIS_PERSONS_RISK.taskCode,
+  criterionMet = criterionMet,
   taskVersion = taskVersion,
 ) {
   override fun toAnswersMap(): Map<String, Any?> = mapOf(
@@ -66,10 +68,12 @@ data class AssessPersonsRiskAnswers(
 ) : AnswerPayload {
   override fun createTaskAnswersEntity(
     addressCheckRequest: CurfewAddressCheckRequest,
+    criterionMet: Boolean,
     taskVersion: String,
   ): ResidentialChecksTaskAnswer = AssessPersonsRiskTaskAnswers(
     answers = this,
     addressCheckRequest = addressCheckRequest,
+    criterionMet = criterionMet,
     taskVersion = taskVersion,
   )
 }

@@ -6,6 +6,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AnswerPayload
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswerType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.status
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskAnswersSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskProgress
@@ -16,7 +17,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Res
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskQuestion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDateTime
 
@@ -38,7 +40,7 @@ class ResidentialChecksService(
       val taskAnswers = taskAnswersForAddressCheck.find { it.taskCode == task.code }
       val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
       ResidentialChecksTaskProgress(
-        status = TaskStatus.NOT_STARTED,
+        status = taskAnswers.status(),
         config = task,
         answers = answersMap,
       )
@@ -49,17 +51,14 @@ class ResidentialChecksService(
 
   fun getResidentialChecksTask(prisonNumber: String, requestId: Long, taskCode: String): ResidentialChecksTaskView {
     val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
-    val task = RESIDENTIAL_CHECKS_POLICY_V1.tasks.find { it.code == taskCode }
-      ?: throw NoResourceFoundException("$taskCode is not a valid task code")
-
+    val taskConfig = getTaskConfig(taskCode)
     val taskAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(requestId, taskCode)
-
     val answersMap = taskAnswers?.toAnswersMap() ?: emptyMap()
 
     return ResidentialChecksTaskView(
       assessmentSummary = currentAssessment,
-      taskConfig = task,
-      taskStatus = TaskStatus.NOT_STARTED,
+      taskConfig = taskConfig,
+      taskStatus = taskAnswers.status(),
       answers = answersMap,
     )
   }
@@ -70,11 +69,13 @@ class ResidentialChecksService(
     saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest,
   ): ResidentialChecksTaskAnswersSummary {
     val taskVersion = PolicyVersion.V1.name
-    val addressCheckRequest = addressService.getCurfewAddressCheckRequest(addressCheckRequestId, prisonNumber)
+    val taskCode = saveTaskAnswersRequest.taskCode
+    val answersMap = saveTaskAnswersRequest.answers
 
-    val answers = getTaskAnswers(saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
-    validateTaskAnswers(saveTaskAnswersRequest.taskCode, answers)
+    val answers = getTaskAnswers(taskCode, answersMap)
+    validateTaskAnswers(taskCode, answers)
 
+    val criterionMet = areTaskCriterionMet(taskCode, answersMap)
     val existingAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(
       addressCheckRequestId,
       saveTaskAnswersRequest.taskCode,
@@ -83,17 +84,39 @@ class ResidentialChecksService(
     if (existingAnswers != null) {
       val updatedAnswers = existingAnswers.updateAnswers(answers)
       updatedAnswers.lastUpdatedTimestamp = LocalDateTime.now()
+      updatedAnswers.criterionMet = criterionMet
       residentialChecksTaskAnswerRepository.save(updatedAnswers)
     } else {
-      residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, taskVersion))
+      val addressCheckRequest = addressService.getCurfewAddressCheckRequest(addressCheckRequestId, prisonNumber)
+      residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, criterionMet, taskVersion))
     }
 
     return ResidentialChecksTaskAnswersSummary(
       addressCheckRequestId = addressCheckRequestId,
-      taskCode = saveTaskAnswersRequest.taskCode,
-      answers = saveTaskAnswersRequest.answers,
+      taskCode = taskCode,
+      answers = answersMap,
       taskVersion = taskVersion,
     )
+  }
+
+  private fun areTaskCriterionMet(taskCode: String, answers: Map<String, Any>): Boolean {
+    val taskQuestions = getTaskQuestions(getTaskConfig(taskCode))
+    var criterionMet = true
+    for (question in taskQuestions) {
+      val answer = answers[question.input.name]
+      if (!question.criterionMet.evaluate(answer)) {
+        criterionMet = false
+        break
+      }
+    }
+    return criterionMet
+  }
+
+  private fun getTaskConfig(taskCode: String): Task = RESIDENTIAL_CHECKS_POLICY_V1.tasks.find { it.code == taskCode }
+    ?: throw NoResourceFoundException("$taskCode is not a valid task code")
+
+  private fun getTaskQuestions(taskConfig: Task): List<TaskQuestion> = taskConfig.sections.flatMap {
+    it.questions
   }
 
   private fun getTaskAnswers(

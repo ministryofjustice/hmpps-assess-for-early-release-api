@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.CriterionMet
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Input
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.InputType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Option
@@ -9,6 +10,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskQuestion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
+
+val CRITERION_MET = CriterionMet { true }
+val CRITERION_MET_IF_ANSWER_PROVIDED = CriterionMet { it != null }
+val CRITERION_MET_IF_ANSWER_TRUE = CriterionMet { it.toString().toBoolean() }
+val CRITERION_MET_IF_ANSWER_FALSE = CriterionMet { !it.toString().toBoolean() }
+val CRITERION_MET_IF_ANSWER_NOT_BLANK = CriterionMet { it != null && it.toString().isNotBlank() }
 
 val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
   version = PolicyVersion.V1,
@@ -30,6 +37,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_TRUE,
             ),
           ),
         ),
@@ -48,6 +56,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option(VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER.displayText, VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER.name),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "main-occupier-given-consent",
@@ -67,6 +76,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_TRUE,
             ),
           ),
         ),
@@ -91,6 +101,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationRequested",
                 type = InputType.DATE,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "date-police-sent-information",
@@ -100,6 +111,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationSent",
                 type = InputType.DATE,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "policeInformationSummary",
@@ -108,6 +120,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationSummary",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_NOT_BLANK,
             ),
           ),
         ),
@@ -132,6 +145,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationRequested",
                 type = InputType.DATE,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "date-children-services-information-sent",
@@ -141,6 +155,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationSent",
                 type = InputType.DATE,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "children-services-information-summary",
@@ -149,6 +164,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationSummary",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_NOT_BLANK,
             ),
           ),
         ),
@@ -169,6 +185,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "pomPrisonBehaviourInformation",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_NOT_BLANK,
             ),
             TaskQuestion(
               code = "mental-health-treatment-needs",
@@ -182,6 +199,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "is-there-a-vlo-officer-for-case",
@@ -194,6 +212,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "information-that-cannot-be-disclosed-to-offender",
@@ -206,6 +225,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
           ),
         ),
@@ -228,6 +248,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_TRUE,
             ),
             TaskQuestion(
               code = "e7ac8d33-fc04-4660-9d0e-bf121acf703f",
@@ -236,6 +257,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "addressSuitableInformation",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_NOT_BLANK,
             ),
             TaskQuestion(
               code = "084edb2b-a52b-4723-b425-0069719fd5f9",
@@ -248,6 +270,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_PROVIDED,
             ),
             TaskQuestion(
               code = "cf8ffa01-6c3e-4710-875b-cff5b14e5c95",
@@ -256,6 +279,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "moreInformation",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET,
             ),
           ),
         ),
@@ -278,6 +302,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_TRUE,
             ),
             TaskQuestion(
               code = "information-to-support-decision",
@@ -286,6 +311,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                 name = "informationToSupportDecision",
                 type = InputType.TEXT,
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_NOT_BLANK,
             ),
             TaskQuestion(
               code = "any-risk-management-planning-actions-needed",
@@ -298,6 +324,7 @@ val RESIDENTIAL_CHECKS_POLICY_V1 = ResidentialChecksPolicy(
                   Option("No", "false"),
                 ),
               ),
+              criterionMet = CRITERION_MET_IF_ANSWER_FALSE,
             ),
           ),
         ),
