@@ -22,6 +22,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -35,6 +37,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
@@ -183,11 +186,9 @@ object TestData {
     )
   }
 
-  fun anAssessmentWithNoProgress() =
-    anAssessmentWithSomeProgress(NOT_STARTED, null, Progress.none(), Progress.none())
+  fun anAssessmentWithNoProgress() = anAssessmentWithSomeProgress(NOT_STARTED, null, Progress.none(), Progress.none())
 
-  fun anAssessmentWithCompleteEligibilityChecks(status: AssessmentStatus, previousStatus: AssessmentStatus? = null) =
-    anAssessmentWithSomeProgress(status, previousStatus, Progress.allSuccessful(), Progress.allSuccessful())
+  fun anAssessmentWithCompleteEligibilityChecks(status: AssessmentStatus, previousStatus: AssessmentStatus? = null) = anAssessmentWithSomeProgress(status, previousStatus, Progress.allSuccessful(), Progress.allSuccessful())
 
   private fun Criterion.toPassedResult(
     type: CriterionType,
@@ -271,14 +272,13 @@ object TestData {
     username = "username",
   )
 
-  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) =
-    CommunityOffenderManager(
-      staffCode = deliusOffenderManager.code,
-      username = deliusOffenderManager.username,
-      email = deliusOffenderManager.email,
-      forename = deliusOffenderManager.name.forename,
-      surname = deliusOffenderManager.name.surname,
-    )
+  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) = CommunityOffenderManager(
+    staffCode = deliusOffenderManager.code,
+    username = deliusOffenderManager.username,
+    email = deliusOffenderManager.email,
+    forename = deliusOffenderManager.name.forename,
+    surname = deliusOffenderManager.name.surname,
+  )
 
   fun aUpdateCom(deliusOffenderManager: DeliusOffenderManager) = deliusOffenderManager.username?.let {
     UpdateCom(
@@ -289,4 +289,18 @@ object TestData {
       surname = deliusOffenderManager.name.surname,
     )
   }
+
+  fun aRiskManagementDecisionAnswers(): RiskManagementDecisionAnswers = RiskManagementDecisionAnswers(
+    canOffenderBeManagedSafely = true,
+    informationToSupportDecision = "reason",
+    riskManagementPlanningActionsNeeded = false,
+  )
+
+  fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean, answers: RiskManagementDecisionAnswers = aRiskManagementDecisionAnswers()): RiskManagementDecisionTaskAnswers = RiskManagementDecisionTaskAnswers(
+    id = 1,
+    addressCheckRequest = aStandardAddressCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = answers,
+  )
 }

@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 import java.time.LocalDateTime
 
 enum class ResidentialChecksTaskAnswerType(val taskCode: String, val taskAnswerClass: Class<out AnswerPayload>) {
@@ -27,15 +28,14 @@ enum class ResidentialChecksTaskAnswerType(val taskCode: String, val taskAnswerC
   ;
 
   companion object {
-    fun getByTaskCode(taskCode: String): ResidentialChecksTaskAnswerType {
-      return entries.find { it.taskCode == taskCode } ?: throw IllegalArgumentException("Invalid task code")
-    }
+    fun getByTaskCode(taskCode: String): ResidentialChecksTaskAnswerType = entries.find { it.taskCode == taskCode } ?: throw IllegalArgumentException("Invalid task code")
   }
 }
 
 sealed interface AnswerPayload {
   fun createTaskAnswersEntity(
     addressCheckRequest: CurfewAddressCheckRequest,
+    criterionMet: Boolean,
     taskVersion: String,
   ): ResidentialChecksTaskAnswer
 }
@@ -59,6 +59,10 @@ abstract class ResidentialChecksTaskAnswer(
   val taskCode: String,
 
   @NotNull
+  @Column(name = "criterion_met")
+  var criterionMet: Boolean,
+
+  @NotNull
   @Column(name = "task_version")
   val taskVersion: String,
 
@@ -71,4 +75,11 @@ abstract class ResidentialChecksTaskAnswer(
   abstract fun getAnswers(): AnswerPayload
   abstract fun updateAnswers(answers: AnswerPayload): ResidentialChecksTaskAnswer
   abstract fun toAnswersMap(): Map<String, Any?>
+}
+
+fun ResidentialChecksTaskAnswer?.status(): TaskStatus {
+  if (this == null || this.toAnswersMap().isEmpty()) {
+    return TaskStatus.NOT_STARTED
+  }
+  return if (criterionMet) TaskStatus.SUITABLE else TaskStatus.UNSUITABLE
 }
