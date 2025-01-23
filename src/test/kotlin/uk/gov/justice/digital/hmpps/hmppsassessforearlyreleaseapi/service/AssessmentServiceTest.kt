@@ -9,7 +9,9 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
@@ -32,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 import java.time.LocalDate
 
@@ -96,7 +99,7 @@ class AssessmentServiceTest {
   }
 
   @Test
-  fun `should submit an assessment`() {
+  fun `should submit an assessment for address checks`() {
     val anOffender = anOffender()
     anOffender.currentAssessment().status = ELIGIBLE_AND_SUITABLE
 
@@ -108,6 +111,70 @@ class AssessmentServiceTest {
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
+  }
+
+  @Test
+  fun `should submit an assessment for pre-decision checks`() {
+    val anOffender = anOffender()
+    anOffender.currentAssessment().status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+
+    service.submitForPreDecisionChecks(PRISON_NUMBER)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository).save(assessmentCaptor.capture())
+    assertThat(assessmentCaptor.value.status).isEqualTo(AWAITING_PRE_DECISION_CHECKS)
+  }
+
+  @Test
+  fun `should update address checks status when checks complete`() {
+    val anOffender = anOffender()
+    anOffender.currentAssessment().status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository).save(assessmentCaptor.capture())
+    assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
+  }
+
+  @Test
+  fun `should not update address checks status when checks already complete`() {
+    val anOffender = anOffender()
+    anOffender.currentAssessment().status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
+    anOffender.currentAssessment().addressChecksComplete = true
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository).save(assessmentCaptor.capture())
+    assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
+  }
+
+  @Test
+  fun `should update address checks status to in progress`() {
+    val anOffender = anOffender()
+    anOffender.currentAssessment().status = AWAITING_ADDRESS_AND_RISK_CHECKS
+
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
+    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.IN_PROGRESS)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository).save(assessmentCaptor.capture())
+    assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    assertThat(assessmentCaptor.value.addressChecksComplete).isFalse()
   }
 
   @Nested

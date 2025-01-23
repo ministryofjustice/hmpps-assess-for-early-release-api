@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 enum class AssessmentStatus {
   NOT_STARTED {
@@ -110,7 +111,11 @@ enum class AssessmentStatus {
       PROBATION_COM to listOf(
         TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, IN_PROGRESS),
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
-        TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
+        TaskProgress.Dynamic(
+          SEND_CHECKS_TO_PRISON,
+        ) {
+          if (it.addressChecksComplete) READY_TO_START else LOCKED
+        },
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
     )
@@ -300,9 +305,7 @@ enum class AssessmentStatus {
       RELEASED_ON_HDC -> AssessmentState.ReleasedOnHDC
     }
 
-    fun getStatusesForRole(role: UserRole): List<AssessmentStatus> {
-      return entries.filter { it.visibleToRole[role] == true }
-    }
+    fun getStatusesForRole(role: UserRole): List<AssessmentStatus> = entries.filter { it.visibleToRole[role] == true }
   }
 }
 
@@ -388,8 +391,9 @@ sealed interface SideEffect {
 }
 
 sealed class AssessmentLifecycleEvent {
-  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) :
-    AssessmentLifecycleEvent()
+  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) : AssessmentLifecycleEvent()
+  data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus) : AssessmentLifecycleEvent()
+
   object SubmitForAddressChecks : AssessmentLifecycleEvent()
   object StartAddressChecks : AssessmentLifecycleEvent()
   object CompleteAddressChecks : AssessmentLifecycleEvent()
@@ -457,14 +461,11 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.AwaitingAddressAndRiskChecks> {
-      on<AssessmentLifecycleEvent.StartAddressChecks> {
-        transitionTo(AssessmentState.AddressAndRiskChecksInProgress)
-      }
-      on<AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided> {
-        when (it.eligibilityStatus) {
-          EligibilityStatus.INELIGIBLE -> transitionTo(AssessmentState.IneligibleOrUnsuitable)
-          EligibilityStatus.IN_PROGRESS -> dontTransition()
-          EligibilityStatus.ELIGIBLE -> dontTransition()
+      on<AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided> {
+        when (it.checkStatus) {
+          ResidentialChecksStatus.UNSUITABLE -> transitionTo(AssessmentState.AddressAndRiskChecksInProgress)
+          ResidentialChecksStatus.IN_PROGRESS -> transitionTo(AssessmentState.AddressAndRiskChecksInProgress)
+          ResidentialChecksStatus.SUITABLE -> dontTransition(SideEffect.Error("Unable to transition to suitable from ${this.status} directly"))
           else -> error("Unexpected eligibility status: $it")
         }
       }
@@ -477,6 +478,14 @@ val assessmentStateMachine =
     }
 
     state<AssessmentState.AddressAndRiskChecksInProgress> {
+      on<AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided> {
+        when (it.checkStatus) {
+          ResidentialChecksStatus.UNSUITABLE -> dontTransition()
+          ResidentialChecksStatus.IN_PROGRESS -> dontTransition()
+          ResidentialChecksStatus.SUITABLE -> dontTransition()
+          else -> error("Unexpected eligibility status: $it")
+        }
+      }
       on<AssessmentLifecycleEvent.CompleteAddressChecks> {
         transitionTo(AssessmentState.AwaitingPreDecisionChecks)
       }
@@ -786,5 +795,9 @@ sealed interface TaskProgress {
 
   class Fixed(override val task: Task, status: TaskStatus) : TaskProgress {
     override val status: (assessment: Assessment) -> TaskStatus = { status }
+  }
+
+  class Dynamic(override val task: Task, check: (assessment: Assessment) -> TaskStatus) : TaskProgress {
+    override val status: (assessment: Assessment) -> TaskStatus = check
   }
 }

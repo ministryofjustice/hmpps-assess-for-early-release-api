@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -10,7 +11,9 @@ import jakarta.persistence.Inheritance
 import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.NotNull
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import java.time.LocalDateTime
 
 @Entity
@@ -39,6 +42,9 @@ abstract class CurfewAddressCheckRequest(
   @ManyToOne
   @JoinColumn(name = "assessment_id", referencedColumnName = "id", nullable = false)
   val assessment: Assessment,
+
+  @OneToMany(mappedBy = "addressCheckRequest", cascade = [CascadeType.ALL], orphanRemoval = true)
+  val taskAnswers: MutableSet<ResidentialChecksTaskAnswer> = mutableSetOf(),
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),

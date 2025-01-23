@@ -64,7 +64,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-checks-complete.sql",
+      "classpath:test_data/an-eligible-and-suitable-offender.sql",
     )
     @Test
     fun `should return the residential checks for an offender`() {
@@ -113,7 +113,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-checks-complete.sql",
+      "classpath:test_data/an-eligible-and-suitable-offender.sql",
     )
     @Test
     fun `should return the residential check task info for an assessment and task code`() {
@@ -205,6 +205,8 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update existing residential checks task answers`() {
+      prisonRegisterMockServer.stubGetPrisons()
+
       webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))

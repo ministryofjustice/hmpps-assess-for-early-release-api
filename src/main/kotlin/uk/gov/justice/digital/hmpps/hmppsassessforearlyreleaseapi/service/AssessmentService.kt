@@ -6,6 +6,8 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.CompleteAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.SubmitForAddressChecks
@@ -25,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Status
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
 
 @Service
@@ -97,6 +100,29 @@ class AssessmentService(
     assessmentRepository.save(assessmentEntity)
   }
 
+  @Transactional
+  fun submitForPreDecisionChecks(prisonNumber: String) {
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(CompleteAddressChecks)
+    assessmentRepository.save(assessmentEntity)
+  }
+
+  @Transactional
+  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus) {
+    val currentAssessment = getCurrentAssessment(prisonNumber)
+    currentAssessment.assessmentEntity.performTransition(
+      AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status),
+    )
+
+    val assessmentEntity = currentAssessment.assessmentEntity
+    if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
+      assessmentEntity.addressChecksComplete = true
+    } else if (status != ResidentialChecksStatus.SUITABLE && assessmentEntity.addressChecksComplete) {
+      assessmentEntity.addressChecksComplete = false
+    }
+    assessmentRepository.save(currentAssessment.assessmentEntity)
+  }
+
   data class AssessmentWithEligibilityProgress(
     val assessmentEntity: Assessment,
     val prison: String,
@@ -112,20 +138,19 @@ class AssessmentService(
       return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
-      EligibilityCriterionProgress(
-        code = code,
-        taskName = name,
-        status = eligibilityCheckResult.getEligibilityStatus(),
-        questions = questions.map {
-          Question(
-            text = it.text,
-            hint = it.hint,
-            name = it.name,
-            answer = eligibilityCheckResult.getAnswer(it.name),
-          )
-        },
-      )
+    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) = EligibilityCriterionProgress(
+      code = code,
+      taskName = name,
+      status = eligibilityCheckResult.getEligibilityStatus(),
+      questions = questions.map {
+        Question(
+          text = it.text,
+          hint = it.hint,
+          name = it.name,
+          answer = eligibilityCheckResult.getAnswer(it.name),
+        )
+      },
+    )
 
     fun getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
       val codeToChecks = this.assessmentEntity.eligibilityCheckResults
@@ -135,19 +160,18 @@ class AssessmentService(
       return policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
-      SuitabilityCriterionProgress(
-        code = code,
-        taskName = name,
-        status = eligibilityCheckResult.getSuitabilityStatus(),
-        questions = questions.map {
-          Question(
-            text = it.text,
-            hint = it.hint,
-            name = it.name,
-            answer = eligibilityCheckResult.getAnswer(it.name),
-          )
-        },
-      )
+    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) = SuitabilityCriterionProgress(
+      code = code,
+      taskName = name,
+      status = eligibilityCheckResult.getSuitabilityStatus(),
+      questions = questions.map {
+        Question(
+          text = it.text,
+          hint = it.hint,
+          name = it.name,
+          answer = eligibilityCheckResult.getAnswer(it.name),
+        )
+      },
+    )
   }
 }
