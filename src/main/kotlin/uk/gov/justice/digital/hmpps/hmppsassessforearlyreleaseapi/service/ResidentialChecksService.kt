@@ -84,11 +84,11 @@ class ResidentialChecksService(
     validateTaskAnswers(taskCode, answers)
 
     val criterionMet = areTaskCriterionMet(taskCode, answersMap)
-    val existingAnswersForAllTasks = residentialChecksTaskAnswerRepository.findByAddressCheckRequestId(
+    val existingAnswers = residentialChecksTaskAnswerRepository.findByAddressCheckRequestIdAndTaskCode(
       addressCheckRequestId,
+      taskCode,
     )
     val addressCheckRequest = addressService.getCurfewAddressCheckRequest(addressCheckRequestId, prisonNumber)
-    val existingAnswers = existingAnswersForAllTasks.firstOrNull { it.taskCode == taskCode }
     if (existingAnswers != null) {
       val updatedAnswers = existingAnswers.updateAnswers(answers)
       updatedAnswers.lastUpdatedTimestamp = LocalDateTime.now()
@@ -150,9 +150,8 @@ class ResidentialChecksService(
   }
 
   private fun getAddressCheckStatus(addressCheckRequest: CurfewAddressCheckRequest): ResidentialChecksStatus {
-    val taskCodes = getPolicyTaskCodes()
     val taskAnswers = addressCheckRequest.taskAnswers
-    val taskStatus = taskCodes.map { taskAnswers.find { answer -> answer.taskCode == it }.toTaskStatus() }
+    val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }.toTaskStatus() }
 
     val unsuitable = taskStatus.any { it == UNSUITABLE }
     val suitable = taskStatus.all { it == SUITABLE }
