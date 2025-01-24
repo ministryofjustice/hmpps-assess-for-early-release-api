@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
@@ -38,7 +39,8 @@ private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
 private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
-private const val SUBMIT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
+private const val SUBMIT_FOR_ADDRESS_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
+private const val SUBMIT_FOR_PRE_DECISION_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-pre-decision-checks"
 
 class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
@@ -157,7 +159,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-checks-complete.sql",
+      "classpath:test_data/an-eligible-and-suitable-offender.sql",
     )
     @Test
     fun `should opt-out an offender`() {
@@ -226,7 +228,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-checks-complete.sql",
+      "classpath:test_data/an-eligible-and-suitable-offender.sql",
     )
     @Test
     fun `should opt-in an offender`() {
@@ -269,11 +271,11 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class SubmitAssessment {
+  inner class SubmitForAddressChecks {
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
-        .uri(SUBMIT_ASSESSMENT_URL)
+        .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -282,7 +284,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if no role`() {
       webTestClient.put()
-        .uri(SUBMIT_ASSESSMENT_URL)
+        .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation())
         .exchange()
         .expectStatus()
@@ -292,7 +294,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
-        .uri(SUBMIT_ASSESSMENT_URL)
+        .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .exchange()
         .expectStatus()
@@ -301,14 +303,14 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-offender-with-checks-complete.sql",
+      "classpath:test_data/an-eligible-and-suitable-offender.sql",
     )
     @Test
-    fun `should submit an assessment`() {
+    fun `should submit an assessment for address checks`() {
       prisonRegisterMockServer.stubGetPrisons()
 
       webTestClient.put()
-        .uri(SUBMIT_ASSESSMENT_URL)
+        .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
         .exchange()
         .expectStatus()
@@ -317,6 +319,58 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
+    }
+  }
+
+  @Nested
+  inner class SubmitForPreDecisionChecks {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-address-checks-complete.sql",
+    )
+    @Test
+    fun `should submit an assessment for pre-decision checks`() {
+      prisonRegisterMockServer.stubGetPrisons()
+
+      webTestClient.put()
+        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val updatedAssessment = assessmentRepository.findAll().first()
+      assertThat(updatedAssessment).isNotNull
+      assertThat(updatedAssessment.status).isEqualTo(AWAITING_PRE_DECISION_CHECKS)
     }
   }
 

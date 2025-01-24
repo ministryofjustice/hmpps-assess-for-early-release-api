@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 import com.tinder.StateMachine.Transition.Invalid
 import com.tinder.StateMachine.Transition.Valid
 import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -49,6 +50,10 @@ data class Assessment(
 
   @NotNull
   val policyVersion: String = "???",
+
+  @NotNull
+  @Column(name = "address_checks_complete")
+  var addressChecksComplete: Boolean = false,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),

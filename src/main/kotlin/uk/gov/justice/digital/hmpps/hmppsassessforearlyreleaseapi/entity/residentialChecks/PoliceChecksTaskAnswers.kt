@@ -54,13 +54,13 @@ class PoliceChecksTaskAnswers(
 
 data class PoliceChecksAnswers(
   @JsonFormat(pattern = "yyyy-MM-dd")
-  @field:NotNull(message = "Enter a valid date in the future that you requested information")
-  @field:Past(message = "Enter a valid date in the future that you requested information")
+  @field:NotNull(message = "Enter a valid date in the past that you requested information")
+  @field:Past(message = "Enter a valid date in the past that you requested information")
   val informationRequested: LocalDate?,
 
   @JsonFormat(pattern = "yyyy-MM-dd")
-  @field:NotNull(message = "Enter a valid date in the future that the information was sent")
-  @field:Past(message = "Enter a valid date in the future that the information was sent")
+  @field:NotNull(message = "Enter a valid date in the past that the information was sent")
+  @field:Past(message = "Enter a valid date in the past that the information was sent")
   val informationSent: LocalDate?,
 
   @field:NotBlank(message = "Enter a summary of the information received")

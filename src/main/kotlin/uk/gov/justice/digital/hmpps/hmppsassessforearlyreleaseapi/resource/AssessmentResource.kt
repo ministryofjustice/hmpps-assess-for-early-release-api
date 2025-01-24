@@ -228,6 +228,59 @@ class AssessmentResource(
       ),
     ],
   )
-  fun submitForAddressChecks(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    assessmentService.submitAssessmentForAddressChecks(prisonNumber)
+  fun submitForAddressChecks(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.submitAssessmentForAddressChecks(prisonNumber)
+
+  @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-pre-decision-checks")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Submits an offender's current assessment to the prison case admin for pre-decision checks",
+    description = "Submits an offender's current assessment to the prison case admin to perform pre-decision checks.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The offender's current assessment has been sent to the prison case admin for checking.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = Void::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Could not find an offender with the provided prison number",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun submitForPreDecisionChecks(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.submitForPreDecisionChecks(prisonNumber)
 }

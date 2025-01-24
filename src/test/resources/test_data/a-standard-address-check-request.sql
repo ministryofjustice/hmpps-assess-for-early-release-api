@@ -24,7 +24,7 @@ insert into assessment(id, offender_id,
                        policy_version)
 values (1,
         (select id from offender where booking_id = 10),
-        'NOT_STARTED',
+        'AWAITING_ADDRESS_AND_RISK_CHECKS',
         '1.0');
 
 insert into address (id,
