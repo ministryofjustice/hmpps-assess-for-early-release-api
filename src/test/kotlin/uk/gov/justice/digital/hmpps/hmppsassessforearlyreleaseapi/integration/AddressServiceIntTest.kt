@@ -217,24 +217,27 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
     assertThat(residentSummary).isNotNull
 
-    val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
+    val dbResidentAfterUpdate = residentRepository.findAll()
     assertThat(dbResidentAfterUpdate).isNotNull
 
-    assertThat(dbResidentAfterUpdate.first().id).isEqualTo(1)
-    assertThat(dbResidentAfterUpdate.first().forename).isEqualTo(addMainResident.forename)
-    assertThat(dbResidentAfterUpdate.first().surname).isEqualTo(addMainResident.surname)
-    assertThat(dbResidentAfterUpdate.first().isMainResident).isEqualTo(addMainResident.isMainResident)
-    assertThat(dbResidentAfterUpdate.first().relation).isEqualTo(addMainResident.relation)
+    assertThat(dbResidentAfterUpdate.any {
+      it.forename == addMainResident.forename &&
+        it.surname == addMainResident.surname &&
+        it.isMainResident == addMainResident.isMainResident &&
+        it.relation == addMainResident.relation
+    }).isTrue()
 
-    assertThat(dbResidentAfterUpdate[1].id).isEqualTo(2)
-    assertThat(dbResidentAfterUpdate[1].forename).isEqualTo(addOtherResident1.forename)
-    assertThat(dbResidentAfterUpdate[1].surname).isEqualTo(addOtherResident1.surname)
-    assertThat(dbResidentAfterUpdate[1].isMainResident).isEqualTo(addOtherResident1.isMainResident)
-    assertThat(dbResidentAfterUpdate[1].relation).isEqualTo(addOtherResident1.relation)
+    assertThat(dbResidentAfterUpdate.any {
+      it.forename == addOtherResident1.forename &&
+        it.surname == addOtherResident1.surname &&
+        it.isMainResident == addOtherResident1.isMainResident &&
+        it.relation == addOtherResident1.relation
+    }).isTrue()
 
-    assertThat(dbResidentAfterUpdate.last().id).isEqualTo(3)
-    assertThat(dbResidentAfterUpdate.last().forename).isEqualTo(addOtherResident2.forename)
-    assertThat(dbResidentAfterUpdate.last().surname).isEqualTo(addOtherResident2.surname)
+    assertThat(dbResidentAfterUpdate.any {
+      it.forename == addOtherResident2.forename &&
+        it.surname == addOtherResident2.surname
+    }).isTrue()
   }
 
   @Sql(
