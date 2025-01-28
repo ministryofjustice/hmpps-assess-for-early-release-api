@@ -176,10 +176,11 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/a-standard-address-check-request.sql",
   )
   @Test
-  fun `should add a resident to a standard address check request`() {
+  fun `should add, edit and remove a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
 
     val addMainResident = AddResidentRequest(
+      residentId = 1,
       forename = "Joshua",
       surname = "Cook",
       phoneNumber = "07739754284",
@@ -189,7 +190,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
     )
 
-    val addOtherResident = AddResidentRequest(
+    val addOtherResident1 = AddResidentRequest(
+      residentId = 2,
       forename = "Tom",
       surname = "Cook",
       phoneNumber = "07739759898",
@@ -199,19 +201,38 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = false,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident))
+    val addOtherResident2 = AddResidentRequest(
+      residentId = null,
+      forename = "John",
+      surname = "Cesena",
+      phoneNumber = "07739759898",
+      relation = "Son",
+      dateOfBirth = LocalDate.now().minusYears(24),
+      age = 22,
+      isMainResident = false,
+    )
+
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
     assertThat(residentSummary).isNotNull
 
-    val dbResident = residentRepository.findAll().first()
-    assertThat(dbResident).isNotNull
-    assertThat(dbResident.forename).isEqualTo(addMainResident.forename)
-    assertThat(dbResident.surname).isEqualTo(addMainResident.surname)
-    assertThat(dbResident.isMainResident).isEqualTo(addMainResident.isMainResident)
-    assertThat(dbResident.relation).isEqualTo(addMainResident.relation)
+    val dbResidentAfterUpdate = residentRepository.findAll()
+    assertThat(dbResidentAfterUpdate).isNotNull
 
-    val dbOtherResident = residentRepository.findAll().last()
-    assertThat(dbOtherResident).isNotNull
-    assertThat(dbOtherResident.isMainResident).isFalse()
+    assertThat(dbResidentAfterUpdate.first().id).isEqualTo(1)
+    assertThat(dbResidentAfterUpdate.first().forename).isEqualTo(addMainResident.forename)
+    assertThat(dbResidentAfterUpdate.first().surname).isEqualTo(addMainResident.surname)
+    assertThat(dbResidentAfterUpdate.first().isMainResident).isEqualTo(addMainResident.isMainResident)
+    assertThat(dbResidentAfterUpdate.first().relation).isEqualTo(addMainResident.relation)
+
+    assertThat(dbResidentAfterUpdate[1].id).isEqualTo(2)
+    assertThat(dbResidentAfterUpdate[1].forename).isEqualTo(addOtherResident1.forename)
+    assertThat(dbResidentAfterUpdate[1].surname).isEqualTo(addOtherResident1.surname)
+    assertThat(dbResidentAfterUpdate[1].isMainResident).isEqualTo(addOtherResident1.isMainResident)
+    assertThat(dbResidentAfterUpdate[1].relation).isEqualTo(addOtherResident1.relation)
+
+    assertThat(dbResidentAfterUpdate.last().id).isEqualTo(3)
+    assertThat(dbResidentAfterUpdate.last().forename).isEqualTo(addOtherResident2.forename)
+    assertThat(dbResidentAfterUpdate.last().surname).isEqualTo(addOtherResident2.surname)
   }
 
   @Sql(
@@ -224,6 +245,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val prisonNumber = "G9374FU"
 
     val addResidentRequest = AddResidentRequest(
+      residentId = 1,
       forename = "Joshua",
       surname = "Cook",
       phoneNumber = "07739754284",

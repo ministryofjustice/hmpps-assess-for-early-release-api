@@ -5,4 +5,6 @@ import org.springframework.stereotype.Repository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 
 @Repository
-interface ResidentRepository : JpaRepository<Resident, Long>
+interface ResidentRepository : JpaRepository<Resident, Long> {
+  fun findByStandardAddressCheckRequestId(standardAddressCheckRequestId: Long): List<Resident>
+}

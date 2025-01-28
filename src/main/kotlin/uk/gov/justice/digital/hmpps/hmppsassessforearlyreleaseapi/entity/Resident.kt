@@ -20,26 +20,26 @@ data class Resident(
   val id: Long = -1,
 
   @NotNull
-  val forename: String,
+  var forename: String,
 
   @NotNull
-  val surname: String,
+  var surname: String,
 
-  val phoneNumber: String?,
-
-  @NotNull
-  val relation: String,
-
-  val dateOfBirth: LocalDate?,
-
-  val age: Int?,
+  var phoneNumber: String?,
 
   @NotNull
-  val isMainResident: Boolean,
+  var relation: String,
+
+  var dateOfBirth: LocalDate?,
+
+  var age: Int?,
+
+  @NotNull
+  var isMainResident: Boolean,
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "standard_address_check_request_id", nullable = false)
-  val standardAddressCheckRequest: StandardAddressCheckRequest,
+  var standardAddressCheckRequest: StandardAddressCheckRequest,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),

@@ -6,6 +6,9 @@ import java.time.LocalDate
 
 @Schema(description = "Request for adding a resident to a standard address check request")
 data class AddResidentRequest(
+  @Schema(description = "A unique internal reference for the resident", example = "87320")
+  val residentId: Long? = null,
+
   @Schema(description = "The resident's forename", example = "Dave")
   val forename: String,
 
