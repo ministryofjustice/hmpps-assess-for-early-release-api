@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import jakarta.persistence.EntityNotFoundException
+import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -175,6 +176,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/a-standard-address-check-request.sql",
   )
+  @Transactional
   @Test
   fun `should add, edit and remove a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
@@ -215,7 +217,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
     assertThat(residentSummary).isNotNull
 
-    val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
+    val dbResidentAfterUpdate = residentRepository.findAll()
     assertThat(dbResidentAfterUpdate).isNotNull
 
     assertThat(dbResidentAfterUpdate.first().id).isEqualTo(1)
