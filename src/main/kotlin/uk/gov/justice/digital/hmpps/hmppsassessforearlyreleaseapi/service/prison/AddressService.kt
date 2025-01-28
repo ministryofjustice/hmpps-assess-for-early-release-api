@@ -141,8 +141,8 @@ class AddressService(
 
     val recordsToUpdate = existingResidents.filter { it.id in addResidentIds }
 
-      // Delete residents not present in addResidentsRequest
-    if(residentsToDelete.isNotEmpty()) {
+    // Delete residents not present in addResidentsRequest
+    if (residentsToDelete.isNotEmpty()) {
       residentRepository.deleteAll(residentsToDelete)
     }
 
