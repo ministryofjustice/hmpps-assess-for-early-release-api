@@ -220,24 +220,30 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val dbResidentAfterUpdate = residentRepository.findAll()
     assertThat(dbResidentAfterUpdate).isNotNull
 
-    assertThat(dbResidentAfterUpdate.any {
-      it.forename == addMainResident.forename &&
-        it.surname == addMainResident.surname &&
-        it.isMainResident == addMainResident.isMainResident &&
-        it.relation == addMainResident.relation
-    }).isTrue()
+    assertThat(
+      dbResidentAfterUpdate.any {
+        it.forename == addMainResident.forename &&
+          it.surname == addMainResident.surname &&
+          it.isMainResident == addMainResident.isMainResident &&
+          it.relation == addMainResident.relation
+      },
+    ).isTrue()
 
-    assertThat(dbResidentAfterUpdate.any {
-      it.forename == addOtherResident1.forename &&
-        it.surname == addOtherResident1.surname &&
-        it.isMainResident == addOtherResident1.isMainResident &&
-        it.relation == addOtherResident1.relation
-    }).isTrue()
+    assertThat(
+      dbResidentAfterUpdate.any {
+        it.forename == addOtherResident1.forename &&
+          it.surname == addOtherResident1.surname &&
+          it.isMainResident == addOtherResident1.isMainResident &&
+          it.relation == addOtherResident1.relation
+      },
+    ).isTrue()
 
-    assertThat(dbResidentAfterUpdate.any {
-      it.forename == addOtherResident2.forename &&
-        it.surname == addOtherResident2.surname
-    }).isTrue()
+    assertThat(
+      dbResidentAfterUpdate.any {
+        it.forename == addOtherResident2.forename &&
+          it.surname == addOtherResident2.surname
+      },
+    ).isTrue()
   }
 
   @Sql(
