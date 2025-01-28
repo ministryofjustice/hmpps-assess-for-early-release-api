@@ -217,7 +217,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
     assertThat(residentSummary).isNotNull
 
-    val dbResidentAfterUpdate = residentRepository.findAll()
+    val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
     assertThat(dbResidentAfterUpdate).isNotNull
 
     assertThat(dbResidentAfterUpdate.first().id).isEqualTo(1)
