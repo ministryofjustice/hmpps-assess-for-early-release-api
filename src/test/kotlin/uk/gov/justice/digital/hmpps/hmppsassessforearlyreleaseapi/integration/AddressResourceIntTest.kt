@@ -257,7 +257,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(AddressPreferencePriority.FIRST)
       assertThat(addressCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
       assertThat(addressCheckRequest.address.firstLine).isEqualTo("4 ADANAC DRIVE")
-      assertThat(addressCheckRequest.residents).hasSize(2)
+      assertThat(addressCheckRequest.residents).hasSize(3)
       assertThat(addressCheckRequest.residents.first().residentId).isEqualTo(2)
     }
   }
@@ -434,7 +434,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val standardAddressCheckRequestSummary = checkRequest as StandardAddressCheckRequestSummary
       assertThat(standardAddressCheckRequestSummary.address.firstLine).isEqualTo("4 ADANAC DRIVE")
       val residentSummary = standardAddressCheckRequestSummary.residents
-      assertThat(residentSummary).hasSize(2)
+      assertThat(residentSummary).hasSize(3)
       assertThat(residentSummary.first().residentId).isEqualTo(2)
     }
   }
