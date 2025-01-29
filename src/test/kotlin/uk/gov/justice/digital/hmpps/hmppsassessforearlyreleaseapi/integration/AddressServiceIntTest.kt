@@ -3,7 +3,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 import com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import jakarta.persistence.EntityNotFoundException
-import jakarta.transaction.Transactional
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -176,7 +175,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/a-standard-address-check-request.sql",
   )
-  @Transactional
   @Test
   fun `should add, edit and remove a resident to a standard address check request`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
@@ -217,33 +215,30 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
     assertThat(residentSummary).isNotNull
 
-    val dbResidentAfterUpdate = residentRepository.findAll()
+    val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
     assertThat(dbResidentAfterUpdate).isNotNull
 
-    assertThat(
-      dbResidentAfterUpdate.any {
-        it.forename == addMainResident.forename &&
-          it.surname == addMainResident.surname &&
-          it.isMainResident == addMainResident.isMainResident &&
-          it.relation == addMainResident.relation
-      },
-    ).isTrue()
+    with(dbResidentAfterUpdate.last()) {
+      assertThat(id).isEqualTo(3)
+      assertThat(forename).isEqualTo(addOtherResident2.forename)
+      assertThat(surname).isEqualTo(addOtherResident2.surname)
+    }
 
-    assertThat(
-      dbResidentAfterUpdate.any {
-        it.forename == addOtherResident1.forename &&
-          it.surname == addOtherResident1.surname &&
-          it.isMainResident == addOtherResident1.isMainResident &&
-          it.relation == addOtherResident1.relation
-      },
-    ).isTrue()
+    with(dbResidentAfterUpdate[1]) {
+      assertThat(id).isEqualTo(2)
+      assertThat(forename).isEqualTo(addOtherResident1.forename)
+      assertThat(surname).isEqualTo(addOtherResident1.surname)
+      assertThat(isMainResident).isEqualTo(addOtherResident1.isMainResident)
+      assertThat(relation).isEqualTo(addOtherResident1.relation)
+    }
 
-    assertThat(
-      dbResidentAfterUpdate.any {
-        it.forename == addOtherResident2.forename &&
-          it.surname == addOtherResident2.surname
-      },
-    ).isTrue()
+    with(dbResidentAfterUpdate.first()) {
+      assertThat(id).isEqualTo(1)
+      assertThat(forename).isEqualTo(addMainResident.forename)
+      assertThat(surname).isEqualTo(addMainResident.surname)
+      assertThat(isMainResident).isEqualTo(addMainResident.isMainResident)
+      assertThat(relation).isEqualTo(addMainResident.relation)
+    }
   }
 
   @Sql(
