@@ -151,23 +151,22 @@ class OffenderService(
     }
   }
 
-  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
-    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
-      offender.crd != prisoner.conditionalReleaseDate ||
-      offender.forename != prisoner.firstName ||
-      offender.surname != prisoner.lastName ||
-      offender.dateOfBirth != prisoner.dateOfBirth
+  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+    offender.crd != prisoner.conditionalReleaseDate ||
+    offender.forename != prisoner.firstName ||
+    offender.surname != prisoner.lastName ||
+    offender.dateOfBirth != prisoner.dateOfBirth
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
-    staffRepository.save(
-      CommunityOffenderManager(
-        staffCode = offenderManager.code,
-        username = offenderManager.username,
-        email = offenderManager.email,
-        forename = offenderManager.name.forename,
-        surname = offenderManager.name.surname,
-      ),
-    )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
+    CommunityOffenderManager(
+      staffCode = offenderManager.code,
+      username = offenderManager.username,
+      email = offenderManager.email,
+      forename = offenderManager.name.forename,
+      surname = offenderManager.name.surname,
+      team = offenderManager.team.code,
+    ),
+  )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

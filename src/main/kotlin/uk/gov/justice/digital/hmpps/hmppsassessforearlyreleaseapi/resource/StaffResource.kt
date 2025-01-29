@@ -72,6 +72,5 @@ class StaffResource(
       ),
     ],
   )
-  fun getStaffDetailsByUsername(@RequestParam(name = "username") username: String) =
-    probationService.getStaffDetailsByUsername(username)
+  fun getStaffDetailsByUsername(@RequestParam(name = "username") username: String) = probationService.getStaffDetailsByUsername(username)
 }

@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
@@ -139,6 +141,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
           "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
           "mainOccupierConsentGiven" to "true",
         ),
+        agent = Agent("user", UserRole.PROBATION_COM, "BDF329"),
       )
 
     @Test
@@ -258,6 +261,11 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
             "pomPrisonBehaviourInformation" : "${"x".repeat(1001)}",
             "vloOfficerForCase": true,
             "informationThatCannotBeDisclosed": false
+          },
+          "agent": {
+            "username": "user",
+            "role": "PROBATION_COM",
+            "onBehalfOf": "BDF329"
           }
         }
       """.trimIndent()
@@ -274,10 +282,9 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     }
   }
 
-  private fun serializedContent(name: String) =
-    this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
-      StandardCharsets.UTF_8,
-    ).readText()
+  private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
+    StandardCharsets.UTF_8,
+  ).readText()
 
   private companion object {
     val prisonRegisterMockServer = PrisonRegisterMockServer()

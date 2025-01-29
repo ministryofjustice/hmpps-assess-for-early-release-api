@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
@@ -18,15 +19,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
@@ -75,7 +80,7 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.optOut(PRISON_NUMBER)
+    service.optOut(PRISON_NUMBER, OptOutRequest(reasonType = NO_REASON_GIVEN, agent = PRISON_CA_AGENT))
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
@@ -91,7 +96,7 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.optBackIn(PRISON_NUMBER)
+    service.optBackIn(PRISON_NUMBER, PRISON_CA_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
@@ -106,7 +111,7 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.submitAssessmentForAddressChecks(PRISON_NUMBER)
+    service.submitAssessmentForAddressChecks(PRISON_NUMBER, PRISON_CA_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
@@ -121,7 +126,7 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.submitForPreDecisionChecks(PRISON_NUMBER)
+    service.submitForPreDecisionChecks(PRISON_NUMBER, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
@@ -136,10 +141,10 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
   }
@@ -153,10 +158,10 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
   }
@@ -169,10 +174,10 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
     whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.IN_PROGRESS)
+    service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.IN_PROGRESS, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isFalse()
   }

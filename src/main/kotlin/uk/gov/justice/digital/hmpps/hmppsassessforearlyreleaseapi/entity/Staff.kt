@@ -40,6 +40,8 @@ abstract class Staff(
 
   val surname: String?,
 
+  val team: String?,
+
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
   val fullName

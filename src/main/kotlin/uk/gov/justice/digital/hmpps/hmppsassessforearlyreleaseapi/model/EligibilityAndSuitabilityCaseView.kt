@@ -132,4 +132,7 @@ data class CriterionCheck(
   @NotNull
   @Schema(description = "A unique code for the check")
   val answers: Map<String, Boolean>,
+
+  @Schema(description = "Details of the agent who is requesting the criterion check")
+  val agent: Agent,
 )

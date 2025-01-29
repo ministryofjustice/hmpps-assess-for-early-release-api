@@ -1,0 +1,3 @@
+ALTER TABLE staff ADD COLUMN team VARCHAR(20);
+
+

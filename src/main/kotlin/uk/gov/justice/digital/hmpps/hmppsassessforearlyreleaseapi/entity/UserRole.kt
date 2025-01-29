@@ -5,4 +5,5 @@ enum class UserRole {
   PRISON_DM,
   PROBATION_COM,
   SUPPORT,
+  SYSTEM,
 }

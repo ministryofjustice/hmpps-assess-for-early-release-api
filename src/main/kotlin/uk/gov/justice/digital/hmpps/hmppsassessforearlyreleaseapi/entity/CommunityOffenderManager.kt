@@ -13,16 +13,19 @@ class CommunityOffenderManager(
   email: String?,
   forename: String?,
   surname: String?,
+  team: String?,
   lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-) : Creator, Staff(
+) : Staff(
   id = id,
   kind = StaffKind.COMMUNITY_OFFENDER_MANAGER,
   username = username,
   email = email,
   forename = forename,
   surname = surname,
+  team = team,
   lastUpdatedTimestamp = lastUpdatedTimestamp,
-) {
+),
+  Creator {
   fun copy(
     id: Long = this.id,
     staffCode: String = this.staffCode,
@@ -38,6 +41,7 @@ class CommunityOffenderManager(
     email = email,
     forename = forename,
     surname = surname,
+    team = team,
     lastUpdatedTimestamp = lastUpdatedTimestamp,
   )
 }

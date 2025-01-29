@@ -70,6 +70,7 @@ class ProbationServiceTest {
         staffEmail = aDeliusOffenderManager.email,
         forename = aDeliusOffenderManager.name.forename,
         surname = aDeliusOffenderManager.name.surname,
+        team = aDeliusOffenderManager.team.code,
       )
     }?.let {
       verify(staffService).updateComDetails(

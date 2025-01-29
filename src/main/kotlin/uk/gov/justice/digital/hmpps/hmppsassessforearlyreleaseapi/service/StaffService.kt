@@ -33,7 +33,7 @@ class StaffService(
       comDetails.staffUsername,
     )
 
-    if (comResult.isNullOrEmpty()) {
+    if (comResult.isEmpty()) {
       staffRepository.saveAndFlush(
         CommunityOffenderManager(
           username = comDetails.staffUsername.uppercase(),
@@ -41,6 +41,7 @@ class StaffService(
           email = comDetails.staffEmail,
           forename = comDetails.forename,
           surname = comDetails.surname,
+          team = comDetails.team,
         ),
       )
 
@@ -94,10 +95,9 @@ class StaffService(
     }
   }
 
-  private fun CommunityOffenderManager.isUpdate(comDetails: UpdateCom) =
-    (comDetails.forename != this.forename) ||
-      (comDetails.surname != this.surname) ||
-      (comDetails.staffEmail != this.email) ||
-      (!comDetails.staffUsername.equals(this.username, ignoreCase = true)) ||
-      (comDetails.staffCode != this.staffCode)
+  private fun CommunityOffenderManager.isUpdate(comDetails: UpdateCom) = (comDetails.forename != this.forename) ||
+    (comDetails.surname != this.surname) ||
+    (comDetails.staffEmail != this.email) ||
+    (!comDetails.staffUsername.equals(this.username, ignoreCase = true)) ||
+    (comDetails.staffCode != this.staffCode)
 }

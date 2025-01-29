@@ -3,11 +3,14 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.Mockito.mock
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doNothing
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
@@ -18,8 +21,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.EligibilityAndSuitabilityService.Companion.toSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -31,13 +34,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 
 class EligibilityAndSuitabilityServiceTest {
   private val assessmentService = mock<AssessmentService>()
-  private val assessmentRepository = mock<AssessmentRepository>()
 
   private val service =
     EligibilityAndSuitabilityService(
       PolicyService(),
       assessmentService,
-      assessmentRepository,
     )
 
   @Nested
@@ -187,7 +188,7 @@ class EligibilityAndSuitabilityServiceTest {
       val assessment = anAssessmentWithNoProgress()
 
       whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
-
+      doNothing().whenever(assessmentService).transitionAssessment(any<Assessment>(), any(), any())
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
 
@@ -195,6 +196,7 @@ class EligibilityAndSuitabilityServiceTest {
         code = criterion.code,
         type = CriteriaType.ELIGIBILITY,
         answers = mapOf(question.name to false),
+        agent = PRISON_CA_AGENT,
       )
 
       assertThat(assessment.assessmentEntity.eligibilityCheckResults).isEmpty()
@@ -202,9 +204,9 @@ class EligibilityAndSuitabilityServiceTest {
       service.saveAnswer(PRISON_NUMBER, criterionChecks)
 
       argumentCaptor<Assessment> {
-        verify(assessmentRepository).save(capture())
+        verify(assessmentService).transitionAssessment(capture(), any(), any())
 
-        assertThat(firstValue.status).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
+        assertThat(firstValue.status).isEqualTo(AssessmentStatus.NOT_STARTED)
         assertThat(firstValue.eligibilityCheckResults).hasSize(1)
         with(firstValue.eligibilityCheckResults.first()) {
           assertThat(criterionCode).isEqualTo(criterion.code)

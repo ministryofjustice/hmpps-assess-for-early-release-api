@@ -19,4 +19,7 @@ data class OptOutRequest(
 
   @Schema(description = "The reason the offender is opting out if reasonType is other", example = "Reason for the offending opting out")
   val otherDescription: String? = null,
+
+  @Schema(description = "Details of the agent who is requesting the opt out")
+  val agent: Agent,
 )

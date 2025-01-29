@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -40,6 +41,9 @@ abstract class AssessmentEvent(
   @Enumerated(EnumType.STRING)
   @Column(name = "event_type", insertable = false, updatable = false)
   var eventType: AssessmentEventType,
+
+  @Embedded
+  val agent: Agent,
 
   val eventTime: LocalDateTime = LocalDateTime.now(),
 
