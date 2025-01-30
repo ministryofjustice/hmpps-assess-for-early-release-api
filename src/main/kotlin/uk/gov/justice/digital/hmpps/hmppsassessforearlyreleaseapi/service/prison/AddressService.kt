@@ -137,9 +137,7 @@ class AddressService(
 
     // Identify residents to delete
     val addResidentIds = addResidentsRequest.mapNotNull { it.residentId }
-    val residentsToDelete = existingResidents.filter { it.id !in addResidentIds }
-
-    val recordsToUpdate = existingResidents.filter { it.id in addResidentIds }
+    val (residentsToDelete, recordsToUpdate) = existingResidents.partition { it.id !in addResidentIds }
 
     // Delete residents not present in addResidentsRequest
     if (residentsToDelete.isNotEmpty()) {
@@ -147,29 +145,28 @@ class AddressService(
     }
 
     val residentsToSave = addResidentsRequest.map { addResidentRequest ->
-      if (recordsToUpdate.any { it.id == addResidentRequest.residentId }) {
-        recordsToUpdate.find { it.id == addResidentRequest.residentId }?.apply {
-          forename = addResidentRequest.forename
-          surname = addResidentRequest.surname
-          phoneNumber = addResidentRequest.phoneNumber
-          relation = addResidentRequest.relation
-          dateOfBirth = addResidentRequest.dateOfBirth
-          age = addResidentRequest.age
-          isMainResident = addResidentRequest.isMainResident
-          standardAddressCheckRequest = addressCheckRequest
-        }
-      } else {
-        Resident(
-          forename = addResidentRequest.forename,
-          surname = addResidentRequest.surname,
-          phoneNumber = addResidentRequest.phoneNumber,
-          relation = addResidentRequest.relation,
-          dateOfBirth = addResidentRequest.dateOfBirth,
-          age = addResidentRequest.age,
-          isMainResident = addResidentRequest.isMainResident,
-          standardAddressCheckRequest = addressCheckRequest,
-        )
+
+      val existingResident = recordsToUpdate.find { it.id == addResidentRequest.residentId }
+      existingResident?.apply {
+        forename = addResidentRequest.forename
+        surname = addResidentRequest.surname
+        phoneNumber = addResidentRequest.phoneNumber
+        relation = addResidentRequest.relation
+        dateOfBirth = addResidentRequest.dateOfBirth
+        age = addResidentRequest.age
+        isMainResident = addResidentRequest.isMainResident
+        standardAddressCheckRequest = addressCheckRequest
       }
+          ?: Resident(
+            forename = addResidentRequest.forename,
+            surname = addResidentRequest.surname,
+            phoneNumber = addResidentRequest.phoneNumber,
+            relation = addResidentRequest.relation,
+            dateOfBirth = addResidentRequest.dateOfBirth,
+            age = addResidentRequest.age,
+            isMainResident = addResidentRequest.isMainResident,
+            standardAddressCheckRequest = addressCheckRequest,
+          )
     }
 
     val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
