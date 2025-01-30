@@ -157,16 +157,16 @@ class AddressService(
         isMainResident = addResidentRequest.isMainResident
         standardAddressCheckRequest = addressCheckRequest
       }
-          ?: Resident(
-            forename = addResidentRequest.forename,
-            surname = addResidentRequest.surname,
-            phoneNumber = addResidentRequest.phoneNumber,
-            relation = addResidentRequest.relation,
-            dateOfBirth = addResidentRequest.dateOfBirth,
-            age = addResidentRequest.age,
-            isMainResident = addResidentRequest.isMainResident,
-            standardAddressCheckRequest = addressCheckRequest,
-          )
+        ?: Resident(
+          forename = addResidentRequest.forename,
+          surname = addResidentRequest.surname,
+          phoneNumber = addResidentRequest.phoneNumber,
+          relation = addResidentRequest.relation,
+          dateOfBirth = addResidentRequest.dateOfBirth,
+          age = addResidentRequest.age,
+          isMainResident = addResidentRequest.isMainResident,
+          standardAddressCheckRequest = addressCheckRequest,
+        )
     }
 
     val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
