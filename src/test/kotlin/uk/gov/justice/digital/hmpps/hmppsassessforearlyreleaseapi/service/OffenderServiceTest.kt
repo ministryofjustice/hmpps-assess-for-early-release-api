@@ -28,14 +28,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDate
 
 class OffenderServiceTest {
   private val assessmentRepository = mock<AssessmentRepository>()
   private val offenderRepository = mock<OffenderRepository>()
-  private val prisonerSearchService = mock<PrisonerSearchService>()
+  private val prisonService = mock<PrisonService>()
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
   private val telemetryClient = mock<TelemetryClient>()
@@ -44,7 +44,7 @@ class OffenderServiceTest {
     OffenderService(
       assessmentRepository,
       offenderRepository,
-      prisonerSearchService,
+      prisonService,
       probationService,
       staffRepository,
       telemetryClient,
@@ -116,7 +116,7 @@ class OffenderServiceTest {
   fun `should create a new offender for a prisoner that has an HDCED`() {
     val hdced = LocalDate.now().plusDays(6)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -124,7 +124,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
@@ -140,7 +140,7 @@ class OffenderServiceTest {
   fun `should create a new offender and create responsible com where it doesn't already exist`() {
     val hdced = LocalDate.now().plusDays(23)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -153,7 +153,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val communityOffenderManagerCaptor = ArgumentCaptor.forClass(CommunityOffenderManager::class.java)
@@ -183,7 +183,7 @@ class OffenderServiceTest {
   fun `should create a new offender and assign responsible com where it already exists`() {
     val hdced = LocalDate.now().plusDays(19)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -197,7 +197,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
@@ -214,7 +214,7 @@ class OffenderServiceTest {
   @Test
   fun `should not create a new offender for a prisoner that does not have an HDCED`() {
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner()
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -222,7 +222,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository, never()).findByPrisonNumber(PRISON_NUMBER)
   }
 
@@ -232,7 +232,7 @@ class OffenderServiceTest {
     val updatedHdced = LocalDate.now().plusDays(10)
 
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = updatedHdced)
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -243,7 +243,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
@@ -258,7 +258,7 @@ class OffenderServiceTest {
     val hdced = LocalDate.now().plusDays(28)
 
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced)
-    whenever(prisonerSearchService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
       ),
@@ -269,7 +269,7 @@ class OffenderServiceTest {
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
-    verify(prisonerSearchService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
     verify(offenderRepository, never()).save(any())
   }

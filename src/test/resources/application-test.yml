@@ -31,6 +31,9 @@ hmpps:
   delius:
     api:
       url: http://localhost:8091
+  prison:
+    api:
+        url: http://localhost:8095
   prisonregister:
     api:
       url: http://localhost:8092
