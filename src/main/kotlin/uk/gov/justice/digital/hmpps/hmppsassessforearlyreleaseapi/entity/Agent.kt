@@ -12,7 +12,7 @@ data class Agent(
   @Enumerated(EnumType.STRING)
   val role: UserRole,
 
-  val onBehalfOf: String,
+  val onBehalfOf: String? = null,
 ) {
   companion object {
     val SYSTEM_AGENT = Agent("SYSTEM", UserRole.SYSTEM, "SYSTEM")
