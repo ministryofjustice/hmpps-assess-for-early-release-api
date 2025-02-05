@@ -9,6 +9,7 @@
     "location": "Birmingham (HMP)",
     "status": "ELIGIBLE_AND_SUITABLE",
     "responsibleCom": null,
+    "team": null,
     "policyVersion": "1.0",
     "tasks": {
       "PRISON_CA": [

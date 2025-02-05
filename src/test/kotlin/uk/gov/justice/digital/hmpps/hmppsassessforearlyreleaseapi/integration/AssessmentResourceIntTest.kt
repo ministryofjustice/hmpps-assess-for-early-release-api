@@ -108,7 +108,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
           status = NOT_STARTED,
-          responsibleCom = null,
           policyVersion = "1.0",
           tasks = mapOf(
             PRISON_CA to listOf(
@@ -126,7 +125,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class OptOut {
-    val anOptOutRequest = OptOutRequest(reasonType = NO_REASON_GIVEN, agent = Agent("a user", PRISON_CA, "ABC"))
+    private val anOptOutRequest = OptOutRequest(reasonType = NO_REASON_GIVEN, agent = Agent("a user", PRISON_CA, "ABC"))
 
     @Test
     fun `should return unauthorized if no token`() {

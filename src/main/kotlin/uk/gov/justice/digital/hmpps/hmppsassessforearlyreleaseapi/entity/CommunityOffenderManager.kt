@@ -13,7 +13,6 @@ class CommunityOffenderManager(
   email: String?,
   forename: String?,
   surname: String?,
-  team: String?,
   lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) : Staff(
   id = id,
@@ -22,7 +21,6 @@ class CommunityOffenderManager(
   email = email,
   forename = forename,
   surname = surname,
-  team = team,
   lastUpdatedTimestamp = lastUpdatedTimestamp,
 ),
   Creator {
@@ -41,7 +39,6 @@ class CommunityOffenderManager(
     email = email,
     forename = forename,
     surname = surname,
-    team = team,
     lastUpdatedTimestamp = lastUpdatedTimestamp,
   )
 }

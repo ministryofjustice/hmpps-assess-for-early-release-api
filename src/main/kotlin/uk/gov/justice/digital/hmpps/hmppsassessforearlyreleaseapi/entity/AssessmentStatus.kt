@@ -306,6 +306,8 @@ enum class AssessmentStatus {
     }
 
     fun getStatusesForRole(role: UserRole): List<AssessmentStatus> = entries.filter { it.visibleToRole[role] == true }
+
+    fun inFlightStatuses(): List<AssessmentStatus> = entries.filter { it != TIMED_OUT && it != REFUSED && it != RELEASED_ON_HDC }
   }
 }
 

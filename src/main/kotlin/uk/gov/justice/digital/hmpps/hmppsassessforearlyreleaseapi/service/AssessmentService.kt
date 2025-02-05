@@ -11,6 +11,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.SubmitForAddressChecks
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
@@ -77,6 +78,7 @@ class AssessmentService(
       location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
+      team = currentAssessment.team,
       policyVersion = currentAssessment.policyVersion,
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
@@ -128,6 +130,15 @@ class AssessmentService(
       assessmentEntity.addressChecksComplete = false
     }
     assessmentRepository.save(assessmentEntity)
+  }
+
+  @Transactional
+  fun updateTeamForResponsibleCom(staffCode: String, team: String) {
+    val comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn("abc", AssessmentStatus.inFlightStatuses())
+    comsAssessments.map {
+      it.copy(team = team)
+    }
+    assessmentRepository.saveAll(comsAssessments)
   }
 
   data class AssessmentWithEligibilityProgress(

@@ -41,7 +41,6 @@ class StaffService(
           email = comDetails.staffEmail,
           forename = comDetails.forename,
           surname = comDetails.surname,
-          team = comDetails.team,
         ),
       )
 

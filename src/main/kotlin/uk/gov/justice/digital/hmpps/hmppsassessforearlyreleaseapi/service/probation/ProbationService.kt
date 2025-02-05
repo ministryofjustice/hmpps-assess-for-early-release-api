@@ -5,10 +5,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StaffService
 
 @Service
 class ProbationService(
+  private val assessmentService: AssessmentService,
   private val deliusApiClient: DeliusApiClient,
   private val probationSearchApiClient: ProbationSearchApiClient,
   private val staffService: StaffService,
@@ -44,9 +46,10 @@ class ProbationService(
             staffEmail = newCom.email,
             forename = newCom.name.forename,
             surname = newCom.name.surname,
-            team = newCom.team.code,
           ),
         )
+
+        assessmentService.updateTeamForResponsibleCom(newCom.code, newCom.team.code)
       }
     } else {
       log.info("newCom not found for crn: $crn")

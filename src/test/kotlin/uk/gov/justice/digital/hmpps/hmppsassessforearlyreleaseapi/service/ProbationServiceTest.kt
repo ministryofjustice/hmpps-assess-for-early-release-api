@@ -18,12 +18,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 
 @ExtendWith(OutputCaptureExtension::class)
 class ProbationServiceTest {
+  private val assessmentService = mock<AssessmentService>()
   private val deliusApiClient = mock<DeliusApiClient>()
   private val probationSearchApiClient = mock<ProbationSearchApiClient>()
   private val staffService = mock<StaffService>()
 
   private val service: ProbationService =
     ProbationService(
+      assessmentService,
       deliusApiClient,
       probationSearchApiClient,
       staffService,
@@ -70,13 +72,13 @@ class ProbationServiceTest {
         staffEmail = aDeliusOffenderManager.email,
         forename = aDeliusOffenderManager.name.forename,
         surname = aDeliusOffenderManager.name.surname,
-        team = aDeliusOffenderManager.team.code,
       )
     }?.let {
       verify(staffService).updateComDetails(
         it,
       )
     }
+    verify(assessmentService).updateTeamForResponsibleCom(aDeliusOffenderManager.code, aDeliusOffenderManager.team.code)
   }
 
   private companion object {

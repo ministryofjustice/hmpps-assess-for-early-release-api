@@ -19,9 +19,6 @@ data class ComSummary(
 
   @Schema(description = "The offender managers surname", example = "Jones")
   val surname: String?,
-
-  @Schema(description = "The team the offender manager is assigned to", example = "N55LAU")
-  val team: String?,
 )
 
 fun CommunityOffenderManager.toSummary(): ComSummary = ComSummary(
@@ -30,5 +27,4 @@ fun CommunityOffenderManager.toSummary(): ComSummary = ComSummary(
   email = this.email,
   forename = this.forename,
   surname = this.surname,
-  team = this.team,
 )

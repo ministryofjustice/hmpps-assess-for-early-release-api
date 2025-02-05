@@ -98,7 +98,6 @@ object TestData {
     location = PRISON_NAME,
     status = NOT_STARTED,
     policyVersion = "1.0",
-    responsibleCom = null,
     tasks = mapOf(
       PRISON_CA to listOf(
         TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
@@ -278,13 +277,12 @@ object TestData {
     username = "username",
   )
 
-  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) = CommunityOffenderManager(
+  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager = aDeliusOffenderManager()) = CommunityOffenderManager(
     staffCode = deliusOffenderManager.code,
     username = deliusOffenderManager.username,
     email = deliusOffenderManager.email,
     forename = deliusOffenderManager.name.forename,
     surname = deliusOffenderManager.name.surname,
-    team = deliusOffenderManager.team.code,
   )
 
   fun aUpdateCom(deliusOffenderManager: DeliusOffenderManager) = deliusOffenderManager.username?.let {
@@ -294,7 +292,6 @@ object TestData {
       staffEmail = deliusOffenderManager.email,
       forename = deliusOffenderManager.name.forename,
       surname = deliusOffenderManager.name.surname,
-      team = deliusOffenderManager.team.code,
     )
   }
 

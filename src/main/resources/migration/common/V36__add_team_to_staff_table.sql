@@ -1,3 +1,1 @@
-ALTER TABLE staff ADD COLUMN team VARCHAR(20);
-
-
+ALTER TABLE assessment ADD COLUMN team VARCHAR(20);

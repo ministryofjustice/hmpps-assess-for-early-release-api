@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
@@ -35,6 +36,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
@@ -180,6 +182,24 @@ class AssessmentServiceTest {
     verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isFalse()
+  }
+
+  @Test
+  fun `should update the team on assessments when their com is updated`() {
+    val com = aCommunityOffenderManager()
+    val newTeamCode = "N68ABC"
+    val assessment = Assessment(
+      offender = anOffender(),
+      responsibleCom = com,
+    )
+    whenever(assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(com.staffCode, AssessmentStatus.inFlightStatuses())).thenReturn(
+      listOf(assessment),
+    )
+
+    service.updateTeamForResponsibleCom(com.staffCode, newTeamCode)
+    val assessmentCaptor = argumentCaptor<List<Assessment>>()
+    verify(assessmentRepository).saveAll(assessmentCaptor.capture())
+    assessmentCaptor.firstValue.map { assertThat(it.team).isEqualTo(newTeamCode) }
   }
 
   @Nested

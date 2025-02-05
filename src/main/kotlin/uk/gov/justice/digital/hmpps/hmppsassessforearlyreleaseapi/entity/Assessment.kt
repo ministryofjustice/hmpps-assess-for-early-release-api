@@ -65,6 +65,8 @@ data class Assessment(
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "responsible_com_id")
   var responsibleCom: CommunityOffenderManager? = null,
+
+  val team: String? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"

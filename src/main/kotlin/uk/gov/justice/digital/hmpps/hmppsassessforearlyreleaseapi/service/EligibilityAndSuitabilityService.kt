@@ -43,6 +43,7 @@ class EligibilityAndSuitabilityService(
         location = prison,
         status = assessmentEntity.status,
         responsibleCom = assessmentEntity.responsibleCom?.toSummary(),
+        team = assessmentEntity.team,
         policyVersion = assessmentEntity.policyVersion,
         tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
           tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }

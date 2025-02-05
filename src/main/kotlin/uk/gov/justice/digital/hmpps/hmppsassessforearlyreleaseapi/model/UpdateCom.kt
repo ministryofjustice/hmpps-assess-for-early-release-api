@@ -22,7 +22,4 @@ data class UpdateCom(
 
   @Schema(description = "The last name of the COM", example = "Bloggs")
   val surname: String,
-
-  @Schema(description = "The team the COM is assigned to", example = "N55LAU")
-  val team: String,
 )
