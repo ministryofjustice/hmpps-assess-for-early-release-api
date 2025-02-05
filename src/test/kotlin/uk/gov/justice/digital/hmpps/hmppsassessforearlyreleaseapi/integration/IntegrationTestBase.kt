@@ -8,11 +8,11 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.boot.test.mock.mockito.SpyBean
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer.DB_DEFAULT_URL
@@ -36,7 +36,7 @@ abstract class IntegrationTestBase {
   @Autowired
   protected lateinit var objectMapper: ObjectMapper
 
-  @SpyBean
+  @MockitoSpyBean
   protected lateinit var telemetryClient: TelemetryClient
 
   internal fun setAuthorisation(

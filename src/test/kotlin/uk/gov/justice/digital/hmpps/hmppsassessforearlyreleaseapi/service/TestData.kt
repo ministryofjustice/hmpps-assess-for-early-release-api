@@ -40,6 +40,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonApiUserDetail
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Name
@@ -309,5 +310,16 @@ object TestData {
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = answers,
+  )
+
+  fun aPrisonApiUserDetails(): PrisonApiUserDetail = PrisonApiUserDetail(
+    staffId = 8103,
+    username = "STAFF1",
+    firstName = "Gaz",
+    lastName = "Lyndsay",
+    activeCaseLoadId = "LEI",
+    accountStatus = "ACTIVE",
+    lockDate = LocalDateTime.of(2028, 3, 21, 11, 28),
+    active = true,
   )
 }

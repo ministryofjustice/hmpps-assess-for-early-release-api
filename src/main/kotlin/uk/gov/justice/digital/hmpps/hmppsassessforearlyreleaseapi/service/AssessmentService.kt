@@ -32,12 +32,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Status
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 
 @Service
 class AssessmentService(
   private val policyService: PolicyService,
-  private val prisonRegisterService: PrisonRegisterService,
+  private val prisonService: PrisonService,
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
 ) {
@@ -55,7 +55,7 @@ class AssessmentService(
     val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
     return AssessmentWithEligibilityProgress(
       assessmentEntity = currentAssessment,
-      prison = prisonRegisterService.getNameForId(offender.prisonId),
+      prison = prisonService.getPrisonNameForId(offender.prisonId),
       policy = policy,
     )
   }
@@ -65,7 +65,7 @@ class AssessmentService(
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
-    val prisonName = prisonRegisterService.getNameForId(offender.prisonId)
+    val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
     val currentAssessment = offender.currentAssessment()
     return AssessmentSummary(
       forename = offender.forename,
