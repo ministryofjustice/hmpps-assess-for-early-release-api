@@ -38,7 +38,7 @@ data class AssessmentSummary(
   @Schema(description = "The community offender manager assigned to this assessment")
   val responsibleCom: ComSummary? = null,
 
-  @Schema(description = "The team the offender this assessment is assigned to", example = "N55LAU")
+  @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "N55LAU")
   val team: String? = null,
 
   @Schema(description = "The version of the policy that this assessment has been carried out under", example = "1.0")
