@@ -8,8 +8,10 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
@@ -216,10 +218,11 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
   @Nested
   open inner class PerformEligibilityCheckResult {
-    val payload = CriterionCheck(
+    private val payload = CriterionCheck(
       code = "category-a",
       type = CriteriaType.SUITABILITY,
       answers = mapOf("categoryA" to true),
+      agent = Agent("some user", UserRole.PRISON_CA, "PCD"),
     )
 
     @Test
@@ -307,6 +310,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         code = "recalled-for-breaching-hdc-curfew",
         type = CriteriaType.ELIGIBILITY,
         answers = mapOf("recalledForBreachingHdcCurfew" to false),
+        agent = Agent("a user", UserRole.PRISON_CA, "ZJW"),
       )
 
       prisonRegisterMockServer.stubGetPrisons()
@@ -347,10 +351,9 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     }
   }
 
-  private fun serializedContent(name: String) =
-    this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
-      StandardCharsets.UTF_8,
-    ).readText()
+  private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
+    StandardCharsets.UTF_8,
+  ).readText()
 
   private companion object {
     val prisonRegisterMockServer = PrisonRegisterMockServer()

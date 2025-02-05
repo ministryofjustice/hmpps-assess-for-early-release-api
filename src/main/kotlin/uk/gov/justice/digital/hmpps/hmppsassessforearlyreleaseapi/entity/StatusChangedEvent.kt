@@ -17,11 +17,13 @@ class StatusChangedEvent(
   @Column(columnDefinition = "jsonb")
   val changes: StatusChange,
 
+  agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,
   eventType = STATUS_CHANGE,
   summary = "status changed from: '${changes.before}', to: '${changes.after}'",
+  agent = agent,
 ) {
 
   override fun toString(): String {

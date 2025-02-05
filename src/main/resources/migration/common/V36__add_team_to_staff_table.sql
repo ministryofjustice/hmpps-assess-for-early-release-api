@@ -1,0 +1,1 @@
+ALTER TABLE assessment ADD COLUMN team VARCHAR(20);

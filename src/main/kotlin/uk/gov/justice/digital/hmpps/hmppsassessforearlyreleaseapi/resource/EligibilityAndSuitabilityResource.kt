@@ -70,8 +70,7 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
       ),
     ],
   )
-  fun getCaseView(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    eligibilityAndSuitabilityService.getCaseView(prisonNumber)
+  fun getCaseView(@Parameter(required = true) @PathVariable prisonNumber: String) = eligibilityAndSuitabilityService.getCaseView(prisonNumber)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/eligibility/{code}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -117,8 +116,7 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
   fun getEligibilityCriterion(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable code: String,
-  ): EligibilityCriterionView =
-    eligibilityAndSuitabilityService.getEligibilityCriterionView(prisonNumber, code)
+  ): EligibilityCriterionView = eligibilityAndSuitabilityService.getEligibilityCriterionView(prisonNumber, code)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/suitability/{code}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -164,8 +162,7 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
   fun getSuitabilityCheck(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable code: String,
-  ): SuitabilityCriterionView =
-    eligibilityAndSuitabilityService.getSuitabilityCriterionView(prisonNumber, code)
+  ): SuitabilityCriterionView = eligibilityAndSuitabilityService.getSuitabilityCriterionView(prisonNumber, code)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/eligibility-and-suitability-check")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -206,6 +203,5 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
   fun answerCheck(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @Validated @RequestBody answer: CriterionCheck,
-  ): Unit =
-    eligibilityAndSuitabilityService.saveAnswer(prisonNumber, answer)
+  ): Unit = eligibilityAndSuitabilityService.saveAnswer(prisonNumber, answer)
 }

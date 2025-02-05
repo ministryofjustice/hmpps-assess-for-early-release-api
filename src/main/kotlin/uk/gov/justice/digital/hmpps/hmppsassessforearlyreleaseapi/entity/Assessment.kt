@@ -65,6 +65,8 @@ data class Assessment(
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "responsible_com_id")
   var responsibleCom: CommunityOffenderManager? = null,
+
+  val team: String? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
@@ -107,6 +109,7 @@ data class Assessment(
 
   fun performTransition(
     event: AssessmentLifecycleEvent,
+    agent: Agent,
   ): AssessmentState {
     val currentStatus = this.status.toState(this.previousStatus)
     val transition = assessmentStateMachine.with { initialState(currentStatus) }.transition(event)
@@ -126,6 +129,7 @@ data class Assessment(
             StatusChangedEvent(
               assessment = this,
               changes = StatusChange(before = transition.fromState.status, after = transition.toState.status),
+              agent = agent,
             ),
           )
 

@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
@@ -27,7 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Status
 class EligibilityAndSuitabilityService(
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
-  private val assessmentRepository: AssessmentRepository,
 ) {
 
   companion object {
@@ -43,6 +42,8 @@ class EligibilityAndSuitabilityService(
         crd = offender.crd,
         location = prison,
         status = assessmentEntity.status,
+        responsibleCom = assessmentEntity.responsibleCom?.toSummary(),
+        team = assessmentEntity.team,
         policyVersion = assessmentEntity.policyVersion,
         tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
           tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
@@ -121,8 +122,7 @@ class EligibilityAndSuitabilityService(
       )
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()
-      assessmentEntity.performTransition(EligibilityAndSuitabilityAnswerProvided(eligibilityStatus))
-      assessmentRepository.save(assessmentEntity)
+      assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus), answer.agent)
     }
   }
 }

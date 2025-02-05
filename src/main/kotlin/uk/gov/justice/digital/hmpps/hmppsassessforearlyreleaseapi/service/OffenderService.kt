@@ -103,7 +103,8 @@ class OffenderService(
       crd = prisoner.conditionalReleaseDate,
     )
 
-    val communityOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)?.let {
+    val deliusOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)
+    val communityOffenderManager = deliusOffenderManager?.let {
       staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
     }
 
@@ -111,6 +112,7 @@ class OffenderService(
       offender = offender,
       policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
       responsibleCom = communityOffenderManager,
+      team = deliusOffenderManager?.team?.code,
     )
 
     offender.assessments.add(assessment)
@@ -151,7 +153,7 @@ class OffenderService(
     }
   }
 
-  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner): Boolean = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
     offender.crd != prisoner.conditionalReleaseDate ||
     offender.forename != prisoner.firstName ||
     offender.surname != prisoner.lastName ||

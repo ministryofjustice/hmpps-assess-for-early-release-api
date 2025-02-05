@@ -11,8 +11,6 @@ private fun properCase(word: String) =
  * Converts a name (first name, last name, middle name, etc.) to proper case equivalent, handling double-barreled names
  * correctly (i.e. each part in a double-barreled is converted to proper case).
  */
-private fun properCaseName(name: String) =
-  if (name.isBlank()) "" else name.split('-').joinToString("-") { properCase(it) }
+private fun properCaseName(name: String) = if (name.isBlank()) "" else name.split('-').joinToString("-") { properCase(it) }
 
-fun String.convertToTitleCase() =
-  if (this.isBlank()) "" else this.split(" ").joinToString(" ") { properCaseName(it) }
+fun String.convertToTitleCase() = if (this.isBlank()) "" else this.split(" ").joinToString(" ") { properCaseName(it) }

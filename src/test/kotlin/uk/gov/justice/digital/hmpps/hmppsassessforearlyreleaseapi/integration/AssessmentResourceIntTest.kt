@@ -21,11 +21,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.DOES_NOT_WANT_TO_BE_TAGGED
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NOWHERE_TO_STAY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -125,11 +125,13 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class OptOut {
+    private val anOptOutRequest = OptOutRequest(reasonType = NO_REASON_GIVEN, agent = Agent("a user", PRISON_CA, "ABC"))
+
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
-        .bodyValue(OptOutRequest(NO_REASON_GIVEN))
+        .bodyValue(anOptOutRequest)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -140,7 +142,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation())
-        .bodyValue(OptOutRequest(NOWHERE_TO_STAY))
+        .bodyValue(anOptOutRequest)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -151,7 +153,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(OptOutRequest(DOES_NOT_WANT_TO_BE_TAGGED))
+        .bodyValue(anOptOutRequest)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -164,12 +166,11 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should opt-out an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
-      val optOutRequest = OptOutRequest(OTHER, "an opt-out reason")
 
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(optOutRequest)
+        .bodyValue(anOptOutRequest.copy(reasonType = OTHER, otherDescription = "an opt-out reason"))
         .exchange()
         .expectStatus()
         .isNoContent
@@ -183,12 +184,11 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return 401 if otherDescription not given when reasonType is other`() {
       prisonRegisterMockServer.stubGetPrisons()
-      val optOutRequest = OptOutRequest(OTHER)
 
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(optOutRequest)
+        .bodyValue(anOptOutRequest.copy(reasonType = OTHER))
         .exchange()
         .expectStatus()
         .isBadRequest
@@ -197,10 +197,13 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class OptIn {
+    private val agent = Agent(username = "a user", role = PRISON_CA, onBehalfOf = "GEB")
+
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -211,6 +214,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation())
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -221,6 +225,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -228,23 +233,16 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/an-eligible-and-suitable-offender.sql",
+      "classpath:test_data/an-opted-out-offender.sql",
     )
     @Test
     fun `should opt-in an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
 
       webTestClient.put()
-        .uri(OPT_OUT_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(OptOutRequest(OTHER, "an opt-out reason"))
-        .exchange()
-        .expectStatus()
-        .isNoContent
-
-      webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isNoContent
@@ -254,28 +252,17 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val assessment = assessmentRepository.findByOffender(offender)
       assertThat(assessment.first().status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     }
-
-    @Test
-    fun `should return 401 if otherDescription not given when reasonType is other`() {
-      prisonRegisterMockServer.stubGetPrisons()
-      val optOutRequest = OptOutRequest(OTHER)
-
-      webTestClient.put()
-        .uri(OPT_OUT_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(optOutRequest)
-        .exchange()
-        .expectStatus()
-        .isBadRequest
-    }
   }
 
   @Nested
   inner class SubmitForAddressChecks {
+    private val agent = Agent(username = "a user", role = PROBATION_COM, onBehalfOf = "GEW324")
+
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -286,6 +273,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation())
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -296,6 +284,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -312,6 +301,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isNoContent
@@ -324,10 +314,12 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class SubmitForPreDecisionChecks {
+    private val agent = Agent(username = "a user", role = PROBATION_COM, onBehalfOf = "GEW324")
+
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
-        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -338,6 +330,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
         .headers(setAuthorisation())
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -348,6 +341,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -364,6 +358,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(agent)
         .exchange()
         .expectStatus()
         .isNoContent

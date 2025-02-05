@@ -22,8 +22,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -58,6 +60,8 @@ object TestData {
   const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
+  val PRISON_CA_AGENT = Agent("prison user", role = PRISON_CA, onBehalfOf = "KXE")
+  val PROBATION_COM_AGENT = Agent("probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
     val offender = Offender(
@@ -268,12 +272,12 @@ object TestData {
     id = 1,
     code = "staff-code",
     Name(forename = "forename", surname = "surname"),
-    team = Team(code = "team 1", "a tgeam"),
-    provider = Provider(code = "probationArea-code-1", description = "probationArea-description-1"),
+    team = Team(code = "team 1", "N55LAU"),
+    provider = Provider(code = "N03", description = "Midlands"),
     username = "username",
   )
 
-  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager) = CommunityOffenderManager(
+  fun aCommunityOffenderManager(deliusOffenderManager: DeliusOffenderManager = aDeliusOffenderManager()) = CommunityOffenderManager(
     staffCode = deliusOffenderManager.code,
     username = deliusOffenderManager.username,
     email = deliusOffenderManager.email,
@@ -291,7 +295,7 @@ object TestData {
     )
   }
 
-  fun aRiskManagementDecisionAnswers(): RiskManagementDecisionAnswers = RiskManagementDecisionAnswers(
+  private fun aRiskManagementDecisionAnswers(): RiskManagementDecisionAnswers = RiskManagementDecisionAnswers(
     canOffenderBeManagedSafely = true,
     informationToSupportDecision = "reason",
     riskManagementPlanningActionsNeeded = false,

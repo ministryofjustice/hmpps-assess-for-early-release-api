@@ -83,15 +83,17 @@ class AssessmentTest {
   @Test
   fun `records status changes`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
-
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS))
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS))
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE))
+    val agent = Agent("user", UserRole.PRISON_CA, "HPE")
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS), agent)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS), agent)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE), agent)
 
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val agents = assessment.assessmentEvents.map { it.agent }
+    assertThat(agents).containsOnly(agent)
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
       StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE),
@@ -101,13 +103,14 @@ class AssessmentTest {
   @Test
   fun `returns to previous state`() {
     val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE)
+    val agent = Agent("user", UserRole.PRISON_CA, "HPE")
 
-    assessment.performTransition(OptOut)
+    assessment.performTransition(OptOut, agent)
 
     assertThat(assessment.status).isEqualTo(OPTED_OUT)
     assertThat(assessment.previousStatus).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
 
-    assessment.performTransition(OptBackIn)
+    assessment.performTransition(OptBackIn, agent)
 
     assertThat(assessment.status).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(OPTED_OUT)
@@ -122,8 +125,9 @@ class AssessmentTest {
   @Test
   fun `handles error side effect`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
+    val agent = Agent("user", UserRole.PRISON_CA, "HPE")
 
-    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE)) }
+    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE), agent) }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessage("Unable to transition to Eligible from NOT_STARTED directly")
 

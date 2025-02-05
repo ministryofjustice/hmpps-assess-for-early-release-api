@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -73,8 +74,7 @@ class AssessmentResource(
       ),
     ],
   )
-  fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) =
-    assessmentService.getCurrentAssessmentSummary(prisonNumber)
+  fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.getCurrentAssessmentSummary(prisonNumber)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/opt-out")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -125,7 +125,7 @@ class AssessmentResource(
     if (optOutRequest.reasonType == OptOutReasonType.OTHER && optOutRequest.otherDescription.isNullOrBlank()) {
       throw ValidationException("otherDescription cannot be blank if reasonType is OTHER")
     }
-    assessmentService.optOut(prisonNumber)
+    assessmentService.optOut(prisonNumber, optOutRequest)
   }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/opt-in")
@@ -172,8 +172,9 @@ class AssessmentResource(
   )
   fun optBackIn(
     @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Valid @RequestBody agent: Agent,
   ) {
-    assessmentService.optBackIn(prisonNumber)
+    assessmentService.optBackIn(prisonNumber, agent)
   }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-address-checks")
@@ -228,7 +229,10 @@ class AssessmentResource(
       ),
     ],
   )
-  fun submitForAddressChecks(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.submitAssessmentForAddressChecks(prisonNumber)
+  fun submitForAddressChecks(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Valid @RequestBody agent: Agent,
+  ) = assessmentService.submitAssessmentForAddressChecks(prisonNumber, agent)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-pre-decision-checks")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -282,5 +286,8 @@ class AssessmentResource(
       ),
     ],
   )
-  fun submitForPreDecisionChecks(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.submitForPreDecisionChecks(prisonNumber)
+  fun submitForPreDecisionChecks(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Valid @RequestBody agent: Agent,
+  ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
 }
