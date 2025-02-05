@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.CacheManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 
 class PrisonRegisterServiceTest : SqsIntegrationTestBase() {
 
@@ -19,7 +19,7 @@ class PrisonRegisterServiceTest : SqsIntegrationTestBase() {
   private lateinit var cacheManager: CacheManager
 
   @Autowired
-  lateinit var prisonRegisterService: PrisonRegisterService
+  lateinit var prisonService: PrisonService
 
   @BeforeEach
   @AfterEach
@@ -31,8 +31,8 @@ class PrisonRegisterServiceTest : SqsIntegrationTestBase() {
   fun `should cache prison details`() {
     prisonRegisterMockServer.stubGetPrisons()
 
-    prisonRegisterService.getPrisonIdsAndNames()
-    prisonRegisterService.getPrisonIdsAndNames()
+    prisonService.getPrisonIdsAndNames()
+    prisonService.getPrisonIdsAndNames()
 
     prisonRegisterMockServer.verify(1, getRequestedFor(urlEqualTo("/prisons")))
   }

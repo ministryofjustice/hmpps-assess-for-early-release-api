@@ -13,8 +13,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDateTime
@@ -27,7 +27,7 @@ const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updat
 class OffenderService(
   private val assessmentRepository: AssessmentRepository,
   private val offenderRepository: OffenderRepository,
-  private val prisonerSearchService: PrisonerSearchService,
+  private val prisonService: PrisonService,
   private val probationService: ProbationService,
   private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
@@ -73,7 +73,7 @@ class OffenderService(
   }
 
   fun createOrUpdateOffender(nomisId: String) {
-    val prisoners = prisonerSearchService.searchPrisonersByNomisIds(listOf(nomisId))
+    val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
     if (prisoners.isEmpty()) {
       val msg = "Could not find prisoner with prisonNumber $nomisId in prisoner search"
       log.warn(msg)
@@ -151,23 +151,21 @@ class OffenderService(
     }
   }
 
-  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) =
-    offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
-      offender.crd != prisoner.conditionalReleaseDate ||
-      offender.forename != prisoner.firstName ||
-      offender.surname != prisoner.lastName ||
-      offender.dateOfBirth != prisoner.dateOfBirth
+  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner): Boolean = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+    offender.crd != prisoner.conditionalReleaseDate ||
+    offender.forename != prisoner.firstName ||
+    offender.surname != prisoner.lastName ||
+    offender.dateOfBirth != prisoner.dateOfBirth
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
-    staffRepository.save(
-      CommunityOffenderManager(
-        staffCode = offenderManager.code,
-        username = offenderManager.username,
-        email = offenderManager.email,
-        forename = offenderManager.name.forename,
-        surname = offenderManager.name.surname,
-      ),
-    )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
+    CommunityOffenderManager(
+      staffCode = offenderManager.code,
+      username = offenderManager.username,
+      email = offenderManager.email,
+      forename = offenderManager.name.forename,
+      surname = offenderManager.name.surname,
+    ),
+  )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

@@ -35,28 +35,28 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonRegisterService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import java.time.LocalDate
 
 class AssessmentServiceTest {
-  private val prisonRegisterService = mock<PrisonRegisterService>()
+  private val prisonService = mock<PrisonService>()
   private val offenderRepository = mock<OffenderRepository>()
   private val assessmentRepository = mock<AssessmentRepository>()
 
   private val service =
-    AssessmentService(PolicyService(), prisonRegisterService, offenderRepository, assessmentRepository)
+    AssessmentService(PolicyService(), prisonService, offenderRepository, assessmentRepository)
 
   @Test
   fun `should get an offenders current assessment`() {
     val hdced = LocalDate.now().plusDays(5)
     val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     val assessment = service.getCurrentAssessmentSummary(PRISON_NUMBER)
 
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
-    verify(prisonRegisterService).getNameForId(PRISON_ID)
+    verify(prisonService).getPrisonNameForId(PRISON_ID)
     assertThat(assessment).extracting(
       "forename",
       "surname",
@@ -73,7 +73,7 @@ class AssessmentServiceTest {
     val offender = anAssessmentWithCompleteEligibilityChecks(status = AWAITING_ADDRESS_AND_RISK_CHECKS).offender
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.optOut(PRISON_NUMBER)
 
@@ -89,7 +89,7 @@ class AssessmentServiceTest {
       anAssessmentWithCompleteEligibilityChecks(status = OPTED_OUT, previousStatus = AWAITING_ADDRESS_AND_RISK_CHECKS)
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.optBackIn(PRISON_NUMBER)
 
@@ -104,7 +104,7 @@ class AssessmentServiceTest {
     anOffender.currentAssessment().status = ELIGIBLE_AND_SUITABLE
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.submitAssessmentForAddressChecks(PRISON_NUMBER)
 
@@ -119,7 +119,7 @@ class AssessmentServiceTest {
     anOffender.currentAssessment().status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.submitForPreDecisionChecks(PRISON_NUMBER)
 
@@ -134,7 +134,7 @@ class AssessmentServiceTest {
     anOffender.currentAssessment().status = ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
 
@@ -151,7 +151,7 @@ class AssessmentServiceTest {
     anOffender.currentAssessment().addressChecksComplete = true
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE)
 
@@ -167,7 +167,7 @@ class AssessmentServiceTest {
     anOffender.currentAssessment().status = AWAITING_ADDRESS_AND_RISK_CHECKS
 
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender)
-    whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.IN_PROGRESS)
 
@@ -183,7 +183,7 @@ class AssessmentServiceTest {
     fun `for existing unstarted offender`() {
       val anOffender = anOffender()
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender.copy())
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
 
@@ -207,7 +207,7 @@ class AssessmentServiceTest {
       )
 
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
 
@@ -233,7 +233,7 @@ class AssessmentServiceTest {
       ).offender
 
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
 
@@ -267,7 +267,7 @@ class AssessmentServiceTest {
       ).offender
 
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-      whenever(prisonRegisterService.getNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+      whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
 
