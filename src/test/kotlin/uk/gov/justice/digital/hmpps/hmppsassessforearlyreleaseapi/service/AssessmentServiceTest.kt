@@ -197,7 +197,9 @@ class AssessmentServiceTest {
     )
 
     service.updateTeamForResponsibleCom(com.staffCode, newTeamCode)
+
     val assessmentCaptor = argumentCaptor<List<Assessment>>()
+    verify(assessmentRepository).findByResponsibleComStaffCodeAndStatusIn(com.staffCode, AssessmentStatus.inFlightStatuses())
     verify(assessmentRepository).saveAll(assessmentCaptor.capture())
     assessmentCaptor.firstValue.map { assertThat(it.team).isEqualTo(newTeamCode) }
   }

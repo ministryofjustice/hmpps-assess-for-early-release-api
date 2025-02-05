@@ -134,8 +134,8 @@ class AssessmentService(
 
   @Transactional
   fun updateTeamForResponsibleCom(staffCode: String, team: String) {
-    val comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn("abc", AssessmentStatus.inFlightStatuses())
-    comsAssessments.map {
+    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, AssessmentStatus.inFlightStatuses())
+    comsAssessments = comsAssessments.map {
       it.copy(team = team)
     }
     assessmentRepository.saveAll(comsAssessments)
