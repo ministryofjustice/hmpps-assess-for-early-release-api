@@ -507,8 +507,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     private fun anAddResidentRequest(): List<AddResidentRequest> =
       listOf(
-        AddResidentRequest(1, forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true),
-        AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false),
+        AddResidentRequest(1, forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true, isOffender = false),
+        AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
       )
   }
 

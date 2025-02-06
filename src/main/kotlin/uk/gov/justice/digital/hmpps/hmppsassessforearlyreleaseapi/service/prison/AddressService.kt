@@ -155,6 +155,7 @@ class AddressService(
         dateOfBirth = addResidentRequest.dateOfBirth
         age = addResidentRequest.age
         isMainResident = addResidentRequest.isMainResident
+        isOffender = addResidentRequest.isOffender
         standardAddressCheckRequest = addressCheckRequest
       }
         ?: Resident(
@@ -165,6 +166,7 @@ class AddressService(
           dateOfBirth = addResidentRequest.dateOfBirth,
           age = addResidentRequest.age,
           isMainResident = addResidentRequest.isMainResident,
+          isOffender = addResidentRequest.isOffender,
           standardAddressCheckRequest = addressCheckRequest,
         )
     }
@@ -262,6 +264,7 @@ class AddressService(
     dateOfBirth = this.dateOfBirth,
     age = this.age,
     isMainResident = this.isMainResident,
+    isOffender = this.isOffender,
   )
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {

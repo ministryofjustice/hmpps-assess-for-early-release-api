@@ -30,4 +30,7 @@ data class AddResidentRequest(
 
   @Schema(description = "Is this main resident at the address", example = "true")
   val isMainResident: Boolean,
+
+  @Schema(description = "Is offender a main resident at the address", example = "true")
+  val isOffender: Boolean,
 )
