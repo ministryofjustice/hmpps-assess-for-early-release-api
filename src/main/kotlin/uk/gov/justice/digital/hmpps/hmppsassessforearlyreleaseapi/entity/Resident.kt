@@ -7,12 +7,18 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.validation.Constraint
+import jakarta.validation.ConstraintValidator
+import jakarta.validation.ConstraintValidatorContext
+import jakarta.validation.Payload
 import software.amazon.awssdk.annotations.NotNull
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.reflect.KClass
 
 @Entity
 @Table(name = "resident")
+@ValidRelation
 data class Resident(
   @Id
   @NotNull
@@ -27,7 +33,6 @@ data class Resident(
 
   var phoneNumber: String?,
 
-  @NotNull
   var relation: String,
 
   var dateOfBirth: LocalDate?,
@@ -36,6 +41,9 @@ data class Resident(
 
   @NotNull
   var isMainResident: Boolean,
+
+  @NotNull
+  var isOffender: Boolean,
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "standard_address_check_request_id", nullable = false)
@@ -47,3 +55,18 @@ data class Resident(
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 )
+
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
+@Retention(AnnotationRetention.RUNTIME)
+@Constraint(validatedBy = [RelationValidator::class])
+annotation class ValidRelation(
+  val message: String = "Relation must be provided if the resident is not an offender",
+  val groups: Array<KClass<*>> = [],
+  val payload: Array<KClass<out Payload>> = [],
+)
+
+class RelationValidator : ConstraintValidator<ValidRelation, Resident> {
+  override fun isValid(resident: Resident, context: ConstraintValidatorContext): Boolean {
+    return resident.isOffender || !resident.relation.isNullOrBlank()
+  }
+}

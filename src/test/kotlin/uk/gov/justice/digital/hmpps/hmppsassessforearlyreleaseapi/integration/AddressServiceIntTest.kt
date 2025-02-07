@@ -188,6 +188,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       dateOfBirth = LocalDate.now().minusYears(24),
       age = 24,
       isMainResident = true,
+      isOffender = false,
     )
 
     val addOtherResident1 = AddResidentRequest(
@@ -199,6 +200,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       dateOfBirth = LocalDate.now().minusYears(24),
       age = 24,
       isMainResident = false,
+      isOffender = false,
     )
 
     val addOtherResident2 = AddResidentRequest(
@@ -210,6 +212,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       dateOfBirth = LocalDate.now().minusYears(24),
       age = 22,
       isMainResident = false,
+      isOffender = false,
     )
 
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
@@ -246,6 +249,61 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/a-standard-address-check-request.sql",
   )
   @Test
+  fun `should fail to add resident without relation if not an offender`() {
+    val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
+
+    val addResidentRequest = AddResidentRequest(
+      residentId = null,
+      forename = "Jane",
+      surname = "Doe",
+      phoneNumber = "07739754284",
+      relation = "",
+      dateOfBirth = LocalDate.now().minusYears(30),
+      age = 30,
+      isMainResident = false,
+      isOffender = false,
+    )
+
+    val exception = assertThrows<jakarta.validation.ConstraintViolationException> {
+      addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
+    }
+
+    assertThat(exception.constraintViolations).hasSize(1)
+    assertThat(exception.constraintViolations.first().message).contains("Relation must be provided if the resident is not an offender")
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  @Test
+  fun `should add resident without relation if an offender`() {
+    val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
+
+    val addResidentRequest = AddResidentRequest(
+      residentId = null,
+      forename = "Jane",
+      surname = "Doe",
+      phoneNumber = "07739754284",
+      relation = "",
+      dateOfBirth = LocalDate.now().minusYears(30),
+      age = 30,
+      isMainResident = false,
+      isOffender = true,
+    )
+
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
+    assertThat(residentSummary).isNotNull
+    assertThat(residentSummary).hasSize(1)
+    assertThat(residentSummary.first().relation).isEmpty()
+    assertThat(residentSummary.first().isOffender).isTrue()
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  @Test
   fun `should throw a not found exception if standard address check request is not linked to prisoner`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
     val prisonNumber = "G9374FU"
@@ -259,6 +317,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       dateOfBirth = LocalDate.now().minusYears(24),
       age = 24,
       isMainResident = true,
+      isOffender = false,
     )
 
     assertThrows<EntityNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest)) }

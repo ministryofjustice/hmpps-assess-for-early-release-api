@@ -244,6 +244,7 @@ object TestData {
       dateOfBirth = LocalDate.of(1989, 3, 21),
       age = 32,
       isMainResident = true,
+      isOffender = false,
       standardAddressCheckRequest = StandardAddressCheckRequest(
         dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
         preferencePriority = AddressPreferencePriority.FIRST,
