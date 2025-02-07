@@ -36,54 +36,19 @@ class OffenderService(
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
     val assessments = assessmentRepository.findByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_CA))
-    return assessments.map { assessment ->
-      val offender = assessment.offender
-      OffenderSummary(
-        prisonNumber = offender.prisonNumber,
-        bookingId = offender.bookingId,
-        forename = offender.forename,
-        surname = offender.surname,
-        hdced = offender.hdced,
-        probationPractitioner = assessment.responsibleCom?.fullName,
-        isPostponed = assessment.status == AssessmentStatus.POSTPONED,
-        postponementReason = assessment.postponementReason,
-        postponementDate = assessment.postponementDate,
-      )
-    }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummary> {
     val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
-    return assessments.map { assessment ->
-      val offender = assessment.offender
-      OffenderSummary(
-        offender.prisonNumber,
-        offender.bookingId,
-        offender.forename,
-        offender.surname,
-        offender.hdced,
-        assessment.responsibleCom?.fullName,
-      )
-    }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
     val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
-    return assessments.map { assessment ->
-      val offender = assessment.offender
-      OffenderSummary(
-        prisonNumber = offender.prisonNumber,
-        bookingId = offender.bookingId,
-        forename = offender.forename,
-        surname = offender.surname,
-        hdced = offender.hdced,
-        probationPractitioner = assessment.responsibleCom?.fullName,
-        isPostponed = assessment.status == AssessmentStatus.POSTPONED,
-//        postponementDate = assessment.po
-      )
-    }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   fun createOrUpdateOffender(nomisId: String) {
@@ -181,6 +146,18 @@ class OffenderService(
       forename = offenderManager.name.forename,
       surname = offenderManager.name.surname,
     ),
+  )
+
+  private fun Assessment.toOffenderSummary() = OffenderSummary(
+    prisonNumber = offender.prisonNumber,
+    bookingId = offender.bookingId,
+    forename = offender.forename,
+    surname = offender.surname,
+    hdced = offender.hdced,
+    probationPractitioner = this.responsibleCom?.fullName,
+    isPostponed = this.status == AssessmentStatus.POSTPONED,
+    postponementDate = this.postponementDate,
+    postponementReason = this.postponementReason,
   )
 
   companion object {
