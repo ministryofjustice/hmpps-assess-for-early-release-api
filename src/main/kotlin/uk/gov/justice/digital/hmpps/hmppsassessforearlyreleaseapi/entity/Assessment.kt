@@ -20,6 +20,7 @@ import jakarta.validation.constraints.NotNull
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Entity
@@ -67,6 +68,10 @@ data class Assessment(
   var responsibleCom: CommunityOffenderManager? = null,
 
   val team: String? = null,
+
+  val postponementReason: String? = null,
+
+  val postponementDate: LocalDate? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
