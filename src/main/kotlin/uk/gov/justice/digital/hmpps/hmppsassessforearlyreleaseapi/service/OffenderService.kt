@@ -5,6 +5,7 @@ import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
@@ -34,9 +35,20 @@ class OffenderService(
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
-    val offenders = offenderRepository.findByPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_CA))
-    return offenders.map {
-      OffenderSummary(it.prisonNumber, it.bookingId, it.forename, it.surname, it.hdced)
+    val assessments = assessmentRepository.findByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_CA))
+    return assessments.map { assessment ->
+      val offender = assessment.offender
+      OffenderSummary(
+        prisonNumber = offender.prisonNumber,
+        bookingId = offender.bookingId,
+        forename = offender.forename,
+        surname = offender.surname,
+        hdced = offender.hdced,
+        probationPractitioner = assessment.responsibleCom?.fullName,
+        isPostponed = assessment.status == AssessmentStatus.POSTPONED,
+        postponementReason = assessment.postponementReason,
+        postponementDate = assessment.postponementDate,
+      )
     }
   }
 
@@ -62,12 +74,14 @@ class OffenderService(
     return assessments.map { assessment ->
       val offender = assessment.offender
       OffenderSummary(
-        offender.prisonNumber,
-        offender.bookingId,
-        offender.forename,
-        offender.surname,
-        offender.hdced,
-        assessment.responsibleCom?.fullName,
+        prisonNumber = offender.prisonNumber,
+        bookingId = offender.bookingId,
+        forename = offender.forename,
+        surname = offender.surname,
+        hdced = offender.hdced,
+        probationPractitioner = assessment.responsibleCom?.fullName,
+        isPostponed = assessment.status == AssessmentStatus.POSTPONED,
+//        postponementDate = assessment.po
       )
     }
   }
