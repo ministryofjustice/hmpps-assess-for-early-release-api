@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.priso
 
 import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
+import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
@@ -129,7 +130,7 @@ class AddressService(
   }
 
   @Transactional
-  fun addResidents(prisonNumber: String, requestId: Long, addResidentsRequest: List<AddResidentRequest>): List<ResidentSummary> {
+  fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>): List<ResidentSummary> {
     val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
 
     // Retrieve existing residents linked to the requestId

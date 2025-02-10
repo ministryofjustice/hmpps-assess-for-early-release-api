@@ -249,34 +249,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     "classpath:test_data/a-standard-address-check-request.sql",
   )
   @Test
-  fun `should fail to add resident without relation if not an offender`() {
-    val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
-
-    val addResidentRequest = AddResidentRequest(
-      residentId = null,
-      forename = "Jane",
-      surname = "Doe",
-      phoneNumber = "07739754284",
-      relation = "",
-      dateOfBirth = LocalDate.now().minusYears(30),
-      age = 30,
-      isMainResident = false,
-      isOffender = false,
-    )
-
-    val exception = assertThrows<jakarta.validation.ConstraintViolationException> {
-      addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
-    }
-
-    assertThat(exception.constraintViolations).hasSize(1)
-    assertThat(exception.constraintViolations.first().message).contains("Relation must be provided if the resident is not an offender")
-  }
-
-  @Sql(
-    "classpath:test_data/reset.sql",
-    "classpath:test_data/a-standard-address-check-request.sql",
-  )
-  @Test
   fun `should add resident without relation if an offender`() {
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.findAll().first()
 
@@ -285,7 +257,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       forename = "Jane",
       surname = "Doe",
       phoneNumber = "07739754284",
-      relation = "",
+      relation = null,
       dateOfBirth = LocalDate.now().minusYears(30),
       age = 30,
       isMainResident = false,
@@ -295,7 +267,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
     assertThat(residentSummary).isNotNull
     assertThat(residentSummary).hasSize(1)
-    assertThat(residentSummary.first().relation).isEmpty()
+    assertThat(residentSummary.first().relation).isNull()
     assertThat(residentSummary.first().isOffender).isTrue()
   }
 

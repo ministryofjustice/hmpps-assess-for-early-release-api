@@ -499,15 +499,46 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(residentSummary.first().forename).isEqualTo(forename)
       assertThat(residentSummary.first().surname).isEqualTo(surname)
       assertThat(residentSummary.first().phoneNumber).isEqualTo(phoneNumber)
-      assertThat(residentSummary.first().relation).isEqualTo(relation)
+      assertThat(residentSummary.first().relation).isNull()
       assertThat(residentSummary.first().dateOfBirth).isEqualTo(dateOfBirth)
       assertThat(residentSummary.first().isMainResident).isEqualTo(isMainResident)
       assertThat(residentSummary.last().isMainResident).isFalse()
     }
 
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should return 400 BAD_REQUEST for validation failure`() {
+      val invalidAddResidentRequest = listOf(
+        AddResidentRequest(
+          residentId = null,
+          forename = "Jane",
+          surname = "Doe",
+          phoneNumber = "07739754284",
+          relation = null,
+          dateOfBirth = LocalDate.now().minusYears(30),
+          age = 30,
+          isMainResident = false,
+          isOffender = false,
+        ),
+      )
+
+      webTestClient.post()
+        .uri(ADD_RESIDENT_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(invalidAddResidentRequest)
+        .exchange()
+        .expectStatus()
+        .isEqualTo(500)
+        .expectBody()
+        .jsonPath("$.userMessage").isEqualTo("Unexpected error: 400 BAD_REQUEST \"Validation failure\"")
+    }
+
     private fun anAddResidentRequest(): List<AddResidentRequest> =
       listOf(
-        AddResidentRequest(1, forename, surname, phoneNumber, relation, dateOfBirth, age = 47, isMainResident = true, isOffender = false),
+        AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
         AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
       )
   }

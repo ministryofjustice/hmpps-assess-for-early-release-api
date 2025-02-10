@@ -19,7 +19,7 @@ data class ResidentSummary(
   val phoneNumber: String? = null,
 
   @Schema(description = "The resident's relation to the offender", example = "Mother")
-  val relation: String,
+  val relation: String? = null,
 
   @Schema(description = "The resident's date of birth", example = "2002-02-20")
   @JsonFormat(pattern = "yyyy-MM-dd")
