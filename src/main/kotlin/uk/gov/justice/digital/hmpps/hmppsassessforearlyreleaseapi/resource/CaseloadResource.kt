@@ -108,8 +108,7 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) =
-    offenderService.getComCaseload(staffCode)
+  fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) = offenderService.getComCaseload(staffCode)
 
   @GetMapping("/prison/{prisonCode}/decision-maker/caseload")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -152,6 +151,5 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) =
-    offenderService.getDecisionMakerCaseload(prisonCode)
+  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) = offenderService.getDecisionMakerCaseload(prisonCode)
 }
