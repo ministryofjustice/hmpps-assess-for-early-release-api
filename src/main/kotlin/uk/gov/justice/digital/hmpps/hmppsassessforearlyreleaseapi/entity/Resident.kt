@@ -33,7 +33,7 @@ data class Resident(
 
   var phoneNumber: String?,
 
-  var relation: String,
+  var relation: String?,
 
   var dateOfBirth: LocalDate?,
 
