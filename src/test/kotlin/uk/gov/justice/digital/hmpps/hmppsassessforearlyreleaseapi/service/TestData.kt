@@ -63,7 +63,7 @@ object TestData {
   val PRISON_CA_AGENT = Agent("prison user", role = PRISON_CA, onBehalfOf = "KXE")
   val PROBATION_COM_AGENT = Agent("probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
 
-  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(10)): Offender {
+  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7)): Offender {
     val offender = Offender(
       id = 1,
       bookingId = BOOKING_ID.toLong(),

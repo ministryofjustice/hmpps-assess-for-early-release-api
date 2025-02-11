@@ -150,7 +150,7 @@ class OffenderService(
     ),
   )
 
-  private fun Assessment.toOffenderSummary() = OffenderSummary(
+  fun Assessment.toOffenderSummary() = OffenderSummary(
     prisonNumber = offender.prisonNumber,
     bookingId = offender.bookingId,
     forename = offender.forename,
