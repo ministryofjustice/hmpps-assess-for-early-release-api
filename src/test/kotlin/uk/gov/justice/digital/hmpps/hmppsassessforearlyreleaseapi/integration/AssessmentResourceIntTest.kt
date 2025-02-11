@@ -104,7 +104,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,
           dateOfBirth = LocalDate.of(1978, 3, 20),
-          hdced = LocalDate.of(2020, 10, 25),
+          hdced = LocalDate.now().plusDays(7),
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
           status = NOT_STARTED,

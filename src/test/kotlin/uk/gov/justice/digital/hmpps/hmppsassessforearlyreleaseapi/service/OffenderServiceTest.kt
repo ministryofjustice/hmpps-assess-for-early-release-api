@@ -30,6 +30,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.BankHolidayService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
+import java.time.Clock
 import java.time.LocalDate
 
 class OffenderServiceTest {
@@ -39,6 +42,8 @@ class OffenderServiceTest {
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
   private val telemetryClient = mock<TelemetryClient>()
+  private val bankHolidayService = mock<BankHolidayService>()
+  private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
 
   private val service: OffenderService =
     OffenderService(
@@ -48,6 +53,7 @@ class OffenderServiceTest {
       probationService,
       staffRepository,
       telemetryClient,
+      workingDaysService,
     )
 
   @Test

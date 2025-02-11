@@ -27,6 +27,7 @@ class WebClientConfiguration(
   @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String,
   @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
   @Value("\${gotenberg.api.url}") private val gotenbergHost: String,
+  @Value("\${hmpps.govuk.api.url}") private val govUkApiUrl: String,
 ) {
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(hmppsAuthBaseUri, healthTimeout)
@@ -150,4 +151,7 @@ class WebClientConfiguration(
         }
         .build(),
     ).build()
+
+  @Bean
+  fun govUkWebClient(): WebClient = WebClient.builder().baseUrl(govUkApiUrl).build()
 }
