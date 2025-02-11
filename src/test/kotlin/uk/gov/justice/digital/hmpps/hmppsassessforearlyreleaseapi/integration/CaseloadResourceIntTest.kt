@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GovUkMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 
@@ -56,6 +57,8 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return offenders at prison with a status of not started`() {
+      govUkMockServer.stubGetBankHolidays()
+
       val offenders = webTestClient.get()
         .uri(GET_CASE_ADMIN_CASELOAD_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -176,17 +179,20 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
   }
 
   private companion object {
+    val govUkMockServer = GovUkMockServer()
     val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
+      govUkMockServer.start()
       prisonRegisterMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
+      govUkMockServer.stop()
       prisonRegisterMockServer.stop()
     }
   }

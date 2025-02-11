@@ -12,6 +12,9 @@ hmpps:
   delius:
     api:
       url: "https://assess-for-early-release-and-delius-dev.hmpps.service.justice.gov.uk"
+  govuk:
+    api:
+      url: "https://www.gov.uk"
   prison:
     api:
         url: "https://prison-api-dev.prison.service.justice.gov.uk"

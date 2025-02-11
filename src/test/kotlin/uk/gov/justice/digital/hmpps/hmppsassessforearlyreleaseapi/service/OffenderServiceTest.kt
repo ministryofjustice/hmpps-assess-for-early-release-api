@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -30,6 +31,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.BankHolidayService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
+import java.time.Clock
 import java.time.LocalDate
 
 class OffenderServiceTest {
@@ -39,6 +43,8 @@ class OffenderServiceTest {
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
   private val telemetryClient = mock<TelemetryClient>()
+  private val bankHolidayService = mock<BankHolidayService>()
+  private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
 
   private val service: OffenderService =
     OffenderService(
@@ -48,13 +54,14 @@ class OffenderServiceTest {
       probationService,
       staffRepository,
       telemetryClient,
+      workingDaysService,
     )
 
   @Test
   fun `should get the case admin case load`() {
     val offender1 = anOffender()
     val offender2 =
-      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, hdced = offender1.hdced.plusWeeks(12))
+      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD")
     whenever(assessmentRepository.findByOffenderPrisonIdAndStatusIn(PRISON_ID, getStatusesForRole(UserRole.PRISON_CA))).thenReturn(
       listOf(
         offender1.currentAssessment(),
@@ -64,7 +71,26 @@ class OffenderServiceTest {
 
     val caseload = service.getCaseAdminCaseload(PRISON_ID)
     assertThat(caseload.size).isEqualTo(2)
-    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(offender1.bookingId, offender2.bookingId)
+    assertThat(caseload).containsExactlyInAnyOrder(
+      OffenderSummary(
+        prisonNumber = offender1.prisonNumber,
+        bookingId = offender1.bookingId,
+        forename = offender1.forename,
+        surname = offender1.surname,
+        hdced = offender1.hdced,
+        workingDaysToHdced = 5,
+        probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
+      ),
+      OffenderSummary(
+        prisonNumber = offender2.prisonNumber,
+        bookingId = offender2.bookingId,
+        forename = offender2.forename,
+        surname = offender2.surname,
+        hdced = offender2.hdced,
+        workingDaysToHdced = 5,
+        probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
+      ),
+    )
   }
 
   @Test

@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -32,6 +33,7 @@ class OffenderService(
   private val probationService: ProbationService,
   private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
+  private val workingDaysService: WorkingDaysService,
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
@@ -148,12 +150,13 @@ class OffenderService(
     ),
   )
 
-  private fun Assessment.toOffenderSummary() = OffenderSummary(
+  fun Assessment.toOffenderSummary() = OffenderSummary(
     prisonNumber = offender.prisonNumber,
     bookingId = offender.bookingId,
     forename = offender.forename,
     surname = offender.surname,
     hdced = offender.hdced,
+    workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
     probationPractitioner = this.responsibleCom?.fullName,
     isPostponed = this.status == AssessmentStatus.POSTPONED,
     postponementDate = this.postponementDate,
