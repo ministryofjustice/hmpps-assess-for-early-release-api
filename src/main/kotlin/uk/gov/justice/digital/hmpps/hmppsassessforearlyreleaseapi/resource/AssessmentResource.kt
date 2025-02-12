@@ -122,7 +122,7 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody optOutRequest: OptOutRequest,
   ) {
-    if (optOutRequest.reasonType == OptOutReasonType.OTHER && optOutRequest.otherDescription.isNullOrBlank()) {
+    if (OptOutReasonType.OTHER == optOutRequest.reasonType && optOutRequest.otherDescription.isNullOrBlank()) {
       throw ValidationException("otherDescription cannot be blank if reasonType is OTHER")
     }
     assessmentService.optOut(prisonNumber, optOutRequest)

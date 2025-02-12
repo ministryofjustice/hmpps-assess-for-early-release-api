@@ -2,12 +2,14 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
@@ -165,20 +167,28 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should opt-out an offender`() {
+      // When
       prisonRegisterMockServer.stubGetPrisons()
+      val request = anOptOutRequest.copy(reasonType = OTHER, otherDescription = "an opt-out reason")
+      val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
-      webTestClient.put()
+      // Given
+      val result = webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(anOptOutRequest.copy(reasonType = OTHER, otherDescription = "an opt-out reason"))
+        .headers(headers)
+        .bodyValue(request)
         .exchange()
-        .expectStatus()
-        .isNoContent
+
+      // Then
+      result.expectStatus().isNoContent
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
-      val assessment = assessmentRepository.findByOffender(offender)
-      assertThat(assessment.first().status).isEqualTo(OPTED_OUT)
+      val assessments = assessmentRepository.findByOffender(offender)
+      assertThat(assessments)
+        .hasSize(1)
+        .extracting(Assessment::status, Assessment::optOutReasonType, Assessment::optOutReasonOther)
+        .containsOnly(tuple(OPTED_OUT, OTHER, "an opt-out reason"))
     }
 
     @Test
