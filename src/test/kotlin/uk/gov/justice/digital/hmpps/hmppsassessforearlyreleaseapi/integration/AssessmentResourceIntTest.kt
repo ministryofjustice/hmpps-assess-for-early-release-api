@@ -111,6 +111,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           location = "Birmingham (HMP)",
           status = NOT_STARTED,
           policyVersion = "1.0",
+          optOutReasonType = OTHER,
+          optOutReasonOther = "I have reason",
           tasks = mapOf(
             PRISON_CA to listOf(
               TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),

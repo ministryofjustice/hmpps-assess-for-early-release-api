@@ -80,6 +80,8 @@ class AssessmentService(
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
       team = currentAssessment.team,
       policyVersion = currentAssessment.policyVersion,
+      optOutReasonType = currentAssessment.optOutReasonType,
+      optOutReasonOther = currentAssessment.optOutReasonOther,
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
