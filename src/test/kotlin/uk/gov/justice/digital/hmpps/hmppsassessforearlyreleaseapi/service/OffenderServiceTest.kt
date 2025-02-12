@@ -80,7 +80,7 @@ class OffenderServiceTest {
         hdced = offender1.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
-        status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS,
+        status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
       ),
       OffenderSummary(
@@ -91,7 +91,7 @@ class OffenderServiceTest {
         hdced = offender2.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
-        status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS,
+        status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
       ),
     )
