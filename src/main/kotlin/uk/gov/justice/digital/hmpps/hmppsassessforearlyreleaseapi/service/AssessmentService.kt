@@ -103,13 +103,10 @@ class AssessmentService(
 
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
-    transitionAssessment(prisonNumber, OptOut, optOutRequest.agent)
-
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-
+    assessmentEntity.performTransition(OptOut, optOutRequest.agent.toEntity())
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
-
     assessmentRepository.save(assessmentEntity)
   }
 

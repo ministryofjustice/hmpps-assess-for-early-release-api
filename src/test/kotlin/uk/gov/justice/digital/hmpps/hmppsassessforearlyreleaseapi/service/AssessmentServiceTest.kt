@@ -85,7 +85,7 @@ class AssessmentServiceTest {
     service.optOut(PRISON_NUMBER, OptOutRequest(reasonType = NO_REASON_GIVEN, agent = PRISON_CA_AGENT))
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
+    verify(assessmentRepository).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(OPTED_OUT)
     assertThat(assessmentCaptor.value.previousStatus).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
   }
