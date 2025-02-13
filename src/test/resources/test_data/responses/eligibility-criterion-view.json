@@ -11,6 +11,8 @@
     "responsibleCom": null,
     "team": null,
     "policyVersion": "1.0",
+    "optOutReasonType":null,
+    "optOutReasonOther":null,
     "tasks": {
       "PRISON_CA": [
         {

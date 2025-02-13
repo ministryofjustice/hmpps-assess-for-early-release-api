@@ -46,4 +46,10 @@ data class AssessmentSummary(
 
   @Schema(description = "The status of tasks that make up this assessment")
   val tasks: Map<UserRole, List<TaskProgress>>,
+
+  @Schema(description = "The opt out reason type")
+  var optOutReasonType: OptOutReasonType? = null,
+
+  @Schema(description = "The opt out reason description if rhe optOutReasonType is OTHER")
+  var optOutReasonOther: String? = null,
 )

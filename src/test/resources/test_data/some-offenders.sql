@@ -7,11 +7,12 @@ values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', current_date + 
        (60, 'C1234CD', 'BMI', 'FIRST-6', 'LAST-6', '1987-04-18', current_date + 7, '2023-06-01', 'NOT_STARTED'),
        (70, 'B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', current_date + 7, '2021-12-18', 'NOT_STARTED');
 
-insert into assessment(offender_id, status, policy_version)
-values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 20), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 40), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0'),
-       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0')
+
+insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other)
+values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 20), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 40), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason'),
+       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason');

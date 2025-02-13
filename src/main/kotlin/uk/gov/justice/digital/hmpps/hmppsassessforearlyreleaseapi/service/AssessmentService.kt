@@ -80,6 +80,8 @@ class AssessmentService(
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
       team = currentAssessment.team,
       policyVersion = currentAssessment.policyVersion,
+      optOutReasonType = currentAssessment.optOutReasonType,
+      optOutReasonOther = currentAssessment.optOutReasonOther,
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
@@ -101,7 +103,11 @@ class AssessmentService(
 
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
-    transitionAssessment(prisonNumber, OptOut, optOutRequest.agent)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(OptOut, optOutRequest.agent.toEntity())
+    assessmentEntity.optOutReasonType = optOutRequest.reasonType
+    assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
+    assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
