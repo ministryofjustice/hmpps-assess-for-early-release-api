@@ -80,6 +80,8 @@ class OffenderServiceTest {
         hdced = offender1.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
+        status = AssessmentStatus.NOT_STARTED,
+        addressChecksComplete = false,
       ),
       OffenderSummary(
         prisonNumber = offender2.prisonNumber,
@@ -89,6 +91,8 @@ class OffenderServiceTest {
         hdced = offender2.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
+        status = AssessmentStatus.NOT_STARTED,
+        addressChecksComplete = false,
       ),
     )
   }

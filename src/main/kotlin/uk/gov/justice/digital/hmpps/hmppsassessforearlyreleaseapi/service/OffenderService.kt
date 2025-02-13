@@ -161,6 +161,8 @@ class OffenderService(
     isPostponed = this.status == AssessmentStatus.POSTPONED,
     postponementDate = this.postponementDate,
     postponementReason = this.postponementReason,
+    status = this.status,
+    addressChecksComplete = this.addressChecksComplete,
   )
 
   companion object {
