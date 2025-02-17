@@ -23,10 +23,6 @@ data class OffenderSummary(
   @JsonFormat(pattern = "yyyy-MM-dd")
   val hdced: LocalDate,
 
-  @Schema(description = "The sentence start date for this sentence (aka court date)", example = "2026-08-23")
-  @JsonFormat(pattern = "yyyy-MM-dd")
-  val sentenceStartDate: LocalDate? = null,
-
   @Schema(description = "The number of working days until the home detention curfew eligibility date", example = "15")
   val workingDaysToHdced: Int,
 
@@ -48,4 +44,7 @@ data class OffenderSummary(
 
   @Schema(description = "Whether the address checks for the offender's current assessment have been completed or not", example = "false")
   val addressChecksComplete: Boolean = false,
+
+  @Schema(description = "whether the assessment task is overdue or not", example = "false")
+  val taskOverdue: Boolean = false,
 )
