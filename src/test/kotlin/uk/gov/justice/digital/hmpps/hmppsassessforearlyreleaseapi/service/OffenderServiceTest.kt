@@ -143,7 +143,7 @@ class OffenderServiceTest {
   }
 
   @Test
-  fun `should create a new offender for a prisoner that has an HDCED and sentenceStartDate`() {
+  fun `should create a new offender for a prisoner that has an HDCED`() {
     val hdced = LocalDate.now().plusDays(6)
     val sentenceStartDate = LocalDate.now().plusDays(10)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced, sentenceStartDate = sentenceStartDate)
