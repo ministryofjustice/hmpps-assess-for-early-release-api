@@ -145,7 +145,8 @@ class OffenderServiceTest {
   @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {
     val hdced = LocalDate.now().plusDays(6)
-    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)
+    val sentenceStartDate = LocalDate.now().plusDays(10)
+    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced, sentenceStartDate = sentenceStartDate)
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
@@ -160,8 +161,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "sentenceStartDate")
+      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced, sentenceStartDate))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
     assertThat(offenderCaptor.value.assessments.first().policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
   }
@@ -295,6 +296,56 @@ class OffenderServiceTest {
     )
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
       anOffender(hdced),
+    )
+
+    service.createOrUpdateOffender(PRISON_NUMBER)
+
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
+    verify(offenderRepository, never()).save(any())
+  }
+
+  @Test
+  fun `should update an existing offender for a prisoner that has an sentenceStartDate`() {
+    val hdced = LocalDate.now().plusDays(28)
+    val existingSentenceStartDate = LocalDate.now().plusDays(6)
+    val updatedSentenceStartDate = LocalDate.now().plusDays(10)
+
+    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced, updatedSentenceStartDate)
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+      listOf(
+        prisonerSearchPrisoner,
+      ),
+    )
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
+      anOffender(sentenceStartDate = existingSentenceStartDate),
+    )
+
+    service.createOrUpdateOffender(PRISON_NUMBER)
+
+    verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
+
+    val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
+    verify(offenderRepository).save(offenderCaptor.capture())
+    assertThat(offenderCaptor.value)
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "sentenceStartDate")
+      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, updatedSentenceStartDate))
+  }
+
+  @Test
+  fun `should not update an existing offender if sentenceStartDate haven't changed`() {
+    val hdced = LocalDate.now().plusDays(28)
+    val sentenceStartDate = LocalDate.now().plusDays(6)
+
+    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced, sentenceStartDate)
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
+      listOf(
+        prisonerSearchPrisoner,
+      ),
+    )
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
+      anOffender(hdced, sentenceStartDate),
     )
 
     service.createOrUpdateOffender(PRISON_NUMBER)

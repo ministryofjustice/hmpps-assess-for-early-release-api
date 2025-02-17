@@ -13,6 +13,9 @@ data class PrisonerSearchPrisoner(
   @JsonFormat(pattern = "yyyy-MM-dd")
   val conditionalReleaseDate: LocalDate? = null,
 
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val sentenceStartDate: LocalDate? = null,
+
   val prisonId: String? = null,
 
   val firstName: String,
