@@ -167,7 +167,7 @@ class OffenderService(
     postponementReason = this.postponementReason,
     status = this.status,
     addressChecksComplete = this.addressChecksComplete,
-    taskOverdue = offender.sentenceStartDate?.let { LocalDate.now() >= it.minusDays(10) } ?: false
+    taskOverdue = offender.sentenceStartDate?.let { LocalDate.now() >= it.minusDays(10) } ?: false,
   )
 
   companion object {
