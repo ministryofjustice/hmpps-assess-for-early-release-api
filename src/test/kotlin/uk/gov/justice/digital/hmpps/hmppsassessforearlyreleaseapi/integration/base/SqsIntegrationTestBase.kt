@@ -9,10 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.springframework.test.context.bean.override.mockito.MockitoBean
 import software.amazon.awssdk.services.sqs.model.PurgeQueueRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.EventProcessingCompleteHandler
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probation.ProbationEventProcessingCompleteHandler
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.LocalStackContainer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.LocalStackContainer.setLocalStackProperties
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.IntegrationTestBase
@@ -21,18 +18,12 @@ import uk.gov.justice.hmpps.sqs.HmppsQueueService
 import uk.gov.justice.hmpps.sqs.MissingQueueException
 import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = ["spring.jpa.properties.hibernate.enable_lazy_load_no_trans=true"])
 @ActiveProfiles("test")
 class SqsIntegrationTestBase : IntegrationTestBase() {
 
   @Autowired
   private lateinit var hmppsQueueService: HmppsQueueService
-
-  @MockitoBean
-  lateinit var done: EventProcessingCompleteHandler
-
-  @MockitoBean
-  lateinit var hmppsOffenderDone: ProbationEventProcessingCompleteHandler
 
   protected val domainEventsTopic by lazy {
     hmppsQueueService.findByTopicId("domainevents")

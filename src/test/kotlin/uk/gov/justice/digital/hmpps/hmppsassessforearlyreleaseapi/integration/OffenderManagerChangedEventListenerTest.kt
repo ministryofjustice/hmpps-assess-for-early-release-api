@@ -55,22 +55,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
     publishHmppsOffenderEventMessage(event)
 
-    awaitAtMost30Secs untilAsserted {
-      verify(hmppsOffenderDone).complete()
-    }
-
-    verify(telemetryClient).trackEvent(
-      OFFENDER_MANAGER_CHANGED,
-      mapOf(
-        "STAFF-CODE" to STAFF_CODE,
-        "USERNAME" to STAFF_USERNAME.uppercase(),
-        "EMAIL" to NEW_STAFF_EMAIL,
-        "FORENAME" to "Jimmy",
-        "SURNAME" to "Vivers",
-      ),
-      null,
-    )
-
+    assertEventOffenderManagerChanged(STAFF_CODE)
     assertThat(staffRepository.findByStaffCodeOrUsernameIgnoreCase(STAFF_CODE, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
@@ -91,24 +76,26 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
     publishHmppsOffenderEventMessage(event)
 
-    awaitAtMost30Secs untilAsserted {
-      verify(hmppsOffenderDone).complete()
-    }
-
-    verify(telemetryClient).trackEvent(
-      OFFENDER_MANAGER_CHANGED,
-      mapOf(
-        "STAFF-CODE" to newStaffCode,
-        "USERNAME" to STAFF_USERNAME.uppercase(),
-        "EMAIL" to NEW_STAFF_EMAIL,
-        "FORENAME" to "Jimmy",
-        "SURNAME" to "Vivers",
-      ),
-      null,
-    )
+    assertEventOffenderManagerChanged(newStaffCode)
 
     assertThat(staffRepository.findByStaffCode(newStaffCode)).isNotNull()
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
+  }
+
+  private fun assertEventOffenderManagerChanged(staffCode: String) {
+    awaitAtMost30Secs untilAsserted {
+      verify(telemetryClient).trackEvent(
+        OFFENDER_MANAGER_CHANGED,
+        mapOf(
+          "STAFF-CODE" to staffCode,
+          "USERNAME" to STAFF_USERNAME.uppercase(),
+          "EMAIL" to NEW_STAFF_EMAIL,
+          "FORENAME" to "Jimmy",
+          "SURNAME" to "Vivers",
+        ),
+        null,
+      )
+    }
   }
 
   private fun publishHmppsOffenderEventMessage(

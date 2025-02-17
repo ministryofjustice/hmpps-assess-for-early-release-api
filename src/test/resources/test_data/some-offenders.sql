@@ -8,11 +8,21 @@ values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', current_date + 
        (70, 'B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', current_date + 7, '2021-12-18', 'NOT_STARTED');
 
 
-insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other)
-values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 20), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 40), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason'),
-       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason');
+insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date)
+values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18'),
+       ((select id from offender where booking_id = 20), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 40), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason',null);
+
+INSERT INTO public.postponement_reason
+(assessment_id, reason_type)
+VALUES((select id from offender where booking_id = 10), 'PLANNING_ACTIONS_CONFIRMATION_NEEDED_BY_PRACTITIONER'),
+      ((select id from offender where booking_id = 10), 'ON_REMAND'),
+      ((select id from offender where booking_id = 10), 'SEGREGATED_AND_GOVERNOR_NEEDS_TO_APPROVE_RELEASE'),
+      ((select id from offender where booking_id = 10), 'NEEDS_TO_SPEND_7_DAYS_IN_NORMAL_LOCATION_AFTER_SEGREGATION'),
+      ((select id from offender where booking_id = 10), 'COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY'),
+      ((select id from offender where booking_id = 10), 'CONFISCATION_ORDER_NOT_PAID_AND_ENF_AGENCY_DEEMS_UNSUITABLE'),
+      ((select id from offender where booking_id = 10), 'PENDING_APPLICATION_WITH_UNDULY_LENIENT_LENIENT_SCH');

@@ -13,11 +13,21 @@ values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', '2020-10-25 ', 
        (60, 'C1234CD', 'BMI', 'FIRST-6', 'LAST-6', '1987-04-18', '2020-10-25', '2023-06-01', 'NOT_STARTED'),
        (70, 'B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', '2020-10-25', '2021-12-18', 'NOT_STARTED');
 
-insert into assessment(offender_id, status, policy_version, responsible_com_id)
-values ((select id from offender where booking_id = 10), 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2),
-       ((select id from offender where booking_id = 20), 'AWAITING_REFUSAL', '1.0', 1),
-       ((select id from offender where booking_id = 30), 'APPROVED', '1.0', 1),
-       ((select id from offender where booking_id = 40), 'TIMED_OUT', '1.0', 2),
-       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0', 1),
-       ((select id from offender where booking_id = 60), 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2),
-       ((select id from offender where booking_id = 70), 'AWAITING_DECISION', '1.0', 1)
+insert into assessment(offender_id, status, policy_version, responsible_com_id, postponement_date)
+values ((select id from offender where booking_id = 10), 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2, null),
+       ((select id from offender where booking_id = 20), 'AWAITING_REFUSAL', '1.0', 1, '2021-12-18'),
+       ((select id from offender where booking_id = 30), 'APPROVED', '1.0', 1, null),
+       ((select id from offender where booking_id = 40), 'TIMED_OUT', '1.0', 2, null),
+       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0', 1, null),
+       ((select id from offender where booking_id = 60), 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2, null),
+       ((select id from offender where booking_id = 70), 'AWAITING_DECISION', '1.0', 1, null);
+
+INSERT INTO public.postponement_reason
+(assessment_id, reason_type)
+VALUES((select id from offender where booking_id = 20), 'PLANNING_ACTIONS_CONFIRMATION_NEEDED_BY_PRACTITIONER'),
+    ((select id from offender where booking_id = 20), 'ON_REMAND'),
+    ((select id from offender where booking_id = 20), 'SEGREGATED_AND_GOVERNOR_NEEDS_TO_APPROVE_RELEASE'),
+    ((select id from offender where booking_id = 20), 'NEEDS_TO_SPEND_7_DAYS_IN_NORMAL_LOCATION_AFTER_SEGREGATION'),
+    ((select id from offender where booking_id = 20), 'COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY'),
+    ((select id from offender where booking_id = 20), 'CONFISCATION_ORDER_NOT_PAID_AND_ENF_AGENCY_DEEMS_UNSUITABLE'),
+    ((select id from offender where booking_id = 20), 'PENDING_APPLICATION_WITH_UNDULY_LENIENT_LENIENT_SCH');

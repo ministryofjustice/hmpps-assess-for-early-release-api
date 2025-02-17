@@ -146,7 +146,7 @@ class AssessmentServiceTest {
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(1)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
   }
@@ -163,7 +163,7 @@ class AssessmentServiceTest {
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.SUITABLE, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(1)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isTrue()
   }
@@ -179,7 +179,7 @@ class AssessmentServiceTest {
     service.updateAddressChecksStatus(PRISON_NUMBER, ResidentialChecksStatus.IN_PROGRESS, PROBATION_COM_AGENT)
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
-    verify(assessmentRepository, times(2)).save(assessmentCaptor.capture())
+    verify(assessmentRepository, times(1)).save(assessmentCaptor.capture())
     assertThat(assessmentCaptor.value.status).isEqualTo(ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     assertThat(assessmentCaptor.value.addressChecksComplete).isFalse()
   }

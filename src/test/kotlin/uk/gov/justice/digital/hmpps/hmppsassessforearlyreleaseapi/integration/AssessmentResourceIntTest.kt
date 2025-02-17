@@ -1,9 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
+import jakarta.persistence.EntityManager
+import jakarta.persistence.PersistenceContext
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -31,16 +35,22 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import java.time.LocalDate
+import java.time.temporal.ChronoUnit
+import java.util.LinkedHashSet
+import java.util.function.Consumer
 
 private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
 private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
+private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/postpone"
 private const val SUBMIT_FOR_ADDRESS_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 private const val SUBMIT_FOR_PRE_DECISION_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-pre-decision-checks"
 
@@ -51,6 +61,14 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var offenderRepository: OffenderRepository
+
+  @PersistenceContext
+  lateinit var entityManager: EntityManager
+
+  @AfterEach
+  fun tearDownWithinTransaction() {
+    entityManager.clear()
+  }
 
   @Nested
   inner class GetCurrentAssessment {
@@ -124,6 +142,102 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           ),
         ),
       )
+    }
+  }
+
+  @Nested
+  open inner class PostponeCase {
+
+    private val anPostponeCaseRequest = PostponeCaseRequest(
+      reasonTypes =
+      LinkedHashSet(
+        listOf(
+          PostponeCaseReasonType.ON_REMAND,
+          PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
+        ),
+      ),
+      agent = Agent("a user", PRISON_CA, "ABC"),
+    )
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .bodyValue(anPostponeCaseRequest)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .headers(setAuthorisation())
+        .bodyValue(anPostponeCaseRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(anPostponeCaseRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-passed-pre-release-checks-for-postponement.sql",
+    )
+    @Test
+    fun `should postpone an offenders assessment`() {
+      // When
+      prisonRegisterMockServer.stubGetPrisons()
+      val request = anPostponeCaseRequest.copy()
+      val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
+
+      // Given
+      val result = webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .headers(headers)
+        .bodyValue(request)
+        .exchange()
+
+      // Then
+      result.expectStatus().isNoContent
+
+      val assessments = assessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
+      assertThat(assessments).hasSize(1)
+
+      val assessment = assessments.first()
+      assertThat(assessment.postponementDate).isToday()
+      assertThat(assessment.postponementReasons).hasSize(2)
+
+      assertThat(assessment.postponementReasons[0])
+        .satisfies(
+          Consumer {
+            assertThat(it.id).isNotNegative()
+            assertThat(it.assessment).isEqualTo(assessment)
+            assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.ON_REMAND)
+            assertThat(it.createdTimestamp).isCloseToUtcNow(within(2, ChronoUnit.SECONDS))
+          },
+        )
+
+      assertThat(assessment.postponementReasons[1])
+        .satisfies(
+          Consumer {
+            assertThat(it.id).isNotNegative()
+            assertThat(it.assessment).isEqualTo(assessment)
+            assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY)
+            assertThat(it.createdTimestamp).isCloseToUtcNow(within(2, ChronoUnit.SECONDS))
+          },
+        )
     }
   }
 
