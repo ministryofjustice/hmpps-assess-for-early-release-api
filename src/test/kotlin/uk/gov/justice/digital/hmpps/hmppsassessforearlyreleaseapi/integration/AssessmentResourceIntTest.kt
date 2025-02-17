@@ -254,7 +254,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `should throw internal server error if agent not given`() {
+    fun `should throw bad request error if agent not given`() {
       // When
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
@@ -270,7 +270,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `should throw internal server error if no reason given`() {
+    fun `should throw bad request error if no reason given`() {
       // When
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
