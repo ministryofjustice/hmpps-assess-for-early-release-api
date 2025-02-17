@@ -159,6 +159,7 @@ class OffenderService(
     forename = offender.forename,
     surname = offender.surname,
     hdced = offender.hdced,
+    sentenceStartDate = offender.sentenceStartDate,
     workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
     probationPractitioner = this.responsibleCom?.fullName,
     isPostponed = this.status == AssessmentStatus.POSTPONED,
