@@ -1,0 +1,1 @@
+ALTER TABLE offender ADD COLUMN sentence_start_date DATE;

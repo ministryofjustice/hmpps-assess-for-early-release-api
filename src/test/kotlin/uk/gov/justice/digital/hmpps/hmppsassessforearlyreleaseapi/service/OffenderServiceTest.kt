@@ -311,7 +311,7 @@ class OffenderServiceTest {
     val existingSentenceStartDate = LocalDate.now().plusDays(6)
     val updatedSentenceStartDate = LocalDate.now().plusDays(10)
 
-    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced, sentenceStartDate = updatedSentenceStartDate)
+    val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced, updatedSentenceStartDate)
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
       listOf(
         prisonerSearchPrisoner,
