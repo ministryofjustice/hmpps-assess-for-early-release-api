@@ -148,6 +148,19 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   @Nested
   open inner class PostponeCase {
 
+    private inner class PostponeCaseRequestNoAgent(
+      val reasonTypes: LinkedHashSet<PostponeCaseReasonType> = LinkedHashSet(),
+    )
+
+    private val anPostponeCaseRequestNoAgent = PostponeCaseRequestNoAgent(
+      reasonTypes = LinkedHashSet(listOf(PostponeCaseReasonType.ON_REMAND)),
+    )
+
+    private val anPostponeCaseRequestWithNoReason = PostponeCaseRequest(
+      reasonTypes = LinkedHashSet(),
+      agent = Agent("a user", PRISON_CA, "ABC"),
+    )
+
     private val anPostponeCaseRequest = PostponeCaseRequest(
       reasonTypes =
       LinkedHashSet(
@@ -238,6 +251,38 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
             assertThat(it.createdTimestamp).isCloseToUtcNow(within(2, ChronoUnit.SECONDS))
           },
         )
+    }
+
+    @Test
+    fun `should throw internal server error if agent not given`() {
+      // When
+      val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
+
+      // Given
+      val result = webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .headers(headers)
+        .bodyValue(anPostponeCaseRequestNoAgent)
+        .exchange()
+
+      // Then
+      result.expectStatus().isBadRequest
+    }
+
+    @Test
+    fun `should throw internal server error if no reason given`() {
+      // When
+      val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
+
+      // Given
+      val result = webTestClient.put()
+        .uri(POSTPONE_ASSESSMENT_URL)
+        .headers(headers)
+        .bodyValue(anPostponeCaseRequestWithNoReason)
+        .exchange()
+
+      // Then
+      result.expectStatus().isBadRequest
     }
   }
 

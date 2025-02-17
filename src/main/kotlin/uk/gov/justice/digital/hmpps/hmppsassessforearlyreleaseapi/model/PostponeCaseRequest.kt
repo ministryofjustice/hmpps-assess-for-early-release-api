@@ -16,5 +16,7 @@ data class PostponeCaseRequest(
   val reasonTypes: LinkedHashSet<PostponeCaseReasonType> = LinkedHashSet(),
 
   @Schema(description = "Details of the agent who is requesting to postpone the case", required = true)
+  @field:NotNull
+  @field:Valid
   val agent: Agent,
 )
