@@ -46,5 +46,5 @@ data class OffenderSummary(
   val addressChecksComplete: Boolean = false,
 
   @Schema(description = "whether the assessment task is overdue or not", example = "false")
-  val taskOverdue: Boolean = false,
+  val isTaskOverdue: Boolean = false,
 )

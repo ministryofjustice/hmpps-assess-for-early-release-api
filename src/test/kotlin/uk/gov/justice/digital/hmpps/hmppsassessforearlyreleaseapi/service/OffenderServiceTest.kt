@@ -84,7 +84,7 @@ class OffenderServiceTest {
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
-        taskOverdue = true,
+        isTaskOverdue = true,
       ),
       OffenderSummary(
         prisonNumber = offender2.prisonNumber,
@@ -96,7 +96,7 @@ class OffenderServiceTest {
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
-        taskOverdue = false,
+        isTaskOverdue = false,
       ),
       OffenderSummary(
         prisonNumber = offender3.prisonNumber,
@@ -108,7 +108,7 @@ class OffenderServiceTest {
         probationPractitioner = offender3.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
-        taskOverdue = true,
+        isTaskOverdue = true,
       ),
     )
   }
