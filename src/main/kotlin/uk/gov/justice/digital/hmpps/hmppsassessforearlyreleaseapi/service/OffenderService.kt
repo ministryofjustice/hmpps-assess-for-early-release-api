@@ -82,6 +82,7 @@ class OffenderService(
       dateOfBirth = prisoner.dateOfBirth,
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
+      sentenceStartDate = prisoner.sentenceStartDate,
     )
 
     val deliusOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)
@@ -117,6 +118,7 @@ class OffenderService(
         dateOfBirth = prisoner.dateOfBirth,
         hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
         crd = prisoner.conditionalReleaseDate,
+        sentenceStartDate = prisoner.sentenceStartDate,
         lastUpdatedTimestamp = LocalDateTime.now(),
       )
       offenderRepository.save(updatedOffender)
@@ -135,6 +137,7 @@ class OffenderService(
   }
 
   private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+    offender.sentenceStartDate != prisoner.sentenceStartDate ||
     offender.crd != prisoner.conditionalReleaseDate ||
     offender.forename != prisoner.firstName ||
     offender.surname != prisoner.lastName ||
