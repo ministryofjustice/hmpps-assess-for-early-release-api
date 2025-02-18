@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -168,7 +167,7 @@ class OffenderService(
     postponementReason = this.postponementReason,
     status = this.status,
     addressChecksComplete = this.addressChecksComplete,
-    isTaskOverdue = offender.sentenceStartDate?.let { LocalDate.now() >= it.plusDays(DAYS_BEFORE_SENTENCE_START) } ?: false,
+    taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
   )
 
   companion object {
