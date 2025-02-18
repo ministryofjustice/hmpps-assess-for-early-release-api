@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.transaction.annotation.Transactional
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
@@ -30,6 +31,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_CREATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_UPDATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TRANSFERRED_EVENT_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.Duration
 import java.time.Instant
@@ -45,6 +47,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   @Autowired
   lateinit var offenderRepository: OffenderRepository
 
+  @MockitoSpyBean
+  protected lateinit var transferPrisonService: TransferPrisonService
+
   private val awaitAtMost30Secs
     get() = await.atMost(Duration.ofSeconds(30))
 
@@ -54,7 +59,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/transfer-prison.sql",
   )
   fun `prisoner received event should update offender prison`() {
-    // Then
+    // Given
     val message = AdditionalInformationTransfer(
       nomsNumber = PRISON_NUMBER,
       reason = "TRANSFERRED",
@@ -100,6 +105,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     awaitAtMost30Secs untilAsserted {
+      verify(transferPrisonService).transferPrisoner(someNonExistentPrisonNumber, NEW_PRISON_CODE)
       verifyNoInteractions(telemetryClient)
     }
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)

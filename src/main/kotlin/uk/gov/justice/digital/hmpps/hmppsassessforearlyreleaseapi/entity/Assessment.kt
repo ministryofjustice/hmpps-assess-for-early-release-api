@@ -33,7 +33,7 @@ data class Assessment(
   @NotNull
   val id: Long = -1,
 
-  @ManyToOne(optional = false, fetch = FetchType.LAZY)
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "offender_id", nullable = false)
   val offender: Offender,
 

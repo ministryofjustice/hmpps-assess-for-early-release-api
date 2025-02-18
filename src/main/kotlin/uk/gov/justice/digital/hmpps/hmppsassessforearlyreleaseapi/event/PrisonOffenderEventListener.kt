@@ -44,7 +44,6 @@ class PrisonOffenderEventListener(
           offenderService.createOrUpdateOffender(updatedEvent.additionalInformation.nomsNumber)
         }
       }
-
       else -> {
         log.debug("Ignoring message with type $eventType")
       }

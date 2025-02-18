@@ -1,13 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
-import jakarta.persistence.EntityManager
-import jakarta.persistence.PersistenceContext
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -61,14 +58,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var offenderRepository: OffenderRepository
-
-  @PersistenceContext
-  lateinit var entityManager: EntityManager
-
-  @AfterEach
-  fun tearDownWithinTransaction() {
-    entityManager.clear()
-  }
 
   @Nested
   inner class GetCurrentAssessment {
@@ -210,12 +199,12 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should postpone an offenders assessment`() {
-      // When
+      // Given
       prisonRegisterMockServer.stubGetPrisons()
       val request = anPostponeCaseRequest.copy()
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
-      // Given
+      // When
       val result = webTestClient.put()
         .uri(POSTPONE_ASSESSMENT_URL)
         .headers(headers)
@@ -255,10 +244,10 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should throw bad request error if agent not given`() {
-      // When
+      // Given
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
-      // Given
+      // When
       val result = webTestClient.put()
         .uri(POSTPONE_ASSESSMENT_URL)
         .headers(headers)
@@ -271,10 +260,10 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should throw bad request error if no reason given`() {
-      // When
+      // Given
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
-      // Given
+      // When
       val result = webTestClient.put()
         .uri(POSTPONE_ASSESSMENT_URL)
         .headers(headers)
@@ -328,12 +317,12 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should opt-out an offender`() {
-      // When
+      // Given
       prisonRegisterMockServer.stubGetPrisons()
       val request = anOptOutRequest.copy(reasonType = OTHER, otherDescription = "an opt-out reason")
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
-      // Given
+      // When
       val result = webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(headers)

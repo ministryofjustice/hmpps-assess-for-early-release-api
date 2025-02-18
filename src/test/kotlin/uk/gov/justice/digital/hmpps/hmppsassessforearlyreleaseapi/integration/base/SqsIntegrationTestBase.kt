@@ -45,10 +45,10 @@ class SqsIntegrationTestBase : IntegrationTestBase() {
 
   @BeforeEach
   fun cleanQueue() {
-    mergeOffenderQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(mergeOffenderQueue.queueUrl).build())
+    mergeOffenderQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(mergeOffenderQueue.queueUrl).build()).get()
     await untilCallTo { mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get() } matches { it == 0 }
 
-    updateComQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(updateComQueue.queueUrl).build())
+    updateComQueue.sqsClient.purgeQueue(PurgeQueueRequest.builder().queueUrl(updateComQueue.queueUrl).build()).get()
     await untilCallTo { updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get() } matches { it == 0 }
   }
 
