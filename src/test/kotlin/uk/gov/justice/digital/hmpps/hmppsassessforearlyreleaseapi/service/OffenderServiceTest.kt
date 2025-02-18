@@ -59,10 +59,10 @@ class OffenderServiceTest {
 
   @Test
   fun `should get the case admin case load`() {
-    val offender1 = anOffender(sentenceStartDate = LocalDate.now().plusDays(5))
+    val offender1 = anOffender(sentenceStartDate = LocalDate.now().minusDays(5))
     val offender2 =
-      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD", sentenceStartDate = LocalDate.now().plusDays(11))
-    val offender3 = offender1.copy(sentenceStartDate = LocalDate.now().plusDays(10))
+      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD", sentenceStartDate = LocalDate.now().minusDays(11))
+    val offender3 = offender1.copy(id = offender1.id + 2, bookingId = offender1.bookingId + 30, prisonNumber = "ZX2318KJ",sentenceStartDate = LocalDate.now().minusDays(10))
     whenever(assessmentRepository.findByOffenderPrisonIdAndStatusIn(PRISON_ID, getStatusesForRole(UserRole.PRISON_CA))).thenReturn(
       listOf(
         offender1.currentAssessment(),
@@ -84,7 +84,7 @@ class OffenderServiceTest {
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
-        isTaskOverdue = true,
+        isTaskOverdue = false,
       ),
       OffenderSummary(
         prisonNumber = offender2.prisonNumber,
@@ -96,7 +96,7 @@ class OffenderServiceTest {
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
-        isTaskOverdue = false,
+        isTaskOverdue = true,
       ),
       OffenderSummary(
         prisonNumber = offender3.prisonNumber,
