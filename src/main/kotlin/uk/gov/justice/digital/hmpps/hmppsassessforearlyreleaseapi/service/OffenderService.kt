@@ -19,11 +19,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 const val PRISONER_CREATED_EVENT_NAME = "assess-for-early-release.prisoner.created"
 const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updated"
+const val DAYS_BEFORE_SENTENCE_START = 10L
 
 @Service
 class OffenderService(
@@ -166,6 +168,7 @@ class OffenderService(
     postponementReasons = this.postponementReasons.map { reason -> reason.reasonType }.toList(),
     status = this.status,
     addressChecksComplete = this.addressChecksComplete,
+    isTaskOverdue = offender.sentenceStartDate?.let { LocalDate.now() >= it.plusDays(DAYS_BEFORE_SENTENCE_START) } ?: false,
   )
 
   companion object {
