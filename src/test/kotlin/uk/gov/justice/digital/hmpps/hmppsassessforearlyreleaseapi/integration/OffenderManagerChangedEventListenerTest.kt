@@ -2,7 +2,9 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.assertj.core.api.Assertions.assertThat
 import org.awaitility.kotlin.await
+import org.awaitility.kotlin.matches
 import org.awaitility.kotlin.untilAsserted
+import org.awaitility.kotlin.untilCallTo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -18,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.probatio
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
+import uk.gov.justice.hmpps.sqs.countMessagesOnQueue
 import java.time.Duration
 
 private const val STAFF_CODE = "STAFF1"
@@ -55,22 +58,7 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
     publishHmppsOffenderEventMessage(event)
 
-    awaitAtMost30Secs untilAsserted {
-      verify(hmppsOffenderDone).complete()
-    }
-
-    verify(telemetryClient).trackEvent(
-      OFFENDER_MANAGER_CHANGED,
-      mapOf(
-        "STAFF-CODE" to STAFF_CODE,
-        "USERNAME" to STAFF_USERNAME.uppercase(),
-        "EMAIL" to NEW_STAFF_EMAIL,
-        "FORENAME" to "Jimmy",
-        "SURNAME" to "Vivers",
-      ),
-      null,
-    )
-
+    assertEventOffenderManagerChanged(STAFF_CODE)
     assertThat(staffRepository.findByStaffCodeOrUsernameIgnoreCase(STAFF_CODE, STAFF_USERNAME).first()?.email).isEqualTo(NEW_STAFF_EMAIL)
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
   }
@@ -91,24 +79,30 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
 
     publishHmppsOffenderEventMessage(event)
 
-    awaitAtMost30Secs untilAsserted {
-      verify(hmppsOffenderDone).complete()
-    }
-
-    verify(telemetryClient).trackEvent(
-      OFFENDER_MANAGER_CHANGED,
-      mapOf(
-        "STAFF-CODE" to newStaffCode,
-        "USERNAME" to STAFF_USERNAME.uppercase(),
-        "EMAIL" to NEW_STAFF_EMAIL,
-        "FORENAME" to "Jimmy",
-        "SURNAME" to "Vivers",
-      ),
-      null,
-    )
+    assertEventOffenderManagerChanged(newStaffCode)
 
     assertThat(staffRepository.findByStaffCode(newStaffCode)).isNotNull()
     assertThat(getNumberOfMessagesCurrentlyOnUpdateComQueue()).isEqualTo(0)
+  }
+
+  private fun assertEventOffenderManagerChanged(staffCode: String) {
+    awaitAtMost30Secs untilCallTo {
+      mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get()
+    } matches { it == 0 }
+
+    awaitAtMost30Secs untilAsserted {
+      verify(telemetryClient).trackEvent(
+        OFFENDER_MANAGER_CHANGED,
+        mapOf(
+          "STAFF-CODE" to staffCode,
+          "USERNAME" to STAFF_USERNAME.uppercase(),
+          "EMAIL" to NEW_STAFF_EMAIL,
+          "FORENAME" to "Jimmy",
+          "SURNAME" to "Vivers",
+        ),
+        null,
+      )
+    }
   }
 
   private fun publishHmppsOffenderEventMessage(

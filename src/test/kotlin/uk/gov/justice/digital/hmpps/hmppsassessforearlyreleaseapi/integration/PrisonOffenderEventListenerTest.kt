@@ -54,29 +54,28 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/transfer-prison.sql",
   )
   fun `prisoner received event should update offender prison`() {
+    // Given
+    val message = AdditionalInformationTransfer(
+      nomsNumber = PRISON_NUMBER,
+      reason = "TRANSFERRED",
+      prisonId = NEW_PRISON_CODE,
+    )
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(OLD_PRISON_CODE)
-
-    publishDomainEventMessage(
-      AdditionalInformationTransfer(
-        nomsNumber = PRISON_NUMBER,
-        reason = "TRANSFERRED",
-        prisonId = NEW_PRISON_CODE,
-      ),
-    )
-
     awaitAtMost30Secs untilAsserted {
-      verify(done).complete()
+      verify(telemetryClient).trackEvent(
+        TRANSFERRED_EVENT_NAME,
+        mapOf(
+          "NOMS-ID" to PRISON_NUMBER,
+          "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
+          "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
+        ),
+        null,
+      )
     }
-
-    verify(telemetryClient).trackEvent(
-      TRANSFERRED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to PRISON_NUMBER,
-        "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
-        "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
-      ),
-      null,
-    )
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
@@ -101,11 +100,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     awaitAtMost30Secs untilAsserted {
-      verify(done).complete()
+      verify(transferPrisonService).transferPrisoner(someNonExistentPrisonNumber, NEW_PRISON_CODE)
+      verifyNoInteractions(telemetryClient)
     }
-
-    verifyNoInteractions(telemetryClient)
-
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
 
@@ -116,6 +113,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/some-offenders.sql",
   )
   fun `Should create a new offender `() {
+    // Given
     val prisonNumber = "Z1234XY"
     val hdced = LocalDate.now().plusDays(20)
     val firstName = "new first name"
@@ -139,22 +137,22 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     probationSearchApiMockServer.stubSearchForPersonOnProbation()
     deliusMockServer.stubGetOffenderManager()
 
-    publishDomainEventMessage(
-      AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE)),
-    )
+    val message = AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE))
 
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
     awaitAtMost30Secs untilAsserted {
-      verify(done).complete()
+      verify(telemetryClient).trackEvent(
+        PRISONER_CREATED_EVENT_NAME,
+        mapOf(
+          "NOMS-ID" to prisonNumber,
+          "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
+        ),
+        null,
+      )
     }
-
-    verify(telemetryClient).trackEvent(
-      PRISONER_CREATED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to prisonNumber,
-        "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
-      ),
-      null,
-    )
 
     val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
     assertThat(createdOffender.forename).isEqualTo(firstName)
@@ -174,6 +172,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/some-offenders.sql",
   )
   fun `Should update an existing offender`() {
+    // Given
     val newHdced = LocalDate.now().plusDays(20)
     val newCrd = LocalDate.now().plusDays(56)
     val newFirstName = "new first name"
@@ -195,25 +194,25 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       ),
     )
 
-    publishDomainEventMessage(
-      AdditionalInformationPrisonerUpdated(nomsNumber = PRISON_NUMBER, listOf(DiffCategory.SENTENCE)),
-    )
+    val message = AdditionalInformationPrisonerUpdated(nomsNumber = PRISON_NUMBER, listOf(DiffCategory.SENTENCE))
 
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
     awaitAtMost30Secs untilAsserted {
-      verify(done).complete()
+      verify(telemetryClient).trackEvent(
+        PRISONER_UPDATED_EVENT_NAME,
+        mapOf(
+          "NOMS-ID" to PRISON_NUMBER,
+          "PRISONER-FIRST_NAME" to newFirstName,
+          "PRISONER-LAST_NAME" to newLastName,
+          "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
+          "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
+        ),
+        null,
+      )
     }
-
-    verify(telemetryClient).trackEvent(
-      PRISONER_UPDATED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to PRISON_NUMBER,
-        "PRISONER-FIRST_NAME" to newFirstName,
-        "PRISONER-LAST_NAME" to newLastName,
-        "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
-        "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
-      ),
-      null,
-    )
 
     val updatedOffender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("could not find updated offender")
     assertThat(updatedOffender.forename).isEqualTo(newFirstName)

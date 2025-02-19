@@ -7,15 +7,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 
-fun interface ProbationEventProcessingCompleteHandler {
-  fun complete()
-}
-
-val NO_OP = ProbationEventProcessingCompleteHandler { }
-
 @Service
 class OffenderManagerChangedEventListener(
-  private val done: ProbationEventProcessingCompleteHandler = NO_OP,
   private val probationService: ProbationService,
   private val mapper: ObjectMapper,
 ) {
@@ -41,7 +34,6 @@ class OffenderManagerChangedEventListener(
         log.debug("Ignoring message with type $eventType")
       }
     }
-    done.complete()
   }
 }
 

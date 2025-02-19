@@ -20,6 +20,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.Postgr
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer.DB_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 
 @ExtendWith(HmppsAuthApiExtension::class)
@@ -38,6 +39,9 @@ abstract class IntegrationTestBase {
 
   @MockitoSpyBean
   protected lateinit var telemetryClient: TelemetryClient
+
+  @MockitoSpyBean
+  protected lateinit var transferPrisonService: TransferPrisonService
 
   internal fun setAuthorisation(
     username: String? = "AUTH_ADM",

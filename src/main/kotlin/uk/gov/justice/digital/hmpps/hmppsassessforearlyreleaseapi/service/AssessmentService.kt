@@ -16,10 +16,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
@@ -34,6 +36,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
+import java.time.LocalDate
 
 @Service
 class AssessmentService(
@@ -95,9 +98,18 @@ class AssessmentService(
   }
 
   @Transactional
-  fun transitionAssessment(prisonNumber: String, event: AssessmentLifecycleEvent, agent: Agent?) {
+  fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-    assessmentEntity.performTransition(event, agent.toEntity())
+
+    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone, postponeCaseRequest.agent.toEntity())
+
+    val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
+      PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)
+    }.toList()
+
+    assessmentEntity.postponementReasons.addAll(reasonTypes)
+    assessmentEntity.postponementDate = LocalDate.now()
+
     assessmentRepository.save(assessmentEntity)
   }
 
@@ -112,24 +124,32 @@ class AssessmentService(
 
   @Transactional
   fun optBackIn(prisonNumber: String, agent: Agent) {
-    transitionAssessment(prisonNumber, OptBackIn, agent)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(OptBackIn, agent.toEntity())
+    assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitAssessmentForAddressChecks(prisonNumber: String, agent: Agent) {
-    transitionAssessment(prisonNumber, SubmitForAddressChecks, agent)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(SubmitForAddressChecks, agent.toEntity())
+    assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitForPreDecisionChecks(prisonNumber: String, agent: Agent) {
-    transitionAssessment(prisonNumber, CompleteAddressChecks, agent)
+    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(CompleteAddressChecks, agent.toEntity())
+    assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, agent: Agent) {
-    transitionAssessment(prisonNumber, AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status), agent)
+    val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    assessmentEntity.performTransition(event, agent.toEntity())
+
     if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true
     } else if (status != ResidentialChecksStatus.SUITABLE && assessmentEntity.addressChecksComplete) {
