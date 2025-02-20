@@ -145,11 +145,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, agent: Agent) {
+  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest) {
     val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-    assessmentEntity.performTransition(event, agent.toEntity())
+    assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
 
     if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true

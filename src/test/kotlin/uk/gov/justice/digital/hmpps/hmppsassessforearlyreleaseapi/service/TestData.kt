@@ -1,19 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
@@ -26,8 +16,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -75,6 +68,17 @@ object TestData {
     offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
     return offender
   }
+
+  val saveResidentialChecksTaskAnswersRequest =
+    SaveResidentialChecksTaskAnswersRequest(
+      taskCode = "address-details-and-informed-consent",
+      answers = mapOf(
+        "electricitySupply" to "true",
+        "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
+        "mainOccupierConsentGiven" to "true",
+      ),
+      agent = Agent("user", PROBATION_COM, "BDF329"),
+    )
 
   fun criterionChecks(type: CriteriaType): CriterionCheck {
     val criterionChecks = CriterionCheck(

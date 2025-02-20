@@ -169,7 +169,7 @@ class AssessmentTest {
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = fromState, after = AssessmentStatus.POSTPONED),
+      StatusChange(before = fromState, after = AssessmentStatus.POSTPONED, context = emptyMap()),
     )
   }
 
