@@ -167,6 +167,7 @@ class OffenderService(
     postponementReasons = this.postponementReasons.map { reason -> reason.reasonType }.toList(),
     status = this.status,
     addressChecksComplete = this.addressChecksComplete,
+    currentTask = this.currentTask(),
     taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
   )
 
