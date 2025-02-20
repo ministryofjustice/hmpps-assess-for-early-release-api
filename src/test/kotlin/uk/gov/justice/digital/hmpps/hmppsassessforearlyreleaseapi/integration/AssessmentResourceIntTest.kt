@@ -110,7 +110,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
               lastName = "LAST-1",
               dateOfBirth = LocalDate.of(1981, 5, 23),
               homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
-              cellLocation = "s/1/c1",
+              cellLocation = "A-1-002",
               mostSeriousOffence = "Robbery",
               prisonName = "Birmingham (HMP)",
             ),
@@ -141,7 +141,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           policyVersion = "1.0",
           optOutReasonType = OTHER,
           optOutReasonOther = "I have reason",
-          cellLocation = "s/1/c1",
+          cellLocation = "A-1-002",
           mainOffense = "Robbery",
           tasks = mapOf(
             PRISON_CA to listOf(
