@@ -1,7 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
-import jakarta.persistence.*
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
@@ -15,7 +16,7 @@ class GenericChangedEvent<T>(
 
   eventType: AssessmentEventType,
   agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
-  ) : AssessmentEvent(
+) : AssessmentEvent(
   id = id,
   assessment = assessment,
   eventType = eventType,
