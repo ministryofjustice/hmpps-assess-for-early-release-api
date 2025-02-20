@@ -17,6 +17,7 @@ import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
@@ -32,7 +33,7 @@ data class Assessment(
   @NotNull
   val id: Long = -1,
 
-  @ManyToOne(optional = false)
+  @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "offender_id", nullable = false)
   val offender: Offender,
 
@@ -70,9 +71,11 @@ data class Assessment(
 
   val team: String? = null,
 
-  val postponementReason: String? = null,
+  @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OrderBy("createdTimestamp ASC")
+  val postponementReasons: MutableList<PostponementReasonEntity> = mutableListOf(),
 
-  val postponementDate: LocalDate? = null,
+  var postponementDate: LocalDate? = null,
 
   @Enumerated(EnumType.STRING)
   var optOutReasonType: OptOutReasonType? = null,
@@ -81,6 +84,14 @@ data class Assessment(
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
+
+  @Override
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+    other as Assessment
+    return id == other.id
+  }
 
   fun addOrReplaceEligibilityCriterionResult(
     criterionType: CriterionType,

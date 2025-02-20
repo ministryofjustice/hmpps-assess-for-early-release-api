@@ -3,9 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.OptOut
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
@@ -139,6 +142,58 @@ class AssessmentTest {
       .hasMessage("Unable to transition to Eligible from NOT_STARTED directly")
 
     assertThat(assessment.status).isEqualTo(NOT_STARTED)
+    assertThat(assessment.previousStatus).isNull()
+
+    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    assertThat(statusChangeEvents).isEmpty()
+  }
+
+  @ParameterizedTest(name = "Performs transition from value: {0} to POSTPONED")
+  @EnumSource(
+    names = [
+      "AWAITING_PRE_DECISION_CHECKS", "AWAITING_DECISION", "APPROVED",
+      "AWAITING_PRE_RELEASE_CHECKS", "PASSED_PRE_RELEASE_CHECKS",
+    ],
+  )
+  fun `handles valid from states to postpone transition`(fromState: AssessmentStatus) {
+    // Given
+    val assessment = Assessment(offender = anOffender(), status = fromState)
+    val agent = Agent("user", UserRole.PRISON_CA, "HPE")
+
+    // When
+    assessment.performTransition(AssessmentLifecycleEvent.Postpone, agent)
+
+    // Then
+    assertThat(assessment.status).isEqualTo(AssessmentStatus.POSTPONED)
+    assertThat(assessment.previousStatus).isEqualTo(fromState)
+
+    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    assertThat(statusChangeEvents).containsExactly(
+      StatusChange(before = fromState, after = AssessmentStatus.POSTPONED),
+    )
+  }
+
+  @ParameterizedTest(name = "Does not perform transition from value: {0} to POSTPONED")
+  @EnumSource(
+    names = [
+      "NOT_STARTED", "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "ELIGIBLE_AND_SUITABLE",
+      "AWAITING_ADDRESS_AND_RISK_CHECKS", "ADDRESS_AND_RISK_CHECKS_IN_PROGRESS",
+      "ADDRESS_UNSUITABLE", "AWAITING_REFUSAL", "INELIGIBLE_OR_UNSUITABLE", "REFUSED", "TIMED_OUT",
+      "POSTPONED", "RELEASED_ON_HDC",
+    ],
+  )
+  fun `handles in-valid from states to postpone transition`(fromState: AssessmentStatus) {
+    // Given
+    val assessment = Assessment(offender = anOffender(), status = fromState)
+    val agent = Agent("user", UserRole.PRISON_CA, "HPE")
+
+    // When
+    val result = assertThatThrownBy { assessment.performTransition(AssessmentLifecycleEvent.Postpone, agent) }
+
+    // Then
+    result.isInstanceOf(IllegalStateException::class.java)
+      .hasMessage("Fail to transition Assessment: '-1', triggered by 'Postpone' from '${fromState.toState(fromState).javaClass.simpleName}'")
+    assertThat(assessment.status).isEqualTo(fromState)
     assertThat(assessment.previousStatus).isNull()
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }

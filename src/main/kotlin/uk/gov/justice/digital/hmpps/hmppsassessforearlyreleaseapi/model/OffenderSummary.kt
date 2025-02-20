@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an offender")
@@ -36,8 +37,8 @@ data class OffenderSummary(
   @JsonFormat(pattern = "yyyy-MM-dd")
   val postponementDate: LocalDate? = null,
 
-  @Schema(description = "The reason that the offender's current assessment was postponed", example = "Have an application pending with the unduly lenient sentence scheme")
-  val postponementReason: String? = null,
+  @Schema(description = "The reasons that the offender's current assessment was postponed", example = "ON_REMAND")
+  val postponementReasons: List<PostponeCaseReasonType> = listOf(),
 
   @Schema(description = "The status of the offender's current assessment", example = "AWAITING_ADDRESS_AND_RISK_CHECKS")
   val status: AssessmentStatus,

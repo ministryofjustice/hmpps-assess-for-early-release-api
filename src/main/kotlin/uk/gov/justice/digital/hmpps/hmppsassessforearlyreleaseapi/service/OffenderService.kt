@@ -164,7 +164,7 @@ class OffenderService(
     probationPractitioner = this.responsibleCom?.fullName,
     isPostponed = this.status == AssessmentStatus.POSTPONED,
     postponementDate = this.postponementDate,
-    postponementReason = this.postponementReason,
+    postponementReasons = this.postponementReasons.map { reason -> reason.reasonType }.toList(),
     status = this.status,
     addressChecksComplete = this.addressChecksComplete,
     taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
