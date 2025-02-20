@@ -88,6 +88,9 @@ object TestData {
     lastName = SURNAME,
     dateOfBirth = LocalDate.of(1981, 5, 23),
     prisonId = PRISON_ID,
+    cellLocation = "A-1-002",
+    mostSeriousOffence = "Robbery",
+    prisonName = PRISON_NAME,
   )
 
   fun anAssessmentSummary() = AssessmentSummary(
@@ -100,6 +103,8 @@ object TestData {
     location = PRISON_NAME,
     status = NOT_STARTED,
     policyVersion = "1.0",
+    cellLocation = "A-1-002",
+    mainOffense = "Robbery",
     tasks = mapOf(
       PRISON_CA to listOf(
         TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
@@ -187,7 +192,6 @@ object TestData {
     )
 
     return AssessmentWithEligibilityProgress(
-      prison = "Birmingham (HMP)",
       policy = POLICY_1_0,
       assessmentEntity = assessment,
     )

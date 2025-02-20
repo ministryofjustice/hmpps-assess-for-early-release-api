@@ -108,8 +108,7 @@ class AddressService(
 
   @Transactional
   fun getCheckRequestsForAssessment(prisonNumber: String): List<CheckRequestSummary> {
-    val assessmentWithEligibilityProgress = assessmentService.getCurrentAssessment(prisonNumber)
-    val assessment = assessmentWithEligibilityProgress.assessmentEntity
+    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
     val checkRequests = curfewAddressCheckRequestRepository.findByAssessment(assessment)
     return checkRequests.map { it.toSummary() }
   }

@@ -15,6 +15,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.PrisonerNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
 
 @RestControllerAdvice
@@ -51,6 +52,17 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
         developerMessage = e.message,
       ),
     ).also { log.info("No resource found exception: {}", e.message) }
+
+  @ExceptionHandler(PrisonerNotFoundException::class)
+  fun handlePrisonerNotFoundException(e: PrisonerNotFoundException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(NOT_FOUND)
+    .body(
+      ErrorResponse(
+        status = NOT_FOUND,
+        userMessage = "Could not find prisoner for given details",
+        developerMessage = "Could not find prisoner for: ${e.prisonCode}",
+      ),
+    ).also { log.info("Could not find prisoner for ${e.prisonCode}", e) }
 
   @ExceptionHandler(AccessDeniedException::class)
   fun handleAccessDeniedException(e: AccessDeniedException): ResponseEntity<uk.gov.justice.hmpps.kotlin.common.ErrorResponse> = ResponseEntity

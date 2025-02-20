@@ -36,7 +36,9 @@
           "progress": "LOCKED"
         }
       ]
-    }
+    },
+    "cellLocation":"s/1/c1",
+    "mainOffense":"Robbery"
   },
   "criterion": {
     "code": "sex-offender-register",

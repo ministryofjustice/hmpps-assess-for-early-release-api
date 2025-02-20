@@ -12,7 +12,7 @@ import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
@@ -20,7 +20,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.RESIDENTIAL_CHECK_TASK_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
 private const val GET_RESIDENTIAL_CHECKS_VIEW_URL =
   "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/residential-checks"
@@ -70,8 +72,24 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return the residential checks for an offender`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
       webTestClient.get()
         .uri(GET_RESIDENTIAL_CHECKS_VIEW_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -119,7 +137,24 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return the residential check task info for an assessment and task code`() {
-      prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
 
       webTestClient.get()
         .uri(GET_RESIDENTIAL_CHECKS_TASK_URL)
@@ -208,8 +243,6 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update existing residential checks task answers`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -287,18 +320,18 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
   ).readText()
 
   private companion object {
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
-      prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
-      prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
     }
   }
 }

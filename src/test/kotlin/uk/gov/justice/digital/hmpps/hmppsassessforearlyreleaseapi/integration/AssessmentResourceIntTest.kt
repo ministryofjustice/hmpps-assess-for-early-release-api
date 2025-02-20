@@ -26,7 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
@@ -38,6 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.Pos
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 import java.util.LinkedHashSet
@@ -96,17 +97,37 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return the current assessment for an offender`() {
-      prisonRegisterMockServer.stubGetPrisons()
+      // Given
 
-      val assessment = webTestClient.get()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "s/1/c1",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
+
+      // When
+
+      val result = webTestClient.get()
         .uri(GET_CURRENT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
         .exchange()
-        .expectStatus()
-        .isOk
-        .expectBody(AssessmentSummary::class.java)
-        .returnResult().responseBody!!
 
+      // Then
+      result.expectStatus().isOk
+      val assessment = result.expectBody(AssessmentSummary::class.java).returnResult().responseBody!!
       assertThat(assessment).isEqualTo(
         AssessmentSummary(
           forename = "FIRST-1",
@@ -120,6 +141,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           policyVersion = "1.0",
           optOutReasonType = OTHER,
           optOutReasonOther = "I have reason",
+          cellLocation = "s/1/c1",
+          mainOffense = "Robbery",
           tasks = mapOf(
             PRISON_CA to listOf(
               TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
@@ -200,7 +223,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should postpone an offenders assessment`() {
       // Given
-      prisonRegisterMockServer.stubGetPrisons()
       val request = anPostponeCaseRequest.copy()
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
@@ -318,7 +340,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should opt-out an offender`() {
       // Given
-      prisonRegisterMockServer.stubGetPrisons()
       val request = anOptOutRequest.copy(reasonType = OTHER, otherDescription = "an opt-out reason")
       val headers = setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"))
 
@@ -343,8 +364,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should return 401 if otherDescription not given when reasonType is other`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.put()
         .uri(OPT_OUT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -397,8 +416,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should opt-in an offender`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -456,8 +473,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should submit an assessment for address checks`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -513,8 +528,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should submit an assessment for pre-decision checks`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -530,18 +543,18 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   }
 
   private companion object {
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
-      prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
-      prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
     }
   }
 }

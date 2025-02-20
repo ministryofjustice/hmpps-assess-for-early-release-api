@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
@@ -15,55 +14,35 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 
 @Service
 class EligibilityAndSuitabilityService(
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
+  private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
 ) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
-
-    fun AssessmentWithEligibilityProgress.toSummary() = with(this) {
-      AssessmentSummary(
-        forename = offender.forename,
-        surname = offender.surname,
-        dateOfBirth = offender.dateOfBirth,
-        prisonNumber = offender.prisonNumber,
-        hdced = offender.hdced,
-        crd = offender.crd,
-        location = prison,
-        status = assessmentEntity.status,
-        responsibleCom = assessmentEntity.responsibleCom?.toSummary(),
-        team = assessmentEntity.team,
-        policyVersion = assessmentEntity.policyVersion,
-        tasks = assessmentEntity.status.tasks().mapValues { (_, tasks) ->
-          tasks.map { TaskProgress(it.task, it.status(assessmentEntity)) }
-        },
-      )
-    }
   }
 
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
-    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
 
-    val eligibility = assessment.getEligibilityProgress()
+    val eligibility = currentAssessment.getEligibilityProgress()
     val eligibilityStatus = eligibility.toStatus()
-    val suitability = assessment.getSuitabilityProgress()
+    val suitability = currentAssessment.getSuitabilityProgress()
     val suitabilityStatus = suitability.toStatus()
 
     return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = assessment.toSummary(),
-      overallStatus = assessment.calculateAggregateEligibilityStatus(),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
+      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
       suitability = suitability,
@@ -79,12 +58,12 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
-    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val eligibilityProgress = currentAssessment.getEligibilityProgress().dropWhile { it.code != code }.take(2)
     if (eligibilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
-      assessmentSummary = currentAssessment.toSummary(),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
       criterion = eligibilityProgress[0],
       nextCriterion = eligibilityProgress.getOrNull(1),
     )
@@ -92,12 +71,12 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
-    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val suitabilityProgress = currentAssessment.getSuitabilityProgress().dropWhile { it.code != code }.take(2)
     if (suitabilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(
-      assessmentSummary = currentAssessment.toSummary(),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
       criterion = suitabilityProgress[0],
       nextCriterion = suitabilityProgress.getOrNull(1),
     )
@@ -108,7 +87,7 @@ class EligibilityAndSuitabilityService(
     log.info("Saving answer: $prisonNumber, $answer")
 
     val criterionType = CriterionType.valueOf(answer.type.name)
-    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
 
     with(currentAssessment) {
       val criterion = policyService.getCriterion(assessmentEntity.policyVersion, criterionType, answer.code)
