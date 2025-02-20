@@ -137,11 +137,11 @@ data class Assessment(
         log.info("Transitioning Assessment: '${this.id}', triggered by event: '${transition.event.label()}' from '${transition.fromState.label()}' to '${transition.toState.label()}'")
         if (currentStatus != transition.toState) {
           assessmentEvents.add(
-            StatusChangedEvent(
-              assessment = this,
-              changes = StatusChange(before = transition.fromState.status, after = transition.toState.status),
-              agent = agent,
-            ),
+              StatusChangedEvent(
+                assessment = this,
+                changes = StatusChange(before = transition.fromState.status, after = transition.toState.status, context = event.getContext()),
+                agent = agent,
+              ),
           )
 
           this.previousStatus = currentStatus.status

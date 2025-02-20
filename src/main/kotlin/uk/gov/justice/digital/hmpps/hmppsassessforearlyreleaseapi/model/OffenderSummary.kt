@@ -45,6 +45,6 @@ data class OffenderSummary(
   @Schema(description = "Whether the address checks for the offender's current assessment have been completed or not", example = "false")
   val addressChecksComplete: Boolean = false,
 
-  @Schema(description = "The date that the current task overdue on", example = "false")
+  @Schema(description = "The date that the current task overdue on", example = "2028-06-23")
   val taskOverdueOn: LocalDate? = null,
 )

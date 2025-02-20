@@ -21,7 +21,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 enum class AssessmentStatus {
@@ -393,22 +396,37 @@ sealed interface SideEffect {
 }
 
 sealed class AssessmentLifecycleEvent {
-  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) : AssessmentLifecycleEvent()
-  data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus) : AssessmentLifecycleEvent()
+  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus, val answer: CriterionCheck) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("eligibilityStatus" to eligibilityStatus, "type" to answer.type, "code" to answer.code, "answers" to answer.answers)
+  }
+  data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus, val answer: SaveResidentialChecksTaskAnswersRequest) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("checkStatus" to checkStatus, "taskCode" to answer.taskCode, "answers" to answer.answers)
+  }
 
-  object SubmitForAddressChecks : AssessmentLifecycleEvent()
+  data class SubmitForAddressChecks(val prisonNumber: String) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("prisonNumber" to prisonNumber)
+  }
   object StartAddressChecks : AssessmentLifecycleEvent()
-  object CompleteAddressChecks : AssessmentLifecycleEvent()
+  data class CompleteAddressChecks(val prisonNumber: String) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("prisonNumber" to prisonNumber)
+  }
   object FailAddressChecks : AssessmentLifecycleEvent()
   object SubmitForDecision : AssessmentLifecycleEvent()
   object Approve : AssessmentLifecycleEvent()
   object Refuse : AssessmentLifecycleEvent()
-  object OptOut : AssessmentLifecycleEvent()
-  object OptBackIn : AssessmentLifecycleEvent()
+  data class OptOut(val reason: OptOutReasonType, val otherDescription: String?) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("reason" to reason as Any, "otherDescription" to (otherDescription ?: "description not provided") as Any)
+  }
+  data class OptBackIn(val prisonNumber: String) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("prisonNumber" to prisonNumber)
+  }
   object Timeout : AssessmentLifecycleEvent()
   object Postpone : AssessmentLifecycleEvent()
   object ReleaseOnHDC : AssessmentLifecycleEvent()
+
+  open fun getContext(): Map<String, Any> = emptyMap()
 }
+
 
 val assessmentStateMachine =
   StateMachine.create<AssessmentState, AssessmentLifecycleEvent, SideEffect> {

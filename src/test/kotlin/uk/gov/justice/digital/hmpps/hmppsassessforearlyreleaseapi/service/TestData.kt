@@ -25,15 +25,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -62,6 +56,9 @@ object TestData {
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
   val PRISON_CA_AGENT = Agent("prison user", role = PRISON_CA, onBehalfOf = "KXE")
   val PROBATION_COM_AGENT = Agent("probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val criterion = POLICY_1_0.eligibilityCriteria[0]
+  private val question = criterion.questions.first()
+  val answers = mapOf(question.name to false)
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
     val offender = Offender(
@@ -77,6 +74,16 @@ object TestData {
     )
     offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
     return offender
+  }
+
+  fun criterionChecks(type: CriteriaType): CriterionCheck {
+    val criterionChecks = CriterionCheck(
+      code = criterion.code,
+      type = type,
+      answers = answers,
+      agent = PRISON_CA_AGENT,
+    )
+    return criterionChecks
   }
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(

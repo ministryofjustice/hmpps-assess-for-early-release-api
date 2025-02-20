@@ -12,9 +12,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.answers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.criterion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.criterionChecks
 
 class AssessmentTest {
 
@@ -84,9 +89,9 @@ class AssessmentTest {
   fun `records status changes`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
     val agent = Agent("user", UserRole.PRISON_CA, "HPE")
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS), agent)
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS), agent)
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE), agent)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS, criterionChecks(CriteriaType.ELIGIBILITY)), agent)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS, criterionChecks(CriteriaType.ELIGIBILITY)), agent)
+    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE, criterionChecks(CriteriaType.ELIGIBILITY)), agent)
 
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
@@ -95,8 +100,8 @@ class AssessmentTest {
     val agents = assessment.assessmentEvents.map { it.agent }
     assertThat(agents).containsOnly(agent)
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS),
-      StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE),
+      StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, context = mapOf("eligibilityStatus" to IN_PROGRESS, "type" to CriteriaType.ELIGIBILITY, "code" to criterion.code, "answers" to answers)),
+      StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE, context = mapOf("eligibilityStatus" to ELIGIBLE, "type" to CriteriaType.ELIGIBILITY, "code" to criterion.code, "answers" to answers)),
     )
   }
 
@@ -104,21 +109,23 @@ class AssessmentTest {
   fun `returns to previous state`() {
     val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE)
     val agent = Agent("user", UserRole.PRISON_CA, "HPE")
+    val reasonType = NO_REASON_GIVEN
+    val otherDescription = "No reason given"
 
-    assessment.performTransition(OptOut, agent)
+    assessment.performTransition(OptOut(reasonType, otherDescription), agent)
 
     assertThat(assessment.status).isEqualTo(OPTED_OUT)
     assertThat(assessment.previousStatus).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
 
-    assessment.performTransition(OptBackIn, agent)
+    assessment.performTransition(OptBackIn(assessment.offender.prisonNumber), agent)
 
     assertThat(assessment.status).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(OPTED_OUT)
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT),
-      StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE),
+      StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT, context = mapOf("reason" to reasonType, "otherDescription" to otherDescription)),
+      StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE, context = mapOf("prisonNumber" to assessment.offender.prisonNumber)),
     )
   }
 
@@ -127,7 +134,7 @@ class AssessmentTest {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
     val agent = Agent("user", UserRole.PRISON_CA, "HPE")
 
-    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE), agent) }
+    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE, criterionChecks(CriteriaType.ELIGIBILITY)), agent) }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessage("Unable to transition to Eligible from NOT_STARTED directly")
 

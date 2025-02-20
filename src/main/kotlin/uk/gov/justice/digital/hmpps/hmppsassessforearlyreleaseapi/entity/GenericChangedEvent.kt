@@ -1,35 +1,33 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
-import jakarta.persistence.Column
-import jakarta.persistence.DiscriminatorValue
-import jakarta.persistence.Entity
+import jakarta.persistence.*
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType.STATUS_CHANGE
 
 @Entity
-@DiscriminatorValue(value = "STATUS_CHANGE")
-class StatusChangedEvent(
+class GenericChangedEvent<T>(
   id: Long = -1L,
   assessment: Assessment,
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val changes: StatusChange,
+  val changes: T,
 
+  eventType: AssessmentEventType,
   agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
-) : AssessmentEvent(
+  ) : AssessmentEvent(
   id = id,
   assessment = assessment,
-  eventType = STATUS_CHANGE,
-  summary = "status changed from: '${changes.before}', to: '${changes.after}'",
+  eventType = eventType,
+  summary = "generic change event with data: '$changes'",
   agent = agent,
 ) {
 
   override fun toString(): String {
-    return "StatusChangedEvent(" +
+    return "GenericChangedEvent(" +
       "id=$id, " +
       "assessment=${assessment.id}, " +
+      "eventType=$eventType, " +
       "summary=$summary, " +
       "changes=$changes, " +
       ")"
@@ -37,7 +35,7 @@ class StatusChangedEvent(
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (other !is StatusChangedEvent) return false
+    if (other !is GenericChangedEvent<*>) return false
     if (!super.equals(other)) return false
     return true
   }
@@ -46,5 +44,3 @@ class StatusChangedEvent(
     return super.hashCode()
   }
 }
-
-data class StatusChange(val before: AssessmentStatus, val after: AssessmentStatus, val context: Map<String, Any>)
