@@ -427,7 +427,6 @@ sealed class AssessmentLifecycleEvent {
   open fun getContext(): Map<String, Any> = emptyMap()
 }
 
-
 val assessmentStateMachine =
   StateMachine.create<AssessmentState, AssessmentLifecycleEvent, SideEffect> {
     initialState(AssessmentState.NotStarted)
