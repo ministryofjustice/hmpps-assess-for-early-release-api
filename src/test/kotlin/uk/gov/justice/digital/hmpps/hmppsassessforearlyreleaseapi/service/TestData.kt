@@ -27,8 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residen
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
@@ -95,16 +93,6 @@ object TestData {
       ),
       agent = Agent("user", PROBATION_COM, "BDF329"),
     )
-
-  fun criterionChecks(type: CriteriaType): CriterionCheck {
-    val criterionChecks = CriterionCheck(
-      code = criterion.code,
-      type = type,
-      answers = answers,
-      agent = PRISON_CA_AGENT,
-    )
-    return criterionChecks
-  }
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,

@@ -6,6 +6,7 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType.STATUS_CHANGE
+import java.util.*
 
 @Entity
 @DiscriminatorValue(value = "STATUS_CHANGE")
@@ -42,9 +43,7 @@ class StatusChangedEvent(
     return true
   }
 
-  override fun hashCode(): Int {
-    return super.hashCode()
-  }
+  override fun hashCode(): Int = Objects.hash(id)
 }
 
 data class StatusChange(val before: AssessmentStatus, val after: AssessmentStatus, val context: Map<String, Any>)

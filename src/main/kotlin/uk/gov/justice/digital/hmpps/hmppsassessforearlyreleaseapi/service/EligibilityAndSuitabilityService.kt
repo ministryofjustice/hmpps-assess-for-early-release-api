@@ -122,7 +122,7 @@ class EligibilityAndSuitabilityService(
       )
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()
-      assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer), answer.agent)
+      assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer.type, answer.code, answer.answers), answer.agent)
     }
   }
 }

@@ -14,10 +14,10 @@ data class OffenderSummary(
   @Schema(description = "The offender's booking id", example = "773722")
   val bookingId: Long,
 
-  @Schema(description = "The offender's first name", example = "Bob")
+  @Schema(description = "The offender's first name", example = "Bob", required = false)
   val forename: String?,
 
-  @Schema(description = "The offender's surname", example = "Smith")
+  @Schema(description = "The offender's surname", example = "Smith", required = false)
   val surname: String?,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
@@ -27,13 +27,13 @@ data class OffenderSummary(
   @Schema(description = "The number of working days until the home detention curfew eligibility date", example = "15")
   val workingDaysToHdced: Int,
 
-  @Schema(description = "The full name of the probation practitioner responsible for this offender", example = "Mark Coombes")
+  @Schema(description = "The full name of the probation practitioner responsible for this offender", example = "Mark Coombes", required = false)
   val probationPractitioner: String? = null,
 
   @Schema(description = "Whether the offender's current assessment has been postponed or not", example = "True")
   val isPostponed: Boolean = false,
 
-  @Schema(description = "The date that the offender's current assessment was postponed", example = "2028-06-23")
+  @Schema(description = "The date that the offender's current assessment was postponed", example = "2028-06-23", required = false)
   @JsonFormat(pattern = "yyyy-MM-dd")
   val postponementDate: LocalDate? = null,
 
@@ -46,6 +46,6 @@ data class OffenderSummary(
   @Schema(description = "Whether the address checks for the offender's current assessment have been completed or not", example = "false")
   val addressChecksComplete: Boolean = false,
 
-  @Schema(description = "The date that the current task overdue on", example = "2028-06-23")
+  @Schema(description = "The date that the current task overdue on", example = "2028-06-23", required = false)
   val taskOverdueOn: LocalDate? = null,
 )

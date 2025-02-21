@@ -126,27 +126,27 @@ class AssessmentService(
   @Transactional
   fun optBackIn(prisonNumber: String, agent: Agent) {
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-    assessmentEntity.performTransition(OptBackIn(prisonNumber), agent.toEntity())
+    assessmentEntity.performTransition(OptBackIn, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitAssessmentForAddressChecks(prisonNumber: String, agent: Agent) {
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-    assessmentEntity.performTransition(SubmitForAddressChecks(prisonNumber), agent.toEntity())
+    assessmentEntity.performTransition(SubmitForAddressChecks, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitForPreDecisionChecks(prisonNumber: String, agent: Agent) {
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
-    assessmentEntity.performTransition(CompleteAddressChecks(prisonNumber), agent.toEntity())
+    assessmentEntity.performTransition(CompleteAddressChecks, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest) {
-    val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest)
+    val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
     assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
