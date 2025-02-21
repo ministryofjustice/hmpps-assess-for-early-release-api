@@ -157,8 +157,8 @@ class OffenderService(
   fun Assessment.toOffenderSummary() = OffenderSummary(
     prisonNumber = offender.prisonNumber,
     bookingId = offender.bookingId,
-    forename = offender.forename,
-    surname = offender.surname,
+    forename = offender.forename!!,
+    surname = offender.surname!!,
     hdced = offender.hdced,
     workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
     probationPractitioner = this.responsibleCom?.fullName,
