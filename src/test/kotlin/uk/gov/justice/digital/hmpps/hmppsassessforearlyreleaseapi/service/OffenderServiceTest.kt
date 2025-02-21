@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -84,6 +85,7 @@ class OffenderServiceTest {
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
+        currentTask = Task.ASSESS_ELIGIBILITY,
         taskOverdueOn = offender1.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
       OffenderSummary(
@@ -96,6 +98,7 @@ class OffenderServiceTest {
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
+        currentTask = Task.ASSESS_ELIGIBILITY,
         taskOverdueOn = offender2.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
       OffenderSummary(
@@ -108,6 +111,7 @@ class OffenderServiceTest {
         probationPractitioner = offender3.currentAssessment().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
+        currentTask = Task.ASSESS_ELIGIBILITY,
         taskOverdueOn = null,
       ),
     )
