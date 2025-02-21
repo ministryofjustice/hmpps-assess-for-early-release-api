@@ -1,12 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import jakarta.persistence.EntityNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
@@ -103,6 +103,6 @@ class AddressServiceTest {
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 
-    assertThrows<EntityNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId) }
+    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId) }
   }
 }

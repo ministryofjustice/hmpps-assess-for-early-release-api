@@ -1,9 +1,9 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation
 
-import jakarta.persistence.EntityNotFoundException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StaffService
@@ -26,7 +26,7 @@ class ProbationService(
 
   fun getStaffDetailsByUsername(username: String): User? {
     val staffDetails = deliusApiClient.getStaffDetailsByUsername(username)
-    return staffDetails ?: throw EntityNotFoundException("Cannot find staff with username $username")
+    return staffDetails ?: throw ItemNotFoundException("Cannot find staff with username $username")
   }
 
   fun offenderManagerChanged(crn: String) {

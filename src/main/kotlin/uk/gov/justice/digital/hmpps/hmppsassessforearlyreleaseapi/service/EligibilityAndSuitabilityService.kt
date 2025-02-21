@@ -1,12 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
@@ -60,7 +60,7 @@ class EligibilityAndSuitabilityService(
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val eligibilityProgress = currentAssessment.getEligibilityProgress().dropWhile { it.code != code }.take(2)
-    if (eligibilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
+    if (eligibilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
       assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
@@ -73,7 +73,7 @@ class EligibilityAndSuitabilityService(
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
     val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val suitabilityProgress = currentAssessment.getSuitabilityProgress().dropWhile { it.code != code }.take(2)
-    if (suitabilityProgress.isEmpty()) throw EntityNotFoundException("Cannot find criterion with code $code")
+    if (suitabilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(
       assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),

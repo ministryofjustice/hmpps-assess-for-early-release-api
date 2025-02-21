@@ -59,8 +59,8 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
     .body(
       ErrorResponse(
         status = NOT_FOUND,
-        userMessage = "Item not found exception : ${e.message}",
-        developerMessage = "ItemNotFoundException : ${e.message}",
+        userMessage = "Item not found exception: ${e.message}",
+        developerMessage = "ItemNotFoundException: ${e.message}",
       ),
     ).also {
       log.info(e.message, e)
