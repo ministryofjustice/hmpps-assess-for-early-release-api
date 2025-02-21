@@ -40,6 +40,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anPostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.answers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.criterion
 
@@ -180,7 +181,7 @@ class AssessmentTest {
     val agent = Agent("user", UserRole.PRISON_CA, "HPE")
 
     // When
-    assessment.performTransition(AssessmentLifecycleEvent.Postpone, agent)
+    assessment.performTransition(AssessmentLifecycleEvent.Postpone(anPostponeCaseRequest.reasonTypes), agent)
 
     // Then
     assertThat(assessment.status).isEqualTo(POSTPONED)
@@ -188,7 +189,7 @@ class AssessmentTest {
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = fromState, after = POSTPONED, context = emptyMap()),
+      StatusChange(before = fromState, after = POSTPONED, context = mapOf("reasonTypes" to anPostponeCaseRequest.reasonTypes)),
     )
   }
 
@@ -207,7 +208,7 @@ class AssessmentTest {
     val agent = Agent("user", UserRole.PRISON_CA, "HPE")
 
     // When
-    val result = assertThatThrownBy { assessment.performTransition(AssessmentLifecycleEvent.Postpone, agent) }
+    val result = assertThatThrownBy { assessment.performTransition(AssessmentLifecycleEvent.Postpone(anPostponeCaseRequest.reasonTypes), agent) }
 
     // Then
     result.isInstanceOf(IllegalStateException::class.java)

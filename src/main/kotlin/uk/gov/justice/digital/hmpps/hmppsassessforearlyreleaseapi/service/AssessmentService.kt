@@ -83,7 +83,7 @@ class AssessmentService(
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
 
-    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone, postponeCaseRequest.agent.toEntity())
+    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agent.toEntity())
 
     val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
       PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)

@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Criteria
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 
 enum class AssessmentStatus {
   NOT_STARTED {
@@ -431,7 +432,9 @@ sealed class AssessmentLifecycleEvent {
   }
   data object OptBackIn : AssessmentLifecycleEvent()
   data object Timeout : AssessmentLifecycleEvent()
-  data object Postpone : AssessmentLifecycleEvent()
+  data class Postpone(val reasonTypes: LinkedHashSet<PostponeCaseReasonType>) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("reasonTypes" to reasonTypes)
+  }
   data object ReleaseOnHDC : AssessmentLifecycleEvent()
 
   open fun getContext(): Map<String, Any> = emptyMap()
