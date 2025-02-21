@@ -37,6 +37,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -54,6 +55,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -71,6 +73,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -94,6 +97,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to true,
@@ -121,6 +125,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to true,
@@ -129,6 +134,12 @@ enum class AssessmentStatus {
   },
 
   AWAITING_PRE_DECISION_CHECKS {
+    override fun tasks() = mapOf(
+      PRISON_CA to listOf(
+        TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, READY_TO_START),
+      ),
+    )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -143,6 +154,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -156,6 +168,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, READY_TO_START),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -194,6 +207,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -211,6 +225,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -232,6 +247,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -262,6 +278,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(OPT_IN, LOCKED),
       ),
     )
+
     override val visibleToRole = mapOf(
       PRISON_CA to true,
       PROBATION_COM to false,
@@ -402,20 +419,20 @@ sealed class AssessmentLifecycleEvent {
     override fun getContext(): Map<String, Any> = mapOf("checkStatus" to checkStatus, "taskCode" to taskCode, "answers" to answers)
   }
 
-  object SubmitForAddressChecks : AssessmentLifecycleEvent()
-  object StartAddressChecks : AssessmentLifecycleEvent()
-  object CompleteAddressChecks : AssessmentLifecycleEvent()
-  object FailAddressChecks : AssessmentLifecycleEvent()
-  object SubmitForDecision : AssessmentLifecycleEvent()
-  object Approve : AssessmentLifecycleEvent()
-  object Refuse : AssessmentLifecycleEvent()
+  data object SubmitForAddressChecks : AssessmentLifecycleEvent()
+  data object StartAddressChecks : AssessmentLifecycleEvent()
+  data object CompleteAddressChecks : AssessmentLifecycleEvent()
+  data object FailAddressChecks : AssessmentLifecycleEvent()
+  data object SubmitForDecision : AssessmentLifecycleEvent()
+  data object Approve : AssessmentLifecycleEvent()
+  data object Refuse : AssessmentLifecycleEvent()
   data class OptOut(val reason: OptOutReasonType, val otherDescription: String?) : AssessmentLifecycleEvent() {
     override fun getContext(): Map<String, Any> = mapOf("reason" to reason as Any, "otherDescription" to (otherDescription ?: "description not provided") as Any)
   }
-  object OptBackIn : AssessmentLifecycleEvent()
-  object Timeout : AssessmentLifecycleEvent()
-  object Postpone : AssessmentLifecycleEvent()
-  object ReleaseOnHDC : AssessmentLifecycleEvent()
+  data object OptBackIn : AssessmentLifecycleEvent()
+  data object Timeout : AssessmentLifecycleEvent()
+  data object Postpone : AssessmentLifecycleEvent()
+  data object ReleaseOnHDC : AssessmentLifecycleEvent()
 
   open fun getContext(): Map<String, Any> = emptyMap()
 }

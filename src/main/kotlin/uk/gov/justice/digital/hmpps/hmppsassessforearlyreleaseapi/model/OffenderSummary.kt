@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import java.time.LocalDate
 
@@ -45,6 +46,9 @@ data class OffenderSummary(
 
   @Schema(description = "Whether the address checks for the offender's current assessment have been completed or not", example = "false")
   val addressChecksComplete: Boolean = false,
+
+  @Schema(description = "The current task for the offender's current assessment, if there is no next task then null will be returned", example = "Assess eligibility and suitability")
+  val currentTask: Task?,
 
   @Schema(description = "The date that the current task overdue on", example = "2028-06-23", required = false)
   val taskOverdueOn: LocalDate? = null,

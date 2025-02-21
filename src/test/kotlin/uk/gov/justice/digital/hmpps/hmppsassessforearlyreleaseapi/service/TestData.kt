@@ -79,9 +79,10 @@ object TestData {
       hdced = hdced,
       sentenceStartDate = sentenceStartDate,
     )
-    offender.assessments.add(Assessment(offender = offender, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code))
+    offender.assessments.add(anAssessment(offender))
     return offender
   }
+
 
   val saveResidentialChecksTaskAnswersRequest =
     SaveResidentialChecksTaskAnswersRequest(
@@ -93,6 +94,8 @@ object TestData {
       ),
       agent = Agent("user", PROBATION_COM, "BDF329"),
     )
+
+  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,
