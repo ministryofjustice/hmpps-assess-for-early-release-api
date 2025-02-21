@@ -164,6 +164,18 @@ data class Assessment(
     }
   }
 
+  fun currentTask(): Task? {
+    val tasksForAssessmentStatus = status.tasks().values.flatten()
+    val availableTasks = tasksForAssessmentStatus.filter {
+      val taskStatus = it.status(this)
+      taskStatus == TaskStatus.READY_TO_START || taskStatus == TaskStatus.IN_PROGRESS
+    }
+
+    val nextTask = availableTasks.firstOrNull { it.status(this) == TaskStatus.READY_TO_START }
+      ?: availableTasks.firstOrNull { it.status(this) == TaskStatus.IN_PROGRESS }
+    return nextTask?.task
+  }
+
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
