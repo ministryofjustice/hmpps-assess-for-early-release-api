@@ -58,7 +58,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       "classpath:test_data/some-offenders.sql",
     )
     @Test
-    fun `should return offenders at prison with a status of not started`() {
+    fun `should return offenders at prison`() {
       // Given
       govUkMockServer.stubGetBankHolidays()
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")

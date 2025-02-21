@@ -64,7 +64,7 @@ class OffenderServiceTest {
     val offender2 =
       offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD", sentenceStartDate = LocalDate.now().minusDays(11))
     val offender3 = offender1.copy(id = offender1.id + 2, bookingId = offender1.bookingId + 30, prisonNumber = "ZX2318KJ", sentenceStartDate = null)
-    whenever(assessmentRepository.findByOffenderPrisonIdAndStatusIn(PRISON_ID, getStatusesForRole(UserRole.PRISON_CA))).thenReturn(
+    whenever(assessmentRepository.findByOffenderPrisonId(PRISON_ID)).thenReturn(
       listOf(
         offender1.currentAssessment(),
         offender2.currentAssessment().copy(offender = offender2),

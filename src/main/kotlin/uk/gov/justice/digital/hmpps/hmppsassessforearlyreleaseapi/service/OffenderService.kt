@@ -38,7 +38,7 @@ class OffenderService(
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
-    val assessments = assessmentRepository.findByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_CA))
+    val assessments = assessmentRepository.findByOffenderPrisonId(prisonCode)
     return assessments.map { it.toOffenderSummary() }
   }
 
