@@ -36,7 +36,9 @@
           "progress": "LOCKED"
         }
       ]
-    }
+    },
+    "cellLocation":"A-1-002",
+    "mainOffense":"Robbery"
   },
   "overallStatus": "NOT_STARTED",
   "tasks": [
