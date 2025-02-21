@@ -42,6 +42,6 @@ class GenericChangedEvent<T>(
   }
 
   override fun hashCode(): Int {
-    return java.util.Objects.hash(super.hashCode(), changes)
+    return super.hashCode()
   }
 }
