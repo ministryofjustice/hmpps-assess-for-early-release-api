@@ -78,8 +78,8 @@ class OffenderServiceTest {
       OffenderSummary(
         prisonNumber = offender1.prisonNumber,
         bookingId = offender1.bookingId,
-        forename = offender1.forename,
-        surname = offender1.surname,
+        forename = offender1.forename!!,
+        surname = offender1.surname!!,
         hdced = offender1.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
@@ -91,8 +91,8 @@ class OffenderServiceTest {
       OffenderSummary(
         prisonNumber = offender2.prisonNumber,
         bookingId = offender2.bookingId,
-        forename = offender2.forename,
-        surname = offender2.surname,
+        forename = offender2.forename!!,
+        surname = offender2.surname!!,
         hdced = offender2.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
@@ -104,8 +104,8 @@ class OffenderServiceTest {
       OffenderSummary(
         prisonNumber = offender3.prisonNumber,
         bookingId = offender3.bookingId,
-        forename = offender3.forename,
-        surname = offender3.surname,
+        forename = offender3.forename!!,
+        surname = offender3.surname!!,
         hdced = offender3.hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender3.currentAssessment().responsibleCom?.fullName,

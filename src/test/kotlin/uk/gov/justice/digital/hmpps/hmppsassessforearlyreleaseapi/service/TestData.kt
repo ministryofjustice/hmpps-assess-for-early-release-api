@@ -29,11 +29,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -48,6 +51,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Team
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.LinkedHashSet
 
 object TestData {
 
@@ -62,6 +66,9 @@ object TestData {
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
   val PRISON_CA_AGENT = Agent("prison user", role = PRISON_CA, onBehalfOf = "KXE")
   val PROBATION_COM_AGENT = Agent("probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val criterion = POLICY_1_0.eligibilityCriteria[0]
+  private val question = criterion.questions.first()
+  val answers = mapOf(question.name to false)
 
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
     val offender = Offender(
@@ -78,6 +85,28 @@ object TestData {
     offender.assessments.add(anAssessment(offender))
     return offender
   }
+
+  val saveResidentialChecksTaskAnswersRequest =
+    SaveResidentialChecksTaskAnswersRequest(
+      taskCode = "address-details-and-informed-consent",
+      answers = mapOf(
+        "electricitySupply" to "true",
+        "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
+        "mainOccupierConsentGiven" to "true",
+      ),
+      agent = Agent("user", PROBATION_COM, "BDF329"),
+    )
+
+  val anPostponeCaseRequest = PostponeCaseRequest(
+    reasonTypes =
+    LinkedHashSet(
+      listOf(
+        PostponeCaseReasonType.ON_REMAND,
+        PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
+      ),
+    ),
+    agent = Agent("a user", PRISON_CA, "ABC"),
+  )
 
   fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
 

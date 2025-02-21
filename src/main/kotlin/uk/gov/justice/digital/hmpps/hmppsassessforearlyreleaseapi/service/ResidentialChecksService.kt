@@ -99,7 +99,7 @@ class ResidentialChecksService(
     }
 
     val checksStatus = getAddressCheckStatus(addressCheckRequest)
-    assessmentService.updateAddressChecksStatus(prisonNumber, checksStatus, saveTaskAnswersRequest.agent)
+    assessmentService.updateAddressChecksStatus(prisonNumber, checksStatus, saveTaskAnswersRequest)
 
     return ResidentialChecksTaskAnswersSummary(
       addressCheckRequestId = addressCheckRequestId,

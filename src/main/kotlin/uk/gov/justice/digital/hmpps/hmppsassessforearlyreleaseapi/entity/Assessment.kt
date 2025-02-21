@@ -150,7 +150,7 @@ data class Assessment(
           assessmentEvents.add(
             StatusChangedEvent(
               assessment = this,
-              changes = StatusChange(before = transition.fromState.status, after = transition.toState.status),
+              changes = StatusChange(before = transition.fromState.status, after = transition.toState.status, context = event.getContext()),
               agent = agent,
             ),
           )
