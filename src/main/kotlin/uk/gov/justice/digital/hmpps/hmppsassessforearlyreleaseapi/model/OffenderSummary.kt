@@ -15,11 +15,11 @@ data class OffenderSummary(
   @Schema(description = "The offender's booking id", example = "773722")
   val bookingId: Long,
 
-  @Schema(description = "The offender's first name", example = "Bob", required = false)
-  val forename: String?,
+  @Schema(description = "The offender's first name", example = "Bob")
+  val forename: String,
 
-  @Schema(description = "The offender's surname", example = "Smith", required = false)
-  val surname: String?,
+  @Schema(description = "The offender's surname", example = "Smith")
+  val surname: String,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
   @JsonFormat(pattern = "yyyy-MM-dd")
