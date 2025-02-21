@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.kotlin.argumentCaptor
@@ -37,10 +38,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.saveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
@@ -51,20 +54,26 @@ class AssessmentServiceTest {
   private val offenderRepository = mock<OffenderRepository>()
   private val assessmentRepository = mock<AssessmentRepository>()
 
+  private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
+
   private val service =
-    AssessmentService(PolicyService(), prisonService, offenderRepository, assessmentRepository)
+    AssessmentService(PolicyService(), offenderRepository, assessmentRepository, offenderToAssessmentSummaryMapper)
 
   @Test
   fun `should get an offenders current assessment`() {
+    // Given
     val hdced = LocalDate.now().plusDays(5)
     val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
-    whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+    whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
+    // When
     val assessment = service.getCurrentAssessmentSummary(PRISON_NUMBER)
 
+    // Then
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
-    verify(prisonService).getPrisonNameForId(PRISON_ID)
+    assertThat(assessment).isNotNull
     assertThat(assessment).extracting(
       "forename",
       "surname",
@@ -213,7 +222,7 @@ class AssessmentServiceTest {
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender.copy())
       whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-      val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
+      val currentAssessment = service.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)
 
       assertThat(currentAssessment.assessmentEntity).isEqualTo(anOffender.currentAssessment())
 
@@ -237,7 +246,7 @@ class AssessmentServiceTest {
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
       whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-      val currentAssessment = service.getCurrentAssessment(PRISON_NUMBER)
+      val currentAssessment = service.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)
 
       val eligibilityProgress = currentAssessment.getEligibilityProgress()
       assertThat(eligibilityProgress).hasSize(11)
@@ -265,7 +274,7 @@ class AssessmentServiceTest {
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
 
-      val assessment = service.getCurrentAssessment(PRISON_NUMBER)
+      val assessment = service.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)
 
       assertThat(assessment.getSuitabilityProgress().find { it.code === criterion1.code }).isEqualTo(
         SuitabilityCriterionProgress(
@@ -299,7 +308,7 @@ class AssessmentServiceTest {
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
 
-      val assessment = service.getCurrentAssessment(PRISON_NUMBER)
+      val assessment = service.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)
 
       assertThat(assessment.getEligibilityProgress().find { it.code === criterion1.code }).isEqualTo(
         EligibilityCriterionProgress(

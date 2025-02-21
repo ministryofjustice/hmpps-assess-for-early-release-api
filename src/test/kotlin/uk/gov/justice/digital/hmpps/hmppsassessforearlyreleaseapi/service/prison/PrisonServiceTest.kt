@@ -8,6 +8,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonApiUserDetails
 import java.time.LocalDate
 
@@ -45,6 +46,9 @@ class PrisonServiceTest {
         firstName = "firstname: $index",
         lastName = "lastname1",
         dateOfBirth = LocalDate.of(1981, 5, 23),
+        cellLocation = "A-1-002",
+        mostSeriousOffence = "Robbery",
+        prisonName = PRISON_NAME,
       )
     }
 

@@ -24,6 +24,7 @@
     <ID>LongParameterList:WebClientConfiguration.kt$WebClientConfiguration$( @Value("\${api.health-timeout:2s}") val healthTimeout: Duration, @Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String, @Value("\${hmpps.delius.api.url}") private val deliusApiUrl: String, @Value("\${hmpps.prison.api.url}") private val prisonApiUrl: String, @Value("\${hmpps.prisonregister.api.url}") private val prisonRegisterApiUrl: String, @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String, @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String, @Value("\${os.places.api.url}") private val osPlacesApiUrl: String, @Value("\${gotenberg.api.url}") private val gotenbergHost: String, @Value("\${hmpps.govuk.api.url}") private val govUkApiUrl: String, )</ID>
     <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
     <ID>TooManyFunctions:AddressService.kt$AddressService</ID>
+    <ID>TooManyFunctions:AssessmentService.kt$AssessmentService</ID>
     <ID>TooManyFunctions:ResidentialChecksService.kt$ResidentialChecksService</ID>
   </CurrentIssues>
 </SmellBaseline>

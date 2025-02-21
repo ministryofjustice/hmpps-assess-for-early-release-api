@@ -27,69 +27,51 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import java.time.LocalDate
 
 @Service
 class AssessmentService(
   private val policyService: PolicyService,
-  private val prisonService: PrisonService,
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
+  private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
 ) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
+  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
+    ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+
   @Transactional
-  fun getCurrentAssessment(prisonNumber: String): AssessmentWithEligibilityProgress {
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+  fun getCurrentAssessment(prisonNumber: String) = getOffender(prisonNumber).currentAssessment()
+
+  @Transactional
+  fun getCurrentAssessmentWithEligibilityProgress(prisonNumber: String): AssessmentWithEligibilityProgress {
+    val offender = getOffender(prisonNumber)
 
     val currentAssessment = offender.currentAssessment()
     val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
     return AssessmentWithEligibilityProgress(
       assessmentEntity = currentAssessment,
-      prison = prisonService.getPrisonNameForId(offender.prisonId),
       policy = policy,
     )
   }
 
   @Transactional
   fun getCurrentAssessmentSummary(prisonNumber: String): AssessmentSummary {
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-
-    val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
-    val currentAssessment = offender.currentAssessment()
-    return AssessmentSummary(
-      forename = offender.forename,
-      surname = offender.surname,
-      dateOfBirth = offender.dateOfBirth,
-      prisonNumber = offender.prisonNumber,
-      hdced = offender.hdced,
-      crd = offender.crd,
-      location = prisonName,
-      status = currentAssessment.status,
-      responsibleCom = currentAssessment.responsibleCom?.toSummary(),
-      team = currentAssessment.team,
-      policyVersion = currentAssessment.policyVersion,
-      optOutReasonType = currentAssessment.optOutReasonType,
-      optOutReasonOther = currentAssessment.optOutReasonOther,
-      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
-      },
-    )
+    val offender = getOffender(prisonNumber)
+    return offenderToAssessmentSummaryMapper.map(offender)
   }
 
   @Transactional
@@ -100,7 +82,7 @@ class AssessmentService(
 
   @Transactional
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
 
     assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone, postponeCaseRequest.agent.toEntity())
 
@@ -116,7 +98,8 @@ class AssessmentService(
 
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
+    assessmentEntity.performTransition(OptOut, optOutRequest.agent.toEntity())
     assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agent.toEntity())
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
@@ -125,21 +108,21 @@ class AssessmentService(
 
   @Transactional
   fun optBackIn(prisonNumber: String, agent: Agent) {
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(OptBackIn, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitAssessmentForAddressChecks(prisonNumber: String, agent: Agent) {
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(SubmitForAddressChecks, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
   fun submitForPreDecisionChecks(prisonNumber: String, agent: Agent) {
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(CompleteAddressChecks, agent.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
@@ -148,7 +131,7 @@ class AssessmentService(
   fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest) {
     val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
 
-    val assessmentEntity = getCurrentAssessment(prisonNumber).assessmentEntity
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
 
     if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
@@ -170,7 +153,6 @@ class AssessmentService(
 
   data class AssessmentWithEligibilityProgress(
     val assessmentEntity: Assessment,
-    val prison: String,
     val policy: Policy,
   ) {
     val offender: Offender = assessmentEntity.offender

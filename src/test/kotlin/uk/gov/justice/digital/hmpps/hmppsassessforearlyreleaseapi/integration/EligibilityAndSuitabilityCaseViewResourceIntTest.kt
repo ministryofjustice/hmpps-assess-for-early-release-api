@@ -11,6 +11,7 @@ import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
@@ -21,7 +22,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
 
 private const val GET_ELIGIBILITY_AND_SUITABILITY_VIEW_URL =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability"
@@ -75,6 +78,24 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     @Test
     fun `should return the eligibility criterion for an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = TestData.PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
 
       webTestClient.get()
         .uri(GET_ELIGIBILITY_AND_SUITABILITY_VIEW_URL)
@@ -123,8 +144,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     )
     @Test
     fun `request non existent code`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.get()
         .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("some-invalid-code"))
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -140,6 +159,24 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     @Test
     fun `should return the initial checks for an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = TestData.PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
 
       webTestClient.get()
         .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("sex-offender-register"))
@@ -188,8 +225,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     )
     @Test
     fun `request non-existent code`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       webTestClient.get()
         .uri(GET_SUITABILITY_CRITERION_VIEW_URL("some-invalid-code"))
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -205,6 +240,24 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     @Test
     fun `should return the suitability criterion for an offender`() {
       prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = TestData.PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
 
       webTestClient.get()
         .uri(GET_SUITABILITY_CRITERION_VIEW_URL("category-a"))
@@ -263,8 +316,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       "classpath:test_data/an-offender-with-eligibility-checks.sql",
     )
     fun `can update a criterion check result`() {
-      prisonRegisterMockServer.stubGetPrisons()
-
       run {
         val criterionView = webTestClient.get()
           .uri(GET_SUITABILITY_CRITERION_VIEW_URL("category-a"))
@@ -313,8 +364,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         agent = Agent("a user", UserRole.PRISON_CA, "ZJW"),
       )
 
-      prisonRegisterMockServer.stubGetPrisons()
-
       run {
         val criterionView = webTestClient.get()
           .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("recalled-for-breaching-hdc-curfew"))
@@ -356,18 +405,21 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
   ).readText()
 
   private companion object {
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
     val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
       prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
       prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
     }
   }
 }
