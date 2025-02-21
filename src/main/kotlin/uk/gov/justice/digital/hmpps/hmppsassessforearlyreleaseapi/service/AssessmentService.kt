@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -17,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
@@ -50,7 +50,7 @@ class AssessmentService(
   }
 
   private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
-    ?: throw EntityNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
+    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 
   @Transactional
   fun getCurrentAssessment(prisonNumber: String) = getOffender(prisonNumber).currentAssessment()

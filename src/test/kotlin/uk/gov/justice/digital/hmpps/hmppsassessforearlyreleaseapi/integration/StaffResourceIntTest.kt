@@ -84,7 +84,7 @@ class StaffResourceIntTest : SqsIntegrationTestBase() {
         .returnResult().responseBody
 
       assertThat(exception?.status).isEqualTo(HttpStatus.NOT_FOUND.value())
-      assertThat(exception?.userMessage).isEqualTo("Could not find entity: Cannot find staff with username $USERNAME")
+      assertThat(exception?.userMessage).isEqualTo("Item not found exception: Cannot find staff with username $USERNAME")
     }
   }
 
@@ -147,7 +147,7 @@ class StaffResourceIntTest : SqsIntegrationTestBase() {
         .returnResult().responseBody
 
       assertThat(exception?.status).isEqualTo(HttpStatus.NOT_FOUND.value())
-      assertThat(exception?.userMessage).isEqualTo("Could not find entity: Cannot find staff with username $USERNAME")
+      assertThat(exception?.userMessage).isEqualTo("Item not found exception: Cannot find staff with username $USERNAME")
     }
   }
 
