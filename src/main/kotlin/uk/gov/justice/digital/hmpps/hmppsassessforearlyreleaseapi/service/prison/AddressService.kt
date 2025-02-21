@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 
-import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
@@ -10,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasChec
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
@@ -117,10 +117,10 @@ class AddressService(
   fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long) {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
-        ?: throw EntityNotFoundException("Cannot find standard address check request with id: $requestId")
+        ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
 
     if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw EntityNotFoundException(
+      throw ItemNotFoundException(
         "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
@@ -190,10 +190,10 @@ class AddressService(
   fun getCurfewAddressCheckRequest(requestId: Long, prisonNumber: String): CurfewAddressCheckRequest {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
-        ?: throw EntityNotFoundException("Cannot find curfew address check request with id: $requestId")
+        ?: throw ItemNotFoundException("Cannot find curfew address check request with id: $requestId")
 
     if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
-      throw EntityNotFoundException(
+      throw ItemNotFoundException(
         "Curfew address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
@@ -203,7 +203,7 @@ class AddressService(
   private fun getStandardAddressCheckRequest(requestId: Long, prisonNumber: String): StandardAddressCheckRequest {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     if (curfewAddressCheckRequest !is StandardAddressCheckRequest) {
-      throw EntityNotFoundException("Cannot find a standard address check request with id: $requestId")
+      throw ItemNotFoundException("Cannot find a standard address check request with id: $requestId")
     }
     return curfewAddressCheckRequest
   }
