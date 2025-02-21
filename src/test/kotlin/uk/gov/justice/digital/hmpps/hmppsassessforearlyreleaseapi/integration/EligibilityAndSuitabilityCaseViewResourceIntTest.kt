@@ -10,6 +10,7 @@ import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
@@ -76,6 +77,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     )
     @Test
     fun `should return the eligibility criterion for an offender`() {
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -156,6 +158,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     )
     @Test
     fun `should return the initial checks for an offender`() {
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -236,6 +239,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
     )
     @Test
     fun `should return the suitability criterion for an offender`() {
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -402,16 +406,19 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
   private companion object {
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
+      prisonRegisterMockServer.start()
       prisonerSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
+      prisonRegisterMockServer.stop()
       prisonerSearchApiMockServer.stop()
     }
   }

@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -26,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -60,6 +62,7 @@ class EligibilityAndSuitabilityServiceTest {
         anAssessmentWithNoProgress(),
       )
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+      whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
       // When
       val caseView = service.getCaseView(PRISON_NUMBER)
@@ -95,6 +98,7 @@ class EligibilityAndSuitabilityServiceTest {
         anAssessmentWithEligibilityProgress,
       )
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+      whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.suitabilityCriteria[0]
       val criterion2 = POLICY_1_0.suitabilityCriteria[1]
@@ -156,6 +160,7 @@ class EligibilityAndSuitabilityServiceTest {
         anAssessmentWithEligibilityProgress,
       )
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+      whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
       val criterion1 = POLICY_1_0.eligibilityCriteria[0]
       val criterion2 = POLICY_1_0.eligibilityCriteria[1]

@@ -3,13 +3,15 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
@@ -26,7 +28,7 @@ class OffenderToAssessmentSummaryMapperTest {
     // Given
     val offender = anOffender()
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
-
+    whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
     // When
     val result = toTest.map(offender)
 
@@ -46,8 +48,8 @@ class OffenderToAssessmentSummaryMapperTest {
     }
 
     // Assert
-    assertThat(result).isExactlyInstanceOf(PrisonerNotFoundException::class.java)
-    assertThat((result as PrisonerNotFoundException).prisonCode).isEqualTo(PRISON_NUMBER)
+    assertThat(result).isExactlyInstanceOf(ItemNotFoundException::class.java)
+    assertThat((result as ItemNotFoundException).message).isEqualTo("Could not find prisoner details for A1234AA")
   }
 
   private fun assertAssessmentSummary(

@@ -12,6 +12,7 @@ import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
@@ -72,6 +73,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return the residential checks for an offender`() {
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -137,6 +139,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return the residential check task info for an assessment and task code`() {
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -321,16 +324,19 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
 
   private companion object {
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
+      prisonRegisterMockServer.start()
       prisonerSearchApiMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
+      prisonRegisterMockServer.stop()
       prisonerSearchApiMockServer.stop()
     }
   }

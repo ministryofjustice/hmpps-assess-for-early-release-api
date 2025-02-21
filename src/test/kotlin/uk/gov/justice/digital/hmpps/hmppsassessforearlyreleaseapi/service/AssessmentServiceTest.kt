@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
 import org.mockito.kotlin.argumentCaptor
@@ -64,6 +65,7 @@ class AssessmentServiceTest {
     val offender = anOffender(hdced)
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+    whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
     // When
     val assessment = service.getCurrentAssessmentSummary(PRISON_NUMBER)

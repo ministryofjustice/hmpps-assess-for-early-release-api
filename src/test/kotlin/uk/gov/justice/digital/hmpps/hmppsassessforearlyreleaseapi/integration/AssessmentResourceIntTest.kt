@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
@@ -98,7 +99,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return the current assessment for an offender`() {
       // Given
-
+      prisonRegisterMockServer.stubGetPrisons()
       prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
         objectMapper.writeValueAsString(
           listOf(
@@ -544,17 +545,20 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   private companion object {
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
       prisonerSearchApiMockServer.start()
+      prisonRegisterMockServer.start()
     }
 
     @JvmStatic
     @AfterAll
     fun stopMocks() {
       prisonerSearchApiMockServer.stop()
+      prisonRegisterMockServer.stop()
     }
   }
 }

@@ -2,11 +2,12 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.PrisonerNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 
 @Component
 class OffenderToAssessmentSummaryMapper(
@@ -15,10 +16,9 @@ class OffenderToAssessmentSummaryMapper(
 
   fun map(offender: Offender): AssessmentSummary {
     val currentAssessment = offender.currentAssessment()
-    val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
-    if (prisonerSearchResults.isEmpty()) {
-      throw PrisonerNotFoundException(offender.prisonNumber)
-    }
+    val prisonerSearchResults = getPrisonerDetails(offender)
+    val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
+
     val prisonerDetails = prisonerSearchResults.first()
     return AssessmentSummary(
       forename = offender.forename,
@@ -27,7 +27,7 @@ class OffenderToAssessmentSummaryMapper(
       prisonNumber = offender.prisonNumber,
       hdced = offender.hdced,
       crd = offender.crd,
-      location = prisonerDetails.prisonName,
+      location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
       team = currentAssessment.team,
@@ -40,5 +40,13 @@ class OffenderToAssessmentSummaryMapper(
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
     )
+  }
+
+  private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
+    val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
+    if (prisonerSearchResults.isEmpty()) {
+      throw ItemNotFoundException("Could not find prisoner details for ${offender.prisonNumber}")
+    }
+    return prisonerSearchResults
   }
 }
