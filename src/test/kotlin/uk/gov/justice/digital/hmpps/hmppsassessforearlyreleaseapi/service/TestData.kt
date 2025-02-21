@@ -83,7 +83,6 @@ object TestData {
     return offender
   }
 
-
   val saveResidentialChecksTaskAnswersRequest =
     SaveResidentialChecksTaskAnswersRequest(
       taskCode = "address-details-and-informed-consent",

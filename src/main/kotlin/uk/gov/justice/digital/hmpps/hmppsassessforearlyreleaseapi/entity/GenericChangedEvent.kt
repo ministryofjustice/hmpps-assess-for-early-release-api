@@ -4,7 +4,6 @@ import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
-import java.util.Objects
 
 @Entity
 class GenericChangedEvent<T>(
@@ -41,6 +40,4 @@ class GenericChangedEvent<T>(
     if (!super.equals(other)) return false
     return true
   }
-
-  override fun hashCode(): Int = Objects.hash(id)
 }
