@@ -41,6 +41,10 @@ class StatusChangedEvent(
     if (!super.equals(other)) return false
     return true
   }
+
+  override fun hashCode(): Int {
+    return java.util.Objects.hash(super.hashCode())
+  }
 }
 
 data class StatusChange(val before: AssessmentStatus, val after: AssessmentStatus, val context: Map<String, Any>)

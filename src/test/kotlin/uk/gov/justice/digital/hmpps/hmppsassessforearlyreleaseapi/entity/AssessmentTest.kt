@@ -147,7 +147,7 @@ class AssessmentTest {
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT, context = mapOf("reason" to reasonType, "otherDescription" to otherDescription)),
-      StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE, context = mapOf("prisonNumber" to assessment.offender.prisonNumber)),
+      StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE, context = emptyMap()),
     )
   }
 
@@ -188,7 +188,7 @@ class AssessmentTest {
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = fromState, after = AssessmentStatus.POSTPONED, context = emptyMap()),
+      StatusChange(before = fromState, after = POSTPONED, context = emptyMap()),
     )
   }
 

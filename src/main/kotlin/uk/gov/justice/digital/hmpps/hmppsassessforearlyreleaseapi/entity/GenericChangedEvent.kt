@@ -40,4 +40,8 @@ class GenericChangedEvent<T>(
     if (!super.equals(other)) return false
     return true
   }
+
+  override fun hashCode(): Int {
+    return java.util.Objects.hash(super.hashCode())
+  }
 }
