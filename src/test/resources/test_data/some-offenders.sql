@@ -10,10 +10,10 @@ values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', current_date + 
 
 insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date)
 values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18'),
-       ((select id from offender where booking_id = 20), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 20), 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', null, null,null),
        ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
-       ((select id from offender where booking_id = 40), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
-       ((select id from offender where booking_id = 50), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
+       ((select id from offender where booking_id = 40), 'AWAITING_PRE_DECISION_CHECKS', '1.0',null,null,null),
+       ((select id from offender where booking_id = 50), 'AWAITING_PRE_RELEASE_CHECKS', '1.0',null,null,null),
        ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
        ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason',null);
 
