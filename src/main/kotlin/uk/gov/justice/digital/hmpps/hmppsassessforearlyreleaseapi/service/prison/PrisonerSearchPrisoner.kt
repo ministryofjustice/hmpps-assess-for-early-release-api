@@ -24,9 +24,9 @@ data class PrisonerSearchPrisoner(
 
   val dateOfBirth: LocalDate,
 
-  val cellLocation: String,
+  val cellLocation: String? = null,
 
-  val mostSeriousOffence: String,
+  val mostSeriousOffence: String? = null,
 
   val prisonName: String,
 )

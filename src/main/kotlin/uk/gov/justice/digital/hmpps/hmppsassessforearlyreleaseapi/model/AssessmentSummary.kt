@@ -53,9 +53,9 @@ data class AssessmentSummary(
   @Schema(description = "The opt out reason description if rhe optOutReasonType is OTHER")
   var optOutReasonOther: String? = null,
 
-  @Schema(description = "Prisoner cell location", example = "A-1-002", required = true)
-  val cellLocation: String,
+  @Schema(description = "Prisoner cell location", example = "A-1-002", required = false)
+  val cellLocation: String?,
 
-  @Schema(description = "The main offense also know as the most serious offence", example = "Robbery", required = true)
-  val mainOffense: String,
+  @Schema(description = "The main offense also know as the most serious offence", example = "Robbery", required = false)
+  val mainOffense: String?,
 )
