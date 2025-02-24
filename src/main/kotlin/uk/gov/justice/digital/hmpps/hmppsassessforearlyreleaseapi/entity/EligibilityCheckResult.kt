@@ -57,8 +57,7 @@ data class EligibilityCheckResult(
   val questionAnswers: Map<String, Boolean>,
 ) {
   @Override
-  override fun toString(): String =
-    this::class.simpleName + "(id: $id, criterionType: $criterionType, criterionCode: $criterionCode, criterionMet: $criterionMet, questionAnswers: $questionAnswers, criterionVersion: $criterionVersion)"
+  override fun toString(): String = this::class.simpleName + "(id: $id, criterionType: $criterionType, criterionCode: $criterionCode, criterionMet: $criterionMet, questionAnswers: $questionAnswers, criterionVersion: $criterionVersion)"
 
   @Override
   override fun hashCode(): Int = javaClass.hashCode()

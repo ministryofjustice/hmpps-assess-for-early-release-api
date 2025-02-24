@@ -202,8 +202,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.address.uprn).isEqualTo(uprn)
     }
 
-    private fun anAddStandardAddressCheckRequest(): AddStandardAddressCheckRequest =
-      AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
+    private fun anAddStandardAddressCheckRequest(): AddStandardAddressCheckRequest = AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
   }
 
   @Nested
@@ -322,8 +321,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
     }
 
-    private fun aAddCasCheckRequest(): AddCasCheckRequest =
-      AddCasCheckRequest(caInfo, ppInfo, priority)
+    private fun aAddCasCheckRequest(): AddCasCheckRequest = AddCasCheckRequest(caInfo, ppInfo, priority)
   }
 
   @Nested
@@ -536,11 +534,10 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .jsonPath("$.userMessage").isEqualTo("Unexpected error: 400 BAD_REQUEST \"Validation failure\"")
     }
 
-    private fun anAddResidentRequest(): List<AddResidentRequest> =
-      listOf(
-        AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
-        AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
-      )
+    private fun anAddResidentRequest(): List<AddResidentRequest> = listOf(
+      AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
+      AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
+    )
   }
 
   @Nested

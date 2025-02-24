@@ -26,14 +26,12 @@ class StatusChangedEvent(
   agent = agent,
 ) {
 
-  override fun toString(): String {
-    return "StatusChangedEvent(" +
-      "id=$id, " +
-      "assessment=${assessment.id}, " +
-      "summary=$summary, " +
-      "changes=$changes, " +
-      ")"
-  }
+  override fun toString(): String = "StatusChangedEvent(" +
+    "id=$id, " +
+    "assessment=${assessment.id}, " +
+    "summary=$summary, " +
+    "changes=$changes, " +
+    ")"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -42,9 +40,7 @@ class StatusChangedEvent(
     return true
   }
 
-  override fun hashCode(): Int {
-    return super.hashCode()
-  }
+  override fun hashCode(): Int = super.hashCode()
 }
 
 data class StatusChange(val before: AssessmentStatus, val after: AssessmentStatus)
