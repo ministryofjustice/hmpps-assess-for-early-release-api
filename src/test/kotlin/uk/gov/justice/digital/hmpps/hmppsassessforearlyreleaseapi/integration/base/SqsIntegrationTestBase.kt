@@ -52,11 +52,9 @@ abstract class SqsIntegrationTestBase : IntegrationTestBase() {
     await untilCallTo { updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get() } matches { it == 0 }
   }
 
-  fun getNumberOfMessagesCurrentlyOnQueue(): Int? =
-    mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get()
+  fun getNumberOfMessagesCurrentlyOnQueue(): Int? = mergeOffenderQueue.sqsClient.countMessagesOnQueue(mergeOffenderQueue.queueUrl).get()
 
-  fun getNumberOfMessagesCurrentlyOnUpdateComQueue(): Int? =
-    updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get()
+  fun getNumberOfMessagesCurrentlyOnUpdateComQueue(): Int? = updateComQueue.sqsClient.countMessagesOnQueue(updateComQueue.queueUrl).get()
 
   companion object {
     private val localStackContainer = LocalStackContainer.instance

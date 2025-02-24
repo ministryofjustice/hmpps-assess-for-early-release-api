@@ -410,8 +410,7 @@ sealed interface SideEffect {
 }
 
 sealed class AssessmentLifecycleEvent {
-  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) :
-    AssessmentLifecycleEvent()
+  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) : AssessmentLifecycleEvent()
 
   data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus) : AssessmentLifecycleEvent()
 

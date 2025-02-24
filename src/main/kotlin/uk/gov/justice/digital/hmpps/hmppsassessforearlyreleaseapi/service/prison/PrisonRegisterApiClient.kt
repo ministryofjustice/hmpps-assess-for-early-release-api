@@ -10,13 +10,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeRe
 @Service
 class PrisonRegisterApiClient(@Qualifier("prisonRegisterClient") val prisonRegisterApiWebClient: WebClient) {
   @Cacheable("prisons")
-  fun getPrisons(): List<Prison> {
-    return prisonRegisterApiWebClient
-      .get()
-      .uri("/prisons")
-      .accept(MediaType.APPLICATION_JSON)
-      .retrieve()
-      .bodyToMono(typeReference<List<Prison>>())
-      .block() ?: emptyList()
-  }
+  fun getPrisons(): List<Prison> = prisonRegisterApiWebClient
+    .get()
+    .uri("/prisons")
+    .accept(MediaType.APPLICATION_JSON)
+    .retrieve()
+    .bodyToMono(typeReference<List<Prison>>())
+    .block() ?: emptyList()
 }
