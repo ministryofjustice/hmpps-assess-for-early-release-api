@@ -164,6 +164,17 @@ data class Assessment(
     }
   }
 
+  fun <T> recordGenericChangedEvent(changes: T, eventType: AssessmentEventType, agent: Agent) {
+    val genericChangedEvent = GenericChangedEvent(
+      assessment = this,
+      changes = changes,
+      eventType = eventType,
+      agent = agent
+    )
+    this.assessmentEvents.add(genericChangedEvent)
+    this.lastUpdatedTimestamp = LocalDateTime.now()
+  }
+
   fun currentTask(): Task? {
     val tasksForAssessmentStatus = status.tasks().values.flatten()
     val availableTasks = tasksForAssessmentStatus.filter {

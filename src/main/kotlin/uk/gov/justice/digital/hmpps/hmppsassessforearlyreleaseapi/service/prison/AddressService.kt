@@ -4,11 +4,7 @@ import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
@@ -142,6 +138,7 @@ class AddressService(
     // Delete residents not present in addResidentsRequest
     if (residentsToDelete.isNotEmpty()) {
       residentRepository.deleteAll(residentsToDelete)
+      addressCheckRequest.assessment.recordGenericChangedEvent(residentsToDelete, AssessmentEventType.RESIDENT_DELETED, Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name))
     }
 
     val residentsToSave = addResidentsRequest.map { addResidentRequest ->
@@ -157,6 +154,8 @@ class AddressService(
         isMainResident = addResidentRequest.isMainResident
         isOffender = addResidentRequest.isOffender
         standardAddressCheckRequest = addressCheckRequest
+        addressCheckRequest.assessment.recordGenericChangedEvent(this, AssessmentEventType.RESIDENT_EDITED, Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name))
+
       }
         ?: Resident(
           forename = addResidentRequest.forename,
@@ -168,7 +167,9 @@ class AddressService(
           isMainResident = addResidentRequest.isMainResident,
           isOffender = addResidentRequest.isOffender,
           standardAddressCheckRequest = addressCheckRequest,
-        )
+        ).also {
+          addressCheckRequest.assessment.recordGenericChangedEvent(it, AssessmentEventType.RESIDENT_ADDED, Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name))
+        }
     }
 
     val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
