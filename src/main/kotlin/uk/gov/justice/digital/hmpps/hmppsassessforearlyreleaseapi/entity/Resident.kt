@@ -68,7 +68,5 @@ annotation class ValidRelation(
 )
 
 class RelationValidator : ConstraintValidator<ValidRelation, Resident> {
-  override fun isValid(resident: Resident, context: ConstraintValidatorContext): Boolean {
-    return resident.isOffender || !resident.relation.isNullOrBlank()
-  }
+  override fun isValid(resident: Resident, context: ConstraintValidatorContext): Boolean = resident.isOffender || !resident.relation.isNullOrBlank()
 }

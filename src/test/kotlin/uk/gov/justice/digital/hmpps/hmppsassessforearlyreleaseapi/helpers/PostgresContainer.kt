@@ -14,27 +14,24 @@ object PostgresContainer {
 
   val instance: PostgreSQLContainer<Nothing>? by lazy { startPostgresqlContainer() }
 
-  private fun startPostgresqlContainer(): PostgreSQLContainer<Nothing>? =
-
-    if (checkPostgresRunning().not()) {
-      PostgreSQLContainer<Nothing>("postgres:16.3").apply {
-        withEnv("HOSTNAME_EXTERNAL", "localhost")
-        withDatabaseName(DB_NAME)
-        withUsername(DB_USERNAME)
-        withPassword(DB_PASSWORD)
-        setWaitStrategy(Wait.forListeningPort())
-        withReuse(true)
-        start()
-      }
-    } else {
-      null
+  private fun startPostgresqlContainer(): PostgreSQLContainer<Nothing>? = if (checkPostgresRunning().not()) {
+    PostgreSQLContainer<Nothing>("postgres:16.3").apply {
+      withEnv("HOSTNAME_EXTERNAL", "localhost")
+      withDatabaseName(DB_NAME)
+      withUsername(DB_USERNAME)
+      withPassword(DB_PASSWORD)
+      setWaitStrategy(Wait.forListeningPort())
+      withReuse(true)
+      start()
     }
+  } else {
+    null
+  }
 
-  private fun checkPostgresRunning(): Boolean =
-    try {
-      val serverSocket = ServerSocket(DB_DEFAULT_PORT)
-      serverSocket.localPort == 0
-    } catch (e: IOException) {
-      true
-    }
+  private fun checkPostgresRunning(): Boolean = try {
+    val serverSocket = ServerSocket(DB_DEFAULT_PORT)
+    serverSocket.localPort == 0
+  } catch (e: IOException) {
+    true
+  }
 }

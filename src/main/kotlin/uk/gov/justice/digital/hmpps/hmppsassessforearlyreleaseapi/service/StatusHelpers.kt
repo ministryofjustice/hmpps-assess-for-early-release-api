@@ -28,11 +28,9 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
-  fun List<SuitabilityCriterionProgress>.getUnsuitableReasons() =
-    this.filter { it.status == UNSUITABLE }.map { it.taskName }
+  fun List<SuitabilityCriterionProgress>.getUnsuitableReasons() = this.filter { it.status == UNSUITABLE }.map { it.taskName }
 
-  fun List<EligibilityCriterionProgress>.getIneligibleReasons() =
-    this.filter { it.status == INELIGIBLE }.map { it.taskName }
+  fun List<EligibilityCriterionProgress>.getIneligibleReasons() = this.filter { it.status == INELIGIBLE }.map { it.taskName }
 
   fun AssessmentWithEligibilityProgress.calculateAggregateEligibilityStatus(): EligibilityStatus {
     val eligibility = getEligibilityProgress()
@@ -56,16 +54,13 @@ object StatusHelpers {
     }
   }
 
-  fun EligibilityCheckResult?.getEligibilityStatus() =
-    this?.let {
-      if (it.criterionMet) ELIGIBLE else INELIGIBLE
-    } ?: NOT_STARTED
+  fun EligibilityCheckResult?.getEligibilityStatus() = this?.let {
+    if (it.criterionMet) ELIGIBLE else INELIGIBLE
+  } ?: NOT_STARTED
 
-  fun EligibilityCheckResult?.getSuitabilityStatus() =
-    this?.let {
-      if (it.criterionMet) SUITABLE else UNSUITABLE
-    } ?: SuitabilityStatus.NOT_STARTED
+  fun EligibilityCheckResult?.getSuitabilityStatus() = this?.let {
+    if (it.criterionMet) SUITABLE else UNSUITABLE
+  } ?: SuitabilityStatus.NOT_STARTED
 
-  fun EligibilityCheckResult?.getAnswer(questionName: String) =
-    this?.let { questionAnswers[questionName] }
+  fun EligibilityCheckResult?.getAnswer(questionName: String) = this?.let { questionAnswers[questionName] }
 }

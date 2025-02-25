@@ -76,7 +76,5 @@ class FormResource(
       ),
     ],
   )
-  fun getPdf(@RequestParam title: String, @RequestParam message: String): ByteArray? {
-    return pdfService.generatePdf(title, message)
-  }
+  fun getPdf(@RequestParam title: String, @RequestParam message: String): ByteArray? = pdfService.generatePdf(title, message)
 }

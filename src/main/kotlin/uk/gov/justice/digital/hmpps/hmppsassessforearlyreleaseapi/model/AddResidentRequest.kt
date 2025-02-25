@@ -51,7 +51,5 @@ annotation class ValidRelation(
 )
 
 class RelationValidator : ConstraintValidator<ValidRelation, AddResidentRequest> {
-  override fun isValid(request: AddResidentRequest, context: ConstraintValidatorContext): Boolean {
-    return request.isOffender || !request.relation.isNullOrBlank()
-  }
+  override fun isValid(request: AddResidentRequest, context: ConstraintValidatorContext): Boolean = request.isOffender || !request.relation.isNullOrBlank()
 }

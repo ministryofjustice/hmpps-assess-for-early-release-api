@@ -131,8 +131,7 @@ class StatusHelpersTest {
 
     private fun overallStatus(
       assessmentWithEligibilityProgress: AssessmentWithEligibilityProgress,
-    ): AbstractComparableAssert<*, EligibilityStatus> =
-      assertThat(assessmentWithEligibilityProgress.calculateAggregateEligibilityStatus())
+    ): AbstractComparableAssert<*, EligibilityStatus> = assertThat(assessmentWithEligibilityProgress.calculateAggregateEligibilityStatus())
   }
 
   @Nested
