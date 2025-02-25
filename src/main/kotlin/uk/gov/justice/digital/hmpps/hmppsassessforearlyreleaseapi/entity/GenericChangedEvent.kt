@@ -26,15 +26,13 @@ class GenericChangedEvent(
   agent = agent,
 ) {
 
-  override fun toString(): String {
-    return "GenericChangedEvent(" +
-      "id=$id, " +
-      "assessment=${assessment.id}, " +
-      "eventType=$eventType, " +
-      "summary=$summary, " +
-      "changes=$changes, " +
-      ")"
-  }
+  override fun toString(): String = "GenericChangedEvent(" +
+    "id=$id, " +
+    "assessment=${assessment.id}, " +
+    "eventType=$eventType, " +
+    "summary=$summary, " +
+    "changes=$changes, " +
+    ")"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
@@ -43,7 +41,5 @@ class GenericChangedEvent(
     return true
   }
 
-  override fun hashCode(): Int {
-    return super.hashCode()
-  }
+  override fun hashCode(): Int = super.hashCode()
 }
