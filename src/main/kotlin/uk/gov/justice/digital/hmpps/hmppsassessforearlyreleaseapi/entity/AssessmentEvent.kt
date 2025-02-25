@@ -30,7 +30,7 @@ enum class AssessmentEventType {
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorFormula(
   "CASE WHEN event_type = 'STATUS_CHANGE' THEN 'STATUS_CHANGE' " +
-    " else 'GENERIC_EVENT' end",
+    " ELSE 'GENERIC_EVENT' END",
   discriminatorType = DiscriminatorType.STRING,
 )
 abstract class AssessmentEvent(
