@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.Item
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
@@ -32,6 +33,7 @@ class AddressServiceTest {
   private val osPlacesApiClient = mock<OsPlacesApiClient>()
   private val residentRepository = mock<ResidentRepository>()
   private val standardAddressCheckRequestRepository = mock<StandardAddressCheckRequestRepository>()
+  private val assessmentRepository = mock<AssessmentRepository>()
 
   private val addressService = AddressService(
     addressRepository,
@@ -42,6 +44,7 @@ class AddressServiceTest {
     osPlacesApiClient,
     standardAddressCheckRequestRepository,
     residentRepository,
+    assessmentRepository,
   )
 
   @Test

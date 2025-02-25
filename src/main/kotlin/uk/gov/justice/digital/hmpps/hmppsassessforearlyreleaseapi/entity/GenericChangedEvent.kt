@@ -2,17 +2,19 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 
 @Entity
-class GenericChangedEvent<T>(
+@DiscriminatorValue(value = "GENERIC_EVENT")
+class GenericChangedEvent(
   id: Long = -1L,
   assessment: Assessment,
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val changes: T,
+  val changes: Map<String, Any>,
 
   eventType: AssessmentEventType,
   agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
@@ -20,7 +22,7 @@ class GenericChangedEvent<T>(
   id = id,
   assessment = assessment,
   eventType = eventType,
-  summary = "generic change event with data: '$changes'",
+  summary = "generic change event with type: $eventType",
   agent = agent,
 ) {
 
@@ -36,7 +38,7 @@ class GenericChangedEvent<T>(
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (other !is GenericChangedEvent<*>) return false
+    if (other !is GenericChangedEvent) return false
     if (!super.equals(other)) return false
     return true
   }
