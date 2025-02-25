@@ -65,16 +65,15 @@ fun OsPlacesApiDPA.getAddressFirstLine(): String {
   return firstLine
 }
 
-fun OsPlacesApiDPA.toAddress(): Address =
-  Address(
-    uprn = this.uprn,
-    firstLine = getAddressFirstLine(),
-    secondLine = this.locality,
-    town = this.postTown,
-    county = this.county,
-    postcode = this.postcode,
-    country = this.countryDescription.split("\\s+".toRegex()).last(),
-    xCoordinate = this.xCoordinate,
-    yCoordinate = this.yCoordinate,
-    addressLastUpdated = this.lastUpdateDate,
-  )
+fun OsPlacesApiDPA.toAddress(): Address = Address(
+  uprn = this.uprn,
+  firstLine = getAddressFirstLine(),
+  secondLine = this.locality,
+  town = this.postTown,
+  county = this.county,
+  postcode = this.postcode,
+  country = this.countryDescription.split("\\s+".toRegex()).last(),
+  xCoordinate = this.xCoordinate,
+  yCoordinate = this.yCoordinate,
+  addressLastUpdated = this.lastUpdateDate,
+)

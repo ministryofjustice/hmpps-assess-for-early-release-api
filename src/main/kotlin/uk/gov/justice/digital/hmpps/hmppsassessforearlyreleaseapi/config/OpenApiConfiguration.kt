@@ -57,41 +57,39 @@ class OpenApiConfiguration(buildProperties: BuildProperties) {
     .name("Authorization").description("A HMPPS Auth access token with the `$role` role.")
 
   @Bean
-  fun preAuthorizeCustomizer(): OperationCustomizer {
-    return OperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
-      // Get PreAuthorize for method or fallback to class annotation
-      (
-        handlerMethod.getMethodAnnotation(PreAuthorize::class.java)?.value ?: handlerMethod.beanType.getAnnotation(
-          PreAuthorize::class.java,
-        )?.value
-        )?.let {
-        val preAuthExp = SpelExpressionParser().parseExpression(it)
-        val spelEvalContext = StandardEvaluationContext()
-        spelEvalContext.beanResolver = BeanFactoryResolver(context)
-        spelEvalContext.setRootObject(
-          object {
-            fun hasRole(role: String) = listOf(role)
-            fun hasAnyRole(vararg roles: String) = roles.toList()
-          },
-        )
+  fun preAuthorizeCustomizer(): OperationCustomizer = OperationCustomizer { operation: Operation, handlerMethod: HandlerMethod ->
+    // Get PreAuthorize for method or fallback to class annotation
+    (
+      handlerMethod.getMethodAnnotation(PreAuthorize::class.java)?.value ?: handlerMethod.beanType.getAnnotation(
+        PreAuthorize::class.java,
+      )?.value
+      )?.let {
+      val preAuthExp = SpelExpressionParser().parseExpression(it)
+      val spelEvalContext = StandardEvaluationContext()
+      spelEvalContext.beanResolver = BeanFactoryResolver(context)
+      spelEvalContext.setRootObject(
+        object {
+          fun hasRole(role: String) = listOf(role)
+          fun hasAnyRole(vararg roles: String) = roles.toList()
+        },
+      )
 
-        val roles = try {
-          (preAuthExp.getValue(spelEvalContext) as List<*>).asListOfType<String>()
-        } catch (e: SpelEvaluationException) {
-          log.warn("Failed to process SPEL fragment", e)
-          emptyList()
-        }
-
-        if (roles.isNotEmpty()) {
-          operation.description =
-            "${operation.description ?: ""}\n\n" + "Requires one of the following roles:\n" + roles.joinToString(
-              prefix = "* ",
-              separator = "\n* ",
-            )
-        }
+      val roles = try {
+        (preAuthExp.getValue(spelEvalContext) as List<*>).asListOfType<String>()
+      } catch (e: SpelEvaluationException) {
+        log.warn("Failed to process SPEL fragment", e)
+        emptyList()
       }
-      operation
+
+      if (roles.isNotEmpty()) {
+        operation.description =
+          "${operation.description ?: ""}\n\n" + "Requires one of the following roles:\n" + roles.joinToString(
+            prefix = "* ",
+            separator = "\n* ",
+          )
+      }
     }
+    operation
   }
 
   @Bean

@@ -4,8 +4,7 @@ import org.springframework.core.ParameterizedTypeReference
 
 inline fun <reified T> typeReference() = object : ParameterizedTypeReference<T>() {}
 
-private fun properCase(word: String) =
-  if (word.isNotEmpty()) word[0].uppercase() + word.lowercase().substring(1) else word
+private fun properCase(word: String) = if (word.isNotEmpty()) word[0].uppercase() + word.lowercase().substring(1) else word
 
 /**
  * Converts a name (first name, last name, middle name, etc.) to proper case equivalent, handling double-barreled names

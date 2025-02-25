@@ -83,8 +83,7 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
   fun getResidentialChecksView(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-  ) =
-    residentialChecksService.getResidentialChecksView(prisonNumber, requestId)
+  ) = residentialChecksService.getResidentialChecksView(prisonNumber, requestId)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/residential-checks/tasks/{taskCode}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -141,8 +140,7 @@ class ResidentialChecksResource(private val residentialChecksService: Residentia
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
     @Parameter(required = true) @PathVariable taskCode: String,
-  ) =
-    residentialChecksService.getResidentialChecksTask(prisonNumber, requestId, taskCode)
+  ) = residentialChecksService.getResidentialChecksTask(prisonNumber, requestId, taskCode)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/residential-checks/answers")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
