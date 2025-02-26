@@ -1,7 +1,6 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 
 data class AddStandardAddressCheckRequestSummary(
 
