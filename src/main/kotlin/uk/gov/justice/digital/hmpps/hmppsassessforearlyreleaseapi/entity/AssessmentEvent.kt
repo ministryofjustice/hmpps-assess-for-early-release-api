@@ -23,6 +23,7 @@ import java.util.Objects
 enum class AssessmentEventType {
   STATUS_CHANGE,
   RESIDENT_UPDATED,
+  ADDRESS_UPDATED,
 }
 
 @Entity

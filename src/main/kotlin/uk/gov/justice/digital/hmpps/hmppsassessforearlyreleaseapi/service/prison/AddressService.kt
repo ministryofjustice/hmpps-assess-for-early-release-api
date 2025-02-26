@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCh
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
@@ -67,6 +68,7 @@ class AddressService(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
   ): StandardAddressCheckRequestSummary {
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
     if (address == null) {
@@ -86,6 +88,13 @@ class AddressService(
         assessment = offender.currentAssessment(),
       ),
     )
+
+    assessmentEntity.recordEvent(
+      changes = mapOf("Standard Address Check Request" to addStandardAddressCheckRequest.toSummary()),
+      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
 
     return standardAddressCheckRequest.toSummary()
   }
@@ -290,6 +299,13 @@ class AddressService(
     age = this.age,
     isMainResident = this.isMainResident,
     isOffender = this.isOffender,
+  )
+
+  private fun AddStandardAddressCheckRequest.toSummary(): AddStandardAddressCheckRequestSummary = AddStandardAddressCheckRequestSummary(
+    caAdditionalInfo = this.caAdditionalInfo,
+    ppAdditionalInfo = this.ppAdditionalInfo,
+    preferencePriority = this.preferencePriority,
+    addressUprn = this.addressUprn,
   )
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {

@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Ass
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
@@ -147,6 +148,21 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(dbAddressCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
     assertThat(dbAddressCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
     assertThat(dbAddressCheckRequest.preferencePriority).isEqualTo(preferencePriority)
+
+    val assessmentEvents = assessmentEventRepository.findByAssessmentId(dbAddressCheckRequest.assessment.id)
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
+    assertThat(firstEvent.changes["Standard Address Check Request"]).isEqualTo(
+      mapOf(
+        "caAdditionalInfo" to caAdditionalInfo,
+        "ppAdditionalInfo" to ppAdditionalInfo,
+        "preferencePriority" to preferencePriority.toString(),
+        "addressUprn" to uprn,
+      ),
+    )
   }
 
   @Sql(
