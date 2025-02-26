@@ -5,42 +5,41 @@ import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType.STATUS_CHANGE
 
 @Entity
-@DiscriminatorValue(value = "STATUS_CHANGE")
-class StatusChangedEvent(
+@DiscriminatorValue(value = "GENERIC_EVENT")
+class GenericChangedEvent(
   id: Long = -1L,
   assessment: Assessment,
 
   @Type(JsonBinaryType::class)
   @Column(columnDefinition = "jsonb")
-  val changes: StatusChange,
+  val changes: Map<String, Any>,
 
+  eventType: AssessmentEventType,
   agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,
-  eventType = STATUS_CHANGE,
-  summary = "status changed from: '${changes.before}', to: '${changes.after}'",
+  eventType = eventType,
+  summary = "generic change event with type: $eventType",
   agent = agent,
 ) {
 
-  override fun toString(): String = "StatusChangedEvent(" +
+  override fun toString(): String = "GenericChangedEvent(" +
     "id=$id, " +
     "assessment=${assessment.id}, " +
+    "eventType=$eventType, " +
     "summary=$summary, " +
     "changes=$changes, " +
     ")"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
-    if (other !is StatusChangedEvent) return false
+    if (other !is GenericChangedEvent) return false
     if (!super.equals(other)) return false
     return true
   }
 
   override fun hashCode(): Int = super.hashCode()
 }
-
-data class StatusChange(val before: AssessmentStatus, val after: AssessmentStatus, val context: Map<String, Any>)

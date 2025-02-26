@@ -16,10 +16,10 @@ data class OffenderSummary(
   val bookingId: Long,
 
   @Schema(description = "The offender's first name", example = "Bob")
-  val forename: String?,
+  val forename: String,
 
   @Schema(description = "The offender's surname", example = "Smith")
-  val surname: String?,
+  val surname: String,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
   @JsonFormat(pattern = "yyyy-MM-dd")
@@ -28,13 +28,13 @@ data class OffenderSummary(
   @Schema(description = "The number of working days until the home detention curfew eligibility date", example = "15")
   val workingDaysToHdced: Int,
 
-  @Schema(description = "The full name of the probation practitioner responsible for this offender", example = "Mark Coombes")
+  @Schema(description = "The full name of the probation practitioner responsible for this offender", example = "Mark Coombes", required = false)
   val probationPractitioner: String? = null,
 
   @Schema(description = "Whether the offender's current assessment has been postponed or not", example = "True")
   val isPostponed: Boolean = false,
 
-  @Schema(description = "The date that the offender's current assessment was postponed", example = "2028-06-23")
+  @Schema(description = "The date that the offender's current assessment was postponed", example = "2028-06-23", required = false)
   @JsonFormat(pattern = "yyyy-MM-dd")
   val postponementDate: LocalDate? = null,
 
@@ -50,6 +50,6 @@ data class OffenderSummary(
   @Schema(description = "The current task for the offender's current assessment, if there is no next task then null will be returned", example = "Assess eligibility and suitability")
   val currentTask: Task?,
 
-  @Schema(description = "The date that the current task overdue on", example = "false")
+  @Schema(description = "The date that the current task overdue on", example = "2028-06-23", required = false)
   val taskOverdueOn: LocalDate? = null,
 )

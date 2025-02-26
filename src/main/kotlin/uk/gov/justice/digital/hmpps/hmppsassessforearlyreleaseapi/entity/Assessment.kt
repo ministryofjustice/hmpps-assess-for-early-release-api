@@ -150,7 +150,7 @@ data class Assessment(
           assessmentEvents.add(
             StatusChangedEvent(
               assessment = this,
-              changes = StatusChange(before = transition.fromState.status, after = transition.toState.status),
+              changes = StatusChange(before = transition.fromState.status, after = transition.toState.status, context = event.getContext()),
               agent = agent,
             ),
           )
@@ -162,6 +162,17 @@ data class Assessment(
         transition.toState
       }
     }
+  }
+
+  fun recordEvent(eventType: AssessmentEventType, changes: Map<String, Any>, agent: Agent) {
+    val genericChangedEvent = GenericChangedEvent(
+      assessment = this,
+      changes = changes,
+      eventType = eventType,
+      agent = agent,
+    )
+    this.assessmentEvents.add(genericChangedEvent)
+    this.lastUpdatedTimestamp = LocalDateTime.now()
   }
 
   fun currentTask(): Task? {

@@ -1,7 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import jakarta.persistence.Column
-import jakarta.persistence.DiscriminatorColumn
 import jakarta.persistence.DiscriminatorType
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
@@ -17,17 +16,24 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import org.hibernate.annotations.DiscriminatorFormula
 import java.time.LocalDateTime
 import java.util.Objects
 
 enum class AssessmentEventType {
   STATUS_CHANGE,
+  RESIDENT_UPDATED,
+  ADDRESS_UPDATED,
 }
 
 @Entity
 @Table(name = "assessment_event")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "event_type", discriminatorType = DiscriminatorType.STRING)
+@DiscriminatorFormula(
+  "CASE WHEN event_type = 'STATUS_CHANGE' THEN 'STATUS_CHANGE' " +
+    " ELSE 'GENERIC_EVENT' END",
+  discriminatorType = DiscriminatorType.STRING,
+)
 abstract class AssessmentEvent(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,7 +45,7 @@ abstract class AssessmentEvent(
   val assessment: Assessment,
 
   @Enumerated(EnumType.STRING)
-  @Column(name = "event_type", insertable = false, updatable = false)
+  @Column(name = "event_type")
   var eventType: AssessmentEventType,
 
   @Embedded

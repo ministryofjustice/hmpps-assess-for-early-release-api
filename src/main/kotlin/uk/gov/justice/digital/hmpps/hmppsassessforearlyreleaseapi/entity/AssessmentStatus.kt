@@ -21,7 +21,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 enum class AssessmentStatus {
@@ -410,9 +413,12 @@ sealed interface SideEffect {
 }
 
 sealed class AssessmentLifecycleEvent {
-  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus) : AssessmentLifecycleEvent()
-
-  data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus) : AssessmentLifecycleEvent()
+  data class EligibilityAndSuitabilityAnswerProvided(val eligibilityStatus: EligibilityStatus, val type: CriteriaType, val code: String, val answers: Map<String, Boolean>) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("eligibilityStatus" to eligibilityStatus, "type" to type, "code" to code, "answers" to answers)
+  }
+  data class ResidentialCheckStatusAnswerProvided(val checkStatus: ResidentialChecksStatus, val taskCode: String, val answers: Map<String, Any>) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("checkStatus" to checkStatus, "taskCode" to taskCode, "answers" to answers)
+  }
 
   data object SubmitForAddressChecks : AssessmentLifecycleEvent()
   data object StartAddressChecks : AssessmentLifecycleEvent()
@@ -421,11 +427,17 @@ sealed class AssessmentLifecycleEvent {
   data object SubmitForDecision : AssessmentLifecycleEvent()
   data object Approve : AssessmentLifecycleEvent()
   data object Refuse : AssessmentLifecycleEvent()
-  data object OptOut : AssessmentLifecycleEvent()
+  data class OptOut(val reason: OptOutReasonType, val otherDescription: String?) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("reason" to reason as Any, "otherDescription" to (otherDescription ?: "description not provided") as Any)
+  }
   data object OptBackIn : AssessmentLifecycleEvent()
   data object Timeout : AssessmentLifecycleEvent()
-  data object Postpone : AssessmentLifecycleEvent()
+  data class Postpone(val reasonTypes: LinkedHashSet<PostponeCaseReasonType>) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("reasonTypes" to reasonTypes)
+  }
   data object ReleaseOnHDC : AssessmentLifecycleEvent()
+
+  open fun getContext(): Map<String, Any> = emptyMap()
 }
 
 val assessmentStateMachine =

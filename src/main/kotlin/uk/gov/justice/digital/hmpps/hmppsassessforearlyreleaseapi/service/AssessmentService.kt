@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
@@ -82,7 +83,7 @@ class AssessmentService(
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
 
-    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone, postponeCaseRequest.agent.toEntity())
+    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agent.toEntity())
 
     val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
       PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)
@@ -97,7 +98,7 @@ class AssessmentService(
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(OptOut, optOutRequest.agent.toEntity())
+    assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agent.toEntity())
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
     assessmentRepository.save(assessmentEntity)
@@ -125,11 +126,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, agent: Agent) {
-    val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status)
+  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest) {
+    val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(event, agent.toEntity())
+    assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
 
     if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true

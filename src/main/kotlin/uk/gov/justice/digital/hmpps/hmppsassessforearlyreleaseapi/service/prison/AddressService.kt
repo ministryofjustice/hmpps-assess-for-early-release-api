@@ -4,11 +4,16 @@ import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
@@ -20,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
@@ -41,6 +47,7 @@ class AddressService(
   private val osPlacesApiClient: OsPlacesApiClient,
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
   private val residentRepository: ResidentRepository,
+  private val assessmentRepository: AssessmentRepository,
 ) {
   fun getAddressesForPostcode(postcode: String): List<AddressSummary> = osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
 
@@ -61,6 +68,7 @@ class AddressService(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
   ): StandardAddressCheckRequestSummary {
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
     if (address == null) {
@@ -80,6 +88,13 @@ class AddressService(
         assessment = offender.currentAssessment(),
       ),
     )
+
+    assessmentEntity.recordEvent(
+      changes = mapOf("Standard Address Check Request" to addStandardAddressCheckRequest.toSummary()),
+      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
 
     return standardAddressCheckRequest.toSummary()
   }
@@ -131,6 +146,7 @@ class AddressService(
   @Transactional
   fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>): List<ResidentSummary> {
     val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
 
     // Retrieve existing residents linked to the requestId
     val existingResidents = residentRepository.findByStandardAddressCheckRequestId(requestId)
@@ -171,8 +187,14 @@ class AddressService(
         )
     }
 
-    val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
+    assessmentEntity.recordEvent(
+      changes = mapOf("Existing Residents" to existingResidents, "New Residents" to addResidentsRequest.map { it.toSummary() }),
+      eventType = AssessmentEventType.RESIDENT_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
 
+    val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
     return savedResidents.map { it!!.toSummary() }
   }
 
@@ -265,6 +287,25 @@ class AddressService(
     age = this.age,
     isMainResident = this.isMainResident,
     isOffender = this.isOffender,
+  )
+
+  private fun AddResidentRequest.toSummary(): AddResidentRequestSummary = AddResidentRequestSummary(
+    residentId = this.residentId,
+    forename = this.forename,
+    surname = this.surname,
+    phoneNumber = this.phoneNumber,
+    relation = this.relation,
+    dateOfBirth = this.dateOfBirth,
+    age = this.age,
+    isMainResident = this.isMainResident,
+    isOffender = this.isOffender,
+  )
+
+  private fun AddStandardAddressCheckRequest.toSummary(): AddStandardAddressCheckRequestSummary = AddStandardAddressCheckRequestSummary(
+    caAdditionalInfo = this.caAdditionalInfo,
+    ppAdditionalInfo = this.ppAdditionalInfo,
+    preferencePriority = this.preferencePriority,
+    addressUprn = this.addressUprn,
   )
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {

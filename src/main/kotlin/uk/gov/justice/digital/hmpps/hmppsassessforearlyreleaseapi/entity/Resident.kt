@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -47,6 +48,7 @@ data class Resident(
 
   @ManyToOne(optional = false)
   @JoinColumn(name = "standard_address_check_request_id", nullable = false)
+  @JsonIgnore
   var standardAddressCheckRequest: StandardAddressCheckRequest,
 
   @NotNull

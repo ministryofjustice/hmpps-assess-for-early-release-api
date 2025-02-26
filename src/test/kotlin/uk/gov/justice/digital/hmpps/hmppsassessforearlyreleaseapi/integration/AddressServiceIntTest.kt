@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
@@ -19,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCh
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
@@ -43,6 +46,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var residentRepository: ResidentRepository
+
+  @Autowired
+  private lateinit var assessmentEventRepository: AssessmentEventRepository
 
   @BeforeEach
   fun resetMocks() {
@@ -141,6 +147,21 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(dbAddressCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
     assertThat(dbAddressCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
     assertThat(dbAddressCheckRequest.preferencePriority).isEqualTo(preferencePriority)
+
+    val assessmentEvents = assessmentEventRepository.findByAssessmentId(dbAddressCheckRequest.assessment.id)
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
+    assertThat(firstEvent.changes["Standard Address Check Request"]).isEqualTo(
+      mapOf(
+        "caAdditionalInfo" to caAdditionalInfo,
+        "ppAdditionalInfo" to ppAdditionalInfo,
+        "preferencePriority" to preferencePriority.toString(),
+        "addressUprn" to uprn,
+      ),
+    )
   }
 
   @Sql(
@@ -242,6 +263,52 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       assertThat(isMainResident).isEqualTo(addMainResident.isMainResident)
       assertThat(relation).isEqualTo(addMainResident.relation)
     }
+
+    // Verify that the event was recorded
+    val assessmentEvents = assessmentEventRepository.findByAssessmentId(standardAddressCheckRequest.assessment.id)
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.RESIDENT_UPDATED)
+    assertThat(firstEvent.summary).isEqualTo("generic change event with type: RESIDENT_UPDATED")
+    assertThat(firstEvent.changes["New Residents"]).isEqualTo(
+      listOf(
+        mapOf(
+          "residentId" to addMainResident.residentId?.toInt(),
+          "forename" to addMainResident.forename,
+          "surname" to addMainResident.surname,
+          "phoneNumber" to addMainResident.phoneNumber,
+          "relation" to addMainResident.relation,
+          "dateOfBirth" to addMainResident.dateOfBirth.toString(),
+          "age" to addMainResident.age,
+          "isMainResident" to addMainResident.isMainResident,
+          "isOffender" to addMainResident.isOffender,
+        ),
+        mapOf(
+          "residentId" to addOtherResident1.residentId?.toInt(),
+          "forename" to addOtherResident1.forename,
+          "surname" to addOtherResident1.surname,
+          "phoneNumber" to addOtherResident1.phoneNumber,
+          "relation" to addOtherResident1.relation,
+          "dateOfBirth" to addOtherResident1.dateOfBirth.toString(),
+          "age" to addOtherResident1.age,
+          "isMainResident" to addOtherResident1.isMainResident,
+          "isOffender" to addOtherResident1.isOffender,
+        ),
+        mapOf(
+          "residentId" to addOtherResident2.residentId?.toInt(),
+          "forename" to addOtherResident2.forename,
+          "surname" to addOtherResident2.surname,
+          "phoneNumber" to addOtherResident2.phoneNumber,
+          "relation" to addOtherResident2.relation,
+          "dateOfBirth" to addOtherResident2.dateOfBirth.toString(),
+          "age" to addOtherResident2.age,
+          "isMainResident" to addOtherResident2.isMainResident,
+          "isOffender" to addOtherResident2.isOffender,
+        ),
+      ),
+    )
   }
 
   @Sql(
