@@ -98,6 +98,7 @@ class EligibilityAndSuitabilityService(
         criterion.code,
         criterionMet,
         answer.answers,
+        answer.agent,
       )
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()

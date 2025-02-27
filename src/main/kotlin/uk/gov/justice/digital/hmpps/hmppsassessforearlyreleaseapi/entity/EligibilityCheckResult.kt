@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
@@ -44,6 +45,9 @@ data class EligibilityCheckResult(
 
   @NotNull
   val criterionVersion: String,
+
+  @Embedded
+  val agent: Agent,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),

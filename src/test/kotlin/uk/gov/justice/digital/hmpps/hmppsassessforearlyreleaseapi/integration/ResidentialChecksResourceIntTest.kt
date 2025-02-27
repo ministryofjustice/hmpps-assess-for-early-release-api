@@ -9,16 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.RESIDENTIAL_CHECK_TASK_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -179,7 +178,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
           "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
           "mainOccupierConsentGiven" to "true",
         ),
-        agent = Agent("user", UserRole.PROBATION_COM, "BDF329"),
+        agent = PROBATION_COM_AGENT,
       )
 
     @Test
@@ -299,13 +298,13 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
             "informationThatCannotBeDisclosed": false
           },
           "agent": {
-            "username": "user",
+            "username": "probationUser",
+            "fullName": "probation user",
             "role": "PROBATION_COM",
-            "onBehalfOf": "BDF329"
+            "onBehalfOf": "ABC123"
           }
         }
       """.trimIndent()
-
       webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
         .header(HttpHeaders.CONTENT_TYPE, "application/json")

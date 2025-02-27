@@ -17,7 +17,7 @@ class GenericChangedEvent(
   val changes: Map<String, Any>,
 
   eventType: AssessmentEventType,
-  agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+  agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,

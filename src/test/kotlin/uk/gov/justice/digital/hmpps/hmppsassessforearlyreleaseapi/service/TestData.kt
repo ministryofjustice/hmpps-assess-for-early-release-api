@@ -37,6 +37,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProg
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -51,7 +52,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probat
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.Team
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.LinkedHashSet
 
 object TestData {
 
@@ -64,8 +64,8 @@ object TestData {
   const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
-  val PRISON_CA_AGENT = Agent("prison user", role = PRISON_CA, onBehalfOf = "KXE")
-  val PROBATION_COM_AGENT = Agent("probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val PRISON_CA_AGENT = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
+  val PROBATION_COM_AGENT = Agent("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
   val criterion = POLICY_1_0.eligibilityCriteria[0]
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)
@@ -94,7 +94,7 @@ object TestData {
         "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
         "mainOccupierConsentGiven" to "true",
       ),
-      agent = Agent("user", PROBATION_COM, "BDF329"),
+      agent = PROBATION_COM_AGENT,
     )
 
   val anPostponeCaseRequest = PostponeCaseRequest(
@@ -105,7 +105,7 @@ object TestData {
         PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
       ),
     ),
-    agent = Agent("a user", PRISON_CA, "ABC"),
+    agent = PRISON_CA_AGENT,
   )
 
   fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
@@ -152,6 +152,7 @@ object TestData {
     taskName = "task-$n",
     questions = listOf(Question("question-$n", answer = true)),
     status = ELIGIBLE,
+    agent = PRISON_CA_AGENT,
   )
 
   fun anSuitabilityCheckDetails(n: Int) = SuitabilityCriterionProgress(
@@ -159,6 +160,7 @@ object TestData {
     taskName = "task-$n",
     questions = listOf(Question("question-$n", answer = true)),
     status = SUITABLE,
+    agent = PRISON_CA_AGENT,
   )
 
   enum class ResultType { PASSED, FAILED }
@@ -243,6 +245,7 @@ object TestData {
     id = 1,
     criterionVersion = POLICY_1_0.code,
     questionAnswers = this.questions.associate { it.name to true },
+    agent = PRISON_CA_AGENT.toEntity(),
   )
 
   private fun Criterion.toFailedResult(
@@ -256,6 +259,7 @@ object TestData {
     id = 1,
     criterionVersion = POLICY_1_0.code,
     questionAnswers = this.questions.associate { it.name to false },
+    agent = PRISON_CA_AGENT.toEntity(),
   )
 
   private fun anAddress() = Address(

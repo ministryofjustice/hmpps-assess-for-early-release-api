@@ -7,13 +7,12 @@ import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
@@ -24,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckReq
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
@@ -92,7 +92,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("Standard Address Check Request" to addStandardAddressCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = SYSTEM_AGENT.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -190,7 +190,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("Existing Residents" to existingResidents, "New Residents" to addResidentsRequest.map { it.toSummary() }),
       eventType = AssessmentEventType.RESIDENT_UPDATED,
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = SYSTEM_AGENT.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
