@@ -13,8 +13,14 @@ import org.mockito.kotlin.whenever
 import org.springframework.validation.SimpleErrors
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.GenericChangedEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
@@ -22,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aRiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
@@ -30,6 +37,7 @@ class ResidentialChecksServiceTest {
   private val addressService = mock<AddressService>()
   private val assessmentService = mock<AssessmentService>()
   private val residentialChecksTaskAnswerRepository = mock<ResidentialChecksTaskAnswerRepository>()
+  private val assessmentRepository = mock<AssessmentRepository>()
   private val objectMapper = jacksonObjectMapper().registerModule(
     JavaTimeModule(),
   )
@@ -41,6 +49,7 @@ class ResidentialChecksServiceTest {
     residentialChecksTaskAnswerRepository,
     objectMapper,
     validator,
+    assessmentRepository,
   )
 
   @Test
@@ -105,6 +114,7 @@ class ResidentialChecksServiceTest {
 
   @Test
   fun `should save residential checks task answers`() {
+    val assessmentEntity = anOffender().currentAssessment()
     val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
       taskCode = "make-a-risk-management-decision",
       answers = mapOf(
@@ -115,6 +125,7 @@ class ResidentialChecksServiceTest {
       agent = PROBATION_COM_AGENT,
     )
 
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessmentEntity)
     whenever(addressService.getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)).thenReturn(
       aStandardAddressCheckRequest(),
     )
@@ -140,6 +151,23 @@ class ResidentialChecksServiceTest {
         assertThat(createdTimestamp).isNotNull()
         assertThat(lastUpdatedTimestamp).isNotNull()
       }
+    }
+
+    argumentCaptor<Assessment> {
+      verify(assessmentRepository).save(capture())
+      assertThat(firstValue.assessmentEvents).isEqualTo(
+        listOf(
+          GenericChangedEvent(
+            assessment = assessmentEntity,
+            changes = mapOf(
+              "addressCheckRequestId" to ADDRESS_REQUEST_ID,
+              "saveTaskAnswersRequest" to saveTaskAnswersRequest,
+            ),
+            eventType = AssessmentEventType.RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED,
+            agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+          ),
+        ),
+      )
     }
   }
 }
