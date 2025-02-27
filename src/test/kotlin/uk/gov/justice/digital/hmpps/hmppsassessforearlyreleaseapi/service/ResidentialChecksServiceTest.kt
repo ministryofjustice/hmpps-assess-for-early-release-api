@@ -164,7 +164,7 @@ class ResidentialChecksServiceTest {
               "saveTaskAnswersRequest" to saveTaskAnswersRequest,
             ),
             eventType = AssessmentEventType.RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED,
-            agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+            agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
           ),
         ),
       )

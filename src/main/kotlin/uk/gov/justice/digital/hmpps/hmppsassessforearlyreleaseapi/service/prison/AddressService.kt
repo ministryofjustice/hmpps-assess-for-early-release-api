@@ -8,12 +8,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddCasC
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
@@ -123,7 +125,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("CAS Check Request" to addCasCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
     )
     assessmentRepository.save(assessmentEntity)
     return casCheckRequest.toSummary()
@@ -151,7 +153,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("Delete Address Check Request Id" to requestId),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -225,7 +227,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("Case Admin Additional Information" to caseAdminInfoRequest.additionalInformation),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
     )
     assessmentRepository.save(assessmentEntity)
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)

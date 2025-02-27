@@ -110,7 +110,7 @@ class ResidentialChecksService(
     assessmentEntity.recordEvent(
       eventType = AssessmentEventType.RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED,
       changes = mapOf("addressCheckRequestId" to addressCheckRequestId, "saveTaskAnswersRequest" to saveTaskAnswersRequest),
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
     )
     assessmentRepository.save(assessmentEntity)
 
