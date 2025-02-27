@@ -9,12 +9,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 data class Agent(
   val username: String,
 
+  val fullName: String,
+
   @Enumerated(EnumType.STRING)
   val role: UserRole,
 
   val onBehalfOf: String? = null,
 ) {
   companion object {
-    val SYSTEM_AGENT = Agent("SYSTEM", UserRole.SYSTEM, "SYSTEM")
+    val SYSTEM_AGENT = Agent(
+      username = "SYSTEM",
+      fullName = "SYSTEM",
+      role = UserRole.SYSTEM,
+      onBehalfOf = "SYSTEM",
+    )
   }
 }

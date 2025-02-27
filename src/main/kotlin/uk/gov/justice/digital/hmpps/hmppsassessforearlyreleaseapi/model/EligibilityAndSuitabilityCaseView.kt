@@ -86,6 +86,8 @@ data class EligibilityCriterionProgress(
   val status: EligibilityStatus,
   @Schema(description = "The questions that are associated with this criterion for this case")
   val questions: List<Question> = emptyList(),
+  @Schema(description = "Details of the user that submitted the answers for this criterion")
+  val agent: Agent?,
 )
 
 @Schema(description = "The progress on a specific suitability criteria for a case")
@@ -98,6 +100,8 @@ data class SuitabilityCriterionProgress(
   val status: SuitabilityStatus,
   @Schema(description = "The questions that are associated with this criterion for this case")
   val questions: List<Question> = emptyList(),
+  @Schema(description = "Details of the user that submitted the answers for this criterion")
+  val agent: Agent?,
 )
 
 @Schema(description = "A question that is asked by the user")

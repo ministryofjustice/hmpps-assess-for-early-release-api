@@ -289,6 +289,7 @@ class AssessmentServiceTest {
               answer = true,
             )
           },
+          agent = PRISON_CA_AGENT,
         ),
       )
     }
@@ -323,6 +324,7 @@ class AssessmentServiceTest {
               answer = true,
             )
           },
+          agent = PRISON_CA_AGENT,
         ),
       )
     }

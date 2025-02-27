@@ -11,8 +11,6 @@
     "responsibleCom": null,
     "team": null,
     "policyVersion": "1.0",
-    "optOutReasonType":null,
-    "optOutReasonOther":null,
     "tasks": {
       "PRISON_CA": [
         {
@@ -37,8 +35,10 @@
         }
       ]
     },
-    "cellLocation":"A-1-002",
-    "mainOffense":"Robbery"
+    "optOutReasonType": null,
+    "optOutReasonOther": null,
+    "cellLocation": "A-1-002",
+    "mainOffense": "Robbery"
   },
   "overallStatus": "IN_PROGRESS",
   "eligibilityStatus": "ELIGIBLE",
@@ -54,7 +54,13 @@
           "name": "requiredToSignSexOffenderRegister",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "wayneroberts",
+        "fullName": "Wayne Roberts",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "extended-sentence-for-violent-or-sexual-offences",
@@ -67,7 +73,13 @@
           "name": "servingExtendedSentenceForViolentOrSexualOffence",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "wayneroberts",
+        "fullName": "Wayne Roberts",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "rotl-failure-to-return",
@@ -80,7 +92,13 @@
           "name": "rotlFailedToReturn",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "community-order-curfew-breach",
@@ -93,7 +111,13 @@
           "name": "communityOrderCurfewBreach",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "recalled-for-breaching-hdc-curfew",
@@ -106,7 +130,13 @@
           "name": "recalledForBreachingHdcCurfew",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "deportation-orders",
@@ -125,7 +155,13 @@
           "name": "servedADecisionToDeport",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "recalled-from-early-release-on-compassionate-grounds",
@@ -138,7 +174,13 @@
           "name": "recalledFromEarlyReleaseOnCompassionateGrounds",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "terrorism",
@@ -151,7 +193,13 @@
           "name": "terroristSentenceOrOffending",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "two-thirds-release",
@@ -170,7 +218,13 @@
           "name": "retrospectiveTwoThirdsReleaseCriteria",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "section-244ZB-notice",
@@ -183,7 +237,13 @@
           "name": "served244ZBNoticeInForce",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "section-20b-release",
@@ -196,7 +256,13 @@
           "name": "schedule20BRelease",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     }
   ],
   "suitabilityStatus": "IN_PROGRESS",
@@ -212,7 +278,8 @@
           "name": "historyOfSexualOffending",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     },
     {
       "code": "liable-to-deportation",
@@ -225,7 +292,8 @@
           "name": "liableToDeportation",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     },
     {
       "code": "recalled-for-poor-behaviour-on-hdc",
@@ -238,7 +306,8 @@
           "name": "poorBehaviourOnHdc",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     },
     {
       "code": "category-a",
@@ -251,7 +320,13 @@
           "name": "categoryA",
           "answer": false
         }
-      ]
+      ],
+      "agent": {
+        "username": "helenreid",
+        "fullName": "Helen Reid",
+        "role": "PRISON_CA",
+        "onBehalfOf": "MDI"
+      }
     },
     {
       "code": "rosh-and-mappa",
@@ -270,7 +345,8 @@
           "name": "mappaLevel2Or3",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     },
     {
       "code": "presumed-unsuitable-offences",
@@ -283,7 +359,8 @@
           "name": "presumedUnsuitableOffences",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     },
     {
       "code": "terrorist-offending-history",
@@ -296,7 +373,8 @@
           "name": "terroristOffendingHistory",
           "answer": null
         }
-      ]
+      ],
+      "agent": null
     }
   ],
   "failureType": null,
