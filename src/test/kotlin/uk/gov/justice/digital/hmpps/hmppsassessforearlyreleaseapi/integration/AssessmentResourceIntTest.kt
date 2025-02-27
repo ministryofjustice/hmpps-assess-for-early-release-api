@@ -376,13 +376,11 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class OptIn {
-    private val agent = PRISON_CA_AGENT
-
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
-        .bodyValue(agent)
+        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -393,7 +391,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation())
-        .bodyValue(agent)
+        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -404,7 +402,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(agent)
+        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isForbidden
@@ -419,7 +417,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(agent)
+        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isNoContent
