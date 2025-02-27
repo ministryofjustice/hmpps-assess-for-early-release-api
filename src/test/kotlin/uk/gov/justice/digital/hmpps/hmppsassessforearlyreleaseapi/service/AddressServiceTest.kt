@@ -91,6 +91,7 @@ class AddressServiceTest {
     val requestId = aStandardAddressCheckRequest().id
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(addressCheckRequest.assessment)
 
     addressService.deleteAddressCheckRequest(prisonNumber, requestId)
 
