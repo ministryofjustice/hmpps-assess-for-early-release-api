@@ -123,6 +123,7 @@ class EligibilityAndSuitabilityServiceTest {
                 answer = true,
               )
             },
+          agent = PRISON_CA_AGENT,
         ),
       )
       assertThat(criterionView.nextCriterion).isEqualTo(
@@ -139,6 +140,7 @@ class EligibilityAndSuitabilityServiceTest {
                 answer = null,
               )
             },
+          agent = null,
         ),
       )
     }
@@ -184,6 +186,7 @@ class EligibilityAndSuitabilityServiceTest {
               answer = true,
             )
           },
+          agent = PRISON_CA_AGENT,
         ),
       )
       assertThat(criterionView.nextCriterion).isEqualTo(
@@ -199,6 +202,7 @@ class EligibilityAndSuitabilityServiceTest {
               answer = null,
             )
           },
+          agent = null,
         ),
       )
     }

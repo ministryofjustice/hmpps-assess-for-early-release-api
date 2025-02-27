@@ -17,7 +17,7 @@ class StatusChangedEvent(
   @Column(columnDefinition = "jsonb")
   val changes: StatusChange,
 
-  agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+  agent: Agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,

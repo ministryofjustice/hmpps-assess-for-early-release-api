@@ -11,8 +11,6 @@
     "responsibleCom": null,
     "team": null,
     "policyVersion": "1.0",
-    "optOutReasonType":null,
-    "optOutReasonOther":null,
     "tasks": {
       "PRISON_CA": [
         {
@@ -37,8 +35,10 @@
         }
       ]
     },
-    "cellLocation":"A-1-002",
-    "mainOffense":"Robbery"
+    "optOutReasonType": null,
+    "optOutReasonOther": null,
+    "cellLocation": "A-1-002",
+    "mainOffense": "Robbery"
   },
   "criterion": {
     "code": "category-a",
@@ -51,7 +51,13 @@
         "name": "categoryA",
         "answer": false
       }
-    ]
+    ],
+    "agent": {
+      "username": "helenreid",
+      "fullName": "Helen Reid",
+      "role": "PRISON_CA",
+      "onBehalfOf": "MDI"
+    }
   },
   "nextCriterion": {
     "code": "rosh-and-mappa",
@@ -70,6 +76,7 @@
         "name": "mappaLevel2Or3",
         "answer": null
       }
-    ]
+    ],
+    "agent": null
   }
 }

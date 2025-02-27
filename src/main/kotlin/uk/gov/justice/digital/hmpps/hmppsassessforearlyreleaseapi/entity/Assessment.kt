@@ -21,9 +21,12 @@ import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent as AgentEntity
 
 @Entity
 @Table(name = "assessment")
@@ -88,7 +91,9 @@ data class Assessment(
   @Override
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
+
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
+
     other as Assessment
     return id == other.id
   }
@@ -98,6 +103,7 @@ data class Assessment(
     criterionCode: String,
     criterionMet: Boolean,
     answers: Map<String, Boolean>,
+    agent: Agent,
   ) {
     val currentResults = this.eligibilityCheckResults
 
@@ -111,6 +117,7 @@ data class Assessment(
           criterionMet = criterionMet,
           questionAnswers = answers,
           lastUpdatedTimestamp = LocalDateTime.now(),
+          agent = agent.toEntity(),
         )
       }
 
@@ -121,6 +128,7 @@ data class Assessment(
         criterionCode = criterionCode,
         criterionVersion = this.policyVersion,
         criterionType = criterionType,
+        agent = agent.toEntity(),
       )
     }
 
@@ -131,7 +139,7 @@ data class Assessment(
 
   fun performTransition(
     event: AssessmentLifecycleEvent,
-    agent: Agent,
+    agent: AgentEntity,
   ): AssessmentState {
     val currentStatus = this.status.toState(this.previousStatus)
     val transition = assessmentStateMachine.with { initialState(currentStatus) }.transition(event)
@@ -164,7 +172,7 @@ data class Assessment(
     }
   }
 
-  fun recordEvent(eventType: AssessmentEventType, changes: Map<String, Any>, agent: Agent) {
+  fun recordEvent(eventType: AssessmentEventType, changes: Map<String, Any>, agent: AgentEntity) {
     val genericChangedEvent = GenericChangedEvent(
       assessment = this,
       changes = changes,

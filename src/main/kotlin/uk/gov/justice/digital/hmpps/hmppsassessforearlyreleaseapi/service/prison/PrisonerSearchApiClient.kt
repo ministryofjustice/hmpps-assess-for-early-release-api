@@ -14,7 +14,7 @@ class PrisonerSearchApiClient(@Qualifier("oauthPrisonerSearchClient") val prison
       return emptyList()
     }
 
-    return prisonerSearchApiWebClient
+    val result = prisonerSearchApiWebClient
       .post()
       .uri("/prisoner-search/prisoner-numbers")
       .accept(MediaType.APPLICATION_JSON)
@@ -22,5 +22,6 @@ class PrisonerSearchApiClient(@Qualifier("oauthPrisonerSearchClient") val prison
       .retrieve()
       .bodyToMono(typeReference<List<PrisonerSearchPrisoner>>())
       .block() ?: emptyList()
+    return result
   }
 }

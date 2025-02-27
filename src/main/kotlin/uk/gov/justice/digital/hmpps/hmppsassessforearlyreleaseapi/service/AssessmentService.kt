@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
@@ -163,7 +164,7 @@ class AssessmentService(
       return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) = EligibilityCriterionProgress(
+    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?): EligibilityCriterionProgress = EligibilityCriterionProgress(
       code = code,
       taskName = name,
       status = eligibilityCheckResult.getEligibilityStatus(),
@@ -175,6 +176,7 @@ class AssessmentService(
           answer = eligibilityCheckResult.getAnswer(it.name),
         )
       },
+      agent = eligibilityCheckResult?.agent?.toModel(),
     )
 
     fun getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
@@ -197,6 +199,7 @@ class AssessmentService(
           answer = eligibilityCheckResult.getAnswer(it.name),
         )
       },
+      agent = eligibilityCheckResult?.agent?.toModel(),
     )
   }
 }
