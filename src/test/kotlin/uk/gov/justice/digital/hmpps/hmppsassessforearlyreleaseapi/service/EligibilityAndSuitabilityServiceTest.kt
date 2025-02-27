@@ -39,6 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
+import java.time.LocalDate
 
 class EligibilityAndSuitabilityServiceTest {
   private val assessmentService = mock<AssessmentService>()
@@ -124,6 +125,7 @@ class EligibilityAndSuitabilityServiceTest {
               )
             },
           agent = PRISON_CA_AGENT,
+          lastUpdated = LocalDate.now(),
         ),
       )
       assertThat(criterionView.nextCriterion).isEqualTo(
@@ -141,6 +143,7 @@ class EligibilityAndSuitabilityServiceTest {
               )
             },
           agent = null,
+          lastUpdated = null,
         ),
       )
     }
@@ -187,6 +190,7 @@ class EligibilityAndSuitabilityServiceTest {
             )
           },
           agent = PRISON_CA_AGENT,
+          lastUpdated = LocalDate.now(),
         ),
       )
       assertThat(criterionView.nextCriterion).isEqualTo(
@@ -203,6 +207,7 @@ class EligibilityAndSuitabilityServiceTest {
             )
           },
           agent = null,
+          lastUpdated = null,
         ),
       )
     }

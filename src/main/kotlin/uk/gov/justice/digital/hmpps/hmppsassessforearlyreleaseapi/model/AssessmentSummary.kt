@@ -21,7 +21,7 @@ data class AssessmentSummary(
   @Schema(description = "The offender's prison number", example = "A1234AA")
   val prisonNumber: String,
 
-  @Schema(description = "The offender's home detention curfew eligibility date", example = "22/11/2026")
+  @Schema(description = "The offender's home detention curfew eligibility date")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val hdced: LocalDate,
 

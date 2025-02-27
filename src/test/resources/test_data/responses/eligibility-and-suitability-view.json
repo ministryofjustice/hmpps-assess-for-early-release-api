@@ -60,7 +60,8 @@
         "fullName": "Wayne Roberts",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "extended-sentence-for-violent-or-sexual-offences",
@@ -79,7 +80,8 @@
         "fullName": "Wayne Roberts",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "rotl-failure-to-return",
@@ -98,7 +100,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "community-order-curfew-breach",
@@ -117,7 +120,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "recalled-for-breaching-hdc-curfew",
@@ -136,7 +140,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "deportation-orders",
@@ -161,7 +166,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "recalled-from-early-release-on-compassionate-grounds",
@@ -180,7 +186,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "terrorism",
@@ -199,7 +206,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "two-thirds-release",
@@ -224,7 +232,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "section-244ZB-notice",
@@ -243,7 +252,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "section-20b-release",
@@ -262,7 +272,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     }
   ],
   "suitabilityStatus": "IN_PROGRESS",
@@ -279,7 +290,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     },
     {
       "code": "liable-to-deportation",
@@ -293,7 +305,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     },
     {
       "code": "recalled-for-poor-behaviour-on-hdc",
@@ -307,7 +320,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     },
     {
       "code": "category-a",
@@ -326,7 +340,8 @@
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
         "onBehalfOf": "MDI"
-      }
+      },
+      "lastUpdated": "2024-11-06"
     },
     {
       "code": "rosh-and-mappa",
@@ -346,7 +361,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     },
     {
       "code": "presumed-unsuitable-offences",
@@ -360,7 +376,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     },
     {
       "code": "terrorist-offending-history",
@@ -374,7 +391,8 @@
           "answer": null
         }
       ],
-      "agent": null
+      "agent": null,
+      "lastUpdated": null
     }
   ],
   "failureType": null,

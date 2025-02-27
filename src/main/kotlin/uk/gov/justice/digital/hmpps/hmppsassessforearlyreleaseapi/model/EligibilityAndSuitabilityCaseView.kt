@@ -1,8 +1,10 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
+import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull
+import java.time.LocalDate
 
 @Schema(
   description = "A view on the progress of suitability and eligibility criteria for a specific case",
@@ -88,6 +90,9 @@ data class EligibilityCriterionProgress(
   val questions: List<Question> = emptyList(),
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: Agent?,
+  @Schema(description = "The date time when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val lastUpdated: LocalDate?,
 )
 
 @Schema(description = "The progress on a specific suitability criteria for a case")
@@ -102,6 +107,9 @@ data class SuitabilityCriterionProgress(
   val questions: List<Question> = emptyList(),
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: Agent?,
+  @Schema(description = "The date time when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val lastUpdated: LocalDate?,
 )
 
 @Schema(description = "A question that is asked by the user")

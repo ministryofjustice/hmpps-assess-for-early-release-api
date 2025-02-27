@@ -57,7 +57,8 @@
       "fullName": "Wayne Roberts",
       "role": "PRISON_CA",
       "onBehalfOf": "MDI"
-    }
+    },
+    "lastUpdated": "2024-11-06"
   },
   "nextCriterion": {
     "code": "extended-sentence-for-violent-or-sexual-offences",
@@ -71,11 +72,12 @@
         "answer": false
       }
     ],
-    "agent":  {
+    "agent": {
       "username": "wayneroberts",
       "fullName": "Wayne Roberts",
       "role": "PRISON_CA",
       "onBehalfOf": "MDI"
-    }
+    },
+    "lastUpdated": "2024-11-06"
   }
 }

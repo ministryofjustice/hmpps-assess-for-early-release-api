@@ -57,7 +57,8 @@
       "fullName": "Helen Reid",
       "role": "PRISON_CA",
       "onBehalfOf": "MDI"
-    }
+    },
+    "lastUpdated": "2024-11-06"
   },
   "nextCriterion": {
     "code": "rosh-and-mappa",
@@ -77,6 +78,7 @@
         "answer": null
       }
     ],
-    "agent": null
+    "agent": null,
+    "lastUpdated": null
   }
 }

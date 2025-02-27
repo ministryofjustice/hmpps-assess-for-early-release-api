@@ -75,6 +75,6 @@ VALUES ((select max(id) from assessment a), 'section-20b-release', '1.0', true, 
         '2024-11-06 06:38:00.766', '2024-11-06 06:38:00.766', '{"schedule20BRelease": false}'::jsonb);
 
 insert into eligibility_check_result
-(assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers, username, full_name, role, on_behalf_of)
+(assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers, username, full_name, role, on_behalf_of, last_updated_timestamp)
 VALUES ((select max(id) from assessment a), 'category-a', '1.0', true, 'SUITABILITY',
-        '{"categoryA": false}'::jsonb, 'helenreid', 'Helen Reid', 'PRISON_CA', 'MDI');
+        '{"categoryA": false}'::jsonb, 'helenreid', 'Helen Reid', 'PRISON_CA', 'MDI', '2024-11-06 06:38:00.766');
