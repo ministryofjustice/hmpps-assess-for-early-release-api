@@ -4,15 +4,18 @@ import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddCasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
@@ -109,6 +112,7 @@ class AddressService(
   ): CasCheckRequestSummary {
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: error("Cannot find offender with prisonNumber $prisonNumber")
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
 
     val casCheckRequest = casCheckRequestRepository.save(
       CasCheckRequest(
@@ -118,6 +122,12 @@ class AddressService(
         assessment = offender.currentAssessment(),
       ),
     )
+    assessmentEntity.recordEvent(
+      changes = mapOf("CAS Check Request" to addCasCheckRequest.toSummary()),
+      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
     return casCheckRequest.toSummary()
   }
 
@@ -139,6 +149,13 @@ class AddressService(
         "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
+    assessmentEntity.recordEvent(
+      changes = mapOf("Delete Address Check Request Id" to requestId),
+      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
 
     curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
   }
@@ -206,6 +223,13 @@ class AddressService(
   ) {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
+    assessmentEntity.recordEvent(
+      changes = mapOf("Case Admin Additional Information" to caseAdminInfoRequest.additionalInformation),
+      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
   }
 
@@ -306,6 +330,12 @@ class AddressService(
     ppAdditionalInfo = this.ppAdditionalInfo,
     preferencePriority = this.preferencePriority,
     addressUprn = this.addressUprn,
+  )
+
+  private fun AddCasCheckRequest.toSummary(): AddCasCheckRequestSummary = AddCasCheckRequestSummary(
+    caAdditionalInfo = this.caAdditionalInfo,
+    ppAdditionalInfo = this.ppAdditionalInfo,
+    preferencePriority = this.preferencePriority,
   )
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {
