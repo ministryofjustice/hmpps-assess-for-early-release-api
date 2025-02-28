@@ -5,10 +5,7 @@ import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AnswerPayload
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswerType
@@ -19,7 +16,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
@@ -40,7 +36,6 @@ class ResidentialChecksService(
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
   private val objectMapper: ObjectMapper,
   private val validator: Validator,
-  private val assessmentRepository: AssessmentRepository,
 ) {
   fun getResidentialChecksView(prisonNumber: String, addressCheckRequestId: Long): ResidentialChecksView {
     val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
@@ -105,14 +100,6 @@ class ResidentialChecksService(
 
     val checksStatus = getAddressCheckStatus(addressCheckRequest)
     assessmentService.updateAddressChecksStatus(prisonNumber, checksStatus, saveTaskAnswersRequest)
-    val assessmentEntity = assessmentService.getCurrentAssessment(prisonNumber)
-
-    assessmentEntity.recordEvent(
-      eventType = AssessmentEventType.RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED,
-      changes = mapOf("addressCheckRequestId" to addressCheckRequestId, "saveTaskAnswersRequest" to saveTaskAnswersRequest),
-      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
-    )
-    assessmentRepository.save(assessmentEntity)
 
     return ResidentialChecksTaskAnswersSummary(
       addressCheckRequestId = addressCheckRequestId,
