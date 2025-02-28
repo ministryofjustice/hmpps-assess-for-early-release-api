@@ -229,7 +229,7 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "caseReferenceNumber")
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "crn")
       .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced, caseReferenceNumber))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
     assertThat(offenderCaptor.value.assessments.first().policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
