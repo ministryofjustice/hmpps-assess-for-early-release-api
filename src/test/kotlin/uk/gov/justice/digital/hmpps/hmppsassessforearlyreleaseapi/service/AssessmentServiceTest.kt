@@ -290,6 +290,7 @@ class AssessmentServiceTest {
             )
           },
           agent = PRISON_CA_AGENT,
+          lastUpdated = LocalDate.now(),
         ),
       )
     }
@@ -325,6 +326,7 @@ class AssessmentServiceTest {
             )
           },
           agent = PRISON_CA_AGENT,
+          lastUpdated = LocalDate.now(),
         ),
       )
     }
