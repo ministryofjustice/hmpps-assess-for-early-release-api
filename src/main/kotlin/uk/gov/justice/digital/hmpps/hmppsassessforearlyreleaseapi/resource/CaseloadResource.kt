@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.OffenderService
 
 @RestController
@@ -39,7 +39,7 @@ class CaseloadResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+            array = ArraySchema(schema = Schema(implementation = OffenderSummaryResponse::class)),
           ),
         ],
       ),
@@ -82,7 +82,7 @@ class CaseloadResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+            array = ArraySchema(schema = Schema(implementation = OffenderSummaryResponse::class)),
           ),
         ],
       ),
@@ -125,7 +125,7 @@ class CaseloadResource(
         content = [
           Content(
             mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = OffenderSummary::class)),
+            array = ArraySchema(schema = Schema(implementation = OffenderSummaryResponse::class)),
           ),
         ],
       ),

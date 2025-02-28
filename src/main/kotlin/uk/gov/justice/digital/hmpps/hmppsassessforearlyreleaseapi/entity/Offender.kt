@@ -43,6 +43,8 @@ data class Offender(
 
   val crd: LocalDate? = null,
 
+  val caseReferenceNumber: String? = null,
+
   val sentenceStartDate: LocalDate? = null,
 
   @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
