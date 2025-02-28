@@ -4,7 +4,9 @@ import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
@@ -35,6 +37,7 @@ class OffenderService(
   private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
   private val workingDaysService: WorkingDaysService,
+  private val assessmentService: AssessmentService,
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
@@ -101,12 +104,22 @@ class OffenderService(
     offender.assessments.add(assessment)
     offenderRepository.save(offender)
 
+    val changes = mapOf(
+      "NOMS-ID" to prisoner.prisonerNumber,
+      "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
+    )
+
+    val assessmentEntity = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
+    assessmentEntity.recordEvent(
+      eventType = AssessmentEventType.PRISONER_CREATED,
+      changes,
+      agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+    )
+    assessmentRepository.save(assessmentEntity)
+
     telemetryClient.trackEvent(
       PRISONER_CREATED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to prisoner.prisonerNumber,
-        "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
-      ),
+      changes,
       null,
     )
   }
@@ -123,15 +136,26 @@ class OffenderService(
         lastUpdatedTimestamp = LocalDateTime.now(),
       )
       offenderRepository.save(updatedOffender)
+
+      val changes = mapOf(
+        "NOMS-ID" to prisoner.prisonerNumber,
+        "PRISONER-FIRST_NAME" to prisoner.firstName,
+        "PRISONER-LAST_NAME" to prisoner.lastName,
+        "PRISONER_DOB" to prisoner.dateOfBirth.format(DateTimeFormatter.ISO_DATE),
+        "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
+      )
+
+      val assessmentEntity = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
+      assessmentEntity.recordEvent(
+        eventType = AssessmentEventType.PRISONER_UPDATED,
+        changes,
+        agent = Agent(UserRole.SYSTEM.name, UserRole.SYSTEM.name, UserRole.SYSTEM, UserRole.SYSTEM.name),
+      )
+      assessmentRepository.save(assessmentEntity)
+
       telemetryClient.trackEvent(
         PRISONER_UPDATED_EVENT_NAME,
-        mapOf(
-          "NOMS-ID" to prisoner.prisonerNumber,
-          "PRISONER-FIRST_NAME" to prisoner.firstName,
-          "PRISONER-LAST_NAME" to prisoner.lastName,
-          "PRISONER_DOB" to prisoner.dateOfBirth.format(DateTimeFormatter.ISO_DATE),
-          "PRISONER_HDCED" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
-        ),
+        changes,
         null,
       )
     }

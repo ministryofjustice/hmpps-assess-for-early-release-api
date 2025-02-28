@@ -4,5 +4,8 @@ ALTER TABLE assessment_event
                                                             'STATUS_CHANGE',
                                                             'RESIDENT_UPDATED',
                                                             'ADDRESS_UPDATED',
-                                                            'RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED'
+                                                            'RESIDENTIAL_CHECKS_TASK_ANSWERS_UPDATED',
+                                                            'PRISON_TRANSFERRED',
+                                                            'PRISONER_UPDATED',
+                                                            'PRISONER_CREATED'
         ));

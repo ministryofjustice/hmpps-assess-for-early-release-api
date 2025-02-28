@@ -46,6 +46,7 @@ class OffenderServiceTest {
   private val telemetryClient = mock<TelemetryClient>()
   private val bankHolidayService = mock<BankHolidayService>()
   private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
+  private val assessmentService = mock<AssessmentService>()
 
   private val service: OffenderService =
     OffenderService(
@@ -56,6 +57,7 @@ class OffenderServiceTest {
       staffRepository,
       telemetryClient,
       workingDaysService,
+      assessmentService,
     )
 
   @Test
@@ -173,6 +175,9 @@ class OffenderServiceTest {
       ),
     )
 
+    val assessment = anOffender().currentAssessment()
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
+
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
@@ -201,6 +206,9 @@ class OffenderServiceTest {
 
     val communityOffenderManager = aCommunityOffenderManager(offenderManager)
     whenever(staffRepository.save(any())).thenReturn(communityOffenderManager)
+
+    val assessment = anOffender().currentAssessment()
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
@@ -239,6 +247,9 @@ class OffenderServiceTest {
         prisonerSearchPrisoner,
       ),
     )
+
+    val assessment = anOffender().currentAssessment()
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
 
     val offenderManager = aDeliusOffenderManager()
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
@@ -292,6 +303,9 @@ class OffenderServiceTest {
       anOffender(existingHdced),
     )
 
+    val assessment = anOffender().currentAssessment()
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
+
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
@@ -340,6 +354,9 @@ class OffenderServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
       anOffender(sentenceStartDate = existingSentenceStartDate),
     )
+
+    val assessment = anOffender().currentAssessment()
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
