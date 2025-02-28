@@ -74,7 +74,7 @@ class OffenderService(
   }
 
   private fun createOffender(prisoner: PrisonerSearchPrisoner) {
-    val caseReferenceNumber = probationService.getCaseReferenceNumber(prisoner.prisonerNumber)
+    val crn = probationService.getCaseReferenceNumber(prisoner.prisonerNumber)
 
     val offender = Offender(
       bookingId = prisoner.bookingId!!.toLong(),
@@ -85,15 +85,15 @@ class OffenderService(
       dateOfBirth = prisoner.dateOfBirth,
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
-      caseReferenceNumber = caseReferenceNumber,
+      crn = crn,
       sentenceStartDate = prisoner.sentenceStartDate,
     )
 
-    val deliusOffenderManager = caseReferenceNumber?.let {
-      probationService.getCurrentResponsibleOfficer(caseReferenceNumber)
+    val deliusOffenderManager = crn?.let {
+      probationService.getCurrentResponsibleOfficer(crn)
     }
 
-    val communityOffenderManager = caseReferenceNumber?.let {
+    val communityOffenderManager = crn?.let {
       deliusOffenderManager?.let {
         staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
       }
@@ -178,7 +178,7 @@ class OffenderService(
     addressChecksComplete = assessment.addressChecksComplete,
     currentTask = assessment.currentTask(),
     taskOverdueOn = assessment.offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
-    caseReferenceNumber = assessment.offender.caseReferenceNumber,
+    crn = assessment.offender.crn,
   )
 
   companion object {

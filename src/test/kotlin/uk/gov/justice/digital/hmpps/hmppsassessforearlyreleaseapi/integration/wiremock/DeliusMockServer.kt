@@ -10,9 +10,9 @@ private const val DELIUS_WIREMOCK_PORT = 8091
 
 class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
 
-  fun stubGetOffenderManager(caseReferenceNumber: String = "X12345", code: String = "STAFF1") {
+  fun stubGetOffenderManager(crn: String = "X12345", code: String = "STAFF1") {
     stubFor(
-      get(urlEqualTo("/probation-case/$caseReferenceNumber/responsible-community-manager")).willReturn(
+      get(urlEqualTo("/probation-case/$crn/responsible-community-manager")).willReturn(
         aResponse().withHeader("Content-Type", "application/json").withBody(
           """{
             "id": 125,

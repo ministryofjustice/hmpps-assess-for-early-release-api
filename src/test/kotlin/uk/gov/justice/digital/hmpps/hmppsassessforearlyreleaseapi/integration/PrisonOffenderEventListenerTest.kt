@@ -115,7 +115,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   fun `Should create a new offender `() {
     // Given
     val prisonNumber = "Z1234XY"
-    val caseReferenceNumber = "DX12340A"
+    val crn = "DX12340A"
     val hdced = LocalDate.now().plusDays(20)
     val firstName = "new first name"
     val lastName = "new last name"
@@ -138,8 +138,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         ),
       ),
     )
-    probationSearchApiMockServer.stubSearchForPersonOnProbation(caseReferenceNumber)
-    deliusMockServer.stubGetOffenderManager(caseReferenceNumber)
+    probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
+    deliusMockServer.stubGetOffenderManager(crn)
 
     val message = AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE))
 
@@ -163,7 +163,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.surname).isEqualTo(lastName)
     assertThat(createdOffender.hdced).isEqualTo(hdced)
     assertThat(createdOffender.assessments).hasSize(1)
-    assertThat(createdOffender.caseReferenceNumber).isEqualTo(caseReferenceNumber)
+    assertThat(createdOffender.crn).isEqualTo(crn)
 
     val assessment = createdOffender.assessments.first()
     assertThat(assessment.status).isEqualTo(AssessmentStatus.NOT_STARTED)

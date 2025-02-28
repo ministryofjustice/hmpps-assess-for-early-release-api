@@ -1,1 +1,1 @@
-ALTER TABLE offender ADD COLUMN case_reference_number VARCHAR(20);
+ALTER TABLE offender ADD COLUMN crn VARCHAR(20);

@@ -1,4 +1,4 @@
-insert into offender(booking_id, prison_number, prison_id, forename, surname, date_of_birth, hdced, crd, status, case_reference_number)
+insert into offender(booking_id, prison_number, prison_id, forename, surname, date_of_birth, hdced, crd, status, crn)
 values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', current_date + 7, '2020-11-14', 'NOT_STARTED', 'DX12340A'),
        (20, 'A1234AB', 'BMI', 'FIRST-2', 'LAST-2', '1983-06-03', current_date + 7, '2020-11-14', 'NOT_STARTED', null),
        (30, 'A1234AC', 'EDF', 'FIRST-3', 'LAST-3', '1989-11-03', current_date + 7, '2027-12-25', 'NOT_STARTED', 'DX12340C'),

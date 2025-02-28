@@ -54,5 +54,5 @@ data class OffenderSummaryResponse(
   val taskOverdueOn: LocalDate? = null,
 
   @Schema(description = "The number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
-  val caseReferenceNumber: String? = null,
+  val crn: String? = null,
 )

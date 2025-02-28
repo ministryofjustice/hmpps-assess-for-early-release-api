@@ -76,7 +76,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
         .returnResult().responseBody!!
       assertThat(offenders).hasSize(4)
       assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
-      assertThat(offenders.map { it.caseReferenceNumber }).containsExactlyInAnyOrder("DX12340A", null, "DX12340D", "DX12340F")
+      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder("DX12340A", null, "DX12340D", "DX12340F")
       assertPostponeDetails(offenders, "A1234AA")
     }
   }
@@ -133,7 +133,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
         .returnResult().responseBody!!
       assertThat(offenders).hasSize(2)
       assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AB", "G9524ZF")
-      assertThat(offenders.map { it.caseReferenceNumber }).containsExactlyInAnyOrder(null, "DX12340C")
+      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder(null, "DX12340C")
       assertThat(offenders.map { it.probationPractitioner }).containsOnly("A Com")
       assertPostponeDetails(offenders, "A1234AB")
     }
@@ -193,7 +193,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenders).hasSize(2)
       assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AB", "A1234AD")
       assertThat(offenders.map { it.probationPractitioner }).containsExactlyInAnyOrder("A Com", "Another Com")
-      assertThat(offenders.map { it.caseReferenceNumber }).containsExactlyInAnyOrder("DX12340B", null)
+      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder("DX12340B", null)
 
       assertPostponeDetails(offenders, "A1234AB")
     }

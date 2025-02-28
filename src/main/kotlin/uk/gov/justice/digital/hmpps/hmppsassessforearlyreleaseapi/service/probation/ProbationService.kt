@@ -21,7 +21,7 @@ class ProbationService(
     return deliusRecord?.otherIds?.crn
   }
 
-  fun getCurrentResponsibleOfficer(caseReferenceNumber: String): DeliusOffenderManager? = deliusApiClient.getOffenderManager(caseReferenceNumber)
+  fun getCurrentResponsibleOfficer(crn: String): DeliusOffenderManager? = deliusApiClient.getOffenderManager(crn)
 
   fun getStaffDetailsByUsername(username: String): User? {
     val staffDetails = deliusApiClient.getStaffDetailsByUsername(username)

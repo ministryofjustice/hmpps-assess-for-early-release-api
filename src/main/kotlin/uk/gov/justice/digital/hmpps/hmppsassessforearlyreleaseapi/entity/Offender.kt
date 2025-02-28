@@ -43,7 +43,7 @@ data class Offender(
 
   val crd: LocalDate? = null,
 
-  val caseReferenceNumber: String? = null,
+  val crn: String? = null,
 
   val sentenceStartDate: LocalDate? = null,
 
