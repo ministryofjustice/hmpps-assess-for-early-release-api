@@ -177,6 +177,7 @@ class AssessmentService(
         )
       },
       agent = eligibilityCheckResult?.agent?.toModel(),
+      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
     )
 
     fun getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
@@ -200,6 +201,7 @@ class AssessmentService(
         )
       },
       agent = eligibilityCheckResult?.agent?.toModel(),
+      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
     )
   }
 }

@@ -153,6 +153,7 @@ object TestData {
     questions = listOf(Question("question-$n", answer = true)),
     status = ELIGIBLE,
     agent = PRISON_CA_AGENT,
+    lastUpdated = LocalDate.now(),
   )
 
   fun anSuitabilityCheckDetails(n: Int) = SuitabilityCriterionProgress(
@@ -161,6 +162,7 @@ object TestData {
     questions = listOf(Question("question-$n", answer = true)),
     status = SUITABLE,
     agent = PRISON_CA_AGENT,
+    lastUpdated = LocalDate.now(),
   )
 
   enum class ResultType { PASSED, FAILED }
