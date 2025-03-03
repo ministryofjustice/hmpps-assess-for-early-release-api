@@ -14,6 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -40,19 +41,19 @@ class OffenderService(
   private val workingDaysService: WorkingDaysService,
 ) {
   @Transactional
-  fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummary> {
+  fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findByOffenderPrisonId(prisonCode)
     return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
-  fun getComCaseload(staffCode: String): List<OffenderSummary> {
+  fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
     return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
-  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummary> {
+  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
     return assessments.map { it.toOffenderSummary() }
   }
@@ -77,6 +78,8 @@ class OffenderService(
   }
 
   private fun createOffender(prisoner: PrisonerSearchPrisoner) {
+    val crn = probationService.getCaseReferenceNumber(prisoner.prisonerNumber)
+
     val offender = Offender(
       bookingId = prisoner.bookingId!!.toLong(),
       prisonNumber = prisoner.prisonerNumber,
@@ -86,12 +89,18 @@ class OffenderService(
       dateOfBirth = prisoner.dateOfBirth,
       hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
       crd = prisoner.conditionalReleaseDate,
+      crn = crn,
       sentenceStartDate = prisoner.sentenceStartDate,
     )
 
-    val deliusOffenderManager = probationService.getCurrentResponsibleOfficer(prisoner.prisonerNumber)
-    val communityOffenderManager = deliusOffenderManager?.let {
-      staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
+    val deliusOffenderManager = crn?.let {
+      probationService.getCurrentResponsibleOfficer(crn)
+    }
+
+    val communityOffenderManager = crn?.let {
+      deliusOffenderManager?.let {
+        staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
+      }
     }
 
     val assessment = Assessment(
@@ -176,7 +185,7 @@ class OffenderService(
     ),
   )
 
-  fun Assessment.toOffenderSummary() = OffenderSummary(
+  fun Assessment.toOffenderSummary() = OffenderSummaryResponse(
     prisonNumber = offender.prisonNumber,
     bookingId = offender.bookingId,
     forename = offender.forename!!,
@@ -191,6 +200,7 @@ class OffenderService(
     addressChecksComplete = this.addressChecksComplete,
     currentTask = this.currentTask(),
     taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
+    crn = offender.crn,
   )
 
   companion object {

@@ -15,14 +15,13 @@ class ProbationService(
   private val probationSearchApiClient: ProbationSearchApiClient,
   private val staffService: StaffService,
 ) {
-  fun getCurrentResponsibleOfficer(prisonNumber: String): DeliusOffenderManager? {
+
+  fun getCaseReferenceNumber(prisonNumber: String): String? {
     val deliusRecord = probationSearchApiClient.searchForPersonOnProbation(prisonNumber)
-    return if (deliusRecord != null) {
-      deliusApiClient.getOffenderManager(deliusRecord.otherIds.crn)
-    } else {
-      null
-    }
+    return deliusRecord?.otherIds?.crn
   }
+
+  fun getCurrentResponsibleOfficer(crn: String): DeliusOffenderManager? = deliusApiClient.getOffenderManager(crn)
 
   fun getStaffDetailsByUsername(username: String): User? {
     val staffDetails = deliusApiClient.getStaffDetailsByUsername(username)
