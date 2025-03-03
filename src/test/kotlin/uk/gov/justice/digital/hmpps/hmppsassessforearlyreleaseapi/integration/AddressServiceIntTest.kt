@@ -11,17 +11,11 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.GenericChangedEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
@@ -29,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
 
@@ -168,6 +163,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         "addressUprn" to uprn,
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Sql(
@@ -187,7 +184,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       preferencePriority = preferencePriority,
     )
 
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest)
+    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, PRISON_CA_AGENT.toEntity())
 
     val dbCasCheckRequests = casCheckRequestRepository.findAll()
     assertThat(dbCasCheckRequests).hasSize(1)
@@ -210,6 +207,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         "preferencePriority" to preferencePriority.toString(),
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Test
@@ -223,7 +222,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, PRISON_CA_AGENT.toEntity())
 
     val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(deletedRequest).isNull()
@@ -240,6 +239,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
     assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_UPDATED")
     assertThat(firstEvent.changes["deleteAddressCheckRequestId"]).isEqualTo(requestId.toInt())
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Sql(
@@ -286,7 +287,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = false,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), PRISON_CA_AGENT.toEntity())
     assertThat(residentSummary).isNotNull
 
     val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
@@ -359,6 +360,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         ),
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Sql(
@@ -381,7 +384,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = true,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT.toEntity())
     assertThat(residentSummary).isNotNull
     assertThat(residentSummary).hasSize(1)
     assertThat(residentSummary.first().relation).isNull()
@@ -409,7 +412,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = false,
     )
 
-    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest)) }
+    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT.toEntity()) }
   }
 
   @Test
@@ -423,7 +426,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val additionalInformation = "Updated case admin info"
     val caseAdminInfoRequest = UpdateCaseAdminAdditionInfoRequest(additionalInformation)
 
-    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest)
+    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, PRISON_CA_AGENT.toEntity())
 
     val curfewAddressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(curfewAddressCheckRequest).isNotNull
@@ -438,6 +441,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val firstEvent = assessmentEvents?.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
     assertThat(firstEvent.changes["caseAdminAdditionalInformation"]).isEqualTo(additionalInformation)
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   private companion object {
