@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aRiskManagementDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
@@ -105,6 +106,7 @@ class ResidentialChecksServiceTest {
 
   @Test
   fun `should save residential checks task answers`() {
+    val assessmentEntity = anOffender().currentAssessment()
     val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
       taskCode = "make-a-risk-management-decision",
       answers = mapOf(
@@ -115,6 +117,7 @@ class ResidentialChecksServiceTest {
       agent = PROBATION_COM_AGENT,
     )
 
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessmentEntity)
     whenever(addressService.getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)).thenReturn(
       aStandardAddressCheckRequest(),
     )

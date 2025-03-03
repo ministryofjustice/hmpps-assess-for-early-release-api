@@ -7,3 +7,11 @@ values
     (5, 50, 'C1234CC', 'MSD', 'FIRST', 'LAST','1981-03-12','2020-10-25', 'NOT_STARTED'),
     (6, 60, 'C1234CD', 'BMI', 'FIRST', 'LAST','1981-03-12','2020-10-25', 'NOT_STARTED'),
     (7, 70, 'B1234BB', 'ABC', 'FIRST', 'LAST','1981-03-12','2020-10-25', 'NOT_STARTED');
+
+insert into assessment(id, offender_id,
+                       status,
+                       policy_version)
+values (1,
+        1,
+        'AWAITING_ADDRESS_AND_RISK_CHECKS',
+        '1.0');

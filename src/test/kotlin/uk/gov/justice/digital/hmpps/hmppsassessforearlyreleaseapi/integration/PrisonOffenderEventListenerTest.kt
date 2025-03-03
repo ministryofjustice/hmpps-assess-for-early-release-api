@@ -14,7 +14,9 @@ import org.springframework.test.context.jdbc.Sql
 import org.springframework.transaction.annotation.Transactional
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
 import software.amazon.awssdk.services.sns.model.PublishRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.AdditionalInformationPrisonerUpdated
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.AdditionalInformationTransfer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.event.DiffCategory
@@ -26,6 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.ba
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_CREATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_UPDATED_EVENT_NAME
@@ -44,6 +47,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
   @Autowired
   lateinit var offenderRepository: OffenderRepository
+
+  @Autowired
+  lateinit var assessmentEventRepository: AssessmentEventRepository
 
   private val awaitAtMost30Secs
     get() = await.atMost(Duration.ofSeconds(30))
@@ -69,15 +75,28 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         TRANSFERRED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to PRISON_NUMBER,
-          "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
-          "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
+          "prisonNumber" to PRISON_NUMBER,
+          "prisonTransferredFrom" to OLD_PRISON_CODE,
+          "prisonTransferredTo" to NEW_PRISON_CODE,
         ),
         null,
       )
     }
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
+
+    val assessment = offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.currentAssessment()
+    val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment?.id!!)
+    assertThat(events).hasSize(1)
+    val event = events.first() as GenericChangedEvent
+    assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISON_TRANSFERRED)
+    assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
+      mapOf(
+        "prisonNumber" to PRISON_NUMBER,
+        "prisonTransferredFrom" to OLD_PRISON_CODE,
+        "prisonTransferredTo" to NEW_PRISON_CODE,
+      ),
+    )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
@@ -151,8 +170,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         PRISONER_CREATED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to prisonNumber,
-          "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
+          "prisonNumber" to prisonNumber,
+          "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
         ),
         null,
       )
@@ -168,6 +187,17 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val assessment = createdOffender.assessments.first()
     assertThat(assessment.status).isEqualTo(AssessmentStatus.NOT_STARTED)
     assertThat(assessment.responsibleCom).isNotNull
+
+    val events = assessmentEventRepository.findByAssessmentId(assessment.id)
+    assertThat(events).hasSize(1)
+    val event = events.first() as GenericChangedEvent
+    assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISONER_CREATED)
+    assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
+      mapOf(
+        "prisonNumber" to prisonNumber,
+        "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
+      ),
+    )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
@@ -213,11 +243,11 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         PRISONER_UPDATED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to PRISON_NUMBER,
-          "PRISONER-FIRST_NAME" to newFirstName,
-          "PRISONER-LAST_NAME" to newLastName,
-          "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
-          "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
+          "prisonNumber" to PRISON_NUMBER,
+          "firstName" to newFirstName,
+          "lastName" to newLastName,
+          "dateOfBirth" to newDob.format(DateTimeFormatter.ISO_DATE),
+          "homeDetentionCurfewEligibilityDate" to newHdced.format(DateTimeFormatter.ISO_DATE),
         ),
         null,
       )
@@ -228,6 +258,21 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(updatedOffender.surname).isEqualTo(newLastName)
     assertThat(updatedOffender.hdced).isEqualTo(newHdced)
     assertThat(updatedOffender.crd).isEqualTo(newCrd)
+
+    val assessment = updatedOffender.assessments.first()
+    val events = assessmentEventRepository.findByAssessmentId(assessment.id)
+    assertThat(events).hasSize(1)
+    val event = events.first() as GenericChangedEvent
+    assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISONER_UPDATED)
+    assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
+      mapOf(
+        "prisonNumber" to PRISON_NUMBER,
+        "firstName" to newFirstName,
+        "lastName" to newLastName,
+        "dateOfBirth" to newDob.format(DateTimeFormatter.ISO_DATE),
+        "homeDetentionCurfewEligibilityDate" to newHdced.format(DateTimeFormatter.ISO_DATE),
+      ),
+    )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }

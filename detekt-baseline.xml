@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
-  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Type: String</ID>
     <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Value: String</ID>

@@ -5,6 +5,10 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 
 const val TRANSFERRED_EVENT_NAME = "assess-for-early-release.prisoner.transferred"
@@ -13,6 +17,7 @@ const val TRANSFERRED_EVENT_NAME = "assess-for-early-release.prisoner.transferre
 @Transactional
 class TransferPrisonService(
   private val offenderRepository: OffenderRepository,
+  private val assessmentRepository: AssessmentRepository,
   private val telemetryClient: TelemetryClient,
 ) {
 
@@ -31,15 +36,23 @@ class TransferPrisonService(
     log.debug("Updating offender: {}", existingOffender.id)
 
     val updatedOffender = existingOffender.copy(prisonId = prisonCode)
+    val changes = mapOf(
+      "prisonNumber" to prisonNumber,
+      "prisonTransferredFrom" to existingPrisonId,
+      "prisonTransferredTo" to prisonCode,
+    )
+    val assessmentEntity = updatedOffender.currentAssessment()
+    assessmentEntity.recordEvent(
+      eventType = AssessmentEventType.PRISON_TRANSFERRED,
+      changes,
+      agent = SYSTEM_AGENT.toEntity(),
+    )
+    assessmentRepository.save(assessmentEntity)
     offenderRepository.saveAllAndFlush(listOf(updatedOffender))
 
     telemetryClient.trackEvent(
       TRANSFERRED_EVENT_NAME,
-      mapOf(
-        "NOMS-ID" to prisonNumber,
-        "PRISON-TRANSFERRED-FROM" to existingPrisonId,
-        "PRISON-TRANSFERRED-TO" to prisonCode,
-      ),
+      changes,
       null,
     )
   }

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
@@ -20,9 +21,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
@@ -49,6 +52,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var assessmentEventRepository: AssessmentEventRepository
+
+  @Autowired
+  private lateinit var curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository
 
   @BeforeEach
   fun resetMocks() {
@@ -154,7 +160,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val firstEvent = assessmentEvents.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.changes["Standard Address Check Request"]).isEqualTo(
+    assertThat(firstEvent.changes["standardAddressCheckRequest"]).isEqualTo(
       mapOf(
         "caAdditionalInfo" to caAdditionalInfo,
         "ppAdditionalInfo" to ppAdditionalInfo,
@@ -190,6 +196,50 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(dbCasCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
     assertThat(dbCasCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
     assertThat(dbCasCheckRequest.preferencePriority).isEqualTo(preferencePriority)
+
+    val assessmentEvents = assessmentEventRepository.findByAssessmentId(dbCasCheckRequest.assessment.id)
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
+    assertThat(firstEvent.changes["casCheckRequest"]).isEqualTo(
+      mapOf(
+        "caAdditionalInfo" to caAdditionalInfo,
+        "ppAdditionalInfo" to ppAdditionalInfo,
+        "preferencePriority" to preferencePriority.toString(),
+      ),
+    )
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  fun `should delete address check request`() {
+    val prisonNumber = "A1234AA"
+    val requestId = 1L
+    val curfewAddressCheckRequest =
+      curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+
+    val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+    assertThat(deletedRequest).isNull()
+
+    val assessmentEvents = curfewAddressCheckRequest?.assessment?.id?.let {
+      assessmentEventRepository.findByAssessmentId(
+        it,
+      )
+    }
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents?.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
+    assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_UPDATED")
+    assertThat(firstEvent.changes["deleteAddressCheckRequestId"]).isEqualTo(requestId.toInt())
   }
 
   @Sql(
@@ -272,7 +322,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val firstEvent = assessmentEvents.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.RESIDENT_UPDATED)
     assertThat(firstEvent.summary).isEqualTo("generic change event with type: RESIDENT_UPDATED")
-    assertThat(firstEvent.changes["New Residents"]).isEqualTo(
+    assertThat(firstEvent.changes["newResidents"]).isEqualTo(
       listOf(
         mapOf(
           "residentId" to addMainResident.residentId?.toInt(),
@@ -360,6 +410,34 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     )
 
     assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest)) }
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/a-standard-address-check-request.sql",
+  )
+  fun `should update case admin additional information`() {
+    val prisonNumber = "A1234AA"
+    val requestId = 1L
+    val additionalInformation = "Updated case admin info"
+    val caseAdminInfoRequest = UpdateCaseAdminAdditionInfoRequest(additionalInformation)
+
+    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest)
+
+    val curfewAddressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
+    assertThat(curfewAddressCheckRequest).isNotNull
+    assertThat(curfewAddressCheckRequest?.caAdditionalInfo).isEqualTo(additionalInformation)
+
+    val assessmentEvents = curfewAddressCheckRequest?.assessment?.id?.let {
+      assessmentEventRepository.findByAssessmentId(it)
+    }
+    assertThat(assessmentEvents).isNotEmpty
+    assertThat(assessmentEvents).hasSize(1)
+
+    val firstEvent = assessmentEvents?.first() as GenericChangedEvent
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
+    assertThat(firstEvent.changes["caseAdminAdditionalInformation"]).isEqualTo(additionalInformation)
   }
 
   private companion object {

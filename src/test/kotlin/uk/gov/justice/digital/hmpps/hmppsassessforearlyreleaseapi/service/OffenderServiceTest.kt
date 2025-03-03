@@ -172,7 +172,6 @@ class OffenderServiceTest {
         prisonerSearchPrisoner,
       ),
     )
-
     service.createOrUpdateOffender(PRISON_NUMBER)
 
     verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
