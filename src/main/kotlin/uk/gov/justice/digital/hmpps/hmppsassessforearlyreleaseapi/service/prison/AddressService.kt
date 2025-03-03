@@ -60,7 +60,7 @@ class AddressService(
   fun addStandardAddressCheckRequest(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
-//    agent: Agent,
+    agent: Agent,
   ): StandardAddressCheckRequestSummary {
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
@@ -86,7 +86,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("standardAddressCheckRequest" to addStandardAddressCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent,
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -132,7 +132,7 @@ class AddressService(
   }
 
   @Transactional
-  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long, agent: Agent) {
+  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long) {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
@@ -146,7 +146,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("deleteAddressCheckRequestId" to requestId),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agent,
+      agent = SYSTEM_AGENT.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 

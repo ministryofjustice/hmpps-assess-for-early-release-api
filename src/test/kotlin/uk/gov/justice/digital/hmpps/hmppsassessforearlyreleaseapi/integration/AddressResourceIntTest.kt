@@ -182,7 +182,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn))
+        .bodyValue(addStandardAddressCheckRequestWrapper())
         .exchange()
         .expectStatus()
         .isCreated
@@ -313,9 +313,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
     }
 
-    private val agentEntity = PRISON_CA_AGENT.toEntity()
-    private fun aAddCasCheckRequest(): AddCasCheckRequest = AddCasCheckRequest(caInfo, ppInfo, priority)
-    private fun aAddCasCheckRequestWrapper(): AddCasCheckRequestWrapper = AddCasCheckRequestWrapper(aAddCasCheckRequest(), agentEntity)
+    private fun aAddCasCheckRequestWrapper(): AddCasCheckRequestWrapper = AddCasCheckRequestWrapper(AddCasCheckRequest(caInfo, ppInfo, priority), PRISON_CA_AGENT.toEntity())
   }
 
   @Nested
@@ -455,7 +453,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation())
-        .bodyValue(anAddResidentRequest())
+        .bodyValue(addResidentsRequestWrapper())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -466,7 +464,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(anAddResidentRequest())
+        .bodyValue(addResidentsRequestWrapper())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -481,7 +479,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val residentSummary = webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(anAddResidentRequest())
+        .bodyValue(addResidentsRequestWrapper())
         .exchange()
         .expectStatus()
         .isCreated
@@ -520,7 +518,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(invalidAddResidentRequest)
+        .bodyValue(AddResidentsRequestWrapper(invalidAddResidentRequest, PRISON_CA_AGENT.toEntity()))
         .exchange()
         .expectStatus()
         .isEqualTo(500)
@@ -532,6 +530,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
       AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
     )
+    private fun addResidentsRequestWrapper(): AddResidentsRequestWrapper = AddResidentsRequestWrapper(anAddResidentRequest(), PRISON_CA_AGENT.toEntity())
   }
 
   @Nested

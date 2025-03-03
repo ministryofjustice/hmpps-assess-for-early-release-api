@@ -138,7 +138,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       addressUprn = uprn,
     )
 
-    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest)
+    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, PRISON_CA_AGENT.toEntity())
 
     val dbStandardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
     assertThat(dbStandardAddressCheckRequests).hasSize(1)
@@ -222,7 +222,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId, PRISON_CA_AGENT.toEntity())
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
 
     val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(deletedRequest).isNull()
@@ -239,8 +239,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
     assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_UPDATED")
     assertThat(firstEvent.changes["deleteAddressCheckRequestId"]).isEqualTo(requestId.toInt())
-    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
-    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Sql(
