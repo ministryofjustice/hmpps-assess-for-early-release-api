@@ -39,19 +39,19 @@ class OffenderService(
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findByOffenderPrisonId(prisonCode)
-    return assessments.map { createOffenderSummaryResponse(it) }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
-    return assessments.map { createOffenderSummaryResponse(it) }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
-    return assessments.map { createOffenderSummaryResponse(it) }
+    return assessments.map { it.toOffenderSummary() }
   }
 
   fun createOrUpdateOffender(nomisId: String) {
@@ -162,23 +162,22 @@ class OffenderService(
     ),
   )
 
-  private fun createOffenderSummaryResponse(assessment: Assessment): OffenderSummaryResponse = OffenderSummaryResponse(
-    prisonNumber = assessment.offender.prisonNumber,
-    bookingId = assessment.offender.bookingId,
-    forename = assessment.offender.forename!!,
-    surname = assessment.offender.surname!!,
-    hdced = assessment.offender.hdced,
-    workingDaysToHdced = workingDaysService.workingDaysBefore(assessment.offender.hdced),
-    probationPractitioner = assessment.responsibleCom?.fullName,
-    isPostponed = assessment.offender.status == AssessmentStatus.POSTPONED,
-    postponementDate = assessment.postponementDate,
-    postponementReasons = assessment.postponementReasons.map
-      { reason -> reason.reasonType }.toList(),
-    status = assessment.status,
-    addressChecksComplete = assessment.addressChecksComplete,
-    currentTask = assessment.currentTask(),
-    taskOverdueOn = assessment.offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
-    crn = assessment.offender.crn,
+  fun Assessment.toOffenderSummary() = OffenderSummaryResponse(
+    prisonNumber = offender.prisonNumber,
+    bookingId = offender.bookingId,
+    forename = offender.forename!!,
+    surname = offender.surname!!,
+    hdced = offender.hdced,
+    workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
+    probationPractitioner = this.responsibleCom?.fullName,
+    isPostponed = this.status == AssessmentStatus.POSTPONED,
+    postponementDate = this.postponementDate,
+    postponementReasons = this.postponementReasons.map { reason -> reason.reasonType }.toList(),
+    status = this.status,
+    addressChecksComplete = this.addressChecksComplete,
+    currentTask = this.currentTask(),
+    taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
+    crn = offender.crn,
   )
 
   companion object {
