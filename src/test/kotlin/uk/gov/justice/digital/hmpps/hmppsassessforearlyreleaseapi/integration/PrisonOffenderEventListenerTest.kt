@@ -30,7 +30,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_CREATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_UPDATED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TRANSFERRED_EVENT_NAME
@@ -51,9 +50,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
   @Autowired
   lateinit var assessmentEventRepository: AssessmentEventRepository
-
-  @Autowired
-  lateinit var assessmentService: AssessmentService
 
   private val awaitAtMost30Secs
     get() = await.atMost(Duration.ofSeconds(30))
@@ -79,9 +75,9 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         TRANSFERRED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to PRISON_NUMBER,
-          "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
-          "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
+          "prisonNumber" to PRISON_NUMBER,
+          "prisonTransferredFrom" to OLD_PRISON_CODE,
+          "PrisonTransferredTo" to NEW_PRISON_CODE,
         ),
         null,
       )
@@ -89,16 +85,16 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
-    val assessment = assessmentService.getCurrentAssessment(PRISON_NUMBER)
-    val events = assessmentEventRepository.findByAssessmentId(assessment.id)
+    val assessment = offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.currentAssessment()
+    val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment?.id!!)
     assertThat(events).hasSize(1)
     val event = events.first() as GenericChangedEvent
     assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISON_TRANSFERRED)
     assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
       mapOf(
-        "NOMS-ID" to PRISON_NUMBER,
-        "PRISON-TRANSFERRED-FROM" to OLD_PRISON_CODE,
-        "PRISON-TRANSFERRED-TO" to NEW_PRISON_CODE,
+        "prisonNumber" to PRISON_NUMBER,
+        "prisonTransferredFrom" to OLD_PRISON_CODE,
+        "PrisonTransferredTo" to NEW_PRISON_CODE,
       ),
     )
 
@@ -173,8 +169,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         PRISONER_CREATED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to prisonNumber,
-          "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
+          "prisonNumber" to prisonNumber,
+          "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
         ),
         null,
       )
@@ -195,8 +191,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISONER_CREATED)
     assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
       mapOf(
-        "NOMS-ID" to prisonNumber,
-        "PRISONER_HDCED" to hdced.format(DateTimeFormatter.ISO_DATE),
+        "prisonNumber" to prisonNumber,
+        "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
       ),
     )
 
@@ -244,11 +240,11 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       verify(telemetryClient).trackEvent(
         PRISONER_UPDATED_EVENT_NAME,
         mapOf(
-          "NOMS-ID" to PRISON_NUMBER,
-          "PRISONER-FIRST_NAME" to newFirstName,
-          "PRISONER-LAST_NAME" to newLastName,
-          "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
-          "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
+          "prisonNumber" to PRISON_NUMBER,
+          "firstName" to newFirstName,
+          "lastName" to newLastName,
+          "dateOfBirth" to newDob.format(DateTimeFormatter.ISO_DATE),
+          "homeDetentionCurfewEligibilityDate" to newHdced.format(DateTimeFormatter.ISO_DATE),
         ),
         null,
       )
@@ -267,11 +263,11 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISONER_UPDATED)
     assertThat(event.changes).containsExactlyInAnyOrderEntriesOf(
       mapOf(
-        "NOMS-ID" to PRISON_NUMBER,
-        "PRISONER-FIRST_NAME" to newFirstName,
-        "PRISONER-LAST_NAME" to newLastName,
-        "PRISONER_DOB" to newDob.format(DateTimeFormatter.ISO_DATE),
-        "PRISONER_HDCED" to newHdced.format(DateTimeFormatter.ISO_DATE),
+        "prisonNumber" to PRISON_NUMBER,
+        "firstName" to newFirstName,
+        "lastName" to newLastName,
+        "dateOfBirth" to newDob.format(DateTimeFormatter.ISO_DATE),
+        "homeDetentionCurfewEligibilityDate" to newHdced.format(DateTimeFormatter.ISO_DATE),
       ),
     )
 

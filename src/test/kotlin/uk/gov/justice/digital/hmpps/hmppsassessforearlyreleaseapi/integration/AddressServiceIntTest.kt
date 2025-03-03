@@ -160,7 +160,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val firstEvent = assessmentEvents.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.changes["Standard Address Check Request"]).isEqualTo(
+    assertThat(firstEvent.changes["standardAddressCheckRequest"]).isEqualTo(
       mapOf(
         "caAdditionalInfo" to caAdditionalInfo,
         "ppAdditionalInfo" to ppAdditionalInfo,
@@ -203,7 +203,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val firstEvent = assessmentEvents.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.changes["CAS Check Request"]).isEqualTo(
+    assertThat(firstEvent.changes["casCheckRequest"]).isEqualTo(
       mapOf(
         "caAdditionalInfo" to caAdditionalInfo,
         "ppAdditionalInfo" to ppAdditionalInfo,
@@ -239,7 +239,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val firstEvent = assessmentEvents?.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
     assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_UPDATED")
-    assertThat(firstEvent.changes["Delete Address Check Request Id"]).isEqualTo(requestId.toInt())
+    assertThat(firstEvent.changes["deleteAddressCheckRequestId"]).isEqualTo(requestId.toInt())
   }
 
   @Sql(
@@ -322,7 +322,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val firstEvent = assessmentEvents.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.RESIDENT_UPDATED)
     assertThat(firstEvent.summary).isEqualTo("generic change event with type: RESIDENT_UPDATED")
-    assertThat(firstEvent.changes["New Residents"]).isEqualTo(
+    assertThat(firstEvent.changes["newResidents"]).isEqualTo(
       listOf(
         mapOf(
           "residentId" to addMainResident.residentId?.toInt(),
@@ -437,7 +437,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val firstEvent = assessmentEvents?.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.changes["Case Admin Additional Information"]).isEqualTo(additionalInformation)
+    assertThat(firstEvent.changes["caseAdminAdditionalInformation"]).isEqualTo(additionalInformation)
   }
 
   private companion object {
