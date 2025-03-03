@@ -19,3 +19,33 @@ If you'd prefer to run tests against a postgres instance running externally via 
 docker-compose -f docker-compose-test.yml up
 ```
 The tests should automatically detect this running on port 5433 and use it instead. 
+
+### Running application on command line
+
+```
+./run-local.sh
+```
+
+### Running application inside the IDE
+
+This option is needed if you want to trace to debug your code!
+If you want to run the spring application in side your IDE, 
+follow the following steps:
+
+* Run in terminal
+```
+./set-vars-to-local-env.sh
+```
+* Then run in terminal
+```
+docker compose up
+```
+* Add the following to your IJ IDE Run/Debug configurations "Environment variables"
+```
+/Users/<<YOUR-USER-DIR>>/env-config/after.env
+```
+<em>The IDE behaves a bit odd here, try and selected the folder and file do not type it in!</em>
+### Running all tests from command line
+```
+./gradlew clean ktlintformat detekt test integrationtest
+```
