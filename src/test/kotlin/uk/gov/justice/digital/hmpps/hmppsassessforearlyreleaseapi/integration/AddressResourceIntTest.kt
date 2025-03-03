@@ -194,7 +194,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.address.uprn).isEqualTo(uprn)
     }
 
-    private fun addStandardAddressCheckRequestWrapper(): AddStandardAddressCheckRequestWrapper = AddStandardAddressCheckRequestWrapper(AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn), PRISON_CA_AGENT.toEntity())
+    private fun addStandardAddressCheckRequestWrapper(): AddStandardAddressCheckRequestWrapper = AddStandardAddressCheckRequestWrapper(AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn), agentEntity)
   }
 
   @Nested
@@ -313,7 +313,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
     }
 
-    private fun aAddCasCheckRequestWrapper(): AddCasCheckRequestWrapper = AddCasCheckRequestWrapper(AddCasCheckRequest(caInfo, ppInfo, priority), PRISON_CA_AGENT.toEntity())
+    private fun aAddCasCheckRequestWrapper(): AddCasCheckRequestWrapper = AddCasCheckRequestWrapper(AddCasCheckRequest(caInfo, ppInfo, priority), agentEntity)
   }
 
   @Nested
@@ -518,19 +518,21 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(AddResidentsRequestWrapper(invalidAddResidentRequest, PRISON_CA_AGENT.toEntity()))
+        .bodyValue(AddResidentsRequestWrapper(invalidAddResidentRequest, agentEntity))
         .exchange()
         .expectStatus()
-        .isEqualTo(500)
+        .isEqualTo(400)
         .expectBody()
-        .jsonPath("$.userMessage").isEqualTo("Unexpected error: 400 BAD_REQUEST \"Validation failure\"")
+        .jsonPath("$.userMessage").value<String> { userMessage ->
+          assertThat(userMessage).contains("Relation must be provided if the resident is not an offender")
+        }
     }
 
     private fun anAddResidentRequest(): List<AddResidentRequest> = listOf(
       AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
       AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
     )
-    private fun addResidentsRequestWrapper(): AddResidentsRequestWrapper = AddResidentsRequestWrapper(anAddResidentRequest(), PRISON_CA_AGENT.toEntity())
+    private fun addResidentsRequestWrapper(): AddResidentsRequestWrapper = AddResidentsRequestWrapper(anAddResidentRequest(), agentEntity)
   }
 
   @Nested
@@ -606,13 +608,14 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anUpdateCaAdditionalInfoRequest() = UpdateCaseAdminAdditionInfoRequest("some information")
-    private fun updateCaseAdminAdditionInfoRequestWrapper() = UpdateCaseAdminAdditionInfoRequestWrapper(anUpdateCaAdditionalInfoRequest(), PRISON_CA_AGENT.toEntity())
+    private fun updateCaseAdminAdditionInfoRequestWrapper() = UpdateCaseAdminAdditionInfoRequestWrapper(anUpdateCaAdditionalInfoRequest(), agentEntity)
 
   }
 
   private companion object {
     val osPlacesMockServer = OsPlacesMockServer(OS_API_KEY)
     val prisonRegisterMockServer = PrisonRegisterMockServer()
+    val agentEntity = PRISON_CA_AGENT.toEntity()
 
     @JvmStatic
     @BeforeAll
