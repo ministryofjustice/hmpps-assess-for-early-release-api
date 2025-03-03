@@ -77,7 +77,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         mapOf(
           "prisonNumber" to PRISON_NUMBER,
           "prisonTransferredFrom" to OLD_PRISON_CODE,
-          "PrisonTransferredTo" to NEW_PRISON_CODE,
+          "prisonTransferredTo" to NEW_PRISON_CODE,
         ),
         null,
       )
@@ -94,7 +94,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       mapOf(
         "prisonNumber" to PRISON_NUMBER,
         "prisonTransferredFrom" to OLD_PRISON_CODE,
-        "PrisonTransferredTo" to NEW_PRISON_CODE,
+        "prisonTransferredTo" to NEW_PRISON_CODE,
       ),
     )
 

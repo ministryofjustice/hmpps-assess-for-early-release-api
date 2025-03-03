@@ -39,7 +39,7 @@ class TransferPrisonService(
     val changes = mapOf(
       "prisonNumber" to prisonNumber,
       "prisonTransferredFrom" to existingPrisonId,
-      "PrisonTransferredTo" to prisonCode,
+      "prisonTransferredTo" to prisonCode,
     )
     val assessmentEntity = updatedOffender.currentAssessment()
     assessmentEntity.recordEvent(
