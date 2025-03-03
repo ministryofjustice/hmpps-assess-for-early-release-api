@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Communi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -75,7 +75,7 @@ class OffenderServiceTest {
     val caseload = service.getCaseAdminCaseload(PRISON_ID)
     assertThat(caseload.size).isEqualTo(3)
     assertThat(caseload).containsExactlyInAnyOrder(
-      OffenderSummary(
+      OffenderSummaryResponse(
         prisonNumber = offender1.prisonNumber,
         bookingId = offender1.bookingId,
         forename = offender1.forename!!,
@@ -88,7 +88,7 @@ class OffenderServiceTest {
         currentTask = Task.ASSESS_ELIGIBILITY,
         taskOverdueOn = offender1.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
-      OffenderSummary(
+      OffenderSummaryResponse(
         prisonNumber = offender2.prisonNumber,
         bookingId = offender2.bookingId,
         forename = offender2.forename!!,
@@ -101,7 +101,7 @@ class OffenderServiceTest {
         currentTask = Task.ASSESS_ELIGIBILITY,
         taskOverdueOn = offender2.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
-      OffenderSummary(
+      OffenderSummaryResponse(
         prisonNumber = offender3.prisonNumber,
         bookingId = offender3.bookingId,
         forename = offender3.forename!!,
@@ -189,6 +189,7 @@ class OffenderServiceTest {
 
   @Test
   fun `should create a new offender and create responsible com where it doesn't already exist`() {
+    // Given
     val hdced = LocalDate.now().plusDays(23)
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = hdced)
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
@@ -196,14 +197,18 @@ class OffenderServiceTest {
         prisonerSearchPrisoner,
       ),
     )
+    val caseReferenceNumber = "DX12340A"
+    whenever(probationService.getCaseReferenceNumber(PRISON_NUMBER)).thenReturn(caseReferenceNumber)
     val offenderManager = aDeliusOffenderManager()
-    whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
+    whenever(probationService.getCurrentResponsibleOfficer(caseReferenceNumber)).thenReturn(offenderManager)
 
     val communityOffenderManager = aCommunityOffenderManager(offenderManager)
     whenever(staffRepository.save(any())).thenReturn(communityOffenderManager)
 
+    // When
     service.createOrUpdateOffender(PRISON_NUMBER)
 
+    // Then
     verify(prisonService).searchPrisonersByNomisIds(listOf(PRISON_NUMBER))
     verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
 
@@ -224,8 +229,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
+      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "crn")
+      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced, caseReferenceNumber))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
     assertThat(offenderCaptor.value.assessments.first().policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
   }

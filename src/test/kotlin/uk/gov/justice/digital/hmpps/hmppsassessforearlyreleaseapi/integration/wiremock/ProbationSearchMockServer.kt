@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 private const val PROBATION_SEARCH_WIREMOCK_PORT = 8094
 
 class ProbationSearchMockServer : WireMockServer(PROBATION_SEARCH_WIREMOCK_PORT) {
-  fun stubSearchForPersonOnProbation() {
+  fun stubSearchForPersonOnProbation(crn: String = "X12345") {
     stubFor(
       post(urlEqualTo("/search"))
         .willReturn(
@@ -19,7 +19,7 @@ class ProbationSearchMockServer : WireMockServer(PROBATION_SEARCH_WIREMOCK_PORT)
             """[
                 {
                  "offenderId": 1,
-                 "otherIds": { "crn": "X12345" },
+                 "otherIds": { "crn": "$crn" },
                  "offenderManagers": [
                     {
                      "active": true,

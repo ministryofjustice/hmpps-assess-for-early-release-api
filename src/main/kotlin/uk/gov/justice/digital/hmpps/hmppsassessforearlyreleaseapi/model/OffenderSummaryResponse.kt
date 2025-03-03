@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.Pos
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an offender")
-data class OffenderSummary(
+data class OffenderSummaryResponse(
   @Schema(description = "The offender's prisoner number", example = "A1234AA")
   val prisonNumber: String,
 
@@ -52,4 +52,7 @@ data class OffenderSummary(
 
   @Schema(description = "The date that the current task overdue on", example = "2028-06-23", required = false)
   val taskOverdueOn: LocalDate? = null,
+
+  @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
+  val crn: String? = null,
 )
