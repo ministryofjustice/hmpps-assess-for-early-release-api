@@ -22,7 +22,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCh
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
@@ -145,7 +144,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       addressUprn = uprn,
     )
 
-    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, PRISON_CA_AGENT.toEntity())
+    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, PRISON_CA_AGENT)
 
     val dbStandardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
     assertThat(dbStandardAddressCheckRequests).hasSize(1)
@@ -191,7 +190,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       preferencePriority = preferencePriority,
     )
 
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, PRISON_CA_AGENT.toEntity())
+    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, PRISON_CA_AGENT)
 
     val dbCasCheckRequests = casCheckRequestRepository.findAll()
     assertThat(dbCasCheckRequests).hasSize(1)
@@ -229,7 +228,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, PRISON_CA_AGENT)
 
     val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(deletedRequest).isNull()
@@ -292,7 +291,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = false,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), PRISON_CA_AGENT.toEntity())
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), PRISON_CA_AGENT)
     assertThat(residentSummary).isNotNull
 
     val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
@@ -389,7 +388,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = true,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT.toEntity())
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT)
     assertThat(residentSummary).isNotNull
     assertThat(residentSummary).hasSize(1)
     assertThat(residentSummary.first().relation).isNull()
@@ -417,7 +416,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = false,
     )
 
-    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT.toEntity()) }
+    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), PRISON_CA_AGENT) }
   }
 
   @Test
@@ -431,7 +430,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val additionalInformation = "Updated case admin info"
     val caseAdminInfoRequest = UpdateCaseAdminAdditionInfoRequest(additionalInformation)
 
-    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, PRISON_CA_AGENT.toEntity())
+    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, PRISON_CA_AGENT)
 
     val curfewAddressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(curfewAddressCheckRequest).isNotNull

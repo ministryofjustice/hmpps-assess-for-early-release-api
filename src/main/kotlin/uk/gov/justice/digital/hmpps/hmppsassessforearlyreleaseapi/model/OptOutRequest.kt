@@ -21,5 +21,5 @@ data class OptOutRequest(
   val otherDescription: String? = null,
 
   @Schema(description = "Details of the agent who is requesting the opt out", required = true)
-  val agent: Agent,
+  val agentDto: AgentDto,
 )

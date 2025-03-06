@@ -114,7 +114,7 @@ class ResidentialChecksServiceTest {
         "informationToSupportDecision" to "info",
         "riskManagementPlanningActionsNeeded" to false,
       ),
-      agent = PROBATION_COM_AGENT,
+      agentDto = PROBATION_COM_AGENT,
     )
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessmentEntity)

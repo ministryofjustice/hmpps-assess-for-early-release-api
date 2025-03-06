@@ -12,31 +12,32 @@ import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.PutMapping
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddCasCheckRequestWrapper
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentsRequestWrapper
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestWrapper
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UpdateCaseAdminAdditionInfoRequestWrapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-class AddressResource(private val addressService: AddressService) {
+class AddressResource(private val addressService: AddressService, private val agentHolder: AgentHolder) {
   @GetMapping("/addresses")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
@@ -167,8 +168,8 @@ class AddressResource(private val addressService: AddressService) {
   )
   fun addStandardAddressCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @RequestBody @Valid addStandardAddressCheckRequestWrapper: AddStandardAddressCheckRequestWrapper,
-  ) = addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequestWrapper.addStandardAddressCheckRequest, addStandardAddressCheckRequestWrapper.agent)
+    @RequestBody @Valid addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
+  ) = addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.agent)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -267,8 +268,8 @@ class AddressResource(private val addressService: AddressService) {
   )
   fun addCasCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @RequestBody @Valid addCasCheckRequestWrapper: AddCasCheckRequestWrapper,
-  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequestWrapper.addCasCheckRequest, addCasCheckRequestWrapper.agent)
+    @RequestBody @Valid addCasCheckRequest: AddCasCheckRequest,
+  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.agent)
 
   @DeleteMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -325,7 +326,7 @@ class AddressResource(private val addressService: AddressService) {
   fun deleteAddressCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-  ) = addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+  ) = addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.agent)
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/address-check-requests")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -435,8 +436,8 @@ class AddressResource(private val addressService: AddressService) {
   fun addStandardAddressCheckRequestResident(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-    @RequestBody @Valid addResidentsRequestWrapper: AddResidentsRequestWrapper,
-  ) = addressService.addResidents(prisonNumber, requestId, addResidentsRequestWrapper.addResidentsRequest, addResidentsRequestWrapper.agent)
+    @RequestBody @Valid addResidentsRequest: List<AddResidentRequest>,
+  ) = addressService.addResidents(prisonNumber, requestId, addResidentsRequest, agentHolder.agent)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/case-admin-additional-information")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -493,6 +494,6 @@ class AddressResource(private val addressService: AddressService) {
   fun updateCaseAdminAdditionalInformation(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-    @RequestBody @Valid updateCaseAdminAdditionInfoRequestWrapper: UpdateCaseAdminAdditionInfoRequestWrapper,
-  ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequestWrapper.updateCaseAdminAdditionInfoRequest, updateCaseAdminAdditionInfoRequestWrapper.agent)
+    @RequestBody @Valid updateCaseAdminAdditionInfoRequest: UpdateCaseAdminAdditionInfoRequest,
+  ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequest, agentHolder.agent)
 }

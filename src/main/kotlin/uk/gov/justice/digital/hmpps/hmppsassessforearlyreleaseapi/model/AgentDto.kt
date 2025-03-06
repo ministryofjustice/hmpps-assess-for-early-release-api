@@ -1,12 +1,12 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent as AgentEntity
 
 @Schema(description = "Details of the agent who is requesting a change be made to a resource")
-data class Agent(
+data class AgentDto(
   @Schema(description = "The name of the user requesting the change", example = "BobSmith")
   val username: String,
 
@@ -20,14 +20,15 @@ data class Agent(
     description = "The organisation the user requesting the change is working on behalf of",
     example = "A prison code or probation team code",
   )
+
   val onBehalfOf: String? = null,
 )
 
-fun Agent?.toEntity(): uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent {
+fun AgentDto?.toEntity(): Agent {
   if (this == null) {
-    return SYSTEM_AGENT.toEntity()
+    return SYSTEM_AGENT
   }
-  return uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent(
+  return Agent(
     username = this.username,
     fullName = this.fullName,
     role = this.role,
@@ -35,4 +36,4 @@ fun Agent?.toEntity(): uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseap
   )
 }
 
-fun AgentEntity.toModel() = Agent(this.username, this.fullName, this.role, this.onBehalfOf)
+fun Agent.toModel() = AgentDto(this.username, this.fullName, this.role, this.onBehalfOf)

@@ -25,19 +25,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCom
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -64,8 +64,8 @@ object TestData {
   const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
-  val PRISON_CA_AGENT = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
-  val PROBATION_COM_AGENT = Agent("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val PRISON_CA_AGENT = AgentDto("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
+  val PROBATION_COM_AGENT = AgentDto("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
   val criterion = POLICY_1_0.eligibilityCriteria[0]
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)
@@ -94,7 +94,7 @@ object TestData {
         "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
         "mainOccupierConsentGiven" to "true",
       ),
-      agent = PROBATION_COM_AGENT,
+      agentDto = PROBATION_COM_AGENT,
     )
 
   val anPostponeCaseRequest = PostponeCaseRequest(
@@ -105,7 +105,7 @@ object TestData {
         PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
       ),
     ),
-    agent = PRISON_CA_AGENT,
+    agentDto = PRISON_CA_AGENT,
   )
 
   fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
@@ -152,7 +152,7 @@ object TestData {
     taskName = "task-$n",
     questions = listOf(Question("question-$n", answer = true)),
     status = ELIGIBLE,
-    agent = PRISON_CA_AGENT,
+    agentDto = PRISON_CA_AGENT,
     lastUpdated = LocalDate.now(),
   )
 

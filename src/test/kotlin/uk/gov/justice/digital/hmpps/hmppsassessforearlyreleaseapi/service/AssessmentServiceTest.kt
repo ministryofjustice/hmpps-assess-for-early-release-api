@@ -92,7 +92,7 @@ class AssessmentServiceTest {
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
     whenever(prisonService.getPrisonNameForId(PRISON_ID)).thenReturn(PRISON_NAME)
 
-    service.optOut(PRISON_NUMBER, OptOutRequest(reasonType = NO_REASON_GIVEN, agent = PRISON_CA_AGENT))
+    service.optOut(PRISON_NUMBER, OptOutRequest(reasonType = NO_REASON_GIVEN, agentDto = PRISON_CA_AGENT))
 
     val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
     verify(assessmentRepository).save(assessmentCaptor.capture())
@@ -325,7 +325,7 @@ class AssessmentServiceTest {
               answer = true,
             )
           },
-          agent = PRISON_CA_AGENT,
+          agentDto = PRISON_CA_AGENT,
           lastUpdated = LocalDate.now(),
         ),
       )

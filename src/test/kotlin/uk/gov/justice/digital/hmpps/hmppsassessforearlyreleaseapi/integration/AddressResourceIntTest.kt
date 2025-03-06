@@ -9,12 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddCasCheckRequestWrapper
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentsRequestWrapper
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestWrapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UpdateCaseAdminAdditionInfoRequestWrapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -27,10 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckReq
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import java.time.LocalDate
 
@@ -158,7 +152,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
-        .bodyValue(addStandardAddressCheckRequestWrapper())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -169,7 +163,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation())
-        .bodyValue(addStandardAddressCheckRequestWrapper())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -180,7 +174,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(addStandardAddressCheckRequestWrapper())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -196,7 +190,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(addStandardAddressCheckRequestWrapper())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isCreated
@@ -208,7 +202,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.address.uprn).isEqualTo(uprn)
     }
 
-    private fun addStandardAddressCheckRequestWrapper(): AddStandardAddressCheckRequestWrapper = AddStandardAddressCheckRequestWrapper(AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn), agentEntity)
+    private fun addStandardAddressCheckRequest() = AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
   }
 
   @Nested
@@ -277,7 +271,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .bodyValue(aAddCasCheckRequestWrapper())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -288,7 +282,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation())
-        .bodyValue(aAddCasCheckRequestWrapper())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -299,7 +293,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(aAddCasCheckRequestWrapper())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -315,7 +309,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(aAddCasCheckRequestWrapper())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isCreated
@@ -327,7 +321,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
     }
 
-    private fun aAddCasCheckRequestWrapper(): AddCasCheckRequestWrapper = AddCasCheckRequestWrapper(AddCasCheckRequest(caInfo, ppInfo, priority), agentEntity)
+    private fun addCasCheckRequest() = AddCasCheckRequest(caInfo, ppInfo, priority)
   }
 
   @Nested
@@ -467,7 +461,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation())
-        .bodyValue(addResidentsRequestWrapper())
+        .bodyValue(anAddResidentRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -478,7 +472,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(addResidentsRequestWrapper())
+        .bodyValue(anAddResidentRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -493,7 +487,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val residentSummary = webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(addResidentsRequestWrapper())
+        .bodyValue(anAddResidentRequest())
         .exchange()
         .expectStatus()
         .isCreated
@@ -532,21 +526,18 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_RESIDENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(AddResidentsRequestWrapper(invalidAddResidentRequest, agentEntity))
+        .bodyValue(invalidAddResidentRequest)
         .exchange()
         .expectStatus()
-        .isEqualTo(400)
+        .isEqualTo(500)
         .expectBody()
-        .jsonPath("$.userMessage").value<String> { userMessage ->
-          assertThat(userMessage).contains("Relation must be provided if the resident is not an offender")
-        }
+        .jsonPath("$.userMessage").isEqualTo("Unexpected error: 400 BAD_REQUEST \"Validation failure\"")
     }
 
     private fun anAddResidentRequest(): List<AddResidentRequest> = listOf(
       AddResidentRequest(1, forename, surname, phoneNumber, null, dateOfBirth, age = 47, isMainResident = true, isOffender = true),
       AddResidentRequest(2, forename, surname, phoneNumber, relation, dateOfBirth, age = 37, isMainResident = false, isOffender = false),
     )
-    private fun addResidentsRequestWrapper(): AddResidentsRequestWrapper = AddResidentsRequestWrapper(anAddResidentRequest(), agentEntity)
   }
 
   @Nested
@@ -555,7 +546,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
-        .bodyValue(updateCaseAdminAdditionInfoRequestWrapper())
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -566,7 +557,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
         .headers(setAuthorisation())
-        .bodyValue(updateCaseAdminAdditionInfoRequestWrapper())
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -577,7 +568,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(updateCaseAdminAdditionInfoRequestWrapper())
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -589,19 +580,16 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update case admin additional information`() {
-      val updateCaseAdminAdditionInfoRequestWrapper = updateCaseAdminAdditionInfoRequestWrapper()
-      val (updateCaAdditionalInfoRequest) = updateCaseAdminAdditionInfoRequestWrapper
-
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(updateCaseAdminAdditionInfoRequestWrapper)
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()
         .isNoContent
 
       val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
-      assertThat(addressCheckRequest?.caAdditionalInfo).isEqualTo(updateCaAdditionalInfoRequest.additionalInformation)
+      assertThat(addressCheckRequest?.caAdditionalInfo).isEqualTo(anUpdateCaAdditionalInfoRequest().additionalInformation)
     }
 
     @Sql(
@@ -622,13 +610,11 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anUpdateCaAdditionalInfoRequest() = UpdateCaseAdminAdditionInfoRequest("some information")
-    private fun updateCaseAdminAdditionInfoRequestWrapper() = UpdateCaseAdminAdditionInfoRequestWrapper(anUpdateCaAdditionalInfoRequest(), agentEntity)
   }
 
   private companion object {
     val osPlacesMockServer = OsPlacesMockServer(OS_API_KEY)
     val prisonRegisterMockServer = PrisonRegisterMockServer()
-    val agentEntity = PRISON_CA_AGENT.toEntity()
 
     @JvmStatic
     @BeforeAll

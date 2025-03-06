@@ -6,7 +6,6 @@ import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType.STATUS_CHANGE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 
 @Entity
 @DiscriminatorValue(value = "STATUS_CHANGE")
@@ -18,7 +17,7 @@ class StatusChangedEvent(
   @Column(columnDefinition = "jsonb")
   val changes: StatusChange,
 
-  agent: Agent = Agent.SYSTEM_AGENT.toEntity(),
+  agent: Agent = Agent.SYSTEM_AGENT,
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,

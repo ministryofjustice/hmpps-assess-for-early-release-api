@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 
@@ -45,7 +44,7 @@ class TransferPrisonService(
     assessmentEntity.recordEvent(
       eventType = AssessmentEventType.PRISON_TRANSFERRED,
       changes,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = SYSTEM_AGENT,
     )
     assessmentRepository.save(assessmentEntity)
     offenderRepository.saveAllAndFlush(listOf(updatedOffender))

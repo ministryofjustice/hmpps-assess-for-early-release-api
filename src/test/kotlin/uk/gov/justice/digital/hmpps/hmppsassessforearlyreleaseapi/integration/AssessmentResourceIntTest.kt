@@ -170,7 +170,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     private val anPostponeCaseRequestWithNoReason = PostponeCaseRequest(
       reasonTypes = LinkedHashSet(),
-      agent = PRISON_CA_AGENT,
+      agentDto = PRISON_CA_AGENT,
     )
 
     private val anPostponeCaseRequest = PostponeCaseRequest(
@@ -181,7 +181,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
         ),
       ),
-      agent = PRISON_CA_AGENT,
+      agentDto = PRISON_CA_AGENT,
     )
 
     @Test
@@ -299,7 +299,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
   @Nested
   inner class OptOut {
-    private val anOptOutRequest = OptOutRequest(reasonType = NO_REASON_GIVEN, agent = PRISON_CA_AGENT)
+    private val anOptOutRequest = OptOutRequest(reasonType = NO_REASON_GIVEN, agentDto = PRISON_CA_AGENT)
 
     @Test
     fun `should return unauthorized if no token`() {

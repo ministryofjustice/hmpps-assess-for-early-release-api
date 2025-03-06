@@ -52,7 +52,7 @@
         "answer": false
       }
     ],
-    "agent": {
+    "agentDto": {
       "username": "wayneroberts",
       "fullName": "Wayne Roberts",
       "role": "PRISON_CA",
@@ -72,7 +72,7 @@
         "answer": false
       }
     ],
-    "agent": {
+    "agentDto": {
       "username": "wayneroberts",
       "fullName": "Wayne Roberts",
       "role": "PRISON_CA",
