@@ -20,7 +20,6 @@ data class AgentDto(
     description = "The organisation the user requesting the change is working on behalf of",
     example = "A prison code or probation team code",
   )
-
   val onBehalfOf: String? = null,
 )
 

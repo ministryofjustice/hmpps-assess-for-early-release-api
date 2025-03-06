@@ -14,7 +14,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 
-
 @Component
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class AgentHolder {
@@ -28,20 +27,18 @@ class HeaderInterceptorConfig(private val agentHolder: AgentHolder) : WebMvcConf
   }
 
   @Bean
-  fun agentInterceptor(): AgentInterceptor {
-    return AgentInterceptor(agentHolder)
-  }
+  fun agentInterceptor(): AgentInterceptor = AgentInterceptor(agentHolder)
 }
 
 class AgentInterceptor(private val agentHolder: AgentHolder) : HandlerInterceptor {
 
   @Throws(Exception::class)
   override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
-    var role = request.getHeader("role")
+    val role = request.getHeader("role")
     agentHolder.agent = AgentDto(
       username = request.getHeader("username") ?: "SYSTEM",
       fullName = request.getHeader("fullName") ?: "SYSTEM",
-      role = if(role != null) UserRole.valueOf(role) else UserRole.SYSTEM,
+      role = if (role != null) UserRole.valueOf(role) else UserRole.SYSTEM,
       onBehalfOf = request.getHeader("onBehalfOf") ?: "SYSTEM",
     )
     return true
