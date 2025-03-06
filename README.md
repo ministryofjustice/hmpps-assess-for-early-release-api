@@ -34,7 +34,7 @@ follow the following steps:
 
 * Run in terminal
 ```
-./set-vars-to-local-env.sh
+./set-vars-to-env-file.sh
 ```
 * Then run in terminal
 ```
