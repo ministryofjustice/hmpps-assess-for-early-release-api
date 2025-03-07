@@ -24,7 +24,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import java.time.LocalDate
 
@@ -189,7 +191,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a standard address check request`() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
@@ -308,7 +310,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a CAS check request`() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
@@ -364,7 +366,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should delete an address check request`() {
       webTestClient.delete()
         .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .exchange()
         .expectStatus()
         .isNoContent
@@ -486,7 +488,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a standard address check request`() {
       val residentSummary = webTestClient.post()
         .uri(ADD_RESIDENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(anAddResidentRequest())
         .exchange()
         .expectStatus()
@@ -580,9 +582,11 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update case admin additional information`() {
+      val agentHolder = AgentHolder()
+      agentHolder.agent = PRISON_CA_AGENT
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()

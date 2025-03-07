@@ -14,6 +14,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class AgentHolder {
   lateinit var agent: AgentDto
+
+  fun isAgentInitialized(): Boolean = this::agent.isInitialized
+
+  fun getAgentOrThrow(): AgentDto {
+    if (!isAgentInitialized()) {
+      error("Agent is missing from the request headers")
+    }
+    return agent
+  }
 }
 
 class AgentHeaderInterceptor(private val agentHolder: AgentHolder) : HandlerInterceptor {

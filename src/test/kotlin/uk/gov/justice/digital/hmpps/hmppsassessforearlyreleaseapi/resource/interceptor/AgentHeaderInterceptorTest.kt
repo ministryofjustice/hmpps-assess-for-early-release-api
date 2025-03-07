@@ -78,9 +78,11 @@ class AgentHeaderInterceptorTest {
     whenever(request.requestURI).thenReturn("/addresses")
 
     assertThat(interceptor.preHandle(request, response, handler)).isTrue()
+    assertThat(agentHolder.isAgentInitialized()).isFalse()
 
-    assertThrows<UninitializedPropertyAccessException> {
+    val exception = assertThrows<Exception> {
       agentHolder.agent
     }
+    assertThat(exception.message).isEqualTo("lateinit property agent has not been initialized")
   }
 }
