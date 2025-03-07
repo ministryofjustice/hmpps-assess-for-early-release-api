@@ -189,7 +189,7 @@ class EligibilityAndSuitabilityServiceTest {
               answer = true,
             )
           },
-          agentDto = PRISON_CA_AGENT,
+          agent = PRISON_CA_AGENT,
           lastUpdated = LocalDate.now(),
         ),
       )
@@ -206,7 +206,7 @@ class EligibilityAndSuitabilityServiceTest {
               answer = null,
             )
           },
-          agentDto = null,
+          agent = null,
           lastUpdated = null,
         ),
       )
@@ -228,7 +228,7 @@ class EligibilityAndSuitabilityServiceTest {
         code = criterion.code,
         type = CriteriaType.ELIGIBILITY,
         answers = mapOf(question.name to false),
-        agentDto = PRISON_CA_AGENT,
+        agent = PRISON_CA_AGENT,
       )
 
       assertThat(assessment.assessmentEntity.eligibilityCheckResults).isEmpty()

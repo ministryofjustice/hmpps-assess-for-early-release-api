@@ -55,7 +55,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "wayneroberts",
         "fullName": "Wayne Roberts",
         "role": "PRISON_CA",
@@ -75,7 +75,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "wayneroberts",
         "fullName": "Wayne Roberts",
         "role": "PRISON_CA",
@@ -95,7 +95,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -115,7 +115,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -135,7 +135,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -161,7 +161,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -181,7 +181,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -201,7 +201,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -227,7 +227,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -247,7 +247,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",
@@ -267,7 +267,7 @@
           "answer": false
         }
       ],
-      "agentDto": {
+      "agent": {
         "username": "helenreid",
         "fullName": "Helen Reid",
         "role": "PRISON_CA",

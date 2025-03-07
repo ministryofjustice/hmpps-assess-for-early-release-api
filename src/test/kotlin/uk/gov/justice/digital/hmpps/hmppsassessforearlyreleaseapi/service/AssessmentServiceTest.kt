@@ -325,7 +325,7 @@ class AssessmentServiceTest {
               answer = true,
             )
           },
-          agentDto = PRISON_CA_AGENT,
+          agent = PRISON_CA_AGENT,
           lastUpdated = LocalDate.now(),
         ),
       )

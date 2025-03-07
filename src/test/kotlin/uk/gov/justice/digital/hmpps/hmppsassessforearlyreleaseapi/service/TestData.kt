@@ -152,7 +152,7 @@ object TestData {
     taskName = "task-$n",
     questions = listOf(Question("question-$n", answer = true)),
     status = ELIGIBLE,
-    agentDto = PRISON_CA_AGENT,
+    agent = PRISON_CA_AGENT,
     lastUpdated = LocalDate.now(),
   )
 

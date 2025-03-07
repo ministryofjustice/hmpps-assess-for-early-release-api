@@ -176,7 +176,7 @@ class AssessmentService(
           answer = eligibilityCheckResult.getAnswer(it.name),
         )
       },
-      agentDto = eligibilityCheckResult?.agent?.toModel(),
+      agent = eligibilityCheckResult?.agent?.toModel(),
       lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
     )
 

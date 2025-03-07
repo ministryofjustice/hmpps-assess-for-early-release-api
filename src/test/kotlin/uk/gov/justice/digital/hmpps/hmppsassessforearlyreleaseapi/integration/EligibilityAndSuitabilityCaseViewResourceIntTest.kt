@@ -274,7 +274,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       code = "category-a",
       type = CriteriaType.SUITABILITY,
       answers = mapOf("categoryA" to true),
-      agentDto = PRISON_CA_AGENT,
+      agent = PRISON_CA_AGENT,
     )
 
     @Test
@@ -360,7 +360,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         code = "recalled-for-breaching-hdc-curfew",
         type = CriteriaType.ELIGIBILITY,
         answers = mapOf("recalledForBreachingHdcCurfew" to false),
-        agentDto = PRISON_CA_AGENT,
+        agent = PRISON_CA_AGENT,
       )
 
       run {
