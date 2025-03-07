@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 
 @Schema(description = "The request type to save a set of answers for a residential checks task.")
 data class SaveResidentialChecksTaskAnswersRequest(
@@ -12,5 +12,5 @@ data class SaveResidentialChecksTaskAnswersRequest(
   val answers: Map<String, Any>,
 
   @Schema(description = "Details of the agent that is submitting the answers")
-  val agent: Agent,
+  val agent: AgentDto,
 )

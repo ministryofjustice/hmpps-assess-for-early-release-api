@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddCasC
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CurfewAddressCheckRequest
@@ -32,6 +31,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
@@ -68,7 +68,9 @@ class AddressService(
   fun addStandardAddressCheckRequest(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
+    agentHolder: AgentHolder,
   ): StandardAddressCheckRequestSummary {
+    val agent = agentHolder.getAgentOrThrow()
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
     if (address == null) {
@@ -93,7 +95,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("standardAddressCheckRequest" to addStandardAddressCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -107,7 +109,9 @@ class AddressService(
   fun addCasCheckRequest(
     prisonNumber: String,
     addCasCheckRequest: AddCasCheckRequest,
+    agentHolder: AgentHolder,
   ): CasCheckRequestSummary {
+    val agent = agentHolder.getAgentOrThrow()
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: error("Cannot find offender with prisonNumber $prisonNumber")
     val assessmentEntity = offender.currentAssessment()
@@ -118,12 +122,13 @@ class AddressService(
         ppAdditionalInfo = addCasCheckRequest.ppAdditionalInfo,
         preferencePriority = addCasCheckRequest.preferencePriority,
         assessment = offender.currentAssessment(),
+        allocatedAddress = null,
       ),
     )
     assessmentEntity.recordEvent(
       changes = mapOf("casCheckRequest" to addCasCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
     return casCheckRequest.toSummary()
@@ -137,7 +142,8 @@ class AddressService(
   }
 
   @Transactional
-  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long) {
+  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long, agentHolder: AgentHolder) {
+    val agent = agentHolder.getAgentOrThrow()
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
@@ -151,7 +157,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("deleteAddressCheckRequestId" to requestId),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -159,7 +165,8 @@ class AddressService(
   }
 
   @Transactional
-  fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>): List<ResidentSummary> {
+  fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>, agentHolder: AgentHolder): List<ResidentSummary> {
+    val agent = agentHolder.getAgentOrThrow()
     val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
     val assessmentEntity = addressCheckRequest.assessment
 
@@ -187,7 +194,6 @@ class AddressService(
         age = addResidentRequest.age
         isMainResident = addResidentRequest.isMainResident
         isOffender = addResidentRequest.isOffender
-        standardAddressCheckRequest = addressCheckRequest
       }
         ?: Resident(
           forename = addResidentRequest.forename,
@@ -205,7 +211,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("existingResidents" to existingResidents, "newResidents" to addResidentsRequest.map { it.toSummary() }),
       eventType = AssessmentEventType.RESIDENT_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -218,14 +224,16 @@ class AddressService(
     prisonNumber: String,
     requestId: Long,
     caseAdminInfoRequest: UpdateCaseAdminAdditionInfoRequest,
+    agentHolder: AgentHolder,
   ) {
+    val agent = agentHolder.getAgentOrThrow()
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
     val assessmentEntity = curfewAddressCheckRequest.assessment
     assessmentEntity.recordEvent(
       changes = mapOf("caseAdminAdditionalInformation" to caseAdminInfoRequest.additionalInformation),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)

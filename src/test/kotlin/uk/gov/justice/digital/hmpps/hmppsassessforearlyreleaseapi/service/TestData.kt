@@ -25,7 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -64,8 +64,8 @@ object TestData {
   const val STAFF_CODE = "STAFF1"
   const val ADDRESS_REQUEST_ID = 1L
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
-  val PRISON_CA_AGENT = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
-  val PROBATION_COM_AGENT = Agent("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val PRISON_CA_AGENT = AgentDto("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
+  val PROBATION_COM_AGENT = AgentDto("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
   val criterion = POLICY_1_0.eligibilityCriteria[0]
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)

@@ -17,7 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Eligibi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -75,8 +75,8 @@ class AssessmentService(
   }
 
   @Transactional
-  fun transitionAssessment(assessmentEntity: Assessment, event: AssessmentLifecycleEvent, agent: Agent?) {
-    assessmentEntity.performTransition(event, agent.toEntity())
+  fun transitionAssessment(assessmentEntity: Assessment, event: AssessmentLifecycleEvent, agentDto: AgentDto?) {
+    assessmentEntity.performTransition(event, agentDto.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
@@ -106,23 +106,23 @@ class AssessmentService(
   }
 
   @Transactional
-  fun optBackIn(prisonNumber: String, agent: Agent) {
+  fun optBackIn(prisonNumber: String, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(OptBackIn, agent.toEntity())
+    assessmentEntity.performTransition(OptBackIn, agentDto.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
-  fun submitAssessmentForAddressChecks(prisonNumber: String, agent: Agent) {
+  fun submitAssessmentForAddressChecks(prisonNumber: String, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(SubmitForAddressChecks, agent.toEntity())
+    assessmentEntity.performTransition(SubmitForAddressChecks, agentDto.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 
   @Transactional
-  fun submitForPreDecisionChecks(prisonNumber: String, agent: Agent) {
+  fun submitForPreDecisionChecks(prisonNumber: String, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(CompleteAddressChecks, agent.toEntity())
+    assessmentEntity.performTransition(CompleteAddressChecks, agentDto.toEntity())
     assessmentRepository.save(assessmentEntity)
   }
 

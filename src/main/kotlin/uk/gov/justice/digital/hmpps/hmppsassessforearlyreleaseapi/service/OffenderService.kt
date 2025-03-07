@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Communi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -119,7 +118,7 @@ class OffenderService(
     assessment.recordEvent(
       eventType = AssessmentEventType.PRISONER_CREATED,
       changes,
-      agent = SYSTEM_AGENT.toEntity(),
+      agent = SYSTEM_AGENT,
     )
     offenderRepository.save(offender)
 
@@ -155,7 +154,7 @@ class OffenderService(
       assessmentEntity.recordEvent(
         eventType = AssessmentEventType.PRISONER_UPDATED,
         changes,
-        agent = SYSTEM_AGENT.toEntity(),
+        agent = SYSTEM_AGENT,
       )
       assessmentRepository.save(assessmentEntity)
 

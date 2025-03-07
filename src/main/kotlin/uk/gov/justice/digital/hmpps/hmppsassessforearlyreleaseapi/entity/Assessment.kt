@@ -21,7 +21,7 @@ import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.toState
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import java.time.LocalDate
@@ -103,7 +103,7 @@ data class Assessment(
     criterionCode: String,
     criterionMet: Boolean,
     answers: Map<String, Boolean>,
-    agent: Agent,
+    agent: AgentDto,
   ) {
     val currentResults = this.eligibilityCheckResults
 
