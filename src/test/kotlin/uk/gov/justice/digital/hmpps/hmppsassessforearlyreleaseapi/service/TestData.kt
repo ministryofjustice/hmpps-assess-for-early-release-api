@@ -94,7 +94,7 @@ object TestData {
         "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
         "mainOccupierConsentGiven" to "true",
       ),
-      agentDto = PROBATION_COM_AGENT,
+      agent = PROBATION_COM_AGENT,
     )
 
   val anPostponeCaseRequest = PostponeCaseRequest(
@@ -105,7 +105,7 @@ object TestData {
         PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
       ),
     ),
-    agentDto = PRISON_CA_AGENT,
+    agent = PRISON_CA_AGENT,
   )
 
   fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)

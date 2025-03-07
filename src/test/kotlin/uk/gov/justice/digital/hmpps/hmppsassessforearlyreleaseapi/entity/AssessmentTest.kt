@@ -59,7 +59,7 @@ class AssessmentTest {
       "code-1",
       criterionMet = true,
       answers = mapOf("code-0" to true),
-      agentDto = anAgent.toModel(),
+      agent = anAgent.toModel(),
     )
     assertThat(assessment.eligibilityCheckResults).hasSize(1)
 
@@ -88,7 +88,7 @@ class AssessmentTest {
       "code-1",
       criterionMet = true,
       answers = mapOf("code-0" to true),
-      agentDto = anAgent.toModel(),
+      agent = anAgent.toModel(),
     )
 
     assessment.addOrReplaceEligibilityCriterionResult(
@@ -96,7 +96,7 @@ class AssessmentTest {
       "code-1",
       criterionMet = true,
       answers = mapOf("code-0" to false),
-      agentDto = anAgent.toModel(),
+      agent = anAgent.toModel(),
     )
 
     assertThat(assessment.eligibilityCheckResults).hasSize(1)

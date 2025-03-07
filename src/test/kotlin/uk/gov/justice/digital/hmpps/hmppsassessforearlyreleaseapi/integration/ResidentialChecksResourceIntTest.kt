@@ -178,7 +178,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
           "visitedAddress" to "I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER",
           "mainOccupierConsentGiven" to "true",
         ),
-        agentDto = PROBATION_COM_AGENT,
+        agent = PROBATION_COM_AGENT,
       )
 
     @Test
@@ -297,7 +297,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
             "vloOfficerForCase": true,
             "informationThatCannotBeDisclosed": false
           },
-          "agentDto": {
+          "agent": {
             "username": "probationUser",
             "fullName": "probation user",
             "role": "PROBATION_COM",

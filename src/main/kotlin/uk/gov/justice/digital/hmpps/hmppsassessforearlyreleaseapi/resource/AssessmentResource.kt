@@ -222,9 +222,9 @@ class AssessmentResource(
   )
   fun optBackIn(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @Valid @RequestBody agentDto: AgentDto,
+    @Valid @RequestBody agent: AgentDto,
   ) {
-    assessmentService.optBackIn(prisonNumber, agentDto)
+    assessmentService.optBackIn(prisonNumber, agent)
   }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-address-checks")
@@ -338,6 +338,6 @@ class AssessmentResource(
   )
   fun submitForPreDecisionChecks(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @Valid @RequestBody agentDto: AgentDto,
-  ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agentDto)
+    @Valid @RequestBody agent: AgentDto,
+  ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
 }

@@ -18,5 +18,5 @@ data class PostponeCaseRequest(
   @Schema(description = "Details of the agent who is requesting to postpone the case", required = true)
   @field:NotNull
   @field:Valid
-  val agentDto: AgentDto,
+  val agent: AgentDto,
 )

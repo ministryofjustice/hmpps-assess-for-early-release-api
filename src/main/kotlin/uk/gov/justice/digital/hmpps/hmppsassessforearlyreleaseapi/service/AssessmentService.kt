@@ -84,7 +84,7 @@ class AssessmentService(
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
 
-    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agentDto.toEntity())
+    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agent.toEntity())
 
     val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
       PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)
@@ -99,7 +99,7 @@ class AssessmentService(
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agentDto.toEntity())
+    assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agent.toEntity())
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
     assessmentRepository.save(assessmentEntity)
@@ -131,7 +131,7 @@ class AssessmentService(
     val event = AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(event, saveTaskAnswersRequest.agentDto.toEntity())
+    assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
 
     if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true

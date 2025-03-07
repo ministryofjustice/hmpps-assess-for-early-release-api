@@ -103,7 +103,7 @@ data class Assessment(
     criterionCode: String,
     criterionMet: Boolean,
     answers: Map<String, Boolean>,
-    agentDto: AgentDto,
+    agent: AgentDto,
   ) {
     val currentResults = this.eligibilityCheckResults
 
@@ -117,7 +117,7 @@ data class Assessment(
           criterionMet = criterionMet,
           questionAnswers = answers,
           lastUpdatedTimestamp = LocalDateTime.now(),
-          agent = agentDto.toEntity(),
+          agent = agent.toEntity(),
         )
       }
 
@@ -128,7 +128,7 @@ data class Assessment(
         criterionCode = criterionCode,
         criterionVersion = this.policyVersion,
         criterionType = criterionType,
-        agent = agentDto.toEntity(),
+        agent = agent.toEntity(),
       )
     }
 

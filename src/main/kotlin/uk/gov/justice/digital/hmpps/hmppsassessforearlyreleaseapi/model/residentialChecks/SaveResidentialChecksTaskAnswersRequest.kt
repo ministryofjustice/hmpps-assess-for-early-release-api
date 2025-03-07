@@ -12,5 +12,5 @@ data class SaveResidentialChecksTaskAnswersRequest(
   val answers: Map<String, Any>,
 
   @Schema(description = "Details of the agent that is submitting the answers")
-  val agentDto: AgentDto,
+  val agent: AgentDto,
 )

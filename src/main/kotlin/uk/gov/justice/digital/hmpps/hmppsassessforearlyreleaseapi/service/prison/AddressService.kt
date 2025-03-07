@@ -70,7 +70,7 @@ class AddressService(
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
     agentHolder: AgentHolder,
   ): StandardAddressCheckRequestSummary {
-    val agentDto = agentHolder.getAgentOrThrow()
+    val agent = agentHolder.getAgentOrThrow()
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
     if (address == null) {
@@ -95,7 +95,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("standardAddressCheckRequest" to addStandardAddressCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agentDto.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -111,7 +111,7 @@ class AddressService(
     addCasCheckRequest: AddCasCheckRequest,
     agentHolder: AgentHolder,
   ): CasCheckRequestSummary {
-    val agentDto = agentHolder.getAgentOrThrow()
+    val agent = agentHolder.getAgentOrThrow()
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: error("Cannot find offender with prisonNumber $prisonNumber")
     val assessmentEntity = offender.currentAssessment()
@@ -128,7 +128,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("casCheckRequest" to addCasCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agentDto.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
     return casCheckRequest.toSummary()
@@ -143,7 +143,7 @@ class AddressService(
 
   @Transactional
   fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long, agentHolder: AgentHolder) {
-    val agentDto = agentHolder.getAgentOrThrow()
+    val agent = agentHolder.getAgentOrThrow()
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
@@ -157,7 +157,7 @@ class AddressService(
     assessmentEntity.recordEvent(
       changes = mapOf("deleteAddressCheckRequestId" to requestId),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agentDto.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
 
@@ -226,14 +226,14 @@ class AddressService(
     caseAdminInfoRequest: UpdateCaseAdminAdditionInfoRequest,
     agentHolder: AgentHolder,
   ) {
-    val agentDto = agentHolder.getAgentOrThrow()
+    val agent = agentHolder.getAgentOrThrow()
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
     val assessmentEntity = curfewAddressCheckRequest.assessment
     assessmentEntity.recordEvent(
       changes = mapOf("caseAdminAdditionalInformation" to caseAdminInfoRequest.additionalInformation),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agentDto.toEntity(),
+      agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
