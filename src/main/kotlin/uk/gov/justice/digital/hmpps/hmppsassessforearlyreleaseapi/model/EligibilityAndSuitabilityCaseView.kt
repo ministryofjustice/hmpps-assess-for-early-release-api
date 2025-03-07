@@ -89,7 +89,7 @@ data class EligibilityCriterionProgress(
   @Schema(description = "The questions that are associated with this criterion for this case")
   val questions: List<Question> = emptyList(),
   @Schema(description = "Details of the user that submitted the answers for this criterion")
-  val agentDto: AgentDto?,
+  val agent: AgentDto?,
   @Schema(description = "The date time when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val lastUpdated: LocalDate?,
@@ -146,5 +146,5 @@ data class CriterionCheck(
   val answers: Map<String, Boolean>,
 
   @Schema(description = "Details of the agent who is requesting the criterion check")
-  val agentDto: AgentDto,
+  val agent: AgentDto,
 )
