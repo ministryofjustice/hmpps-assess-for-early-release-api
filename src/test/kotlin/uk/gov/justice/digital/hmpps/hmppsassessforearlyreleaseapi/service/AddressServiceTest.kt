@@ -98,7 +98,7 @@ class AddressServiceTest {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder)
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
     verify(curfewAddressCheckRequestRepository).findById(requestId)
     verify(curfewAddressCheckRequestRepository).delete(addressCheckRequest)
@@ -115,6 +115,6 @@ class AddressServiceTest {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder) }
+    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow()) }
   }
 }

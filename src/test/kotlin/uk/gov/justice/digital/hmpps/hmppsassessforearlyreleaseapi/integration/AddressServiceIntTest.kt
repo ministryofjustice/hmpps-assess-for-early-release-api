@@ -147,7 +147,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder)
+    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
 
     val dbStandardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
     assertThat(dbStandardAddressCheckRequests).hasSize(1)
@@ -197,7 +197,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
 
     val exception = assertThrows<Exception> {
-      addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder)
+      addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
     }
     assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
   }
@@ -221,7 +221,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder)
+    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
     val dbCasCheckRequests = casCheckRequestRepository.findAll()
     assertThat(dbCasCheckRequests).hasSize(1)
@@ -267,7 +267,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
 
     val exception = assertThrows<Exception> {
-      addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder)
+      addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
     }
 
     assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
@@ -287,7 +287,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder)
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
     val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(deletedRequest).isNull()
@@ -353,7 +353,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), agentHolder)
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), agentHolder.getAgentOrThrow())
     assertThat(residentSummary).isNotNull
 
     val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
@@ -453,7 +453,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder)
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder.getAgentOrThrow())
     assertThat(residentSummary).isNotNull
     assertThat(residentSummary).hasSize(1)
     assertThat(residentSummary.first().relation).isNull()
@@ -483,7 +483,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder) }
+    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder.getAgentOrThrow()) }
   }
 
   @Test
@@ -499,7 +499,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, agentHolder)
+    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, agentHolder.getAgentOrThrow())
 
     val curfewAddressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(curfewAddressCheckRequest).isNotNull

@@ -70,7 +70,7 @@ class AgentHeaderInterceptorTest {
   }
 
   @Test
-  fun `should not set agent when any header is missing`() {
+  fun `should not set agent when role is missing`() {
     whenever(request.getHeader("username")).thenReturn("testUser")
     whenever(request.getHeader("fullName")).thenReturn("Test User")
     whenever(request.getHeader("role")).thenReturn(null)
@@ -80,9 +80,37 @@ class AgentHeaderInterceptorTest {
     assertThat(interceptor.preHandle(request, response, handler)).isTrue()
     assertThat(agentHolder.isAgentInitialized()).isFalse()
 
-    val exception = assertThrows<Exception> {
+    val roleNullException = assertThrows<Exception> {
       agentHolder.agent
     }
-    assertThat(exception.message).isEqualTo("lateinit property agent has not been initialized")
+    assertThat(roleNullException.message).isEqualTo("lateinit property agent has not been initialized")
+
+    whenever(request.getHeader("username")).thenReturn(null)
+    whenever(request.getHeader("fullName")).thenReturn("Test User")
+    whenever(request.getHeader("role")).thenReturn(UserRole.SYSTEM.name)
+    whenever(request.getHeader("onBehalfOf")).thenReturn("testBehalf")
+    whenever(request.requestURI).thenReturn("/addresses")
+
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue()
+    assertThat(agentHolder.isAgentInitialized()).isFalse()
+
+    val userNameNullException = assertThrows<Exception> {
+      agentHolder.agent
+    }
+    assertThat(userNameNullException.message).isEqualTo("lateinit property agent has not been initialized")
+
+    whenever(request.getHeader("username")).thenReturn("testUser")
+    whenever(request.getHeader("fullName")).thenReturn(null)
+    whenever(request.getHeader("role")).thenReturn(UserRole.SYSTEM.name)
+    whenever(request.getHeader("onBehalfOf")).thenReturn("testBehalf")
+    whenever(request.requestURI).thenReturn("/addresses")
+
+    assertThat(interceptor.preHandle(request, response, handler)).isTrue()
+    assertThat(agentHolder.isAgentInitialized()).isFalse()
+
+    val fullNameNullException = assertThrows<Exception> {
+      agentHolder.agent
+    }
+    assertThat(fullNameNullException.message).isEqualTo("lateinit property agent has not been initialized")
   }
 }

@@ -204,6 +204,22 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.address.uprn).isEqualTo(uprn)
     }
 
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/some-offenders.sql",
+      "classpath:test_data/an-address.sql",
+    )
+    @Test
+    fun `should return bad request if agent is missing`() {
+      webTestClient.post()
+        .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(addStandardAddressCheckRequest())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
     private fun addStandardAddressCheckRequest() = AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
   }
 

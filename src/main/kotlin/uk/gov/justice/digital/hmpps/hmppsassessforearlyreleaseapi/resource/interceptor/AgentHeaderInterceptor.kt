@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.inte
 
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import jakarta.validation.ValidationException
 import org.springframework.context.annotation.Scope
 import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
@@ -19,7 +20,7 @@ class AgentHolder {
 
   fun getAgentOrThrow(): AgentDto {
     if (!isAgentInitialized()) {
-      error("Agent is missing from the request headers")
+      throw ValidationException("Agent is missing from the request headers")
     }
     return agent
   }
@@ -50,11 +51,5 @@ class AgentHeaderInterceptor(private val agentHolder: AgentHolder) : HandlerInte
     return true
   }
 
-  private fun shouldSkipRequest(request: HttpServletRequest): Boolean {
-    val path = request.requestURI
-    return request.method.equals("GET", ignoreCase = true) ||
-      path.startsWith("/health") ||
-      path.startsWith("/ping") ||
-      path.startsWith("/swagger")
-  }
+  private val shouldSkipRequest: (HttpServletRequest) -> Boolean = { request -> request.method.equals("GET", ignoreCase = true) }
 }

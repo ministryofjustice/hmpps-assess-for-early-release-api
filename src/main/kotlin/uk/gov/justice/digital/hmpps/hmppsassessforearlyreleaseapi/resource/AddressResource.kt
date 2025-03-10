@@ -169,7 +169,7 @@ class AddressResource(private val addressService: AddressService, private val ag
   fun addStandardAddressCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @RequestBody @Valid addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
-  ) = addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder)
+  ) = addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/standard-address-check-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -269,7 +269,7 @@ class AddressResource(private val addressService: AddressService, private val ag
   fun addCasCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @RequestBody @Valid addCasCheckRequest: AddCasCheckRequest,
-  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder)
+  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
   @DeleteMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -326,7 +326,7 @@ class AddressResource(private val addressService: AddressService, private val ag
   fun deleteAddressCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
-  ) = addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder)
+  ) = addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
   @GetMapping("/offender/{prisonNumber}/current-assessment/address-check-requests")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -437,7 +437,7 @@ class AddressResource(private val addressService: AddressService, private val ag
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
     @RequestBody @Valid addResidentsRequest: List<AddResidentRequest>,
-  ) = addressService.addResidents(prisonNumber, requestId, addResidentsRequest, agentHolder)
+  ) = addressService.addResidents(prisonNumber, requestId, addResidentsRequest, agentHolder.getAgentOrThrow())
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}/case-admin-additional-information")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -495,5 +495,5 @@ class AddressResource(private val addressService: AddressService, private val ag
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
     @RequestBody @Valid updateCaseAdminAdditionInfoRequest: UpdateCaseAdminAdditionInfoRequest,
-  ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequest, agentHolder)
+  ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequest, agentHolder.getAgentOrThrow())
 }

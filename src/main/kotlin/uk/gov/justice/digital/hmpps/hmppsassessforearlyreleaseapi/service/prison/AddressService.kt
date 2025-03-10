@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCh
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
@@ -31,7 +32,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiDPA
@@ -68,9 +68,8 @@ class AddressService(
   fun addStandardAddressCheckRequest(
     prisonNumber: String,
     addStandardAddressCheckRequest: AddStandardAddressCheckRequest,
-    agentHolder: AgentHolder,
+    agent: AgentDto,
   ): StandardAddressCheckRequestSummary {
-    val agent = agentHolder.getAgentOrThrow()
     val uprn = addStandardAddressCheckRequest.addressUprn
     var address = addressRepository.findByUprn(uprn)
     if (address == null) {
@@ -109,9 +108,8 @@ class AddressService(
   fun addCasCheckRequest(
     prisonNumber: String,
     addCasCheckRequest: AddCasCheckRequest,
-    agentHolder: AgentHolder,
+    agent: AgentDto,
   ): CasCheckRequestSummary {
-    val agent = agentHolder.getAgentOrThrow()
     val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       ?: error("Cannot find offender with prisonNumber $prisonNumber")
     val assessmentEntity = offender.currentAssessment()
@@ -142,8 +140,7 @@ class AddressService(
   }
 
   @Transactional
-  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long, agentHolder: AgentHolder) {
-    val agent = agentHolder.getAgentOrThrow()
+  fun deleteAddressCheckRequest(prisonNumber: String, requestId: Long, agent: AgentDto) {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
@@ -165,8 +162,7 @@ class AddressService(
   }
 
   @Transactional
-  fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>, agentHolder: AgentHolder): List<ResidentSummary> {
-    val agent = agentHolder.getAgentOrThrow()
+  fun addResidents(prisonNumber: String, requestId: Long, @Valid addResidentsRequest: List<AddResidentRequest>, agent: AgentDto): List<ResidentSummary> {
     val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
     val assessmentEntity = addressCheckRequest.assessment
 
@@ -224,9 +220,8 @@ class AddressService(
     prisonNumber: String,
     requestId: Long,
     caseAdminInfoRequest: UpdateCaseAdminAdditionInfoRequest,
-    agentHolder: AgentHolder,
+    agent: AgentDto,
   ) {
-    val agent = agentHolder.getAgentOrThrow()
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
     val assessmentEntity = curfewAddressCheckRequest.assessment

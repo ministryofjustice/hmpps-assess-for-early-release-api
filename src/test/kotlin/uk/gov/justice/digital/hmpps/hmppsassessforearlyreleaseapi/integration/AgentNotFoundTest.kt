@@ -21,6 +21,6 @@ class AgentNotFoundTest : SqsIntegrationTestBase() {
       .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
       .exchange()
       .expectBody()
-      .jsonPath("$.userMessage").isEqualTo("Unexpected error: Agent is missing from the request headers")
+      .jsonPath("$.userMessage").isEqualTo("Validation failure: Agent is missing from the request headers")
   }
 }
