@@ -16,6 +16,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
@@ -93,7 +95,10 @@ class AddressServiceTest {
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(addressCheckRequest.assessment)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
     verify(curfewAddressCheckRequestRepository).findById(requestId)
     verify(curfewAddressCheckRequestRepository).delete(addressCheckRequest)
@@ -107,6 +112,9 @@ class AddressServiceTest {
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 
-    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId) }
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow()) }
   }
 }

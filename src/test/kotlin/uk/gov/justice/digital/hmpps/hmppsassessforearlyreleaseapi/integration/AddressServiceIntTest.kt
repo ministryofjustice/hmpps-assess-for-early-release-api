@@ -28,7 +28,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cas
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.time.LocalDate
 
@@ -142,8 +144,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       preferencePriority = preferencePriority,
       addressUprn = uprn,
     )
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest)
+    addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
 
     val dbStandardAddressCheckRequests = standardAddressCheckRequestRepository.findAll()
     assertThat(dbStandardAddressCheckRequests).hasSize(1)
@@ -168,6 +172,34 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         "addressUprn" to uprn,
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+    "classpath:test_data/an-address.sql",
+  )
+  @Test
+  fun `should throw agent not initialized error for standard address check request`() {
+    val prisonNumber = "C1234CC"
+    val caAdditionalInfo = "ca info"
+    val ppAdditionalInfo = "pp info"
+    val preferencePriority = AddressPreferencePriority.FIRST
+    val uprn = "200010019924"
+    val addStandardAddressCheckRequest = AddStandardAddressCheckRequest(
+      caAdditionalInfo = caAdditionalInfo,
+      ppAdditionalInfo = ppAdditionalInfo,
+      preferencePriority = preferencePriority,
+      addressUprn = uprn,
+    )
+    val agentHolder = AgentHolder()
+
+    val exception = assertThrows<Exception> {
+      addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
+    }
+    assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
   }
 
   @Sql(
@@ -186,8 +218,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       ppAdditionalInfo = ppAdditionalInfo,
       preferencePriority = preferencePriority,
     )
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest)
+    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
     val dbCasCheckRequests = casCheckRequestRepository.findAll()
     assertThat(dbCasCheckRequests).hasSize(1)
@@ -210,6 +244,33 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         "preferencePriority" to preferencePriority.toString(),
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
+  }
+
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+    "classpath:test_data/an-address.sql",
+  )
+  @Test
+  fun `should throw agent not initialized error`() {
+    val prisonNumber = "C1234CC"
+    val caAdditionalInfo = "ca info"
+    val ppAdditionalInfo = "pp info"
+    val preferencePriority = AddressPreferencePriority.SECOND
+    val addCasCheckRequest = AddCasCheckRequest(
+      caAdditionalInfo = caAdditionalInfo,
+      ppAdditionalInfo = ppAdditionalInfo,
+      preferencePriority = preferencePriority,
+    )
+    val agentHolder = AgentHolder()
+
+    val exception = assertThrows<Exception> {
+      addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
+    }
+
+    assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
   }
 
   @Test
@@ -223,7 +284,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val curfewAddressCheckRequest =
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
     val deletedRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(deletedRequest).isNull()
@@ -286,7 +350,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = false,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2))
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addMainResident, addOtherResident1, addOtherResident2), agentHolder.getAgentOrThrow())
     assertThat(residentSummary).isNotNull
 
     val dbResidentAfterUpdate = residentRepository.findAll().sortedBy { it.id }
@@ -359,6 +426,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
         ),
       ),
     )
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   @Sql(
@@ -381,7 +450,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isOffender = true,
     )
 
-    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest))
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    val residentSummary = addressService.addResidents(TestData.PRISON_NUMBER, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder.getAgentOrThrow())
     assertThat(residentSummary).isNotNull
     assertThat(residentSummary).hasSize(1)
     assertThat(residentSummary.first().relation).isNull()
@@ -408,8 +480,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
       isMainResident = true,
       isOffender = false,
     )
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
 
-    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest)) }
+    assertThrows<ItemNotFoundException> { addressService.addResidents(prisonNumber, standardAddressCheckRequest.id, listOf(addResidentRequest), agentHolder.getAgentOrThrow()) }
   }
 
   @Test
@@ -422,8 +496,10 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val requestId = 1L
     val additionalInformation = "Updated case admin info"
     val caseAdminInfoRequest = UpdateCaseAdminAdditionInfoRequest(additionalInformation)
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest)
+    addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, caseAdminInfoRequest, agentHolder.getAgentOrThrow())
 
     val curfewAddressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
     assertThat(curfewAddressCheckRequest).isNotNull
@@ -438,6 +514,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val firstEvent = assessmentEvents?.first() as GenericChangedEvent
     assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
     assertThat(firstEvent.changes["caseAdminAdditionalInformation"]).isEqualTo(additionalInformation)
+    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
+    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
   }
 
   private companion object {
