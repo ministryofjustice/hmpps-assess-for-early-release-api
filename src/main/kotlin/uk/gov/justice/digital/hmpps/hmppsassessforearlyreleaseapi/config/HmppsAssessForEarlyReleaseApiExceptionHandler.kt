@@ -122,12 +122,6 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
     return problemDetail
   }
 
-  @ExceptionHandler(UninitializedPropertyAccessException::class)
-  fun handleUninitializedPropertyAccessException(ex: UninitializedPropertyAccessException): ResponseEntity<Map<String, String>> {
-    val errorResponse = mapOf("message" to "Agent has not been initialized")
-    return ResponseEntity(errorResponse, BAD_REQUEST)
-  }
-
   private companion object {
     private val log = LoggerFactory.getLogger(this::class.java)
   }
