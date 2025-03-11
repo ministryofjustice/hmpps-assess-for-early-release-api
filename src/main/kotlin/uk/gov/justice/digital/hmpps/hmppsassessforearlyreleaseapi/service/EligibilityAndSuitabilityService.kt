@@ -14,6 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
@@ -22,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 
 @Service
 class EligibilityAndSuitabilityService(
+  private val offenderRepository: OffenderRepository,
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
@@ -33,7 +36,7 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
-    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
+    val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
 
     val eligibility = currentAssessment.getEligibilityProgress()
     val eligibilityStatus = eligibility.toStatus()
@@ -58,7 +61,7 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {
-    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
+    val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val eligibilityProgress = currentAssessment.getEligibilityProgress().dropWhile { it.code != code }.take(2)
     if (eligibilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
@@ -71,7 +74,7 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getSuitabilityCriterionView(prisonNumber: String, code: String): SuitabilityCriterionView {
-    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
+    val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
     val suitabilityProgress = currentAssessment.getSuitabilityProgress().dropWhile { it.code != code }.take(2)
     if (suitabilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
@@ -87,7 +90,7 @@ class EligibilityAndSuitabilityService(
     log.info("Saving answer: $prisonNumber, $answer")
 
     val criterionType = CriterionType.valueOf(answer.type.name)
-    val currentAssessment = assessmentService.getCurrentAssessmentWithEligibilityProgress(prisonNumber)
+    val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
 
     with(currentAssessment) {
       val criterion = policyService.getCriterion(assessmentEntity.policyVersion, criterionType, answer.code)
@@ -105,4 +108,18 @@ class EligibilityAndSuitabilityService(
       assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer.type, answer.code, answer.answers), answer.agent)
     }
   }
+
+  private fun getCurrentAssessmentWithEligibilityProgress(prisonNumber: String): AssessmentWithEligibilityProgress {
+    val offender = getOffender(prisonNumber)
+
+    val currentAssessment = offender.currentAssessment()
+    val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
+    return AssessmentWithEligibilityProgress(
+      assessmentEntity = currentAssessment,
+      policy = policy,
+    )
+  }
+
+  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
+    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 }
