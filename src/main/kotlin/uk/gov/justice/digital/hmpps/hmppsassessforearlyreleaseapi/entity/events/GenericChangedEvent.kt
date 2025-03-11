@@ -1,10 +1,13 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 
 @Entity
 @DiscriminatorValue(value = "GENERIC_EVENT")

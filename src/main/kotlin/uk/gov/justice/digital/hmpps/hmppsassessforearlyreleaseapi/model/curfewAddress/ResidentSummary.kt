@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema

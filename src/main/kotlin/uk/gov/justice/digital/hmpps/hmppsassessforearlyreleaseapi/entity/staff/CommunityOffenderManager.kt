@@ -1,7 +1,8 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff
 
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Creator
 import java.time.LocalDateTime
 
 @Entity

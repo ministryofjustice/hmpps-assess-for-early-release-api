@@ -1,7 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CommunityOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 
 @Schema(description = "A summary of a community offender manager")
 data class ComSummary(

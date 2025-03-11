@@ -1,10 +1,9 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
 
-@Schema(description = "Request for adding a CAS check request")
-data class AddCasCheckRequest(
+data class AddStandardAddressCheckRequestSummary(
+
   @Schema(description = "Any additional information added by the case admin", example = "Additional information about this address...")
   val caAdditionalInfo: String?,
 
@@ -13,4 +12,7 @@ data class AddCasCheckRequest(
 
   @Schema(description = "The offenders priority for this address", example = "SECOND")
   val preferencePriority: AddressPreferencePriority,
+
+  @Schema(description = "The UPRN of the address to check", example = "200010019924")
+  val addressUprn: String,
 )

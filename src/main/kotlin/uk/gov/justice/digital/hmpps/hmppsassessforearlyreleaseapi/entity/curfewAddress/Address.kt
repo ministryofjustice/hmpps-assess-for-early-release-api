@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress
 
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
