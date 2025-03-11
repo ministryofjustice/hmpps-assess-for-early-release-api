@@ -40,7 +40,6 @@ import java.time.LocalDate
 
 @Service
 class AssessmentService(
-  private val policyService: PolicyService,
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
@@ -55,18 +54,6 @@ class AssessmentService(
 
   @Transactional
   fun getCurrentAssessment(prisonNumber: String) = getOffender(prisonNumber).currentAssessment()
-
-  @Transactional
-  fun getCurrentAssessmentWithEligibilityProgress(prisonNumber: String): AssessmentWithEligibilityProgress {
-    val offender = getOffender(prisonNumber)
-
-    val currentAssessment = offender.currentAssessment()
-    val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
-    return AssessmentWithEligibilityProgress(
-      assessmentEntity = currentAssessment,
-      policy = policy,
-    )
-  }
 
   @Transactional
   fun getCurrentAssessmentSummary(prisonNumber: String): AssessmentSummary {
