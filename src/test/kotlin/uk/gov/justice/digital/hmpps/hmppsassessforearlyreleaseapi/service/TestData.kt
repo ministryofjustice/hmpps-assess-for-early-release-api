@@ -15,8 +15,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
@@ -131,6 +132,7 @@ object TestData {
     prisonNumber = PRISON_NUMBER,
     hdced = LocalDate.of(2020, 10, 25),
     crd = LocalDate.of(2022, 3, 21),
+    createdDate = LocalDate.of(2021, 12, 6),
     location = PRISON_NAME,
     status = NOT_STARTED,
     policyVersion = "1.0",
@@ -141,7 +143,8 @@ object TestData {
         TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
         TaskProgress(name = ENTER_CURFEW_ADDRESS, progress = LOCKED),
         TaskProgress(name = REVIEW_APPLICATION_AND_SEND_FOR_DECISION, progress = LOCKED),
-        TaskProgress(name = PREPARE_FOR_RELEASE, progress = LOCKED),
+        TaskProgress(name = COMPLETE_14_DAY_CHECKS, progress = LOCKED),
+        TaskProgress(name = COMPLETE_2_DAY_CHECKS, progress = LOCKED),
         TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
       ),
     ),

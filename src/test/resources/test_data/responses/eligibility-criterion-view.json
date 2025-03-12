@@ -6,6 +6,7 @@
     "prisonNumber": "A1234AA",
     "hdced": "2020-10-25",
     "crd": "2020-11-14",
+    "createdDate": "2025-03-12",
     "location": "Birmingham (HMP)",
     "status": "NOT_STARTED",
     "responsibleCom": null,
@@ -26,7 +27,11 @@
           "progress": "LOCKED"
         },
         {
-          "name": "PREPARE_FOR_RELEASE",
+          "name": "COMPLETE_14_DAY_CHECKS",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "COMPLETE_2_DAY_CHECKS",
           "progress": "LOCKED"
         },
         {

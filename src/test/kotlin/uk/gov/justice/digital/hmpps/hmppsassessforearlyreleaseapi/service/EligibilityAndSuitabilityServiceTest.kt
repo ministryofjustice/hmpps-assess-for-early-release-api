@@ -73,6 +73,7 @@ class EligibilityAndSuitabilityServiceTest {
         anAssessmentSummary().copy(
           hdced = anOffender.hdced,
           crd = anOffender.crd,
+          createdDate = anOffender.createdTimestamp.toLocalDate(),
         ),
       )
 

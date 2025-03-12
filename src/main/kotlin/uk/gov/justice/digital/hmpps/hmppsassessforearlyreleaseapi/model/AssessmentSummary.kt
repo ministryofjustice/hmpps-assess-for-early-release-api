@@ -29,6 +29,10 @@ data class AssessmentSummary(
   @JsonFormat(pattern = "yyyy-MM-dd")
   val crd: LocalDate?,
 
+  @Schema(description = "The offender's conditional release date", example = "22/11/2026")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val createdDate: LocalDate?,
+
   @Schema(description = "The name of the prison the offender is in", example = "Foston Hall (HMP)")
   val location: String,
 
