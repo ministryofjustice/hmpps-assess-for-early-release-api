@@ -1,0 +1,21 @@
+<div th:fragment="fullName">
+  <div>
+    <div th:text="${currentAssessment.forename}?:''">First Name</div>
+    <div th:text="${currentAssessment.surname}?:''">Last Name</div>
+  </div>
+</div>
+<div th:fragment="prisonNumber">
+  <div>
+    <div th:text="${currentAssessment.prisonNumber}">Prison Number</div>
+  </div>
+</div>
+<div th:fragment="dateOfBirth">
+  <div>
+    <div th:text="${#temporals.format(currentAssessment.dateOfBirth, 'dd-MM-yyyy')}">dateOfBirth</div>
+  </div>
+</div>
+<div th:fragment="hdced">
+    <div>
+      <div th:text="${#temporals.format(currentAssessment.hdced, 'dd-MM-yyyy')}">hdce date</div>
+  </div>
+</div>

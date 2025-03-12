@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
+<head>
+  <title th:text="${docSubjectType}">Document Title</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+</head>
+  <body>
+    <div th:replace="offender/fragments/offender_details.html :: prisonNumber"></div>
+    <div th:replace="offender/fragments/offender_details.html :: dateOfBirth"></div>
+    <div th:replace="offender/fragments/offender_details.html :: hdced"></div>
+  </body>
+</html>

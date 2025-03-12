@@ -11,7 +11,7 @@ import reactor.core.publisher.Mono
 @Component
 class GotenbergApiClient(@Qualifier("gotenbergClient") val gotenbergClient: WebClient) {
 
-  fun convertHtmlToPdf(requestEntity: HttpEntity<LinkedMultiValueMap<String, Any>>): ByteArray? {
+  fun requestPdf(requestEntity: HttpEntity<LinkedMultiValueMap<String, Any>>): ByteArray? {
     val gotenbergApiResponse = gotenbergClient
       .post()
       .uri("/forms/chromium/convert/html")
