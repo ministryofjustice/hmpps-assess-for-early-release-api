@@ -34,8 +34,8 @@ class PdfService(
   }
 
   private fun getTemplateFile(documentSubjectType: DocumentSubjectType): String {
-    val directoryNameEnd = documentSubjectType.name.lowercase().split('_', limit = 2)
-    return directoryNameEnd[0] + '/' + directoryNameEnd[1]
+    val pathNameParts = documentSubjectType.name.lowercase().split('_', limit = 2)
+    return pathNameParts[0] + '/' + pathNameParts[1]
   }
 
   private fun addAssessmentDetails(
