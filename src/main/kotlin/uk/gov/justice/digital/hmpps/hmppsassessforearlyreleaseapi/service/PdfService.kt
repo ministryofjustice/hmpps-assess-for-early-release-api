@@ -3,23 +3,16 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.http.HttpEntity
-import org.springframework.http.HttpHeaders
-import org.springframework.http.MediaType
 import org.springframework.stereotype.Service
-import org.springframework.util.LinkedMultiValueMap
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.PdfConfigProperties
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
-import java.nio.charset.StandardCharsets
 
 @Service
 class PdfService(
   private val thymeleafEngine: TemplateEngine,
   private val gotenbergApiClient: GotenbergApiClient,
   @Value("\${assessments.url}") private val assessmentsUrl: String,
-  private val pdfConfigProperties: PdfConfigProperties,
   private val assessmentService: AssessmentService,
 ) {
 
@@ -31,7 +24,6 @@ class PdfService(
     val templatePathAndFile = getTemplateFile(documentSubjectType)
     val data = HashMap<String, Any>()
 
-    data["currentAssessment"] = documentSubjectType.name
     data["assessmentsUrl"] = assessmentsUrl
     data["docSubjectType"] = documentSubjectType.name
 
@@ -80,26 +72,7 @@ class PdfService(
   }
 
   private fun createPdf(htmlContent: String, documentSubjectType: DocumentSubjectType): ByteArray? {
-    val headers = HttpHeaders()
-    headers.contentType = MediaType.MULTIPART_FORM_DATA
-
-    val documentData = HttpEntity(
-      htmlContent.toByteArray(StandardCharsets.UTF_8),
-      HttpHeaders().apply {
-        contentType = MediaType.TEXT_HTML
-        setContentDispositionFormData("files", documentSubjectType.name.lowercase() + ".pdf")
-      },
-    )
-
-    val body = LinkedMultiValueMap<String, Any>()
-    body.add("files", documentData)
-    body.add("paperWidth", pdfConfigProperties.paperWidth)
-    body.add("paperHeight", pdfConfigProperties.paperHeight)
-    body.add("marginTop", pdfConfigProperties.marginTop)
-    body.add("marginBottom", pdfConfigProperties.marginBottom)
-    body.add("marginLeft", pdfConfigProperties.marginLeft)
-    body.add("marginRight", pdfConfigProperties.marginRight)
-
-    return gotenbergApiClient.requestPdf(HttpEntity(body, headers))
+    val documentFileName = documentSubjectType.name.lowercase()
+    return gotenbergApiClient.sendCreatePdfRequest(htmlContent, documentFileName)
   }
 }

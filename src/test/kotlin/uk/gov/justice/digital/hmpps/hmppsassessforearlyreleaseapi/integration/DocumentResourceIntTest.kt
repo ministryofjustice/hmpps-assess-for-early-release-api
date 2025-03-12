@@ -7,12 +7,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.kotlin.verify
-import org.springframework.http.HttpEntity
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.springframework.util.LinkedMultiValueMap
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GotenbergMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -32,7 +31,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   private val prisonNumber = "A1234AA"
 
   @Captor
-  lateinit var argumentCaptor: ArgumentCaptor<HttpEntity<LinkedMultiValueMap<String, Any>>>
+  lateinit var stringArgumentCaptor: ArgumentCaptor<String>
 
   @BeforeEach
   fun startMocks() {
@@ -237,21 +236,8 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     .exchange()
 
   private fun getThymeleafHtml(): String? {
-    verify(gotenbergApiClient).requestPdf(capture(argumentCaptor))
-    val httpEntity = argumentCaptor.value
-    assertThat(httpEntity).isNotNull
-    assertThat(httpEntity.body).isNotNull
-
-    return httpEntity.body?.let {
-      val files = it["files"] as List<*>
-      if (files[0] is HttpEntity<*>) {
-        (files[0] as HttpEntity<ByteArray>).body?.let {
-          String(it, StandardCharsets.UTF_8)
-        }
-      } else {
-        null
-      }
-    }
+    verify(gotenbergApiClient).sendCreatePdfRequest(capture(stringArgumentCaptor), anyString())
+    return stringArgumentCaptor.value
   }
 
   private fun getExpectedThymeleafHtml(
