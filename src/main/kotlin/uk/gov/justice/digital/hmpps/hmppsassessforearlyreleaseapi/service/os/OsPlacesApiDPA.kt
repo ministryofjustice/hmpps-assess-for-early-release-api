@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Address
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
 import java.time.LocalDate
 
 data class OsPlacesApiDPA(

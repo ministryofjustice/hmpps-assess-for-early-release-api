@@ -5,13 +5,8 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito
-import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doNothing
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
@@ -26,6 +21,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
@@ -42,12 +39,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import java.time.LocalDate
 
 class EligibilityAndSuitabilityServiceTest {
+  private val offenderRepository = mock<OffenderRepository>()
   private val assessmentService = mock<AssessmentService>()
   private val prisonService = Mockito.mock<PrisonService>()
   private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
 
   private val service =
     EligibilityAndSuitabilityService(
+      offenderRepository,
       PolicyService(),
       assessmentService,
       offenderToAssessmentSummaryMapper,
@@ -59,9 +58,7 @@ class EligibilityAndSuitabilityServiceTest {
     fun `for existing unstarted offender`() {
       // Given
       val anOffender = anOffender()
-      whenever(assessmentService.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithNoProgress(),
-      )
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender())
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -96,9 +93,7 @@ class EligibilityAndSuitabilityServiceTest {
         suitabilityProgress = Progress.specifyByIndex(0 to PASSED),
       )
 
-      whenever(assessmentService.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress,
-      )
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.offender)
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -162,9 +157,7 @@ class EligibilityAndSuitabilityServiceTest {
         suitabilityProgress = Progress.none(),
       )
 
-      whenever(assessmentService.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)).thenReturn(
-        anAssessmentWithEligibilityProgress,
-      )
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.offender)
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -220,8 +213,7 @@ class EligibilityAndSuitabilityServiceTest {
     fun `for existing unstarted offender`() {
       val assessment = anAssessmentWithNoProgress()
 
-      whenever(assessmentService.getCurrentAssessmentWithEligibilityProgress(PRISON_NUMBER)).thenReturn(assessment)
-      doNothing().whenever(assessmentService).transitionAssessment(any<Assessment>(), any(), any())
+      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
 
@@ -236,26 +228,22 @@ class EligibilityAndSuitabilityServiceTest {
 
       service.saveAnswer(PRISON_NUMBER, criterionChecks)
 
-      argumentCaptor<Assessment> {
-        verify(assessmentService).transitionAssessment(capture(), any(), any())
-
-        assertThat(firstValue.status).isEqualTo(AssessmentStatus.NOT_STARTED)
-        assertThat(firstValue.eligibilityCheckResults).hasSize(1)
-        with(firstValue.eligibilityCheckResults.first()) {
-          assertThat(criterionCode).isEqualTo(criterion.code)
-          assertThat(criterionType).isEqualTo(ELIGIBILITY)
-          assertThat(criterionMet).isEqualTo(true)
-          assertThat(criterionVersion).isEqualTo(firstValue.policyVersion)
-          assertThat(assessment.assessmentEntity).isEqualTo(firstValue)
-          assertThat(questionAnswers).isEqualTo(mapOf(question.name to false))
-        }
+      assertThat(assessment.assessmentEntity.status).isEqualTo(AssessmentStatus.NOT_STARTED)
+      assertThat(assessment.assessmentEntity.eligibilityCheckResults).hasSize(1)
+      with(assessment.assessmentEntity.eligibilityCheckResults.first()) {
+        assertThat(criterionCode).isEqualTo(criterion.code)
+        assertThat(criterionType).isEqualTo(ELIGIBILITY)
+        assertThat(criterionMet).isEqualTo(true)
+        assertThat(criterionVersion).isEqualTo(assessment.assessmentEntity.policyVersion)
+        assertThat(assessment.assessmentEntity).isEqualTo(assessment.assessmentEntity)
+        assertThat(questionAnswers).isEqualTo(mapOf(question.name to false))
       }
     }
   }
 
   private fun assertAssessmentSummary(
     assessmentSummary: AssessmentSummary,
-    assessmentWithEligibilityProgress: AssessmentService.AssessmentWithEligibilityProgress,
+    assessmentWithEligibilityProgress: AssessmentWithEligibilityProgress,
   ) {
     val expectedAssessment = assessmentWithEligibilityProgress.assessmentEntity
 
@@ -275,7 +263,8 @@ class EligibilityAndSuitabilityServiceTest {
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
 
     assertThat(assessmentSummary.tasks).isEqualTo(
-      expectedAssessment.status.tasks().mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },
+      expectedAssessment.status.tasks()
+        .mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },
     )
 
     assertThat(assessmentSummary.cellLocation).isEqualTo("A-1-002")

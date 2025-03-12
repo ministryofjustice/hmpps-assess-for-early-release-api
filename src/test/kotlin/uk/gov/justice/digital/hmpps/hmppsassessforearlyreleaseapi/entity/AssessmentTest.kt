@@ -34,6 +34,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CO
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChange
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
@@ -131,8 +133,26 @@ class AssessmentTest {
     val agents = assessment.assessmentEvents.map { it.agent }
     assertThat(agents).containsOnly(anAgentEntity)
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = NOT_STARTED, after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, context = mapOf("eligibilityStatus" to IN_PROGRESS, "type" to CriteriaType.ELIGIBILITY, "code" to criterion.code, "answers" to answers)),
-      StatusChange(before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS, after = ELIGIBLE_AND_SUITABLE, context = mapOf("eligibilityStatus" to ELIGIBLE, "type" to CriteriaType.ELIGIBILITY, "code" to criterion.code, "answers" to answers)),
+      StatusChange(
+        before = NOT_STARTED,
+        after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        context = mapOf(
+          "eligibilityStatus" to IN_PROGRESS,
+          "type" to CriteriaType.ELIGIBILITY,
+          "code" to criterion.code,
+          "answers" to answers,
+        ),
+      ),
+      StatusChange(
+        before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+        after = ELIGIBLE_AND_SUITABLE,
+        context = mapOf(
+          "eligibilityStatus" to ELIGIBLE,
+          "type" to CriteriaType.ELIGIBILITY,
+          "code" to criterion.code,
+          "answers" to answers,
+        ),
+      ),
     )
   }
 
@@ -154,7 +174,11 @@ class AssessmentTest {
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = INELIGIBLE_OR_UNSUITABLE, after = OPTED_OUT, context = mapOf("reason" to reasonType, "otherDescription" to otherDescription)),
+      StatusChange(
+        before = INELIGIBLE_OR_UNSUITABLE,
+        after = OPTED_OUT,
+        context = mapOf("reason" to reasonType, "otherDescription" to otherDescription),
+      ),
       StatusChange(before = OPTED_OUT, after = INELIGIBLE_OR_UNSUITABLE, context = emptyMap()),
     )
   }
@@ -194,7 +218,11 @@ class AssessmentTest {
 
     val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
-      StatusChange(before = fromState, after = POSTPONED, context = mapOf("reasonTypes" to anPostponeCaseRequest.reasonTypes)),
+      StatusChange(
+        before = fromState,
+        after = POSTPONED,
+        context = mapOf("reasonTypes" to anPostponeCaseRequest.reasonTypes),
+      ),
     )
   }
 

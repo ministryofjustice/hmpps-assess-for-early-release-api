@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff
 
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorColumn

@@ -1,10 +1,10 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonTypeName
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
 import java.time.LocalDateTime
 
 @Schema(description = "Response object which describes a CAS check request")
