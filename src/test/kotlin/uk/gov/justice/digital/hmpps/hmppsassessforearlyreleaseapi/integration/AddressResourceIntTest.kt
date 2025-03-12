@@ -9,22 +9,24 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressCheckRequestStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddCasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddResidentRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddStandardAddressCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CasCheckRequestSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ResidentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateCaseAdminAdditionInfoRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddressSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CasCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.ResidentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import java.time.LocalDate
 
@@ -152,7 +154,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
-        .bodyValue(anAddStandardAddressCheckRequest())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -163,7 +165,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation())
-        .bodyValue(anAddStandardAddressCheckRequest())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -174,7 +176,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(anAddStandardAddressCheckRequest())
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -189,8 +191,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a standard address check request`() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(anAddStandardAddressCheckRequest())
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
+        .bodyValue(addStandardAddressCheckRequest())
         .exchange()
         .expectStatus()
         .isCreated
@@ -202,7 +204,23 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.address.uprn).isEqualTo(uprn)
     }
 
-    private fun anAddStandardAddressCheckRequest(): AddStandardAddressCheckRequest = AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/some-offenders.sql",
+      "classpath:test_data/an-address.sql",
+    )
+    @Test
+    fun `should return bad request if agent is missing`() {
+      webTestClient.post()
+        .uri(ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(addStandardAddressCheckRequest())
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    private fun addStandardAddressCheckRequest() = AddStandardAddressCheckRequest(caInfo, ppInfo, priority, uprn)
   }
 
   @Nested
@@ -271,7 +289,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .bodyValue(aAddCasCheckRequest())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -282,7 +300,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation())
-        .bodyValue(aAddCasCheckRequest())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -293,7 +311,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(aAddCasCheckRequest())
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isForbidden
@@ -308,8 +326,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a CAS check request`() {
       val addressCheckRequest = webTestClient.post()
         .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(aAddCasCheckRequest())
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
+        .bodyValue(addCasCheckRequest())
         .exchange()
         .expectStatus()
         .isCreated
@@ -321,7 +339,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
     }
 
-    private fun aAddCasCheckRequest(): AddCasCheckRequest = AddCasCheckRequest(caInfo, ppInfo, priority)
+    private fun addCasCheckRequest() = AddCasCheckRequest(caInfo, ppInfo, priority)
   }
 
   @Nested
@@ -364,7 +382,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should delete an address check request`() {
       webTestClient.delete()
         .uri(DELETE_ADDRESS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .exchange()
         .expectStatus()
         .isNoContent
@@ -486,7 +504,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should add a standard address check request`() {
       val residentSummary = webTestClient.post()
         .uri(ADD_RESIDENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(anAddResidentRequest())
         .exchange()
         .expectStatus()
@@ -580,18 +598,18 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update case admin additional information`() {
-      val updateCaAdditionalInfoRequest = anUpdateCaAdditionalInfoRequest()
-
+      val agentHolder = AgentHolder()
+      agentHolder.agent = PRISON_CA_AGENT
       webTestClient.put()
         .uri(UPDATE_CASE_AMIN_ADDITIONAL_INFO)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .bodyValue(updateCaAdditionalInfoRequest)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
+        .bodyValue(anUpdateCaAdditionalInfoRequest())
         .exchange()
         .expectStatus()
         .isNoContent
 
       val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
-      assertThat(addressCheckRequest?.caAdditionalInfo).isEqualTo(updateCaAdditionalInfoRequest.additionalInformation)
+      assertThat(addressCheckRequest?.caAdditionalInfo).isEqualTo(anUpdateCaAdditionalInfoRequest().additionalInformation)
     }
 
     @Sql(

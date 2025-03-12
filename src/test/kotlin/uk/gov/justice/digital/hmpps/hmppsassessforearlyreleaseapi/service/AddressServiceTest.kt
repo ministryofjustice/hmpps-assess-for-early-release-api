@@ -7,8 +7,8 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CheckRequestType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.StandardAddressCheckRequestSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CheckRequestType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
@@ -16,12 +16,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Cur
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.AddressService
 import java.util.Optional
 
 class AddressServiceTest {
@@ -93,7 +94,10 @@ class AddressServiceTest {
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(addressCheckRequest.assessment)
 
-    addressService.deleteAddressCheckRequest(prisonNumber, requestId)
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow())
 
     verify(curfewAddressCheckRequestRepository).findById(requestId)
     verify(curfewAddressCheckRequestRepository).delete(addressCheckRequest)
@@ -107,6 +111,9 @@ class AddressServiceTest {
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 
-    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId) }
+    val agentHolder = AgentHolder()
+    agentHolder.agent = PRISON_CA_AGENT
+
+    assertThrows<ItemNotFoundException> { addressService.deleteAddressCheckRequest(prisonNumber, requestId, agentHolder.getAgentOrThrow()) }
   }
 }

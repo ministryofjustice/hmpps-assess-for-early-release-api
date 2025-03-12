@@ -23,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.Postgr
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer.DB_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.GotenbergApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
@@ -59,7 +60,14 @@ abstract class IntegrationTestBase {
     username: String? = "AUTH_ADM",
     roles: List<String> = listOf(),
     scopes: List<String> = listOf("read"),
-  ): (HttpHeaders) -> Unit = jwtAuthHelper.setAuthorisationHeader(username = username, scope = scopes, roles = roles)
+    agent: AgentDto? = null,
+  ): (HttpHeaders) -> Unit = { headers ->
+    jwtAuthHelper.setAuthorisationHeader(username = username, scope = scopes, roles = roles)(headers)
+    headers.set("username", agent?.username)
+    headers.set("role", agent?.role?.name)
+    headers.set("fullName", agent?.fullName)
+    headers.set("onBehalfOf", agent?.onBehalfOf)
+  }
 
   protected fun stubPingWithResponse(status: Int) {
     hmppsAuth.stubHealthPing(status)
