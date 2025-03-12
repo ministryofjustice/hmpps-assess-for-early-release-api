@@ -1,18 +1,13 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import com.microsoft.applicationinsights.TelemetryClient
-import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
@@ -20,13 +15,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 const val PRISONER_CREATED_EVENT_NAME = "assess-for-early-release.prisoner.created"
 const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updated"
-const val DAYS_BEFORE_SENTENCE_START = 10L
 
 @Service
 class OffenderService(
@@ -36,26 +29,7 @@ class OffenderService(
   private val probationService: ProbationService,
   private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
-  private val workingDaysService: WorkingDaysService,
 ) {
-  @Transactional
-  fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findByOffenderPrisonId(prisonCode)
-    return assessments.map { it.toOffenderSummary() }
-  }
-
-  @Transactional
-  fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
-    return assessments.map { it.toOffenderSummary() }
-  }
-
-  @Transactional
-  fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
-    return assessments.map { it.toOffenderSummary() }
-  }
-
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
     if (prisoners.isEmpty()) {
@@ -181,24 +155,6 @@ class OffenderService(
       forename = offenderManager.name.forename,
       surname = offenderManager.name.surname,
     ),
-  )
-
-  fun Assessment.toOffenderSummary() = OffenderSummaryResponse(
-    prisonNumber = offender.prisonNumber,
-    bookingId = offender.bookingId,
-    forename = offender.forename!!,
-    surname = offender.surname!!,
-    hdced = offender.hdced,
-    workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
-    probationPractitioner = this.responsibleCom?.fullName,
-    isPostponed = this.status == AssessmentStatus.POSTPONED,
-    postponementDate = this.postponementDate,
-    postponementReasons = this.postponementReasons.map { reason -> reason.reasonType }.toList(),
-    status = this.status,
-    addressChecksComplete = this.addressChecksComplete,
-    currentTask = this.currentTask(),
-    taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
-    crn = offender.crn,
   )
 
   companion object {
