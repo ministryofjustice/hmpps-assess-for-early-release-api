@@ -1,11 +1,13 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events
 
 import io.hypersistence.utils.hibernate.type.json.JsonBinaryType
 import jakarta.persistence.Column
 import jakarta.persistence.DiscriminatorValue
 import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentEventType.STATUS_CHANGE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
 
 @Entity
 @DiscriminatorValue(value = "STATUS_CHANGE")
@@ -17,11 +19,11 @@ class StatusChangedEvent(
   @Column(columnDefinition = "jsonb")
   val changes: StatusChange,
 
-  agent: Agent = Agent.SYSTEM_AGENT,
+  agent: Agent = Agent.Companion.SYSTEM_AGENT,
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,
-  eventType = STATUS_CHANGE,
+  eventType = AssessmentEventType.STATUS_CHANGE,
   summary = "status changed from: '${changes.before}', to: '${changes.after}'",
   agent = agent,
 ) {
