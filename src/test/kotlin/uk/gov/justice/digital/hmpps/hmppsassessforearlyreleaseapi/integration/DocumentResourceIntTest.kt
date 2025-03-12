@@ -56,7 +56,6 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",
   )
-  @SuppressWarnings("unchecked")
   fun `get documents by prison number and document subject type should process correctly`(
     documentSubjectType: DocumentSubjectType,
   ) {
