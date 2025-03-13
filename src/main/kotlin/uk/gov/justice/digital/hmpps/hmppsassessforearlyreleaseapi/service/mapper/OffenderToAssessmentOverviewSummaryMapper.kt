@@ -3,14 +3,12 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PolicyService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
@@ -59,13 +57,7 @@ class OffenderToAssessmentOverviewSummaryMapper(
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
       toDoEligibilityAndSuitabilityBy = getToDoByDate(offender),
-      result = when {
-        eligibilityStatus == INELIGIBLE && suitabilityStatus == NOT_STARTED -> "Ineligible"
-        eligibilityStatus == ELIGIBLE && suitabilityStatus == UNSUITABLE -> "Unsuitable"
-        eligibilityStatus == INELIGIBLE && suitabilityStatus == UNSUITABLE -> "Ineligible and Unsuitable"
-        eligibilityStatus == ELIGIBLE && suitabilityStatus == SUITABLE -> "Eligible and Suitable"
-        else -> null
-      },
+      result = determineResult(eligibilityStatus, suitabilityStatus),
     )
   }
 
@@ -89,5 +81,15 @@ class OffenderToAssessmentOverviewSummaryMapper(
       assessmentEntity = currentAssessment,
       policy = policy,
     )
+  }
+
+  private fun determineResult(eligibilityStatus: EligibilityStatus, suitabilityStatus: SuitabilityStatus): String? {
+    return when {
+      eligibilityStatus == INELIGIBLE && suitabilityStatus == NOT_STARTED -> "Ineligible"
+      eligibilityStatus == ELIGIBLE && suitabilityStatus == UNSUITABLE -> "Unsuitable"
+      eligibilityStatus == INELIGIBLE && suitabilityStatus == UNSUITABLE -> "Ineligible and Unsuitable"
+      eligibilityStatus == ELIGIBLE && suitabilityStatus == SUITABLE -> "Eligible and Suitable"
+      else -> null
+    }
   }
 }
