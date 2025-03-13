@@ -132,7 +132,6 @@ object TestData {
     prisonNumber = PRISON_NUMBER,
     hdced = LocalDate.of(2020, 10, 25),
     crd = LocalDate.of(2022, 3, 21),
-    createdDate = LocalDate.of(2021, 12, 6),
     location = PRISON_NAME,
     status = NOT_STARTED,
     policyVersion = "1.0",
@@ -189,6 +188,11 @@ object TestData {
       fun allSuccessful(): Progress = object : Progress {
         override fun contains(index: Int) = true
         override fun get(index: Int) = PASSED
+      }
+
+      fun allFailed(): Progress = object : Progress {
+        override fun contains(index: Int) = true
+        override fun get(index: Int) = FAILED
       }
     }
   }

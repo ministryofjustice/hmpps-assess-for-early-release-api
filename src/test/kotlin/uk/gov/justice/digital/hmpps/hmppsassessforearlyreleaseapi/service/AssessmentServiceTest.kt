@@ -11,12 +11,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -27,12 +22,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.saveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
@@ -42,11 +40,16 @@ class AssessmentServiceTest {
   private val prisonService = mock<PrisonService>()
   private val offenderRepository = mock<OffenderRepository>()
   private val assessmentRepository = mock<AssessmentRepository>()
+  private val policyService = PolicyService()
 
   private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
+  private val offenderToAssessmentOverviewSummaryMapper = OffenderToAssessmentOverviewSummaryMapper(
+    prisonService,
+    policyService,
+  )
 
   private val service =
-    AssessmentService(offenderRepository, assessmentRepository, offenderToAssessmentSummaryMapper)
+    AssessmentService(offenderRepository, assessmentRepository, offenderToAssessmentSummaryMapper, offenderToAssessmentOverviewSummaryMapper)
 
   @Test
   fun `should get an offenders current assessment`() {
@@ -71,7 +74,40 @@ class AssessmentServiceTest {
       "crd",
       "location",
       "status",
-    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, PRISON_NAME, AssessmentStatus.NOT_STARTED))
+    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER, hdced, null, PRISON_NAME, NOT_STARTED))
+  }
+
+  @Test
+  fun `should get an offenders current assessment overview`() {
+    // Given
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      ELIGIBLE_AND_SUITABLE,
+      eligibilityProgress = Progress.allSuccessful(),
+      suitabilityProgress = Progress.allSuccessful(),
+    )
+    val offender = anAssessmentWithEligibilityProgress.offender
+    whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(offender)
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+    whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
+
+    // When
+    val assessment = service.getAssessmentOverviewSummary(PRISON_NUMBER)
+
+    // Then
+    verify(offenderRepository).findByPrisonNumber(PRISON_NUMBER)
+    assertThat(assessment).isNotNull
+    assertThat(assessment).extracting(
+      "forename",
+      "surname",
+      "prisonNumber",
+      "hdced",
+      "crd",
+      "location",
+      "status",
+      "toDoEligibilityAndSuitabilityBy",
+      "result",
+    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER,
+      LocalDate.of(2025, 3, 20), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable"))
   }
 
   @Test

@@ -7,7 +7,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
-data class AssessmentSummary(
+data class AssessmentOverviewSummary(
   @Schema(description = "The offender's first name", example = "Bob")
   val forename: String?,
 
@@ -58,4 +58,11 @@ data class AssessmentSummary(
 
   @Schema(description = "The main offense also know as the most serious offence", example = "Robbery", required = false)
   val mainOffense: String?,
+
+  @Schema(description = "The assessment created date plus five days", example = "2002-02-20")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val toDoEligibilityAndSuitabilityBy: LocalDate?,
+
+  @Schema(description = "The assessment's assess eligibility and suitability task result", example = "Ineligible")
+  val result: String?,
 )

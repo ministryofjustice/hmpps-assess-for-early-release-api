@@ -18,6 +18,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -32,6 +33,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
@@ -43,6 +45,7 @@ class AssessmentService(
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
+  private val offenderToAssessmentOverviewSummaryMapper: OffenderToAssessmentOverviewSummaryMapper,
 ) {
 
   companion object {
@@ -59,6 +62,12 @@ class AssessmentService(
   fun getCurrentAssessmentSummary(prisonNumber: String): AssessmentSummary {
     val offender = getOffender(prisonNumber)
     return offenderToAssessmentSummaryMapper.map(offender)
+  }
+
+  @Transactional
+  fun getAssessmentOverviewSummary(prisonNumber: String): AssessmentOverviewSummary {
+    val offender = getOffender(prisonNumber)
+    return offenderToAssessmentOverviewSummaryMapper.map(offender)
   }
 
   @Transactional

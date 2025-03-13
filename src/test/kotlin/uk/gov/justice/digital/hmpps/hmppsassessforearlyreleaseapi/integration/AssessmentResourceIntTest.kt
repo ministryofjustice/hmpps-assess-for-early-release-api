@@ -28,18 +28,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.*
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -128,16 +126,15 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       // Then
       result.expectStatus().isOk
-      val assessment = result.expectBody(AssessmentSummary::class.java).returnResult().responseBody!!
+      val assessment = result.expectBody(AssessmentOverviewSummary::class.java).returnResult().responseBody!!
       assertThat(assessment).isEqualTo(
-        AssessmentSummary(
+        AssessmentOverviewSummary(
           forename = "FIRST-1",
           surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,
           dateOfBirth = LocalDate.of(1978, 3, 20),
           hdced = LocalDate.now().plusDays(7),
           crd = LocalDate.of(2020, 11, 14),
-          createdDate = LocalDate.of(2021, 12, 6),
           location = "Birmingham (HMP)",
           status = NOT_STARTED,
           policyVersion = "1.0",
@@ -155,6 +152,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
               TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
             ),
           ),
+          toDoEligibilityAndSuitabilityBy = LocalDate.now().plusDays(DAYS_TO_ADD),
+          result = null,
         ),
       )
     }
