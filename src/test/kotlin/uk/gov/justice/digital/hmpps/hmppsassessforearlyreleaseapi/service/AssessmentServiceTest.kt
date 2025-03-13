@@ -106,8 +106,12 @@ class AssessmentServiceTest {
       "status",
       "toDoEligibilityAndSuitabilityBy",
       "result",
-    ).isEqualTo(listOf(FORENAME, SURNAME, PRISON_NUMBER,
-      LocalDate.of(2025, 3, 20), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable"))
+    ).isEqualTo(
+      listOf(
+        FORENAME, SURNAME, PRISON_NUMBER,
+        LocalDate.of(2025, 3, 20), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable",
+      ),
+    )
   }
 
   @Test
