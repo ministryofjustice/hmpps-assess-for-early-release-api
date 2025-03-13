@@ -1,5 +1,7 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpHeaders
@@ -17,32 +19,45 @@ class GotenbergApiClient(
   private val pdfConfigProperties: PdfConfigProperties,
 ) {
 
-  fun sendCreatePdfRequest(htmlContent: String, documentFileName: String): ByteArray? {
-    val headers = HttpHeaders()
-    headers.contentType = MediaType.MULTIPART_FORM_DATA
+  private val uri = "/forms/chromium/convert/html"
 
-    val body = createPdfRequestData(htmlContent, documentFileName)
+  companion object {
+    val LOG: Logger = LoggerFactory.getLogger(this::class.java)
+  }
+
+  fun sendCreatePdfRequest(htmlContent: String): ByteArray? {
+    val httpEntity = HttpEntity(
+      createPdfRequestData(htmlContent),
+      createHttpsHeaders(),
+    )
 
     return gotenbergClient
       .post()
-      .uri("/forms/chromium/convert/html")
+      .uri(uri)
       .contentType(MediaType.MULTIPART_FORM_DATA)
-      .bodyValue(HttpEntity(body, headers).body ?: LinkedMultiValueMap<String, Any>())
+      .bodyValue(httpEntity.body!!)
       .retrieve()
       .bodyToMono(ByteArray::class.java)
-      .onErrorResume { Mono.error(it) }
-      .block()
+      .onErrorResume {
+        LOG.error("sendCreatePdfRequest Failed post Request: $htmlContent  URI: $uri Error: ${it.message} ", it)
+        Mono.error(it)
+      }.block()
+  }
+
+  private fun createHttpsHeaders(): HttpHeaders {
+    val headers = HttpHeaders()
+    headers.contentType = MediaType.MULTIPART_FORM_DATA
+    return headers
   }
 
   private fun createPdfRequestData(
     htmlContent: String,
-    documentFileName: String,
   ): LinkedMultiValueMap<String, Any> {
     val documentData = HttpEntity(
       htmlContent.toByteArray(StandardCharsets.UTF_8),
       HttpHeaders().apply {
         contentType = MediaType.TEXT_HTML
-        setContentDispositionFormData("files", documentFileName + ".pdf")
+        setContentDispositionFormData("files", "index.html")
       },
     )
 

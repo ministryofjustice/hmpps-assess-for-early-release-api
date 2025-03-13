@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Captor
 import org.mockito.kotlin.verify
 import org.springframework.test.context.jdbc.Sql
@@ -220,6 +219,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
             lastName = "LAST-1",
             dateOfBirth = LocalDate.of(1981, 5, 23),
             homeDetentionCurfewEligibilityDate = LocalDate.of(2025, 2, 23),
+            sentenceStartDate = LocalDate.of(2025, 2, 23),
             cellLocation = "A-1-002",
             mostSeriousOffence = "Robbery",
             prisonName = "Birmingham (HMP)",
@@ -235,7 +235,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     .exchange()
 
   private fun getThymeleafHtml(): String? {
-    verify(gotenbergApiClient).sendCreatePdfRequest(capture(stringArgumentCaptor), anyString())
+    verify(gotenbergApiClient).sendCreatePdfRequest(capture(stringArgumentCaptor))
     return stringArgumentCaptor.value
   }
 

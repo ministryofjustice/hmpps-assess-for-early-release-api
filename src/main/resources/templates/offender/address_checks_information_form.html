@@ -5,8 +5,8 @@
   <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
 </head>
   <body>
-    <div th:replace="offender/fragments/offender_details.html :: prisonNumber"></div>
-    <div th:replace="offender/fragments/offender_details.html :: dateOfBirth"></div>
-    <div th:replace="offender/fragments/offender_details.html :: hdced"></div>
+    <div th:replace="~{offender/fragments/offender_details.html :: prisonNumber}"></div>
+    <div th:replace="~{offender/fragments/offender_details.html :: dateOfBirth}"></div>
+    <div th:replace="~{offender/fragments/offender_details.html :: crd}"></div>
   </body>
 </html>

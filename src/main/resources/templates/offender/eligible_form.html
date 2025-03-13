@@ -5,7 +5,7 @@
   <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
 </head>
   <body>
-    <div th:replace="offender/fragments/offender_details.html :: prisonNumber"></div>
-    <div th:replace="offender/fragments/offender_details.html :: fullName"></div>
+    <div th:replace="~{offender/fragments/offender_details.html :: prisonNumber}"></div>
+    <div th:replace="~{offender/fragments/offender_details.html :: fullName}"></div>
   </body>
 </html>

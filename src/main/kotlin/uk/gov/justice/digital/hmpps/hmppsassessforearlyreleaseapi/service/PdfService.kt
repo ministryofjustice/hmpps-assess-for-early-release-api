@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 
 @Service
 class PdfService(
@@ -30,7 +31,7 @@ class PdfService(
     addAssessmentDetails(documentSubjectType, prisonNumber, data)
 
     val htmlContent = createHtmlContent(templatePathAndFile, data)
-    return createPdf(htmlContent, documentSubjectType)
+    return gotenbergApiClient.sendCreatePdfRequest(htmlContent)
   }
 
   private fun getTemplateFile(documentSubjectType: DocumentSubjectType): String {
@@ -69,10 +70,5 @@ class PdfService(
     val context = Context()
     context.setVariables(details)
     return thymeleafEngine.process(templatePathAndFile, context)
-  }
-
-  private fun createPdf(htmlContent: String, documentSubjectType: DocumentSubjectType): ByteArray? {
-    val documentFileName = documentSubjectType.name.lowercase()
-    return gotenbergApiClient.sendCreatePdfRequest(htmlContent, documentFileName)
   }
 }

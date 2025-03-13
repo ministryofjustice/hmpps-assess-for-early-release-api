@@ -24,8 +24,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.Postgr
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.GotenbergApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 
 @ExtendWith(HmppsAuthApiExtension::class)
