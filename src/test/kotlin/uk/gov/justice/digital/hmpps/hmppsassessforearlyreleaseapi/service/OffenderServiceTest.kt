@@ -10,21 +10,14 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
@@ -32,9 +25,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.BankHolidayService
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
-import java.time.Clock
 import java.time.LocalDate
 
 class OffenderServiceTest {
@@ -44,8 +34,6 @@ class OffenderServiceTest {
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
   private val telemetryClient = mock<TelemetryClient>()
-  private val bankHolidayService = mock<BankHolidayService>()
-  private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
 
   private val service: OffenderService =
     OffenderService(
@@ -55,112 +43,7 @@ class OffenderServiceTest {
       probationService,
       staffRepository,
       telemetryClient,
-      workingDaysService,
     )
-
-  @Test
-  fun `should get the case admin case load`() {
-    val offender1 = anOffender(sentenceStartDate = LocalDate.now().minusDays(5))
-    val offender2 =
-      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD", sentenceStartDate = LocalDate.now().minusDays(11))
-    val offender3 = offender1.copy(id = offender1.id + 2, bookingId = offender1.bookingId + 30, prisonNumber = "ZX2318KJ", sentenceStartDate = null)
-    whenever(assessmentRepository.findByOffenderPrisonId(PRISON_ID)).thenReturn(
-      listOf(
-        offender1.currentAssessment(),
-        offender2.currentAssessment().copy(offender = offender2),
-        offender3.currentAssessment().copy(offender = offender3),
-      ),
-    )
-
-    val caseload = service.getCaseAdminCaseload(PRISON_ID)
-    assertThat(caseload.size).isEqualTo(3)
-    assertThat(caseload).containsExactlyInAnyOrder(
-      OffenderSummaryResponse(
-        prisonNumber = offender1.prisonNumber,
-        bookingId = offender1.bookingId,
-        forename = offender1.forename!!,
-        surname = offender1.surname!!,
-        hdced = offender1.hdced,
-        workingDaysToHdced = 5,
-        probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
-        status = AssessmentStatus.NOT_STARTED,
-        addressChecksComplete = false,
-        currentTask = Task.ASSESS_ELIGIBILITY,
-        taskOverdueOn = offender1.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
-      ),
-      OffenderSummaryResponse(
-        prisonNumber = offender2.prisonNumber,
-        bookingId = offender2.bookingId,
-        forename = offender2.forename!!,
-        surname = offender2.surname!!,
-        hdced = offender2.hdced,
-        workingDaysToHdced = 5,
-        probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
-        status = AssessmentStatus.NOT_STARTED,
-        addressChecksComplete = false,
-        currentTask = Task.ASSESS_ELIGIBILITY,
-        taskOverdueOn = offender2.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
-      ),
-      OffenderSummaryResponse(
-        prisonNumber = offender3.prisonNumber,
-        bookingId = offender3.bookingId,
-        forename = offender3.forename!!,
-        surname = offender3.surname!!,
-        hdced = offender3.hdced,
-        workingDaysToHdced = 5,
-        probationPractitioner = offender3.currentAssessment().responsibleCom?.fullName,
-        status = AssessmentStatus.NOT_STARTED,
-        addressChecksComplete = false,
-        currentTask = Task.ASSESS_ELIGIBILITY,
-        taskOverdueOn = null,
-      ),
-    )
-  }
-
-  @Test
-  fun `should get the com case load`() {
-    val assessment1 =
-      anOffender().currentAssessment().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
-    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
-    whenever(
-      assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(
-        STAFF_CODE,
-        getStatusesForRole(UserRole.PROBATION_COM),
-      ),
-    ).thenReturn(listOf(assessment1, assessment2))
-
-    val caseload = service.getComCaseload(STAFF_CODE)
-    assertThat(caseload.size).isEqualTo(2)
-    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
-      assessment1.offender.bookingId,
-      assessment2.offender.bookingId,
-    )
-  }
-
-  @Test
-  fun `should get the decision maker case load`() {
-    val assessment1 =
-      anOffender().currentAssessment().copy(status = AssessmentStatus.APPROVED)
-    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_DECISION)
-    whenever(
-      assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(
-        PRISON_ID,
-        getStatusesForRole(UserRole.PRISON_DM),
-      ),
-    ).thenReturn(
-      listOf(
-        assessment1,
-        assessment2,
-      ),
-    )
-
-    val caseload = service.getDecisionMakerCaseload(PRISON_ID)
-    assertThat(caseload.size).isEqualTo(2)
-    assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
-      assessment1.offender.bookingId,
-      assessment2.offender.bookingId,
-    )
-  }
 
   @Test
   fun `should create a new offender for a prisoner that has an HDCED`() {

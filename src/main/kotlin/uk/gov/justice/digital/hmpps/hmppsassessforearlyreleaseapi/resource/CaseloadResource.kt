@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.OffenderService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.CaseloadService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class CaseloadResource(
-  private val offenderService: OffenderService,
+  private val caseloadService: CaseloadService,
 ) {
 
   @GetMapping("/prison/{prisonCode}/case-admin/caseload")
@@ -65,7 +65,7 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getCaseAdminCaseload(@Parameter(required = true) @PathVariable prisonCode: String) = offenderService.getCaseAdminCaseload(prisonCode)
+  fun getCaseAdminCaseload(@Parameter(required = true) @PathVariable prisonCode: String) = caseloadService.getCaseAdminCaseload(prisonCode)
 
   @GetMapping("/probation/community-offender-manager/staff-code/{staffCode}/caseload")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -108,7 +108,7 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) = offenderService.getComCaseload(staffCode)
+  fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) = caseloadService.getComCaseload(staffCode)
 
   @GetMapping("/prison/{prisonCode}/decision-maker/caseload")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -151,5 +151,5 @@ class CaseloadResource(
       ),
     ],
   )
-  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) = offenderService.getDecisionMakerCaseload(prisonCode)
+  fun getDecisionMakerCaseload(@Parameter(required = true) @PathVariable prisonCode: String) = caseloadService.getDecisionMakerCaseload(prisonCode)
 }
