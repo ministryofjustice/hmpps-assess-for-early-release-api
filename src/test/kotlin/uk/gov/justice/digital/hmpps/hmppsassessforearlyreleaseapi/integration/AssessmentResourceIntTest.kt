@@ -17,8 +17,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
@@ -27,7 +28,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -39,6 +40,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -119,7 +121,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       )
 
       // When
-
       val result = webTestClient.get()
         .uri(GET_CURRENT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
@@ -127,9 +128,9 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       // Then
       result.expectStatus().isOk
-      val assessment = result.expectBody(AssessmentSummary::class.java).returnResult().responseBody!!
+      val assessment = result.expectBody(AssessmentOverviewSummary::class.java).returnResult().responseBody!!
       assertThat(assessment).isEqualTo(
-        AssessmentSummary(
+        AssessmentOverviewSummary(
           forename = "FIRST-1",
           surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,
@@ -148,10 +149,13 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
               TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
               TaskProgress(name = ENTER_CURFEW_ADDRESS, progress = LOCKED),
               TaskProgress(name = REVIEW_APPLICATION_AND_SEND_FOR_DECISION, progress = LOCKED),
-              TaskProgress(name = PREPARE_FOR_RELEASE, progress = LOCKED),
+              TaskProgress(name = COMPLETE_14_DAY_CHECKS, progress = LOCKED),
+              TaskProgress(name = COMPLETE_2_DAY_CHECKS, progress = LOCKED),
               TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
             ),
           ),
+          toDoEligibilityAndSuitabilityBy = LocalDate.now().plusDays(DAYS_TO_ADD),
+          result = null,
         ),
       )
     }

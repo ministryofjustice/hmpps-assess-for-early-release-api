@@ -5,12 +5,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.APPROVE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONFIRM_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CREATE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.OPT_IN
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
@@ -34,7 +35,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, READY_TO_START),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
@@ -52,7 +54,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, IN_PROGRESS),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
@@ -70,7 +73,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, READY_TO_START),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
@@ -88,7 +92,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, COMPLETE),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
       PROBATION_COM to listOf(
@@ -112,7 +117,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, COMPLETE),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
       PROBATION_COM to listOf(
@@ -222,7 +228,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, COMPLETE),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, LOCKED),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
@@ -270,7 +277,8 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(ASSESS_ELIGIBILITY, LOCKED),
         TaskProgress.Fixed(ENTER_CURFEW_ADDRESS, IN_PROGRESS),
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, LOCKED),
-        TaskProgress.Fixed(PREPARE_FOR_RELEASE, LOCKED),
+        TaskProgress.Fixed(COMPLETE_14_DAY_CHECKS, LOCKED),
+        TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
       PRISON_DM to listOf(

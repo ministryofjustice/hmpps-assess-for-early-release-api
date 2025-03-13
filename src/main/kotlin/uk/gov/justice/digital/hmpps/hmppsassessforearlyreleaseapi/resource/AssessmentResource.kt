@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
@@ -49,7 +49,7 @@ class AssessmentResource(
         content = [
           Content(
             mediaType = "application/json",
-            schema = Schema(implementation = AssessmentSummary::class),
+            schema = Schema(implementation = AssessmentOverviewSummary::class),
           ),
         ],
       ),
@@ -75,7 +75,7 @@ class AssessmentResource(
       ),
     ],
   )
-  fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.getCurrentAssessmentSummary(prisonNumber)
+  fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.getAssessmentOverviewSummary(prisonNumber)
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/opt-out")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

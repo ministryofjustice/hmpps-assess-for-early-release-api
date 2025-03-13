@@ -9,8 +9,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PREPARE_FOR_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
@@ -141,7 +142,8 @@ object TestData {
         TaskProgress(name = ASSESS_ELIGIBILITY, progress = READY_TO_START),
         TaskProgress(name = ENTER_CURFEW_ADDRESS, progress = LOCKED),
         TaskProgress(name = REVIEW_APPLICATION_AND_SEND_FOR_DECISION, progress = LOCKED),
-        TaskProgress(name = PREPARE_FOR_RELEASE, progress = LOCKED),
+        TaskProgress(name = COMPLETE_14_DAY_CHECKS, progress = LOCKED),
+        TaskProgress(name = COMPLETE_2_DAY_CHECKS, progress = LOCKED),
         TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
       ),
     ),
@@ -186,6 +188,11 @@ object TestData {
       fun allSuccessful(): Progress = object : Progress {
         override fun contains(index: Int) = true
         override fun get(index: Int) = PASSED
+      }
+
+      fun allFailed(): Progress = object : Progress {
+        override fun contains(index: Int) = true
+        override fun get(index: Int) = FAILED
       }
     }
   }
