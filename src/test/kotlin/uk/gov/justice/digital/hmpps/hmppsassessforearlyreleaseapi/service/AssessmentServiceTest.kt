@@ -17,6 +17,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -48,13 +49,10 @@ class AssessmentServiceTest {
   private val policyService = PolicyService()
 
   private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
-  private val offenderToAssessmentOverviewSummaryMapper = OffenderToAssessmentOverviewSummaryMapper(
-    prisonService,
-    policyService,
-  )
+  private val offenderToAssessmentOverviewSummaryMapper = OffenderToAssessmentOverviewSummaryMapper()
 
   private val service =
-    AssessmentService(offenderRepository, assessmentRepository, offenderToAssessmentSummaryMapper, offenderToAssessmentOverviewSummaryMapper)
+    AssessmentService(offenderRepository, assessmentRepository, offenderToAssessmentSummaryMapper, offenderToAssessmentOverviewSummaryMapper, prisonService, policyService)
 
   @Test
   fun `should get an offenders current assessment`() {
@@ -117,6 +115,20 @@ class AssessmentServiceTest {
         LocalDate.of(2025, 3, 20), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable",
       ),
     )
+  }
+
+  @Test
+  fun `should throw exception when prisoner details not found`() {
+    // Given
+    val prisonNumber = "A1234AA"
+    whenever(offenderRepository.findByPrisonNumber(prisonNumber)).thenReturn(anOffender())
+    whenever(prisonService.searchPrisonersByNomisIds(listOf(prisonNumber))).thenReturn(emptyList())
+
+    // When / Then
+    val exception = org.junit.jupiter.api.assertThrows<ItemNotFoundException> {
+      service.getAssessmentOverviewSummary(prisonNumber)
+    }
+    assertThat(exception.message).isEqualTo("Could not find prisoner details for $prisonNumber")
   }
 
   @Test

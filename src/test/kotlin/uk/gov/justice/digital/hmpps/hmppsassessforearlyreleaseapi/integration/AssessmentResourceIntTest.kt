@@ -121,7 +121,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       )
 
       // When
-
       val result = webTestClient.get()
         .uri(GET_CURRENT_ASSESSMENT_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))

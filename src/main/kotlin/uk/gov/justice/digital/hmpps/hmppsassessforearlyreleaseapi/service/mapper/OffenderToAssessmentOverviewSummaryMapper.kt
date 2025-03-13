@@ -2,7 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 
 import org.springframework.stereotype.Component
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -13,34 +12,16 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PolicyService
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 
 const val DAYS_TO_ADD = 5L
 
 @Component
-class OffenderToAssessmentOverviewSummaryMapper(
-  private val prisonService: PrisonService,
-  private val policyService: PolicyService,
-) {
+class OffenderToAssessmentOverviewSummaryMapper {
 
-  fun map(offender: Offender): AssessmentOverviewSummary {
-    val prisonerSearchResults = getPrisonerDetails(offender)
+  fun map(offender: Offender, prisonName: String, prisonerSearchResults: PrisonerSearchPrisoner, eligibilityStatus: EligibilityStatus, suitabilityStatus: SuitabilityStatus): AssessmentOverviewSummary {
     val currentAssessment = offender.currentAssessment()
-    val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
-
-    val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(offender)
-
-    val eligibility = assessmentWithEligibilityProgress.getEligibilityProgress()
-    val eligibilityStatus = eligibility.toStatus()
-    val suitability = assessmentWithEligibilityProgress.getSuitabilityProgress()
-    val suitabilityStatus = suitability.toStatus()
-
-    val prisonerDetails = prisonerSearchResults.first()
     return AssessmentOverviewSummary(
       forename = offender.forename,
       surname = offender.surname,
@@ -55,8 +36,8 @@ class OffenderToAssessmentOverviewSummaryMapper(
       policyVersion = currentAssessment.policyVersion,
       optOutReasonType = currentAssessment.optOutReasonType,
       optOutReasonOther = currentAssessment.optOutReasonOther,
-      cellLocation = prisonerDetails.cellLocation,
-      mainOffense = prisonerDetails.mostSeriousOffence,
+      cellLocation = prisonerSearchResults.cellLocation,
+      mainOffense = prisonerSearchResults.mostSeriousOffence,
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
@@ -68,23 +49,6 @@ class OffenderToAssessmentOverviewSummaryMapper(
   private fun getToDoByDate(offender: Offender): LocalDate {
     val createdDate = offender.createdTimestamp.toLocalDate()
     return createdDate.plusDays(DAYS_TO_ADD)
-  }
-
-  private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
-    val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
-    if (prisonerSearchResults.isEmpty()) {
-      throw ItemNotFoundException("Could not find prisoner details for ${offender.prisonNumber}")
-    }
-    return prisonerSearchResults
-  }
-
-  private fun getCurrentAssessmentWithEligibilityProgress(offender: Offender): AssessmentWithEligibilityProgress {
-    val currentAssessment = offender.currentAssessment()
-    val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
-    return AssessmentWithEligibilityProgress(
-      assessmentEntity = currentAssessment,
-      policy = policy,
-    )
   }
 
   private fun determineResult(eligibilityStatus: EligibilityStatus, suitabilityStatus: SuitabilityStatus): String? = when {
