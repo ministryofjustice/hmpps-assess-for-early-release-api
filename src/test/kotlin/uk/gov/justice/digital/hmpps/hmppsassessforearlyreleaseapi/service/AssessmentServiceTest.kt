@@ -112,7 +112,7 @@ class AssessmentServiceTest {
     ).isEqualTo(
       listOf(
         FORENAME, SURNAME, PRISON_NUMBER,
-        LocalDate.of(2025, 3, 20), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable",
+        LocalDate.now().plusDays(7), null, PRISON_NAME, ELIGIBLE_AND_SUITABLE, LocalDate.now().plusDays(5), "Eligible and Suitable",
       ),
     )
   }
