@@ -92,3 +92,12 @@ os:
     api:
       url: "https://api.os.uk/search/places/v1"
       key: ${os.places.api.key}
+
+document:
+  pdf:
+      paperWidth: 8.27
+      paperHeight: 11.69
+      marginTop: 1
+      marginBottom: 1
+      marginLeft: 1
+      marginRight: 1

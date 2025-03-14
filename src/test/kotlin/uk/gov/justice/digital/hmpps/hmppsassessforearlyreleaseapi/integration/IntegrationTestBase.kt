@@ -2,12 +2,15 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.microsoft.applicationinsights.TelemetryClient
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentCaptor
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
+import org.springframework.cache.CacheManager
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
@@ -22,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TransferPrisonService
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 import uk.gov.justice.hmpps.test.kotlin.auth.JwtAuthorisationHelper
 
 @ExtendWith(HmppsAuthApiExtension::class)
@@ -38,11 +42,19 @@ abstract class IntegrationTestBase {
   @Autowired
   protected lateinit var objectMapper: ObjectMapper
 
+  @Autowired
+  private lateinit var cacheManager: CacheManager
+
   @MockitoSpyBean
   protected lateinit var telemetryClient: TelemetryClient
 
   @MockitoSpyBean
   protected lateinit var transferPrisonService: TransferPrisonService
+
+  @MockitoSpyBean
+  lateinit var gotenbergApiClient: GotenbergApiClient
+
+  protected fun <T> capture(argumentCaptor: ArgumentCaptor<T>): T = argumentCaptor.capture()
 
   internal fun setAuthorisation(
     username: String? = "AUTH_ADM",
@@ -59,6 +71,11 @@ abstract class IntegrationTestBase {
 
   protected fun stubPingWithResponse(status: Int) {
     hmppsAuth.stubHealthPing(status)
+  }
+
+  @BeforeEach
+  fun evictAllCaches() {
+    cacheManager.cacheNames.forEach { cacheManager.getCache(it)?.clear() }
   }
 
   protected fun jsonString(any: Any) = objectMapper.writeValueAsString(any) as String

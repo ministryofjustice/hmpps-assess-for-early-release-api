@@ -45,4 +45,20 @@ class PrisonRegisterMockServer : WireMockServer(PRISON_REGISTER_WIREMOCK_PORT) {
         ),
     )
   }
+
+  fun stubGetPrisonsNoResults() {
+    val json = """[]""".trimIndent()
+
+    stubFor(
+      get(urlEqualTo("/prisons"))
+        .willReturn(
+          aResponse().withHeader(
+            "Content-Type",
+            "application/json",
+          ).withBody(
+            json,
+          ).withStatus(200),
+        ),
+    )
+  }
 }
