@@ -33,7 +33,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Off
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -75,12 +74,7 @@ class AssessmentService(
     val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
     val prisonerSearchResults = getPrisonerDetails(offender).first()
     val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(offender)
-
-    val eligibility = assessmentWithEligibilityProgress.getEligibilityProgress()
-    val eligibilityStatus = eligibility.toStatus()
-    val suitability = assessmentWithEligibilityProgress.getSuitabilityProgress()
-    val suitabilityStatus = suitability.toStatus()
-    return offenderToAssessmentOverviewSummaryMapper.map(offender, prisonName, prisonerSearchResults, eligibilityStatus, suitabilityStatus)
+    return offenderToAssessmentOverviewSummaryMapper.map(assessmentWithEligibilityProgress, prisonName, prisonerSearchResults)
   }
 
   @Transactional

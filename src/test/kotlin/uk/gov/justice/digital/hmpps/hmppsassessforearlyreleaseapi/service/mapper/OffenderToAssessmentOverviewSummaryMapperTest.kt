@@ -2,19 +2,17 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import java.time.LocalDate
 
 class OffenderToAssessmentOverviewSummaryMapperTest {
@@ -24,51 +22,71 @@ class OffenderToAssessmentOverviewSummaryMapperTest {
   @Test
   fun `maps offender to assessment overview summary correctly with Eligible and Suitable result`() {
     // Given
-    val offender = anOffender()
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      ELIGIBLE_AND_SUITABLE,
+      eligibilityProgress = Progress.allSuccessful(),
+      suitabilityProgress = Progress.allSuccessful(),
+    )
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, SUITABLE)
+    val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Eligible and Suitable")
+    assertAssessmentOverviewSummary(result, anAssessmentWithEligibilityProgress.offender, "Eligible and Suitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Ineligible result`() {
     // Given
-    val offender = anOffender()
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      INELIGIBLE_OR_UNSUITABLE,
+      eligibilityProgress = Progress.allFailed(),
+      suitabilityProgress = Progress.allSuccessful(),
+    )
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, SuitabilityStatus.NOT_STARTED)
+    val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Ineligible")
+    assertAssessmentOverviewSummary(result, anAssessmentWithEligibilityProgress.offender, "Ineligible")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Unsuitable result`() {
     // Given
-    val offender = anOffender()
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      INELIGIBLE_OR_UNSUITABLE,
+      eligibilityProgress = Progress.allSuccessful(),
+      suitabilityProgress = Progress.allFailed(),
+    )
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, UNSUITABLE)
+    val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Unsuitable")
+    assertAssessmentOverviewSummary(result, anAssessmentWithEligibilityProgress.offender, "Unsuitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Ineligible and Unsuitable result`() {
     // Given
-    val offender = anOffender()
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      INELIGIBLE_OR_UNSUITABLE,
+      eligibilityProgress = Progress.allFailed(),
+      suitabilityProgress = Progress.allFailed(),
+    )
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, UNSUITABLE)
+    val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Ineligible and Unsuitable")
+    assertAssessmentOverviewSummary(result, anAssessmentWithEligibilityProgress.offender, "Ineligible and Unsuitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with null result`() {
     // Given
-    val offender = anOffender()
+    val anAssessmentWithEligibilityProgress = anAssessmentWithSomeProgress(
+      ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
+      eligibilityProgress = Progress.none(),
+      suitabilityProgress = Progress.none(),
+    )
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), EligibilityStatus.NOT_STARTED, SuitabilityStatus.NOT_STARTED)
+    val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
-    assertAssessmentOverviewSummary(result, offender, null)
+    assertAssessmentOverviewSummary(result, anAssessmentWithEligibilityProgress.offender, null)
   }
 
   private fun assertAssessmentOverviewSummary(
