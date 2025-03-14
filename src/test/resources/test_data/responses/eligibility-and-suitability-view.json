@@ -26,7 +26,11 @@
           "progress": "LOCKED"
         },
         {
-          "name": "PREPARE_FOR_RELEASE",
+          "name": "COMPLETE_14_DAY_CHECKS",
+          "progress": "LOCKED"
+        },
+        {
+          "name": "COMPLETE_2_DAY_CHECKS",
           "progress": "LOCKED"
         },
         {

@@ -8,14 +8,14 @@ values (10, 'A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', current_date + 
        (70, 'B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', current_date + 7, '2021-12-18', 'NOT_STARTED', 'DX12340G');
 
 
-insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date)
-values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18'),
-       ((select id from offender where booking_id = 20), 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', null, null,null),
-       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
-       ((select id from offender where booking_id = 40), 'AWAITING_PRE_DECISION_CHECKS', '1.0',null,null,null),
-       ((select id from offender where booking_id = 50), 'AWAITING_PRE_RELEASE_CHECKS', '1.0',null,null,null),
-       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason',null),
-       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason',null);
+insert into assessment(offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date, created_timestamp)
+values ((select id from offender where booking_id = 10), 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18', '2021-12-06'),
+       ((select id from offender where booking_id = 20), 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', null, null,null, '2021-12-06'),
+       ((select id from offender where booking_id = 30), 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06'),
+       ((select id from offender where booking_id = 40), 'AWAITING_PRE_DECISION_CHECKS', '1.0',null,null,null, '2021-12-06'),
+       ((select id from offender where booking_id = 50), 'AWAITING_PRE_RELEASE_CHECKS', '1.0',null,null,null, '2021-12-06'),
+       ((select id from offender where booking_id = 60), 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06'),
+       ((select id from offender where booking_id = 70), 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06');
 
 INSERT INTO public.postponement_reason
 (assessment_id, reason_type)
