@@ -90,7 +90,7 @@ data class EligibilityCriterionProgress(
   val questions: List<Question> = emptyList(),
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: AgentDto?,
-  @Schema(description = "The date time when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
+  @Schema(description = "The date when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val lastUpdated: LocalDate?,
 )
@@ -107,7 +107,7 @@ data class SuitabilityCriterionProgress(
   val questions: List<Question> = emptyList(),
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: AgentDto?,
-  @Schema(description = "The date time when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
+  @Schema(description = "The date when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val lastUpdated: LocalDate?,
 )
