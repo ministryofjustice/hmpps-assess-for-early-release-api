@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.validation.annotation.Validated
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
@@ -174,8 +172,14 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "204",
-        description = "Returns no content if check has been recorded correctly",
+        responseCode = "200",
+        description = "Returns the current eligibility and suitability status for an assessment",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = EligibilityAndSuitabilityCaseView::class),
+          ),
+        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -199,9 +203,8 @@ class EligibilityAndSuitabilityResource(private val eligibilityAndSuitabilitySer
       ),
     ],
   )
-  @ResponseStatus(HttpStatus.NO_CONTENT)
   fun answerCheck(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @Validated @RequestBody answer: CriterionCheck,
-  ): Unit = eligibilityAndSuitabilityService.saveAnswer(prisonNumber, answer)
+  ): EligibilityAndSuitabilityCaseView = eligibilityAndSuitabilityService.saveAnswer(prisonNumber, answer)
 }

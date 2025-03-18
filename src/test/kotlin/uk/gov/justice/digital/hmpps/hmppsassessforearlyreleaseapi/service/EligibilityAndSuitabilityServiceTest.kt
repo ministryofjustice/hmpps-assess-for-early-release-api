@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummar
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
@@ -213,6 +214,8 @@ class EligibilityAndSuitabilityServiceTest {
       val assessment = anAssessmentWithNoProgress()
 
       whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
+      whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
+      whenever(prisonService.getPrisonNameForId(assessment.offender.prisonId)).thenReturn(PRISON_ID)
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
 

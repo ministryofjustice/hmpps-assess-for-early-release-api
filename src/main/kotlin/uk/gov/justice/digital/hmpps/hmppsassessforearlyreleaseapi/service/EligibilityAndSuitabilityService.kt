@@ -37,26 +37,7 @@ class EligibilityAndSuitabilityService(
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
     val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
-
-    val eligibility = currentAssessment.getEligibilityProgress()
-    val eligibilityStatus = eligibility.toStatus()
-    val suitability = currentAssessment.getSuitabilityProgress()
-    val suitabilityStatus = suitability.toStatus()
-
-    return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
-      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
-      eligibility = eligibility,
-      eligibilityStatus = eligibilityStatus,
-      suitability = suitability,
-      suitabilityStatus = suitabilityStatus,
-      failureType = when {
-        eligibilityStatus == INELIGIBLE -> FailureType.INELIGIBLE
-        suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
-        else -> null
-      },
-      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
-    )
+    return eligibilityAndSuitabilityCaseView(currentAssessment)
   }
 
   @Transactional
@@ -86,7 +67,7 @@ class EligibilityAndSuitabilityService(
   }
 
   @Transactional
-  fun saveAnswer(prisonNumber: String, answer: CriterionCheck) {
+  fun saveAnswer(prisonNumber: String, answer: CriterionCheck): EligibilityAndSuitabilityCaseView {
     log.info("Saving answer: $prisonNumber, $answer")
 
     val criterionType = CriterionType.valueOf(answer.type.name)
@@ -106,6 +87,7 @@ class EligibilityAndSuitabilityService(
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()
       assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer.type, answer.code, answer.answers), answer.agent)
+      return eligibilityAndSuitabilityCaseView(currentAssessment)
     }
   }
 
@@ -117,6 +99,28 @@ class EligibilityAndSuitabilityService(
     return AssessmentWithEligibilityProgress(
       assessmentEntity = currentAssessment,
       policy = policy,
+    )
+  }
+
+  private fun eligibilityAndSuitabilityCaseView(currentAssessment: AssessmentWithEligibilityProgress): EligibilityAndSuitabilityCaseView {
+    val eligibility = currentAssessment.getEligibilityProgress()
+    val eligibilityStatus = eligibility.toStatus()
+    val suitability = currentAssessment.getSuitabilityProgress()
+    val suitabilityStatus = suitability.toStatus()
+
+    return EligibilityAndSuitabilityCaseView(
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
+      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
+      eligibility = eligibility,
+      eligibilityStatus = eligibilityStatus,
+      suitability = suitability,
+      suitabilityStatus = suitabilityStatus,
+      failureType = when {
+        eligibilityStatus == INELIGIBLE -> FailureType.INELIGIBLE
+        suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
+        else -> null
+      },
+      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
     )
   }
 
