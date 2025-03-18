@@ -7,7 +7,7 @@ import jakarta.persistence.Entity
 import org.hibernate.annotations.Type
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 
 @Entity
 @DiscriminatorValue(value = "STATUS_CHANGE")
