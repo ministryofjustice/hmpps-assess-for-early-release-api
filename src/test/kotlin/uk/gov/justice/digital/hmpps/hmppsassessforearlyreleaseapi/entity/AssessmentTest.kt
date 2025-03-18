@@ -14,7 +14,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChange
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChangedEvent
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksPassed
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.Postpone
@@ -39,8 +40,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.RELEASED_ON_HDC
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.TIMED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessment
@@ -124,9 +123,9 @@ class AssessmentTest {
   @Test
   fun `records status changes`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS, CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(IN_PROGRESS, CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
-    assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE, CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
+    assessment.performTransition(EligibilityAnswerProvided(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
+    assessment.performTransition(EligibilityAnswerProvided(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
+    assessment.performTransition(EligibilityChecksPassed(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
 
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
@@ -139,7 +138,6 @@ class AssessmentTest {
         before = NOT_STARTED,
         after = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
         context = mapOf(
-          "eligibilityStatus" to IN_PROGRESS,
           "type" to CriteriaType.ELIGIBILITY,
           "code" to criterion.code,
           "answers" to answers,
@@ -149,7 +147,6 @@ class AssessmentTest {
         before = ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
         after = ELIGIBLE_AND_SUITABLE,
         context = mapOf(
-          "eligibilityStatus" to ELIGIBLE,
           "type" to CriteriaType.ELIGIBILITY,
           "code" to criterion.code,
           "answers" to answers,
@@ -189,7 +186,7 @@ class AssessmentTest {
   fun `handles error side effect`() {
     val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
 
-    assertThatThrownBy { assessment.performTransition(EligibilityAndSuitabilityAnswerProvided(ELIGIBLE, CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity) }
+    assertThatThrownBy { assessment.performTransition(EligibilityChecksPassed(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity) }
       .isInstanceOf(IllegalStateException::class.java)
       .hasMessage("Unable to transition to Eligible from NOT_STARTED directly")
 

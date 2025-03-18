@@ -1,19 +1,33 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state
 
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 sealed class AssessmentLifecycleEvent {
-  data class EligibilityAndSuitabilityAnswerProvided(
-    val eligibilityStatus: EligibilityStatus,
+  data class EligibilityAnswerProvided(
     val type: CriteriaType,
     val code: String,
     val answers: Map<String, Boolean>,
   ) : AssessmentLifecycleEvent() {
-    override fun getContext(): Map<String, Any> = mapOf("eligibilityStatus" to eligibilityStatus, "type" to type, "code" to code, "answers" to answers)
+    override fun getContext(): Map<String, Any> = mapOf("type" to type, "code" to code, "answers" to answers)
+  }
+
+  data class EligibilityChecksPassed(
+    val type: CriteriaType,
+    val code: String,
+    val answers: Map<String, Boolean>,
+  ) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("type" to type, "code" to code, "answers" to answers)
+  }
+
+  data class EligibilityChecksFailed(
+    val type: CriteriaType,
+    val code: String,
+    val answers: Map<String, Boolean>,
+  ) : AssessmentLifecycleEvent() {
+    override fun getContext(): Map<String, Any> = mapOf("type" to type, "code" to code, "answers" to answers)
   }
 
   data class ResidentialCheckStatusAnswerProvided(
