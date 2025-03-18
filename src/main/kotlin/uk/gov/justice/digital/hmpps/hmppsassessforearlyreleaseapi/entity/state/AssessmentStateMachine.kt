@@ -3,7 +3,9 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state
 import com.tinder.StateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.Approve
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.CompleteAddressChecks
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksFailed
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksPassed
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.FailAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptOut
@@ -34,45 +36,30 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentState.ReleasedOnHDC
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentState.TimedOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.Companion.toState
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.SideEffect.Error
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLifecycleEvent, SideEffect> {
   initialState(NotStarted)
 
   state<NotStarted> {
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> transitionTo(EligibilityAndSuitabilityInProgress)
-        EligibilityStatus.ELIGIBLE -> dontTransition(SideEffect.Error("Unable to transition to Eligible from ${this.status} directly"))
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { transitionTo(EligibilityAndSuitabilityInProgress) }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
+    on<EligibilityChecksPassed> { dontTransition(Error("Unable to transition to Eligible from ${this.status} directly")) }
     on<Timeout> { transitionTo(TimedOut) }
   }
 
   state<EligibilityAndSuitabilityInProgress> {
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> transitionTo(EligibleAndSuitable)
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { transitionTo(EligibleAndSuitable) }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Timeout> { transitionTo(TimedOut) }
   }
 
   state<EligibleAndSuitable> {
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> transitionTo(EligibilityAndSuitabilityInProgress)
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { transitionTo(EligibilityAndSuitabilityInProgress) }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<SubmitForAddressChecks> { transitionTo(AwaitingAddressAndRiskChecks) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
     on<Timeout> { transitionTo(TimedOut) }
@@ -83,7 +70,7 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
       when (it.checkStatus) {
         ResidentialChecksStatus.UNSUITABLE -> transitionTo(AddressAndRiskChecksInProgress)
         ResidentialChecksStatus.IN_PROGRESS -> transitionTo(AddressAndRiskChecksInProgress)
-        ResidentialChecksStatus.SUITABLE -> dontTransition(SideEffect.Error("Unable to transition to suitable from ${this.status} directly"))
+        ResidentialChecksStatus.SUITABLE -> dontTransition(Error("Unable to transition to suitable from ${this.status} directly"))
         else -> error("Unexpected eligibility status: $it")
       }
     }
@@ -108,14 +95,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
 
   state<AwaitingPreDecisionChecks> {
     on<SubmitForDecision> { transitionTo(AwaitingDecision) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Postpone> { transitionTo(Postponed) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
@@ -124,14 +106,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
   state<AwaitingDecision> {
     on<Approve> { transitionTo(Approved) }
     on<Refuse> { transitionTo(Refused) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Postpone> { transitionTo(Postponed) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
@@ -139,14 +116,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
 
   state<Approved> {
     on<SubmitForAddressChecks> { transitionTo(AwaitingPreReleaseChecks) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Postpone> { transitionTo(Postponed) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
@@ -154,14 +126,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
 
   state<AwaitingPreReleaseChecks> {
     on<CompleteAddressChecks> { transitionTo(PassedPreReleaseChecks) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Postpone> { transitionTo(Postponed) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
@@ -169,14 +136,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
 
   state<PassedPreReleaseChecks> {
     on<ReleaseOnHDC> { transitionTo(ReleasedOnHDC) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Postpone> { transitionTo(Postponed) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
@@ -184,14 +146,9 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
 
   state<AddressUnsuitable> {
     on<SubmitForAddressChecks> { transitionTo(AwaitingRefusal) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
   }
@@ -199,26 +156,16 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
   state<AwaitingRefusal> {
     on<Timeout> { transitionTo(TimedOut) }
     on<Refuse> { transitionTo(Refused) }
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> transitionTo(IneligibleOrUnsuitable)
-        EligibilityStatus.IN_PROGRESS -> dontTransition()
-        EligibilityStatus.ELIGIBLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { dontTransition() }
+    on<EligibilityChecksPassed> { dontTransition() }
+    on<EligibilityChecksFailed> { transitionTo(IneligibleOrUnsuitable) }
     on<SubmitForAddressChecks> { transitionTo(AwaitingAddressAndRiskChecks) }
   }
 
   state<IneligibleOrUnsuitable> {
-    on<EligibilityAndSuitabilityAnswerProvided> {
-      when (it.eligibilityStatus) {
-        EligibilityStatus.INELIGIBLE -> dontTransition()
-        EligibilityStatus.IN_PROGRESS -> transitionTo(EligibilityAndSuitabilityInProgress)
-        EligibilityStatus.ELIGIBLE -> transitionTo(EligibleAndSuitable)
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<EligibilityAnswerProvided> { transitionTo(EligibilityAndSuitabilityInProgress) }
+    on<EligibilityChecksPassed> { transitionTo(EligibleAndSuitable) }
+    on<EligibilityChecksFailed> { dontTransition() }
     on<SubmitForAddressChecks> { transitionTo(AwaitingAddressAndRiskChecks) }
     on<StartAddressChecks> { transitionTo(AddressAndRiskChecksInProgress) }
     on<SubmitForDecision> { transitionTo(AwaitingPreDecisionChecks) }

@@ -5,12 +5,16 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksFailed
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksPassed
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
@@ -86,7 +90,15 @@ class EligibilityAndSuitabilityService(
       )
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()
-      assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer.type, answer.code, answer.answers), answer.agent)
+
+      val event = when (eligibilityStatus) {
+        INELIGIBLE -> EligibilityChecksFailed(answer.type, answer.code, answer.answers)
+        ELIGIBLE -> EligibilityChecksPassed(answer.type, answer.code, answer.answers)
+        IN_PROGRESS -> EligibilityAnswerProvided(answer.type, answer.code, answer.answers)
+        else -> error("Should not be possible to have a status of $eligibilityStatus")
+      }
+
+      assessmentService.transitionAssessment(assessmentEntity, event, answer.agent)
       return eligibilityAndSuitabilityCaseView(currentAssessment)
     }
   }
