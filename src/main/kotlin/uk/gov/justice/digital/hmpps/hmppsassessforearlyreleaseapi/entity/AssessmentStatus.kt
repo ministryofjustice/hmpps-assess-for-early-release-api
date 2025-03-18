@@ -40,12 +40,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
   },
 
   ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS {
@@ -59,12 +53,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
   },
 
   ELIGIBLE_AND_SUITABLE {
@@ -77,12 +65,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(COMPLETE_2_DAY_CHECKS, LOCKED),
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
-    )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
     )
   },
 
@@ -102,12 +84,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
-    )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to true,
-      PRISON_DM to false,
     )
   },
 
@@ -132,12 +108,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to true,
-      PRISON_DM to false,
-    )
   },
 
   AWAITING_PRE_DECISION_CHECKS {
@@ -145,12 +115,6 @@ enum class AssessmentStatus {
       PRISON_CA to listOf(
         TaskProgress.Fixed(REVIEW_APPLICATION_AND_SEND_FOR_DECISION, READY_TO_START),
       ),
-    )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
     )
   },
 
@@ -161,12 +125,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
   },
 
   APPROVED {
@@ -175,37 +133,13 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, READY_TO_START),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
   },
 
-  AWAITING_PRE_RELEASE_CHECKS {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
-  },
+  AWAITING_PRE_RELEASE_CHECKS,
 
-  PASSED_PRE_RELEASE_CHECKS {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
-  },
+  PASSED_PRE_RELEASE_CHECKS,
 
-  ADDRESS_UNSUITABLE {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
-  },
+  ADDRESS_UNSUITABLE,
 
   AWAITING_REFUSAL {
     override fun tasks() = mapOf(
@@ -213,12 +147,6 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(CONFIRM_RELEASE, READY_TO_START),
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
-    )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
     )
   },
 
@@ -233,21 +161,9 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
   },
 
-  REFUSED {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
-  },
+  REFUSED,
   TIMED_OUT {
     override fun tasks() = mapOf(
       PRISON_DM to listOf(
@@ -255,21 +171,9 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(APPROVE_LICENCE, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
   },
 
-  POSTPONED {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
-  },
+  POSTPONED,
 
   OPTED_OUT {
     override fun tasks() = mapOf(
@@ -287,25 +191,12 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(OPT_IN, LOCKED),
       ),
     )
-
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to true,
-    )
   },
 
-  RELEASED_ON_HDC {
-    override val visibleToRole = mapOf(
-      PRISON_CA to true,
-      PROBATION_COM to false,
-      PRISON_DM to false,
-    )
-  },
+  RELEASED_ON_HDC,
   ;
 
   open fun tasks(): Map<UserRole, List<TaskProgress>> = emptyMap()
-  abstract val visibleToRole: Map<UserRole, Boolean>
 
   companion object {
     // Note: ideally we'd be able to unmarshall this directly from the stored Assessment entity, this is a workaround.
@@ -332,8 +223,6 @@ enum class AssessmentStatus {
 
       RELEASED_ON_HDC -> AssessmentState.ReleasedOnHDC
     }
-
-    fun getStatusesForRole(role: UserRole): List<AssessmentStatus> = entries.filter { it.visibleToRole[role] == true }
 
     fun inFlightStatuses(): List<AssessmentStatus> = entries.filter { it != TIMED_OUT && it != REFUSED && it != RELEASED_ON_HDC }
   }
