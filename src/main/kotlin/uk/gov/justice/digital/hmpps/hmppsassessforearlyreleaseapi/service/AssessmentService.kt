@@ -14,7 +14,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.CompleteAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptBackIn
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptOut
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.ResidentialCheckAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.SubmitForAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
@@ -39,6 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
@@ -131,15 +132,15 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, saveTaskAnswersRequest: SaveResidentialChecksTaskAnswersRequest) {
-    val event = ResidentialCheckStatusAnswerProvided(status, saveTaskAnswersRequest.taskCode, saveTaskAnswersRequest.answers)
+  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, request: SaveResidentialChecksTaskAnswersRequest) {
+    val event = ResidentialCheckAnswerProvided(status, request.taskCode, request.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(event, saveTaskAnswersRequest.agent.toEntity())
+    assessmentEntity.performTransition(event, request.agent.toEntity())
 
-    if (status == ResidentialChecksStatus.SUITABLE && !assessmentEntity.addressChecksComplete) {
+    if (status == SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true
-    } else if (status != ResidentialChecksStatus.SUITABLE && assessmentEntity.addressChecksComplete) {
+    } else if (status != SUITABLE && assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = false
     }
     assessmentRepository.save(assessmentEntity)

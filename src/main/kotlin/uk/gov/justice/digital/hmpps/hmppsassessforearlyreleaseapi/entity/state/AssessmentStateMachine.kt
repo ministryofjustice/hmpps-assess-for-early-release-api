@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.Postpone
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.Refuse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.ReleaseOnHDC
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.ResidentialCheckStatusAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.ResidentialCheckAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.StartAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.SubmitForAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.SubmitForDecision
@@ -37,7 +37,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentState.TimedOut
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.Companion.toState
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.SideEffect.Error
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLifecycleEvent, SideEffect> {
   initialState(NotStarted)
@@ -66,27 +65,13 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
   }
 
   state<AwaitingAddressAndRiskChecks> {
-    on<ResidentialCheckStatusAnswerProvided> {
-      when (it.checkStatus) {
-        ResidentialChecksStatus.UNSUITABLE -> transitionTo(AddressAndRiskChecksInProgress)
-        ResidentialChecksStatus.IN_PROGRESS -> transitionTo(AddressAndRiskChecksInProgress)
-        ResidentialChecksStatus.SUITABLE -> dontTransition(Error("Unable to transition to suitable from ${this.status} directly"))
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<ResidentialCheckAnswerProvided> { transitionTo(AddressAndRiskChecksInProgress) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }
   }
 
   state<AddressAndRiskChecksInProgress> {
-    on<ResidentialCheckStatusAnswerProvided> {
-      when (it.checkStatus) {
-        ResidentialChecksStatus.UNSUITABLE -> dontTransition()
-        ResidentialChecksStatus.IN_PROGRESS -> dontTransition()
-        ResidentialChecksStatus.SUITABLE -> dontTransition()
-        else -> error("Unexpected eligibility status: $it")
-      }
-    }
+    on<ResidentialCheckAnswerProvided> { dontTransition() }
     on<CompleteAddressChecks> { transitionTo(AwaitingPreDecisionChecks) }
     on<FailAddressChecks> { transitionTo(AddressUnsuitable) }
     on<Timeout> { transitionTo(TimedOut) }

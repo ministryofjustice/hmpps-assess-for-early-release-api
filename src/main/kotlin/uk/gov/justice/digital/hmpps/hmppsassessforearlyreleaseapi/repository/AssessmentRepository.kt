@@ -18,6 +18,4 @@ interface AssessmentRepository : JpaRepository<Assessment, Long> {
   fun findByResponsibleComStaffCodeAndStatusIn(staffCode: String, status: List<AssessmentStatus>): List<Assessment>
 
   fun findByResponsibleComStaffCode(staffCode: String): List<Assessment>
-
-  fun findAllByOffenderPrisonIdAndStatusIn(prisonId: String, statusCodes: List<AssessmentStatus>): List<Assessment>
 }
