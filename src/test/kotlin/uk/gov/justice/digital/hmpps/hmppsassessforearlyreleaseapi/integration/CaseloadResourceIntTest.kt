@@ -5,13 +5,13 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GovUkMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.time.LocalDate
 
 private const val PRISON_CODE = "BMI"
@@ -72,7 +72,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       // Then
       response.expectStatus().isOk
 
-      val offenders = response.expectBody(object : ParameterizedTypeReference<List<OffenderSummaryResponse>>() {})
+      val offenders = response.expectBody(typeReference<List<OffenderSummaryResponse>>())
         .returnResult().responseBody!!
       assertThat(offenders).hasSize(4)
       assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
@@ -129,11 +129,11 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       // Then
       response.expectStatus().isOk
 
-      val offenders = response.expectBody(object : ParameterizedTypeReference<List<OffenderSummaryResponse>>() {})
+      val offenders = response.expectBody(typeReference<List<OffenderSummaryResponse>>())
         .returnResult().responseBody!!
-      assertThat(offenders).hasSize(2)
-      assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AB", "G9524ZF")
-      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder(null, "DX12340C")
+      assertThat(offenders).hasSize(4)
+      assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AB", "G9524ZF", "C1234CC", "B1234BB")
+      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder(null, "DX12340C", "DX12340E", "DX12340G")
       assertThat(offenders.map { it.probationPractitioner }).containsOnly("A Com")
       assertPostponeDetails(offenders, "A1234AB")
     }
@@ -188,12 +188,12 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       // Then
       response.expectStatus().isOk
 
-      val offenders = response.expectBody(object : ParameterizedTypeReference<List<OffenderSummaryResponse>>() {})
+      val offenders = response.expectBody(typeReference<List<OffenderSummaryResponse>>())
         .returnResult().responseBody!!
-      assertThat(offenders).hasSize(2)
-      assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AB", "A1234AD")
-      assertThat(offenders.map { it.probationPractitioner }).containsExactlyInAnyOrder("A Com", "Another Com")
-      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder("DX12340B", null)
+      assertThat(offenders).hasSize(4)
+      assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
+      assertThat(offenders.map { it.probationPractitioner }).containsExactlyInAnyOrder("Another Com", "A Com", "Another Com", "Another Com")
+      assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder("DX12340A", "DX12340B", null, "DX12340F")
 
       assertPostponeDetails(offenders, "A1234AB")
     }

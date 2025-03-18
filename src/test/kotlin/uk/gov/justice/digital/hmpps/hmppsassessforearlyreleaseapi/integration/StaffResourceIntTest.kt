@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -13,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonApiUserDetail
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.User
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 
 private const val USERNAME = "com-user"
 private const val GET_STAFF_DETAILS_BY_USERNAME_URL = "/staff?username=$USERNAME"
@@ -63,7 +63,7 @@ class StaffResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody(object : ParameterizedTypeReference<User>() {})
+        .expectBody(typeReference<User>())
         .returnResult().responseBody!!
 
       assertThat(comUserDetails.username).isEqualTo(USERNAME)
@@ -129,7 +129,7 @@ class StaffResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody(object : ParameterizedTypeReference<PrisonApiUserDetail>() {})
+        .expectBody(typeReference<PrisonApiUserDetail>())
         .returnResult().responseBody!!
 
       assertThat(prisonUserDetails.username).isEqualTo(USERNAME)

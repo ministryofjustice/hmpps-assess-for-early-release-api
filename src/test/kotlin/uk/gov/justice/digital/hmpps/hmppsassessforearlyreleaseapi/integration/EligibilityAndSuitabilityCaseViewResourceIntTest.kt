@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -24,6 +23,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
@@ -343,7 +343,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<SuitabilityCriterionView>() {})
+          .expectBody(typeReference<SuitabilityCriterionView>())
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(SUITABLE)
@@ -364,7 +364,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<SuitabilityCriterionView>() {})
+          .expectBody(typeReference<SuitabilityCriterionView>())
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
@@ -411,7 +411,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<EligibilityCriterionView>() {})
+          .expectBody(typeReference<EligibilityCriterionView>())
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(NOT_STARTED)
@@ -425,7 +425,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<EligibilityAndSuitabilityCaseView>() {})
+          .expectBody(typeReference<EligibilityAndSuitabilityCaseView>())
           .returnResult().responseBody!!
 
         assertThat(eligibilityAndSuitabilityView.overallStatus).isEqualTo(IN_PROGRESS)
