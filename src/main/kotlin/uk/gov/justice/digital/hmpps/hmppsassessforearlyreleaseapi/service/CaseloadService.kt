@@ -37,7 +37,7 @@ class CaseloadService(
     forename = offender.forename!!,
     surname = offender.surname!!,
     hdced = offender.hdced,
-    workingDaysToHdced = workingDaysService.workingDaysBefore(offender.hdced),
+    workingDaysToHdced = workingDaysService.workingDaysUntil(offender.hdced),
     probationPractitioner = this.responsibleCom?.fullName,
     isPostponed = this.status == AssessmentStatus.POSTPONED,
     postponementDate = this.postponementDate,

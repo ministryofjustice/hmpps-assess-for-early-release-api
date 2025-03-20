@@ -1,7 +1,36 @@
-h1 {
-    color: red !important;
+body {
+    counter-reset: sectionCounter conditionCounter;
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
 }
 
-p {
-    color: blueviolet !important;
+.title {
+    font-size: 18pt;
+    margin: 20px 0;
+}
+
+.subtitle {
+    font-size: 16pt;
+}
+
+.offender-summary {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.offender-summary div {
+    width: 50%;
+}
+
+.first {
+    /*background-color: aliceblue;*/
+}
+.second {
+    /*background-color: burlywood;*/
+}
+.third {
+    /*background-color: crimson;*/
+}
+.fourth {
+    /*background-color: gold;*/
 }

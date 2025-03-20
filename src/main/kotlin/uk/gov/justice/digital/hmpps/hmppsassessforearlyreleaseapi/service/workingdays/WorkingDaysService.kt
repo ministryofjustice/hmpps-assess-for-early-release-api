@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 @Service
 class WorkingDaysService(private val bankHolidayService: BankHolidayService, private val clock: Clock) {
-  fun workingDaysBefore(
+  fun workingDaysUntil(
     date: LocalDate,
   ): Int = generateSequence(date) {
     if (it > LocalDate.now(clock)) {
@@ -19,6 +19,12 @@ class WorkingDaysService(private val bankHolidayService: BankHolidayService, pri
     .drop(1)
     .filterNot { isNonWorkingDay(it) }
     .count()
+
+  fun workingDaysBefore(
+    date: LocalDate,
+  ): Sequence<LocalDate> = generateSequence(date) { it.minusDays(1) }
+    .drop(1)
+    .filterNot { isNonWorkingDay(it) }
 
   fun isWeekend(date: LocalDate): Boolean = date.dayOfWeek in weekend
 
