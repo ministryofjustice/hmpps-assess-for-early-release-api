@@ -18,7 +18,7 @@ class StandardAddressCheckRequest(
   dateRequested: LocalDateTime = LocalDateTime.now(),
   preferencePriority: AddressPreferencePriority,
   status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS,
-  assessment: Assessment,
+  assessments: MutableList<Assessment>,
   @ManyToOne
   @JoinColumn(name = "address_id", referencedColumnName = "id")
   val address: Address,
@@ -37,5 +37,5 @@ class StandardAddressCheckRequest(
   dateRequested = dateRequested,
   preferencePriority = preferencePriority,
   status = status,
-  assessment = assessment,
+  assessments = assessments,
 )

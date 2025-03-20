@@ -5,5 +5,5 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 
 interface CurfewAddressCheckRequestRepository : JpaRepository<CurfewAddressCheckRequest, Long> {
-  fun findByAssessment(assessment: Assessment): List<CurfewAddressCheckRequest>
+  fun findByAssessments(assessments: MutableList<Assessment>): List<CurfewAddressCheckRequest>
 }

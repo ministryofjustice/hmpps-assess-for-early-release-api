@@ -280,7 +280,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class AddCasCheckRequestTests {
+  inner class AddCasAddressCheckRequestTests {
     private val caInfo = "ca info"
     private val ppInfo = "pp info"
     private val priority = AddressPreferencePriority.SECOND

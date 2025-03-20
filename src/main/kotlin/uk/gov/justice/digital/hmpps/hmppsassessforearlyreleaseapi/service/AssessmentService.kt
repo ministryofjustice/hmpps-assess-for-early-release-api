@@ -64,6 +64,7 @@ class AssessmentService(
   private val staffRepository: StaffRepository,
   @org.springframework.context.annotation.Lazy
   private val probationService: ProbationService,
+  private val addressService: AddressService,
 ) {
 
   companion object {
@@ -277,29 +278,31 @@ class AssessmentService(
   fun deleteCurrentAssessment(prisonerNumber: String, agent: AgentDto) {
     log.debug("Deleting current assessment for prisonerNumber: {}", prisonerNumber)
 
-    val currentAssessment = this.getCurrentAssessment(prisonerNumber)
-    val offender = currentAssessment.offender
+    val currentAssessmentToBeDeleted = this.getCurrentAssessment(prisonerNumber)
+    val offender = currentAssessmentToBeDeleted.offender
 
-    currentAssessment.deletedTimestamp = LocalDateTime.now()
+    currentAssessmentToBeDeleted.deletedTimestamp = LocalDateTime.now()
 
     val assessmentEventInfo = mutableMapOf(
       "prisonerNumber" to prisonerNumber,
     )
 
-    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED, currentAssessment, assessmentEventInfo, agent)
+    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED, currentAssessmentToBeDeleted, assessmentEventInfo, agent)
 
     val telemetryInfo = assessmentEventInfo + mapOf(
       "agent" to agent.username,
       "agentRole" to agent.role.name,
-      "id" to currentAssessment.id.toString(),
+      "id" to currentAssessmentToBeDeleted.id.toString(),
     )
 
     sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
 
-    assessmentRepository.save(currentAssessment)
+    assessmentRepository.save(currentAssessmentToBeDeleted)
 
     val newAssessment = createAssessment(offender, prisonerNumber = prisonerNumber)
     offender.assessments.add(newAssessment)
+
+    addressService.transferAddressChecks(currentAssessmentToBeDeleted, newAssessment)
   }
 
   private fun recordAssessmentEvent(

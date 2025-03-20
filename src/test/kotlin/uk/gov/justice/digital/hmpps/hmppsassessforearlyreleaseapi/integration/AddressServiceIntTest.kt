@@ -217,7 +217,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
     agentHolder.agent = PRISON_CA_AGENT
 
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
+    addressService.addCasAddressCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
     val dbCasCheckRequests = casCheckRequestRepository.findAll()
     assertThat(dbCasCheckRequests).hasSize(1)
@@ -263,7 +263,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val agentHolder = AgentHolder()
 
     val exception = assertThrows<Exception> {
-      addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
+      addressService.addCasAddressCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
     }
 
     assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
