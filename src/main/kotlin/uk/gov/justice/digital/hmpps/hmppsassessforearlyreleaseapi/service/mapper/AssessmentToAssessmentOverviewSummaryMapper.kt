@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
@@ -18,10 +19,10 @@ import java.time.LocalDate
 const val DAYS_TO_ADD = 5L
 
 @Component
-class OffenderToAssessmentOverviewSummaryMapper {
+class AssessmentToAssessmentOverviewSummaryMapper {
 
-  fun map(offender: Offender, prisonName: String, prisonerSearchResults: PrisonerSearchPrisoner, eligibilityStatus: EligibilityStatus, suitabilityStatus: SuitabilityStatus): AssessmentOverviewSummary {
-    val currentAssessment = offender.currentAssessment()
+  fun map(assessment: Assessment, prisonName: String, prisonerSearchResults: PrisonerSearchPrisoner, eligibilityStatus: EligibilityStatus, suitabilityStatus: SuitabilityStatus): AssessmentOverviewSummary {
+    val offender = assessment.offender
     return AssessmentOverviewSummary(
       forename = offender.forename,
       surname = offender.surname,
@@ -30,16 +31,16 @@ class OffenderToAssessmentOverviewSummaryMapper {
       hdced = offender.hdced,
       crd = offender.crd,
       location = prisonName,
-      status = currentAssessment.status,
-      responsibleCom = currentAssessment.responsibleCom?.toSummary(),
-      team = currentAssessment.team,
-      policyVersion = currentAssessment.policyVersion,
-      optOutReasonType = currentAssessment.optOutReasonType,
-      optOutReasonOther = currentAssessment.optOutReasonOther,
+      status = assessment.status,
+      responsibleCom = assessment.responsibleCom?.toSummary(),
+      team = assessment.team,
+      policyVersion = assessment.policyVersion,
+      optOutReasonType = assessment.optOutReasonType,
+      optOutReasonOther = assessment.optOutReasonOther,
       cellLocation = prisonerSearchResults.cellLocation,
       mainOffense = prisonerSearchResults.mostSeriousOffence,
-      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
+      tasks = assessment.status.tasks().mapValues { (_, tasks) ->
+        tasks.map { TaskProgress(it.task, it.status(assessment)) }
       },
       toDoEligibilityAndSuitabilityBy = getToDoByDate(offender),
       result = determineResult(eligibilityStatus, suitabilityStatus),

@@ -175,11 +175,11 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
   )
   @Test
-  fun `should handle Offender not found error`() {
+  fun `should handle assessment not found error`() {
     // Given
     val documentSubjectType = DocumentSubjectType.OFFENDER_ELIGIBLE_FORM
     val url = "/offender/$prisonNumber/document/$documentSubjectType"
-    val expectedErrorMessage = "ItemNotFoundException: Cannot find offender with prisonNumber $prisonNumber"
+    val expectedErrorMessage = "ItemNotFoundException: Cannot find current assessment with prisonNumber $prisonNumber"
     val expectedHttpErrorCode = 404
 
     gotenbergMockServer.stubPostPdf(pdfBytes)

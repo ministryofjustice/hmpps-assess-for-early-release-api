@@ -13,6 +13,7 @@ import jakarta.validation.ValidationException
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -26,13 +27,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class AssessmentResource(
   private val assessmentService: AssessmentService,
-) {
+  private val agentHolder : AgentHolder,
+  ) {
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -340,4 +343,51 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody agent: AgentDto,
   ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
+
+  @DeleteMapping("/offender/{prisonNumber}/current-assessment")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Deletes the current assessment for a prisoner",
+    description = "Deletes details of the current assessment for a prisoner",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "Returns No Content status code",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = AssessmentOverviewSummary::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun deleteCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) {
+    assessmentService.deleteCurrentAssessment(prisonNumber, agentHolder.agent)
+  }
+
 }

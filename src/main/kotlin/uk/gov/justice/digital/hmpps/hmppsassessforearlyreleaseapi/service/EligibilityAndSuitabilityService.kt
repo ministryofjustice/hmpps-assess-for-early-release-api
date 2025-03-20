@@ -44,7 +44,7 @@ class EligibilityAndSuitabilityService(
     val suitabilityStatus = suitability.toStatus()
 
     return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
       overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
@@ -66,7 +66,7 @@ class EligibilityAndSuitabilityService(
     if (eligibilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
     return EligibilityCriterionView(
-      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
       criterion = eligibilityProgress[0],
       nextCriterion = eligibilityProgress.getOrNull(1),
     )
@@ -79,7 +79,7 @@ class EligibilityAndSuitabilityService(
     if (suitabilityProgress.isEmpty()) throw ItemNotFoundException("Cannot find criterion with code $code")
 
     return SuitabilityCriterionView(
-      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.offender),
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
       criterion = suitabilityProgress[0],
       nextCriterion = suitabilityProgress.getOrNull(1),
     )
@@ -110,9 +110,7 @@ class EligibilityAndSuitabilityService(
   }
 
   private fun getCurrentAssessmentWithEligibilityProgress(prisonNumber: String): AssessmentWithEligibilityProgress {
-    val offender = getOffender(prisonNumber)
-
-    val currentAssessment = offender.currentAssessment()
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
     val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
     return AssessmentWithEligibilityProgress(
       assessmentEntity = currentAssessment,
@@ -120,6 +118,4 @@ class EligibilityAndSuitabilityService(
     )
   }
 
-  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
-    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 }

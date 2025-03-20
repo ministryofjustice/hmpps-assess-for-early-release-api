@@ -58,7 +58,7 @@ class EligibilityAndSuitabilityServiceTest {
     fun `for existing unstarted offender`() {
       // Given
       val anOffender = anOffender()
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anOffender())
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(anOffender().assessments.first())
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -92,7 +92,7 @@ class EligibilityAndSuitabilityServiceTest {
         suitabilityProgress = Progress.specifyByIndex(0 to PASSED),
       )
 
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.offender)
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.assessmentEntity)
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -156,7 +156,7 @@ class EligibilityAndSuitabilityServiceTest {
         suitabilityProgress = Progress.none(),
       )
 
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.offender)
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(anAssessmentWithEligibilityProgress.assessmentEntity)
       whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
       whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
 
@@ -212,7 +212,7 @@ class EligibilityAndSuitabilityServiceTest {
     fun `for existing unstarted offender`() {
       val assessment = anAssessmentWithNoProgress()
 
-      whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(assessment.offender)
+      whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment.assessmentEntity)
       val criterion = POLICY_1_0.eligibilityCriteria[0]
       val question = criterion.questions.first()
 

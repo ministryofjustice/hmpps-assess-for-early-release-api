@@ -2,7 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
@@ -17,66 +17,74 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import java.time.LocalDate
 
-class OffenderToAssessmentOverviewSummaryMapperTest {
+class AssessmentToAssessmentOverviewSummaryMapperTest {
 
-  private val toTest: OffenderToAssessmentOverviewSummaryMapper = OffenderToAssessmentOverviewSummaryMapper()
+  private val toTest: AssessmentToAssessmentOverviewSummaryMapper = AssessmentToAssessmentOverviewSummaryMapper()
 
   @Test
   fun `maps offender to assessment overview summary correctly with Eligible and Suitable result`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
+
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, SUITABLE)
+    val result = toTest.map(assessment, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, SUITABLE)
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Eligible and Suitable")
+    assertAssessmentOverviewSummary(result, assessment, "Eligible and Suitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Ineligible result`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
+
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, SuitabilityStatus.NOT_STARTED)
+    val result = toTest.map(assessment, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, SuitabilityStatus.NOT_STARTED)
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Ineligible")
+    assertAssessmentOverviewSummary(result, assessment, "Ineligible")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Unsuitable result`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
+
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, UNSUITABLE)
+    val result = toTest.map(assessment, PRISON_NAME, aPrisonerSearchPrisoner(), ELIGIBLE, UNSUITABLE)
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Unsuitable")
+    assertAssessmentOverviewSummary(result, assessment, "Unsuitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with Ineligible and Unsuitable result`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, UNSUITABLE)
+    val result = toTest.map(assessment, PRISON_NAME, aPrisonerSearchPrisoner(), INELIGIBLE, UNSUITABLE)
     // Assert
-    assertAssessmentOverviewSummary(result, offender, "Ineligible and Unsuitable")
+    assertAssessmentOverviewSummary(result, assessment, "Ineligible and Unsuitable")
   }
 
   @Test
   fun `maps offender to assessment overview summary correctly with null result`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
     // When
-    val result = toTest.map(offender, PRISON_NAME, aPrisonerSearchPrisoner(), EligibilityStatus.NOT_STARTED, SuitabilityStatus.NOT_STARTED)
+    val result = toTest.map(assessment, PRISON_NAME, aPrisonerSearchPrisoner(), EligibilityStatus.NOT_STARTED, SuitabilityStatus.NOT_STARTED)
     // Assert
-    assertAssessmentOverviewSummary(result, offender, null)
+    assertAssessmentOverviewSummary(result, assessment, null)
   }
 
   private fun assertAssessmentOverviewSummary(
     assessmentOverviewSummary: AssessmentOverviewSummary,
-    offender: Offender,
+    expectedAssessment: Assessment,
     result: String?,
   ) {
-    val expectedAssessment = offender.currentAssessment()
+    val offender = expectedAssessment.offender
 
     assertThat(assessmentOverviewSummary).isNotNull
     assertThat(assessmentOverviewSummary.crd).isEqualTo(offender.crd)

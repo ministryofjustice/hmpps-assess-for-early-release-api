@@ -4,22 +4,17 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-
-const val PRISONER_CREATED_EVENT_NAME = "assess-for-early-release.prisoner.created"
-const val PRISONER_UPDATED_EVENT_NAME = "assess-for-early-release.prisoner.updated"
 
 @Service
 class OffenderService(
@@ -29,6 +24,7 @@ class OffenderService(
   private val probationService: ProbationService,
   private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
+  private val assessmentService: AssessmentService
 ) {
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
@@ -50,9 +46,10 @@ class OffenderService(
   }
 
   private fun createOffender(prisoner: PrisonerSearchPrisoner) {
+    log.debug("Create new offender for prisoner {}", prisoner)
     val crn = probationService.getCaseReferenceNumber(prisoner.prisonerNumber)
 
-    val offender = Offender(
+    val offender = offenderRepository.save(Offender(
       bookingId = prisoner.bookingId!!.toLong(),
       prisonNumber = prisoner.prisonerNumber,
       prisonId = prisoner.prisonId!!,
@@ -63,47 +60,25 @@ class OffenderService(
       crd = prisoner.conditionalReleaseDate,
       crn = crn,
       sentenceStartDate = prisoner.sentenceStartDate,
-    )
+    ))
 
-    val deliusOffenderManager = crn?.let {
-      probationService.getCurrentResponsibleOfficer(crn)
-    }
-
-    val communityOffenderManager = crn?.let {
-      deliusOffenderManager?.let {
-        staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
-      }
-    }
-
-    val assessment = Assessment(
-      offender = offender,
-      policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
-      responsibleCom = communityOffenderManager,
-      team = deliusOffenderManager?.team?.code,
-    )
-
+    val assessment = assessmentService.createAssessment(offender, prisonerNumber = prisoner.prisonerNumber)
     offender.assessments.add(assessment)
-
     val changes = mapOf(
       "prisonNumber" to prisoner.prisonerNumber,
-      "homeDetentionCurfewEligibilityDate" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
+      "homeDetentionCurfewEligibilityDate" to offender.hdced.format(DateTimeFormatter.ISO_DATE),
     )
-
-    assessment.recordEvent(
-      eventType = AssessmentEventType.PRISONER_CREATED,
-      changes,
-      agent = SYSTEM_AGENT,
-    )
-    offenderRepository.save(offender)
 
     telemetryClient.trackEvent(
-      PRISONER_CREATED_EVENT_NAME,
+      TelemertyEvent.PRISONER_CREATED_EVENT_NAME.key,
       changes,
       null,
     )
   }
 
   private fun updateOffender(offender: Offender, prisoner: PrisonerSearchPrisoner) {
+    log.debug("Update offender for prisoner {}", prisoner)
+
     if (hasOffenderBeenUpdated(offender, prisoner)) {
       val updatedOffender = offender.copy(
         forename = prisoner.firstName,
@@ -124,16 +99,16 @@ class OffenderService(
         "homeDetentionCurfewEligibilityDate" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
       )
 
-      val assessmentEntity = updatedOffender.currentAssessment()
-      assessmentEntity.recordEvent(
+      val currentAssessment = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
+      currentAssessment.recordEvent(
         eventType = AssessmentEventType.PRISONER_UPDATED,
         changes,
         agent = SYSTEM_AGENT,
       )
-      assessmentRepository.save(assessmentEntity)
+      assessmentRepository.save(currentAssessment)
 
       telemetryClient.trackEvent(
-        PRISONER_UPDATED_EVENT_NAME,
+        TelemertyEvent.PRISONER_UPDATED_EVENT_NAME.key,
         changes,
         null,
       )
@@ -146,16 +121,6 @@ class OffenderService(
     offender.forename != prisoner.firstName ||
     offender.surname != prisoner.lastName ||
     offender.dateOfBirth != prisoner.dateOfBirth
-
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
-    CommunityOffenderManager(
-      staffCode = offenderManager.code,
-      username = offenderManager.username,
-      email = offenderManager.email,
-      forename = offenderManager.name.forename,
-      surname = offenderManager.name.surname,
-    ),
-  )
 
   companion object {
     private val log = LoggerFactory.getLogger(this::class.java)

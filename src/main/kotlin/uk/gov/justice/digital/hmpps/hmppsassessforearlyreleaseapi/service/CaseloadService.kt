@@ -17,19 +17,19 @@ class CaseloadService(
 ) {
   @Transactional
   fun getCaseAdminCaseload(prisonCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findByOffenderPrisonId(prisonCode)
+    val assessments = assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(prisonCode)
     return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
+    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
     return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusIn(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
+    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusInAndDeletedTimestampIsNull(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
     return assessments.map { it.toOffenderSummary() }
   }
 

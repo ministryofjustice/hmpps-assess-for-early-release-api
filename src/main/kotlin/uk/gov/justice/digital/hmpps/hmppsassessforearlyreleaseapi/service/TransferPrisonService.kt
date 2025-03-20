@@ -17,6 +17,7 @@ const val TRANSFERRED_EVENT_NAME = "assess-for-early-release.prisoner.transferre
 class TransferPrisonService(
   private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
+  private val assessmentService: AssessmentService,
   private val telemetryClient: TelemetryClient,
 ) {
 
@@ -40,13 +41,13 @@ class TransferPrisonService(
       "prisonTransferredFrom" to existingPrisonId,
       "prisonTransferredTo" to prisonCode,
     )
-    val assessmentEntity = updatedOffender.currentAssessment()
-    assessmentEntity.recordEvent(
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    currentAssessment.recordEvent(
       eventType = AssessmentEventType.PRISON_TRANSFERRED,
       changes,
       agent = SYSTEM_AGENT,
     )
-    assessmentRepository.save(assessmentEntity)
+    assessmentRepository.save(currentAssessment)
     offenderRepository.saveAllAndFlush(listOf(updatedOffender))
 
     telemetryClient.trackEvent(

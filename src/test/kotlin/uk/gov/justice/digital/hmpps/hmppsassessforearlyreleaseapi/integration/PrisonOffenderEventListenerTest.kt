@@ -9,7 +9,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.transaction.annotation.Transactional
 import software.amazon.awssdk.services.sns.model.MessageAttributeValue
@@ -28,11 +27,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.ba
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_CREATED_EVENT_NAME
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PRISONER_UPDATED_EVENT_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PolicyService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TRANSFERRED_EVENT_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.Duration
 import java.time.Instant
@@ -44,12 +41,6 @@ private const val OLD_PRISON_CODE = "BMI"
 private const val NEW_PRISON_CODE = "MDI"
 
 class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
-
-  @Autowired
-  lateinit var offenderRepository: OffenderRepository
-
-  @Autowired
-  lateinit var assessmentEventRepository: AssessmentEventRepository
 
   private val awaitAtMost30Secs
     get() = await.atMost(Duration.ofSeconds(30))
@@ -85,8 +76,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
-    val assessment = offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.currentAssessment()
-    val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment?.id!!)
+    val assessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+    val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment.id)
     assertThat(events).hasSize(1)
     val event = events.first() as GenericChangedEvent
     assertThat(event.eventType).isEqualTo(AssessmentEventType.PRISON_TRANSFERRED)
@@ -139,24 +130,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val firstName = "new first name"
     val lastName = "new last name"
 
-    prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
-      objectMapper.writeValueAsString(
-        listOf(
-          PrisonerSearchPrisoner(
-            bookingId = "123",
-            prisonerNumber = prisonNumber,
-            prisonId = "HMI",
-            firstName = firstName,
-            lastName = lastName,
-            dateOfBirth = LocalDate.of(1981, 5, 23),
-            homeDetentionCurfewEligibilityDate = hdced,
-            cellLocation = "A-1-002",
-            mostSeriousOffence = "Robbery",
-            prisonName = "Cardiff",
-          ),
-        ),
-      ),
-    )
+    stubSearchPrisonersByNomisIds(prisonNumber, firstName, lastName, hdced)
     probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
     deliusMockServer.stubGetOffenderManager(crn)
 
@@ -166,16 +140,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     publishDomainEventMessage(message)
 
     // Then
-    awaitAtMost30Secs untilAsserted {
-      verify(telemetryClient).trackEvent(
-        PRISONER_CREATED_EVENT_NAME,
-        mapOf(
-          "prisonNumber" to prisonNumber,
-          "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
-        ),
-        null,
-      )
-    }
+    verifyTelemetryEvent(prisonNumber, hdced)
 
     val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
     assertThat(createdOffender.forename).isEqualTo(firstName)
@@ -186,7 +151,19 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     val assessment = createdOffender.assessments.first()
     assertThat(assessment.status).isEqualTo(AssessmentStatus.NOT_STARTED)
+    assertThat(assessment.deletedTimestamp).isNull()
+    assertThat(assessment.createdTimestamp).isNotNull
+    assertThat(assessment.offender).isEqualTo(createdOffender)
+    assertThat(assessment.policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
+    assertThat(assessment.team).isEqualTo("team-code-1")
     assertThat(assessment.responsibleCom).isNotNull
+    assessment.responsibleCom?.let {
+      assertThat(it.staffCode).isEqualTo("STAFF1")
+      assertThat(it.username).isEqualTo("a-com")
+      assertThat(it.email).isEqualTo("staff-code-1-com@justice.gov.uk")
+      assertThat(it.forename).isEqualTo("Jimmy")
+      assertThat(it.surname).isEqualTo("Vivers")
+    }
 
     val events = assessmentEventRepository.findByAssessmentId(assessment.id)
     assertThat(events).hasSize(1)
@@ -201,6 +178,115 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
+
+  @Test
+  @Transactional
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `When offender not on probation then no crn, team and community offender manager`() {
+    // Given
+    val prisonNumber = "Z1234XY"
+    val hdced = LocalDate.now().plusDays(20)
+    val firstName = "new first name"
+    val lastName = "new last name"
+
+    stubSearchPrisonersByNomisIds(prisonNumber, firstName, lastName, hdced)
+    probationSearchApiMockServer.stubSearchForPersonOnProbationNoResult()
+
+    val message = AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE))
+
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
+    verifyTelemetryEvent(prisonNumber, hdced)
+
+    val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
+    assertThat(createdOffender.crn).isNull()
+
+    val assessment = createdOffender.assessments.first()
+    assertThat(assessment.team).isNull()
+    assertThat(assessment.responsibleCom).isNull()
+  }
+
+
+  @Test
+  @Transactional
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `When offender has no offender manager then offender has no team or community offender manager`() {
+    // Given
+    val prisonNumber = "Z1234XY"
+    val crn = "DX12340A"
+    val hdced = LocalDate.now().plusDays(20)
+    val firstName = "new first name"
+    val lastName = "new last name"
+
+    stubSearchPrisonersByNomisIds(prisonNumber, firstName, lastName, hdced)
+    probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
+    deliusMockServer.stubGetOffenderManager404(crn)
+
+    val message = AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE))
+
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
+    verifyTelemetryEvent(prisonNumber, hdced)
+
+    val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
+    assertThat(createdOffender.crn).isEqualTo(crn)
+
+    val assessment = createdOffender.assessments.first()
+    assertThat(assessment.team).isNull()
+    assertThat(assessment.responsibleCom).isNull()
+  }
+
+  @Test
+  @Transactional
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+    "classpath:test_data/an-staff.sql",
+  )
+  fun `Should create a new offender 2`() {
+    // Given
+    val prisonNumber = "Z1234XY"
+    val crn = "DX12340A"
+    val hdced = LocalDate.now().plusDays(20)
+    val firstName = "new first name"
+    val lastName = "new last name"
+
+    stubSearchPrisonersByNomisIds(prisonNumber, firstName, lastName, hdced)
+    probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
+    deliusMockServer.stubGetOffenderManager(crn)
+
+    val message = AdditionalInformationPrisonerUpdated(nomsNumber = prisonNumber, listOf(DiffCategory.SENTENCE))
+
+    // When
+    publishDomainEventMessage(message)
+
+    // Then
+    verifyTelemetryEvent(prisonNumber, hdced)
+
+    val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
+    assertThat(createdOffender.crn).isEqualTo(crn)
+
+    val assessment = createdOffender.assessments.first()
+    assertThat(assessment.team).isEqualTo("team-code-1")
+    assertThat(assessment.responsibleCom).isNotNull
+    assessment.responsibleCom?.let {
+      assertThat(it.username).isEqualTo("a-com")
+      assertThat(it.email).isEqualTo("a-com@justice.gov.uk")
+      assertThat(it.forename).isEqualTo("a")
+      assertThat(it.surname).isEqualTo("com")
+    }
+  }
+
 
   @Test
   @Sql(
@@ -241,7 +327,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     // Then
     awaitAtMost30Secs untilAsserted {
       verify(telemetryClient).trackEvent(
-        PRISONER_UPDATED_EVENT_NAME,
+        TelemertyEvent.PRISONER_UPDATED_EVENT_NAME.key,
         mapOf(
           "prisonNumber" to PRISON_NUMBER,
           "firstName" to newFirstName,
@@ -275,6 +361,45 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
+  }
+
+  private fun stubSearchPrisonersByNomisIds(
+    prisonNumber: String,
+    firstName: String,
+    lastName: String,
+    hdced: LocalDate?,
+  ) {
+    prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+      objectMapper.writeValueAsString(
+        listOf(
+          PrisonerSearchPrisoner(
+            bookingId = "123",
+            prisonerNumber = prisonNumber,
+            prisonId = "HMI",
+            firstName = firstName,
+            lastName = lastName,
+            dateOfBirth = LocalDate.of(1981, 5, 23),
+            homeDetentionCurfewEligibilityDate = hdced,
+            cellLocation = "A-1-002",
+            mostSeriousOffence = "Robbery",
+            prisonName = "Cardiff",
+          ),
+        ),
+      ),
+      )
+  }
+
+  private fun verifyTelemetryEvent(prisonNumber: String, hdced: LocalDate) {
+    awaitAtMost30Secs untilAsserted {
+      verify(telemetryClient).trackEvent(
+        TelemertyEvent.PRISONER_CREATED_EVENT_NAME.key,
+        mapOf(
+          "prisonNumber" to prisonNumber,
+          "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
+        ),
+        null,
+      )
+      }
   }
 
   private fun publishDomainEventMessage(

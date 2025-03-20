@@ -48,7 +48,7 @@ data class Offender(
   val sentenceStartDate: LocalDate? = null,
 
   @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  val assessments: MutableSet<Assessment> = mutableSetOf(),
+  val assessments: MutableSet<Assessment> = linkedSetOf(),
 
   @NotNull
   @Enumerated(EnumType.STRING)
@@ -60,8 +60,6 @@ data class Offender(
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
-
-  fun currentAssessment(): Assessment = this.assessments.first()
 
   @Override
   override fun equals(other: Any?): Boolean {

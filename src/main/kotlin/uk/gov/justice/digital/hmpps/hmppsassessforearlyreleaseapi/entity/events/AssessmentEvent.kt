@@ -30,6 +30,7 @@ enum class AssessmentEventType {
   PRISON_TRANSFERRED,
   PRISONER_UPDATED,
   PRISONER_CREATED,
+  ASSESSMENT_DELETED,
 }
 
 @Entity

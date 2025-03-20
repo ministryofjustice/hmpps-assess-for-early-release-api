@@ -13,7 +13,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Add
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
@@ -30,7 +29,6 @@ class AddressServiceTest {
   private val assessmentService = mock<AssessmentService>()
   private val casCheckRequestRepository = mock<CasCheckRequestRepository>()
   private val curfewAddressCheckRequestRepository = mock<CurfewAddressCheckRequestRepository>()
-  private val offenderRepository = mock<OffenderRepository>()
   private val osPlacesApiClient = mock<OsPlacesApiClient>()
   private val residentRepository = mock<ResidentRepository>()
   private val standardAddressCheckRequestRepository = mock<StandardAddressCheckRequestRepository>()
@@ -41,7 +39,6 @@ class AddressServiceTest {
     assessmentService,
     casCheckRequestRepository,
     curfewAddressCheckRequestRepository,
-    offenderRepository,
     osPlacesApiClient,
     standardAddressCheckRequestRepository,
     residentRepository,
@@ -53,7 +50,7 @@ class AddressServiceTest {
     // Given
     val addressCheckRequest = aStandardAddressCheckRequest()
     val casCheckRequest = aCasCheckRequest()
-    val assessment = anOffender().currentAssessment()
+    val assessment = anOffender().assessments.first()
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
     whenever(curfewAddressCheckRequestRepository.findByAssessment(assessment)).thenReturn(

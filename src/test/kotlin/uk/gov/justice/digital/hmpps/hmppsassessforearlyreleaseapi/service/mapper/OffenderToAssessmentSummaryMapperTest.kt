@@ -6,7 +6,7 @@ import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
@@ -27,24 +27,26 @@ class OffenderToAssessmentSummaryMapperTest {
   fun `maps offender to assessment summary correctly`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
     whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
     // When
-    val result = toTest.map(offender)
+    val result = toTest.map(assessment)
 
     // Assert
-    assertAssessmentSummary(result, offender)
+    assertAssessmentSummary(result, assessment)
   }
 
   @Test
   fun `when prisoner not found exception is thrown`() {
     // Given
     val offender = anOffender()
+    val assessment = offender.assessments.first()
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf())
 
     // When
     val result = assertThrows<Throwable> {
-      toTest.map(offender)
+      toTest.map(assessment)
     }
 
     // Assert
@@ -54,9 +56,9 @@ class OffenderToAssessmentSummaryMapperTest {
 
   private fun assertAssessmentSummary(
     assessmentSummary: AssessmentSummary,
-    offender: Offender,
+    expectedAssessment: Assessment,
   ) {
-    val expectedAssessment = offender.currentAssessment()
+    val offender = expectedAssessment.offender
 
     assertThat(assessmentSummary).isNotNull
     assertThat(assessmentSummary.crd).isEqualTo(offender.crd)

@@ -29,7 +29,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Add
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
@@ -43,7 +42,6 @@ class AddressService(
   private val assessmentService: AssessmentService,
   private val casCheckRequestRepository: CasCheckRequestRepository,
   private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
-  private val offenderRepository: OffenderRepository,
   private val osPlacesApiClient: OsPlacesApiClient,
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
   private val residentRepository: ResidentRepository,
@@ -76,9 +74,7 @@ class AddressService(
       address = addressRepository.save(address)
     }
 
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: error("Cannot find offender with prisonNumber $prisonNumber")
-    val assessmentEntity = offender.currentAssessment()
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
 
     val standardAddressCheckRequest = standardAddressCheckRequestRepository.save(
       StandardAddressCheckRequest(
@@ -86,16 +82,16 @@ class AddressService(
         ppAdditionalInfo = addStandardAddressCheckRequest.ppAdditionalInfo,
         preferencePriority = addStandardAddressCheckRequest.preferencePriority,
         address = address!!,
-        assessment = offender.currentAssessment(),
+        assessment = currentAssessment,
       ),
     )
 
-    assessmentEntity.recordEvent(
+    currentAssessment.recordEvent(
       changes = mapOf("standardAddressCheckRequest" to addStandardAddressCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
       agent = agent.toEntity(),
     )
-    assessmentRepository.save(assessmentEntity)
+    assessmentRepository.save(currentAssessment)
 
     return standardAddressCheckRequest.toSummary()
   }
@@ -109,25 +105,23 @@ class AddressService(
     addCasCheckRequest: AddCasCheckRequest,
     agent: AgentDto,
   ): CasCheckRequestSummary {
-    val offender = offenderRepository.findByPrisonNumber(prisonNumber)
-      ?: error("Cannot find offender with prisonNumber $prisonNumber")
-    val assessmentEntity = offender.currentAssessment()
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
 
     val casCheckRequest = casCheckRequestRepository.save(
       CasCheckRequest(
         caAdditionalInfo = addCasCheckRequest.caAdditionalInfo,
         ppAdditionalInfo = addCasCheckRequest.ppAdditionalInfo,
         preferencePriority = addCasCheckRequest.preferencePriority,
-        assessment = offender.currentAssessment(),
+        assessment = currentAssessment,
         allocatedAddress = null,
       ),
     )
-    assessmentEntity.recordEvent(
+    currentAssessment.recordEvent(
       changes = mapOf("casCheckRequest" to addCasCheckRequest.toSummary()),
       eventType = AssessmentEventType.ADDRESS_UPDATED,
       agent = agent.toEntity(),
     )
-    assessmentRepository.save(assessmentEntity)
+    assessmentRepository.save(currentAssessment)
     return casCheckRequest.toSummary()
   }
 
