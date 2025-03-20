@@ -1,5 +1,4 @@
 body {
-    counter-reset: sectionCounter conditionCounter;
     font-family: Arial, sans-serif;
     font-size: 11pt;
 }
@@ -20,17 +19,4 @@ body {
 
 .offender-summary div {
     width: 50%;
-}
-
-.first {
-    /*background-color: aliceblue;*/
-}
-.second {
-    /*background-color: burlywood;*/
-}
-.third {
-    /*background-color: crimson;*/
-}
-.fourth {
-    /*background-color: gold;*/
 }
