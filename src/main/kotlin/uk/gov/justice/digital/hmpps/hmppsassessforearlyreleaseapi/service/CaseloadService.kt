@@ -3,9 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
@@ -23,13 +21,13 @@ class CaseloadService(
 
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, getStatusesForRole(UserRole.PROBATION_COM))
+    val assessments = assessmentRepository.findByResponsibleComStaffCodeAndDeletedTimestampIsNull(staffCode)
     return assessments.map { it.toOffenderSummary() }
   }
 
   @Transactional
   fun getDecisionMakerCaseload(prisonCode: String): List<OffenderSummaryResponse> {
-    val assessments = assessmentRepository.findAllByOffenderPrisonIdAndStatusInAndDeletedTimestampIsNull(prisonCode, getStatusesForRole(UserRole.PRISON_DM))
+    val assessments = assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(prisonCode)
     return assessments.map { it.toOffenderSummary() }
   }
 

@@ -4,13 +4,17 @@ import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentLifecycleEvent.EligibilityAndSuitabilityAnswerProvided
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAnswerProvided
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksFailed
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityChecksPassed
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
@@ -36,27 +40,7 @@ class EligibilityAndSuitabilityService(
 
   @Transactional
   fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
-    val currentAssessment = getCurrentAssessmentWithEligibilityProgress(prisonNumber)
-
-    val eligibility = currentAssessment.getEligibilityProgress()
-    val eligibilityStatus = eligibility.toStatus()
-    val suitability = currentAssessment.getSuitabilityProgress()
-    val suitabilityStatus = suitability.toStatus()
-
-    return EligibilityAndSuitabilityCaseView(
-      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
-      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
-      eligibility = eligibility,
-      eligibilityStatus = eligibilityStatus,
-      suitability = suitability,
-      suitabilityStatus = suitabilityStatus,
-      failureType = when {
-        eligibilityStatus == INELIGIBLE -> FailureType.INELIGIBLE
-        suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
-        else -> null
-      },
-      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
-    )
+    return eligibilityAndSuitabilityCaseView(getCurrentAssessmentWithEligibilityProgress(prisonNumber))
   }
 
   @Transactional
@@ -86,7 +70,7 @@ class EligibilityAndSuitabilityService(
   }
 
   @Transactional
-  fun saveAnswer(prisonNumber: String, answer: CriterionCheck) {
+  fun saveAnswer(prisonNumber: String, answer: CriterionCheck): EligibilityAndSuitabilityCaseView {
     log.info("Saving answer: $prisonNumber, $answer")
 
     val criterionType = CriterionType.valueOf(answer.type.name)
@@ -105,7 +89,16 @@ class EligibilityAndSuitabilityService(
       )
 
       val eligibilityStatus = currentAssessment.calculateAggregateEligibilityStatus()
-      assessmentService.transitionAssessment(assessmentEntity, EligibilityAndSuitabilityAnswerProvided(eligibilityStatus, answer.type, answer.code, answer.answers), answer.agent)
+
+      val event = when (eligibilityStatus) {
+        INELIGIBLE -> EligibilityChecksFailed(answer.type, answer.code, answer.answers)
+        ELIGIBLE -> EligibilityChecksPassed(answer.type, answer.code, answer.answers)
+        IN_PROGRESS -> EligibilityAnswerProvided(answer.type, answer.code, answer.answers)
+        else -> error("Should not be possible to have a status of $eligibilityStatus")
+      }
+
+      assessmentService.transitionAssessment(assessmentEntity, event, answer.agent)
+      return eligibilityAndSuitabilityCaseView(currentAssessment)
     }
   }
 
@@ -118,4 +111,28 @@ class EligibilityAndSuitabilityService(
     )
   }
 
+  private fun eligibilityAndSuitabilityCaseView(currentAssessment: AssessmentWithEligibilityProgress): EligibilityAndSuitabilityCaseView {
+    val eligibility = currentAssessment.getEligibilityProgress()
+    val eligibilityStatus = eligibility.toStatus()
+    val suitability = currentAssessment.getSuitabilityProgress()
+    val suitabilityStatus = suitability.toStatus()
+
+    return EligibilityAndSuitabilityCaseView(
+      assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
+      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
+      eligibility = eligibility,
+      eligibilityStatus = eligibilityStatus,
+      suitability = suitability,
+      suitabilityStatus = suitabilityStatus,
+      failureType = when {
+        eligibilityStatus == INELIGIBLE -> FailureType.INELIGIBLE
+        suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
+        else -> null
+      },
+      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
+    )
+  }
+
+  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
+    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 }

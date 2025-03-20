@@ -8,15 +8,8 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.ELIGIBLE_AND_SUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.NOT_STARTED
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
@@ -26,13 +19,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
@@ -43,7 +37,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.Pos
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
@@ -157,92 +150,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           result = null,
         ),
       )
-    }
-  }
-
-  @Nested
-  inner class DeleteCurrentAssessment {
-    @Test
-    fun `should return unauthorized if no token`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .exchange()
-        .expectStatus()
-        .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden if no role`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Test
-    fun `should return forbidden if wrong role`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Sql(
-      "classpath:test_data/reset.sql",
-      "classpath:test_data/-offenders.sql",
-    )
-    //@Test
-    fun `should soft delete current assigment for an offender`() {
-      // Given
-      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
-      val url = DELETE_CURRENT_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
-      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
-      val crn = "DX12340A"
-
-      probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
-      deliusMockServer.stubGetOffenderManager(crn)
-
-      // When
-      val result = webTestClient.delete()
-        .uri(url)
-        .headers(authorisation)
-        .exchange()
-
-      // Then
-      result.expectStatus().isNoContent
-
-      val deletedAssessment =  assessmentRepository.findById(initialAssessment.id).get()
-      assertThat(deletedAssessment.deletedTimestamp).isNotNull()
-      assertThat(deletedAssessment.deletedTimestamp).isCloseToUtcNow((within(2, ChronoUnit.SECONDS)))
-
-      val lastEvent = deletedAssessment.assessmentEvents.last()
-      assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
-      assertThat(lastEvent.agent.username).isEqualTo(TestData.PRISON_CA_AGENT.username)
-      assertThat(lastEvent).isOfAnyClassIn(GenericChangedEvent::class.java)
-      val lastEventGeneric = lastEvent as GenericChangedEvent
-      assertThat(lastEventGeneric.changes).isEqualTo(mapOf(
-        "prisonerNumber" to "A1234AA"))
-
-      verify(telemetryClient).trackEvent(
-        TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME.key,
-          mapOf(
-            "prisonerNumber" to "A1234AA",
-            "agent" to "prisonUser",
-            "agentRole" to "PRISON_CA",
-            "id" to initialAssessment.id.toString()),
-          null,
-        )
-
-      val assessments = deletedAssessment.offender.assessments
-      assertThat(assessments).hasSize(2)
-      assertThat(assessments.first().id).isEqualTo(initialAssessment.id)
-      assertThat(assessments.last().deletedTimestamp).isNull()
-      assertThat(assessments.last().status).isEqualTo(AssessmentStatus.NOT_STARTED)
     }
   }
 
@@ -628,16 +535,12 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   private companion object {
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
     val prisonRegisterMockServer = PrisonRegisterMockServer()
-    val probationSearchApiMockServer = ProbationSearchMockServer()
-    val deliusMockServer = DeliusMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
       prisonerSearchApiMockServer.start()
       prisonRegisterMockServer.start()
-      probationSearchApiMockServer.start()
-      deliusMockServer.start()
     }
 
     @JvmStatic
@@ -645,8 +548,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun stopMocks() {
       prisonerSearchApiMockServer.stop()
       prisonRegisterMockServer.stop()
-      probationSearchApiMockServer.stop()
-      deliusMockServer.stop()
     }
   }
 }

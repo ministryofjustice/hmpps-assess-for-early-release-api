@@ -4,10 +4,8 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.whenever
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AssessmentStatus.Companion.getStatusesForRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.CaseloadService.Companion.DAYS_BEFORE_SENTENCE_START
@@ -34,8 +32,18 @@ class CaseloadServiceTest {
   fun `should get the case admin case load`() {
     val offender1 = anOffender(sentenceStartDate = LocalDate.now().minusDays(5))
     val offender2 =
-      offender1.copy(id = offender1.id + 1, bookingId = offender1.bookingId + 29, prisonNumber = "ZX2318KD", sentenceStartDate = LocalDate.now().minusDays(11))
-    val offender3 = offender1.copy(id = offender1.id + 2, bookingId = offender1.bookingId + 30, prisonNumber = "ZX2318KJ", sentenceStartDate = null)
+      offender1.copy(
+        id = offender1.id + 1,
+        bookingId = offender1.bookingId + 29,
+        prisonNumber = "ZX2318KD",
+        sentenceStartDate = LocalDate.now().minusDays(11),
+      )
+    val offender3 = offender1.copy(
+      id = offender1.id + 2,
+      bookingId = offender1.bookingId + 30,
+      prisonNumber = "ZX2318KJ",
+      sentenceStartDate = null,
+    )
     whenever(assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(PRISON_ID)).thenReturn(
       listOf(
         offender1.assessments.first(),
@@ -95,10 +103,7 @@ class CaseloadServiceTest {
       anOffender().assessments.first().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     whenever(
-      assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(
-        STAFF_CODE,
-        getStatusesForRole(UserRole.PROBATION_COM),
-      ),
+      assessmentRepository.findByResponsibleComStaffCodeAndDeletedTimestampIsNull(STAFF_CODE),
     ).thenReturn(listOf(assessment1, assessment2))
 
     val caseload = service.getComCaseload(STAFF_CODE)
@@ -115,10 +120,7 @@ class CaseloadServiceTest {
       anOffender().assessments.first().copy(status = AssessmentStatus.APPROVED)
     val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_DECISION)
     whenever(
-      assessmentRepository.findAllByOffenderPrisonIdAndStatusInAndDeletedTimestampIsNull(
-        PRISON_ID,
-        getStatusesForRole(UserRole.PRISON_DM),
-      ),
+      assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(PRISON_ID),
     ).thenReturn(
       listOf(
         assessment1,

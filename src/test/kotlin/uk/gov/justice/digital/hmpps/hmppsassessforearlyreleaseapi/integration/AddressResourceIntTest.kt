@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
@@ -28,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.inter
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
@@ -88,7 +88,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody(object : ParameterizedTypeReference<List<AddressSummary>>() {})
+        .expectBody(typeReference<List<AddressSummary>>())
         .returnResult().responseBody!!
 
       assertThat(addresses).hasSize(3)
@@ -196,7 +196,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isCreated
-        .expectBody(object : ParameterizedTypeReference<StandardAddressCheckRequestSummary>() {})
+        .expectBody(typeReference<StandardAddressCheckRequestSummary>())
         .returnResult().responseBody!!
 
       assertThat(addressCheckRequest.caAdditionalInfo).isEqualTo(caInfo)
@@ -267,7 +267,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody(object : ParameterizedTypeReference<StandardAddressCheckRequestSummary>() {})
+        .expectBody(typeReference<StandardAddressCheckRequestSummary>())
         .returnResult().responseBody!!
 
       assertThat(addressCheckRequest.requestId).isEqualTo(ADDRESS_REQUEST_ID)
@@ -331,7 +331,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isCreated
-        .expectBody(object : ParameterizedTypeReference<CasCheckRequestSummary>() {})
+        .expectBody(typeReference<CasCheckRequestSummary>())
         .returnResult().responseBody!!
 
       assertThat(addressCheckRequest.caAdditionalInfo).isEqualTo(caInfo)
@@ -437,7 +437,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isOk
-        .expectBody(object : ParameterizedTypeReference<List<CheckRequestSummary>>() {})
+        .expectBody(typeReference<List<CheckRequestSummary>>())
         .returnResult().responseBody!!
 
       assertThat(checkRequestSummaries).hasSize(1)
@@ -509,7 +509,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .exchange()
         .expectStatus()
         .isCreated
-        .expectBody(object : ParameterizedTypeReference<List<ResidentSummary>>() {})
+        .expectBody(typeReference<List<ResidentSummary>>())
         .returnResult().responseBody!!
 
       assertThat(residentSummary.first().forename).isEqualTo(forename)

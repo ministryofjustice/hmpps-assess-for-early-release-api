@@ -5,7 +5,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.core.ParameterizedTypeReference
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -13,15 +12,18 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 
@@ -315,13 +317,33 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       "classpath:test_data/an-offender-with-eligibility-checks.sql",
     )
     fun `can update a criterion check result`() {
+      prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = TestData.PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
+
       run {
         val criterionView = webTestClient.get()
           .uri(GET_SUITABILITY_CRITERION_VIEW_URL("category-a"))
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<SuitabilityCriterionView>() {})
+          .expectBody(typeReference<SuitabilityCriterionView>())
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(SUITABLE)
@@ -334,7 +356,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
         .exchange()
         .expectStatus()
-        .isNoContent
+        .isOk
 
       run {
         val criterionView = webTestClient.get()
@@ -342,7 +364,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<SuitabilityCriterionView>() {})
+          .expectBody(typeReference<SuitabilityCriterionView>())
           .returnResult().responseBody!!
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
@@ -356,6 +378,26 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
       "classpath:test_data/an-offender-with-unstarted-eligibility-checks.sql",
     )
     fun `can record a criterion check`() {
+      prisonRegisterMockServer.stubGetPrisons()
+      prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
+        objectMapper.writeValueAsString(
+          listOf(
+            PrisonerSearchPrisoner(
+              bookingId = "123",
+              prisonerNumber = TestData.PRISON_NUMBER,
+              prisonId = "HMI",
+              firstName = "FIRST-1",
+              lastName = "LAST-1",
+              dateOfBirth = LocalDate.of(1981, 5, 23),
+              homeDetentionCurfewEligibilityDate = LocalDate.now().plusDays(7),
+              cellLocation = "A-1-002",
+              mostSeriousOffence = "Robbery",
+              prisonName = "Birmingham (HMP)",
+            ),
+          ),
+        ),
+      )
+
       val payload = CriterionCheck(
         code = "recalled-for-breaching-hdc-curfew",
         type = CriteriaType.ELIGIBILITY,
@@ -369,32 +411,28 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<EligibilityCriterionView>() {})
+          .expectBody(typeReference<EligibilityCriterionView>())
           .returnResult().responseBody!!
 
-        assertThat(criterionView.criterion.status).isEqualTo(EligibilityStatus.NOT_STARTED)
+        assertThat(criterionView.criterion.status).isEqualTo(NOT_STARTED)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(null)
       }
 
-      webTestClient.put()
-        .uri(PERFORM_CRITERIA_CHECK)
-        .bodyValue(payload)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
-        .exchange()
-        .expectStatus()
-        .isNoContent
-
       run {
-        val criterionView = webTestClient.get()
-          .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("recalled-for-breaching-hdc-curfew"))
+        val eligibilityAndSuitabilityView = webTestClient.put()
+          .uri(PERFORM_CRITERIA_CHECK)
+          .bodyValue(payload)
           .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
           .exchange()
           .expectStatus().isOk
-          .expectBody(object : ParameterizedTypeReference<EligibilityCriterionView>() {})
+          .expectBody(typeReference<EligibilityAndSuitabilityCaseView>())
           .returnResult().responseBody!!
 
-        assertThat(criterionView.criterion.status).isEqualTo(ELIGIBLE)
-        assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
+        assertThat(eligibilityAndSuitabilityView.overallStatus).isEqualTo(IN_PROGRESS)
+        val updatedCriteria = eligibilityAndSuitabilityView.eligibility.find { it.code == payload.code }
+        assertThat(updatedCriteria).isNotNull()
+        assertThat(updatedCriteria!!.status).isEqualTo(ELIGIBLE)
+        assertThat(updatedCriteria.questions.first().answer).isEqualTo(false)
       }
     }
   }
