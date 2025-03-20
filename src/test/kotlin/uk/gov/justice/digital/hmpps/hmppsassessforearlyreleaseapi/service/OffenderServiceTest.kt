@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.AdditionalAnswers
 import org.mockito.ArgumentCaptor
-import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.kotlin.any
 import org.mockito.kotlin.never
@@ -16,12 +15,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
@@ -34,7 +31,6 @@ class OffenderServiceTest {
   private val offenderRepository = mock<OffenderRepository>()
   private val prisonService = mock<PrisonService>()
   private val probationService = mock<ProbationService>()
-  private val staffRepository = mock<StaffRepository>()
   private val telemetryClient = mock<TelemetryClient>()
   private val assessmentService = mock<AssessmentService>()
 
@@ -44,7 +40,6 @@ class OffenderServiceTest {
       offenderRepository,
       prisonService,
       probationService,
-      staffRepository,
       telemetryClient,
       assessmentService,
     )
@@ -91,9 +86,6 @@ class OffenderServiceTest {
     val offenderManager = aDeliusOffenderManager()
     whenever(probationService.getCurrentResponsibleOfficer(caseReferenceNumber)).thenReturn(offenderManager)
 
-    val communityOffenderManager = aCommunityOffenderManager(offenderManager)
-    whenever(staffRepository.save(any())).thenReturn(communityOffenderManager)
-
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
     whenever(assessmentService.createAssessment(any(), any())).thenReturn(mockAssessment)
@@ -127,8 +119,6 @@ class OffenderServiceTest {
     val offenderManager = aDeliusOffenderManager()
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
 
-    val communityOffenderManager = aCommunityOffenderManager(offenderManager)
-    whenever(staffRepository.findByStaffCode(offenderManager.code)).thenReturn(communityOffenderManager)
     val mockAssessment = mock(Assessment::class.java)
     whenever(assessmentService.createAssessment(any(), any())).thenReturn(mockAssessment)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
@@ -146,8 +136,6 @@ class OffenderServiceTest {
       .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
       .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
-
-    verify(staffRepository, never()).save(any())
   }
 
   @Test

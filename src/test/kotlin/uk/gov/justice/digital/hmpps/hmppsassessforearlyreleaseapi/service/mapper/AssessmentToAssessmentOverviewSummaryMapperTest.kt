@@ -17,7 +17,7 @@ import java.time.LocalDate
 
 class AssessmentToAssessmentOverviewSummaryMapperTest {
 
-  private val toTest  = AssessmentToAssessmentOverviewSummaryMapper()
+  private val toTest = AssessmentToAssessmentOverviewSummaryMapper()
 
   @Test
   fun `maps offender to assessment overview summary correctly with Eligible and Suitable result`() {

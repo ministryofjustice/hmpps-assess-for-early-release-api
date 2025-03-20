@@ -8,7 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -22,9 +21,8 @@ class OffenderService(
   private val offenderRepository: OffenderRepository,
   private val prisonService: PrisonService,
   private val probationService: ProbationService,
-  private val staffRepository: StaffRepository,
   private val telemetryClient: TelemetryClient,
-  private val assessmentService: AssessmentService
+  private val assessmentService: AssessmentService,
 ) {
   fun createOrUpdateOffender(nomisId: String) {
     val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
@@ -49,18 +47,20 @@ class OffenderService(
     log.debug("Create new offender for prisoner {}", prisoner)
     val crn = probationService.getCaseReferenceNumber(prisoner.prisonerNumber)
 
-    val offender = offenderRepository.save(Offender(
-      bookingId = prisoner.bookingId!!.toLong(),
-      prisonNumber = prisoner.prisonerNumber,
-      prisonId = prisoner.prisonId!!,
-      forename = prisoner.firstName,
-      surname = prisoner.lastName,
-      dateOfBirth = prisoner.dateOfBirth,
-      hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
-      crd = prisoner.conditionalReleaseDate,
-      crn = crn,
-      sentenceStartDate = prisoner.sentenceStartDate,
-    ))
+    val offender = offenderRepository.save(
+      Offender(
+        bookingId = prisoner.bookingId!!.toLong(),
+        prisonNumber = prisoner.prisonerNumber,
+        prisonId = prisoner.prisonId!!,
+        forename = prisoner.firstName,
+        surname = prisoner.lastName,
+        dateOfBirth = prisoner.dateOfBirth,
+        hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
+        crd = prisoner.conditionalReleaseDate,
+        crn = crn,
+        sentenceStartDate = prisoner.sentenceStartDate,
+      ),
+    )
 
     val assessment = assessmentService.createAssessment(offender, prisonerNumber = prisoner.prisonerNumber)
     offender.assessments.add(assessment)

@@ -34,8 +34,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Assess
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class AssessmentResource(
   private val assessmentService: AssessmentService,
-  private val agentHolder : AgentHolder,
-  ) {
+  private val agentHolder: AgentHolder,
+) {
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -389,5 +389,4 @@ class AssessmentResource(
   fun deleteCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) {
     assessmentService.deleteCurrentAssessment(prisonNumber, agentHolder.agent)
   }
-
 }

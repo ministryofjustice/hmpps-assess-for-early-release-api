@@ -57,8 +57,16 @@ class AssessmentServiceTest {
   private val assessmentToAssessmentOverviewSummaryMapper = AssessmentToAssessmentOverviewSummaryMapper()
 
   private val service =
-    AssessmentService( assessmentRepository, offenderToAssessmentSummaryMapper,
-      assessmentToAssessmentOverviewSummaryMapper, prisonService, policyService, telemetryClient, staffRepository, probationService)
+    AssessmentService(
+      assessmentRepository,
+      offenderToAssessmentSummaryMapper,
+      assessmentToAssessmentOverviewSummaryMapper,
+      prisonService,
+      policyService,
+      telemetryClient,
+      staffRepository,
+      probationService,
+    )
 
   @Test
   fun `should get an offenders current assessment`() {

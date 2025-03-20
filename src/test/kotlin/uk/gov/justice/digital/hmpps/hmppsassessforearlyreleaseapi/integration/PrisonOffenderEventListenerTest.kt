@@ -211,7 +211,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(assessment.responsibleCom).isNull()
   }
 
-
   @Test
   @Transactional
   @Sql(
@@ -286,7 +285,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       assertThat(it.surname).isEqualTo("com")
     }
   }
-
 
   @Test
   @Sql(
@@ -386,7 +384,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
           ),
         ),
       ),
-      )
+    )
   }
 
   private fun verifyTelemetryEvent(prisonNumber: String, hdced: LocalDate) {
@@ -399,7 +397,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         ),
         null,
       )
-      }
+    }
   }
 
   private fun publishDomainEventMessage(

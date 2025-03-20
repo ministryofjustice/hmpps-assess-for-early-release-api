@@ -37,9 +37,7 @@ class EligibilityAndSuitabilityService(
   }
 
   @Transactional
-  fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView {
-    return eligibilityAndSuitabilityCaseView(getCurrentAssessmentWithEligibilityProgress(prisonNumber))
-  }
+  fun getCaseView(prisonNumber: String): EligibilityAndSuitabilityCaseView = eligibilityAndSuitabilityCaseView(getCurrentAssessmentWithEligibilityProgress(prisonNumber))
 
   @Transactional
   fun getEligibilityCriterionView(prisonNumber: String, code: String): EligibilityCriterionView {

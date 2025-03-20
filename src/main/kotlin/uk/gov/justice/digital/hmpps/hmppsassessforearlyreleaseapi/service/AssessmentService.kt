@@ -63,7 +63,7 @@ class AssessmentService(
   private val telemetryClient: TelemetryClient,
   private val staffRepository: StaffRepository,
   @org.springframework.context.annotation.Lazy
-  private val probationService: ProbationService
+  private val probationService: ProbationService,
 ) {
 
   companion object {
@@ -71,7 +71,7 @@ class AssessmentService(
   }
 
   @Transactional
-  fun getCurrentAssessment(prisonNumber: String) : Assessment {
+  fun getCurrentAssessment(prisonNumber: String): Assessment {
     val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
     if (assessments.isEmpty()) {
       throw ItemNotFoundException("Cannot find current assessment with prisonNumber $prisonNumber")
@@ -228,9 +228,8 @@ class AssessmentService(
     )
   }
 
-
   @Transactional
-  fun createAssessment(offender : Offender, prisonerNumber : String) : Assessment {
+  fun createAssessment(offender: Offender, prisonerNumber: String): Assessment {
     log.debug("Creating assessment for prisonerNumber: {}", prisonerNumber)
 
     val deliusOffenderManager = offender.crn?.let {
@@ -284,15 +283,16 @@ class AssessmentService(
     currentAssessment.deletedTimestamp = LocalDateTime.now()
 
     val assessmentEventInfo = mutableMapOf(
-      "prisonerNumber" to prisonerNumber
+      "prisonerNumber" to prisonerNumber,
     )
 
-    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED,currentAssessment, assessmentEventInfo, agent)
+    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED, currentAssessment, assessmentEventInfo, agent)
 
     val telemetryInfo = assessmentEventInfo + mapOf(
-        "agent" to agent.username,
-        "agentRole" to agent.role.name,
-        "id" to currentAssessment.id.toString())
+      "agent" to agent.username,
+      "agentRole" to agent.role.name,
+      "id" to currentAssessment.id.toString(),
+    )
 
     sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
 
@@ -303,7 +303,7 @@ class AssessmentService(
   }
 
   private fun recordAssessmentEvent(
-    type : AssessmentEventType,
+    type: AssessmentEventType,
     assessment: Assessment,
     info: MutableMap<String, String>,
     agent: AgentDto,
@@ -312,18 +312,18 @@ class AssessmentService(
       eventType = type,
       info,
       agent = agent.toEntity(),
-      )
+    )
   }
 
   private fun sendTelemetryInfo(
     deleteInfo: Map<String, String>,
-    telemertyEvent : TelemertyEvent
+    telemertyEvent: TelemertyEvent,
   ) {
     telemetryClient.trackEvent(
       telemertyEvent.key,
       deleteInfo,
       null,
-      )
+    )
   }
 
   private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
