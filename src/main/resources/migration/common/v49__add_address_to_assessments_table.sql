@@ -5,6 +5,9 @@ CREATE TABLE address_to_assessments (
         CONSTRAINT address_to_assessments_pkey PRIMARY KEY (check_request_id, assessment_id)
 );
 
+-- rename table to standard naming used for derived tables
+ALTER TABLE cas_check_request RENAME TO cas_address_check_request;
+
 -- Migrate data across
 INSERT INTO address_to_assessments (check_request_id, assessment_id)
      SELECT id as check_request_id,
