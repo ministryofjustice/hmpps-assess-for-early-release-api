@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
@@ -40,14 +39,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import java.time.LocalDate
 
 class EligibilityAndSuitabilityServiceTest {
-  private val offenderRepository = mock<OffenderRepository>()
   private val assessmentService = mock<AssessmentService>()
   private val prisonService = Mockito.mock<PrisonService>()
   private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
 
   private val service =
     EligibilityAndSuitabilityService(
-      offenderRepository,
       PolicyService(),
       assessmentService,
       offenderToAssessmentSummaryMapper,

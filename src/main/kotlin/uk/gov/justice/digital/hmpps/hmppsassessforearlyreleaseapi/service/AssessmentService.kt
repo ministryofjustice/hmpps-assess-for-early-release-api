@@ -38,7 +38,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
@@ -82,7 +81,7 @@ class AssessmentService(
 
   @Transactional
   fun getCurrentAssessmentSummary(prisonNumber: String): AssessmentSummary {
-    val currentAssessment = getCurrentAssessment(prisonNumber);
+    val currentAssessment = getCurrentAssessment(prisonNumber)
     return offenderToAssessmentSummaryMapper.map(currentAssessment)
   }
 
@@ -262,7 +261,7 @@ class AssessmentService(
       agent = SYSTEM_AGENT,
     )
 
-    return assessmentRepository.save(assessment);
+    return assessmentRepository.save(assessment)
   }
 
   private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(

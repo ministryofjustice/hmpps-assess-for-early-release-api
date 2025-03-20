@@ -18,7 +18,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.FailureType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
@@ -28,7 +27,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 
 @Service
 class EligibilityAndSuitabilityService(
-  private val offenderRepository: OffenderRepository,
   private val policyService: PolicyService,
   private val assessmentService: AssessmentService,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
@@ -132,7 +130,4 @@ class EligibilityAndSuitabilityService(
       failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
     )
   }
-
-  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
-    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
 }
