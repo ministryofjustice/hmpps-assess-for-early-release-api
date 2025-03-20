@@ -19,11 +19,11 @@ import java.time.LocalDate
 const val DAYS_TO_ADD = 5L
 
 @Component
-class OffenderToAssessmentOverviewSummaryMapper {
+class AssessmentToAssessmentOverviewSummaryMapper {
 
   fun map(assessmentWithEligibilityProgress: AssessmentWithEligibilityProgress, prisonName: String, prisonerSearchResults: PrisonerSearchPrisoner): AssessmentOverviewSummary {
     val offender = assessmentWithEligibilityProgress.offender
-    val currentAssessment = offender.currentAssessment()
+    val currentAssessment = assessmentWithEligibilityProgress.assessmentEntity
     val eligibility = assessmentWithEligibilityProgress.getEligibilityProgress()
     val eligibilityStatus = eligibility.toStatus()
     val suitability = assessmentWithEligibilityProgress.getSuitabilityProgress()

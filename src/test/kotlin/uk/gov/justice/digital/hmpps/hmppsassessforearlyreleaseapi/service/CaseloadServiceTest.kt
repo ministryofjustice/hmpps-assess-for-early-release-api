@@ -44,11 +44,11 @@ class CaseloadServiceTest {
       prisonNumber = "ZX2318KJ",
       sentenceStartDate = null,
     )
-    whenever(assessmentRepository.findByOffenderPrisonId(PRISON_ID)).thenReturn(
+    whenever(assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(PRISON_ID)).thenReturn(
       listOf(
-        offender1.currentAssessment(),
-        offender2.currentAssessment().copy(offender = offender2),
-        offender3.currentAssessment().copy(offender = offender3),
+        offender1.assessments.first(),
+        offender2.assessments.first().copy(offender = offender2),
+        offender3.assessments.first().copy(offender = offender3),
       ),
     )
 
@@ -62,7 +62,7 @@ class CaseloadServiceTest {
         surname = offender1.surname!!,
         hdced = offender1.hdced,
         workingDaysToHdced = 5,
-        probationPractitioner = offender1.currentAssessment().responsibleCom?.fullName,
+        probationPractitioner = offender1.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
         currentTask = Task.ASSESS_ELIGIBILITY,
@@ -75,7 +75,7 @@ class CaseloadServiceTest {
         surname = offender2.surname!!,
         hdced = offender2.hdced,
         workingDaysToHdced = 5,
-        probationPractitioner = offender2.currentAssessment().responsibleCom?.fullName,
+        probationPractitioner = offender2.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
         currentTask = Task.ASSESS_ELIGIBILITY,
@@ -88,7 +88,7 @@ class CaseloadServiceTest {
         surname = offender3.surname!!,
         hdced = offender3.hdced,
         workingDaysToHdced = 5,
-        probationPractitioner = offender3.currentAssessment().responsibleCom?.fullName,
+        probationPractitioner = offender3.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
         currentTask = Task.ASSESS_ELIGIBILITY,
@@ -100,10 +100,10 @@ class CaseloadServiceTest {
   @Test
   fun `should get the com case load`() {
     val assessment1 =
-      anOffender().currentAssessment().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
-    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
+      anOffender().assessments.first().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
+    val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
     whenever(
-      assessmentRepository.findByResponsibleComStaffCode(STAFF_CODE),
+      assessmentRepository.findByResponsibleComStaffCodeAndDeletedTimestampIsNull(STAFF_CODE),
     ).thenReturn(listOf(assessment1, assessment2))
 
     val caseload = service.getComCaseload(STAFF_CODE)
@@ -117,10 +117,10 @@ class CaseloadServiceTest {
   @Test
   fun `should get the decision maker case load`() {
     val assessment1 =
-      anOffender().currentAssessment().copy(status = AssessmentStatus.APPROVED)
-    val assessment2 = anOffender().currentAssessment().copy(status = AssessmentStatus.AWAITING_DECISION)
+      anOffender().assessments.first().copy(status = AssessmentStatus.APPROVED)
+    val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_DECISION)
     whenever(
-      assessmentRepository.findByOffenderPrisonId(PRISON_ID),
+      assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(PRISON_ID),
     ).thenReturn(
       listOf(
         assessment1,

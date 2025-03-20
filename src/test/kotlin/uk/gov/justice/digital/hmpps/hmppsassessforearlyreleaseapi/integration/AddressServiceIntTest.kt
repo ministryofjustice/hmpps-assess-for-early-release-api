@@ -23,7 +23,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAd
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
@@ -51,9 +50,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
   @Autowired
   private lateinit var residentRepository: ResidentRepository
-
-  @Autowired
-  private lateinit var assessmentEventRepository: AssessmentEventRepository
 
   @Autowired
   private lateinit var curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository

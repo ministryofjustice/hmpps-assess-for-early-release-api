@@ -1,15 +1,19 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.CompleteAddressChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.OptBackIn
@@ -30,11 +34,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentOverviewSummaryMapper
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Policy
@@ -42,41 +47,54 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class AssessmentService(
-  private val offenderRepository: OffenderRepository,
   private val assessmentRepository: AssessmentRepository,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
-  private val offenderToAssessmentOverviewSummaryMapper: OffenderToAssessmentOverviewSummaryMapper,
+  private val assessmentToAssessmentOverviewSummaryMapper: AssessmentToAssessmentOverviewSummaryMapper,
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
+  private val telemetryClient: TelemetryClient,
+  private val staffRepository: StaffRepository,
+  @org.springframework.context.annotation.Lazy
+  private val probationService: ProbationService,
 ) {
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
   }
 
-  private fun getOffender(prisonNumber: String) = offenderRepository.findByPrisonNumber(prisonNumber)
-    ?: throw ItemNotFoundException("Cannot find offender with prisonNumber $prisonNumber")
-
   @Transactional
-  fun getCurrentAssessment(prisonNumber: String) = getOffender(prisonNumber).currentAssessment()
+  fun getCurrentAssessment(prisonNumber: String): Assessment {
+    val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
+    if (assessments.isEmpty()) {
+      throw ItemNotFoundException("Cannot find current assessment with prisonNumber $prisonNumber")
+    }
+    return assessments.last()
+  }
 
   @Transactional
   fun getCurrentAssessmentSummary(prisonNumber: String): AssessmentSummary {
-    val offender = getOffender(prisonNumber)
-    return offenderToAssessmentSummaryMapper.map(offender)
+    val currentAssessment = getCurrentAssessment(prisonNumber)
+    return offenderToAssessmentSummaryMapper.map(currentAssessment)
   }
 
   @Transactional
   fun getAssessmentOverviewSummary(prisonNumber: String): AssessmentOverviewSummary {
-    val offender = getOffender(prisonNumber)
+    val currentAssessment = getCurrentAssessment(prisonNumber)
+    val offender = currentAssessment.offender
+
     val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
     val prisonerSearchResults = getPrisonerDetails(offender).first()
-    val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(offender)
-    return offenderToAssessmentOverviewSummaryMapper.map(assessmentWithEligibilityProgress, prisonName, prisonerSearchResults)
+    val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(currentAssessment)
+
+    return assessmentToAssessmentOverviewSummaryMapper.map(assessmentWithEligibilityProgress, prisonName, prisonerSearchResults)
   }
 
   @Transactional
@@ -148,7 +166,7 @@ class AssessmentService(
 
   @Transactional
   fun updateTeamForResponsibleCom(staffCode: String, team: String) {
-    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusIn(staffCode, AssessmentStatus.inFlightStatuses())
+    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, AssessmentStatus.inFlightStatuses())
     comsAssessments = comsAssessments.map {
       it.copy(team = team)
     }
@@ -210,6 +228,104 @@ class AssessmentService(
     )
   }
 
+  @Transactional
+  fun createAssessment(offender: Offender, prisonerNumber: String): Assessment {
+    log.debug("Creating assessment for prisonerNumber: {}", prisonerNumber)
+
+    val deliusOffenderManager = offender.crn?.let {
+      probationService.getCurrentResponsibleOfficer(it)
+    }
+
+    val communityOffenderManager = offender.crn?.let {
+      deliusOffenderManager?.let {
+        staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it)
+      }
+    }
+
+    val assessment = Assessment(
+      offender = offender,
+      policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+      responsibleCom = communityOffenderManager,
+      team = deliusOffenderManager?.team?.code,
+    )
+
+    val changes = mapOf(
+      "prisonNumber" to prisonerNumber,
+      "homeDetentionCurfewEligibilityDate" to offender.hdced.format(DateTimeFormatter.ISO_DATE),
+    )
+
+    assessment.recordEvent(
+      eventType = AssessmentEventType.PRISONER_CREATED,
+      changes,
+      agent = SYSTEM_AGENT,
+    )
+
+    return assessmentRepository.save(assessment)
+  }
+
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
+    CommunityOffenderManager(
+      staffCode = offenderManager.code,
+      username = offenderManager.username,
+      email = offenderManager.email,
+      forename = offenderManager.name.forename,
+      surname = offenderManager.name.surname,
+    ),
+  )
+
+  @Transactional
+  fun deleteCurrentAssessment(prisonerNumber: String, agent: AgentDto) {
+    log.debug("Deleting current assessment for prisonerNumber: {}", prisonerNumber)
+
+    val currentAssessment = this.getCurrentAssessment(prisonerNumber)
+    val offender = currentAssessment.offender
+
+    currentAssessment.deletedTimestamp = LocalDateTime.now()
+
+    val assessmentEventInfo = mutableMapOf(
+      "prisonerNumber" to prisonerNumber,
+    )
+
+    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED, currentAssessment, assessmentEventInfo, agent)
+
+    val telemetryInfo = assessmentEventInfo + mapOf(
+      "agent" to agent.username,
+      "agentRole" to agent.role.name,
+      "id" to currentAssessment.id.toString(),
+    )
+
+    sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
+
+    assessmentRepository.save(currentAssessment)
+
+    val newAssessment = createAssessment(offender, prisonerNumber = prisonerNumber)
+    offender.assessments.add(newAssessment)
+  }
+
+  private fun recordAssessmentEvent(
+    type: AssessmentEventType,
+    assessment: Assessment,
+    info: MutableMap<String, String>,
+    agent: AgentDto,
+  ) {
+    assessment.recordEvent(
+      eventType = type,
+      info,
+      agent = agent.toEntity(),
+    )
+  }
+
+  private fun sendTelemetryInfo(
+    deleteInfo: Map<String, String>,
+    telemertyEvent: TelemertyEvent,
+  ) {
+    telemetryClient.trackEvent(
+      telemertyEvent.key,
+      deleteInfo,
+      null,
+    )
+  }
+
   private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
     val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
     if (prisonerSearchResults.isEmpty()) {
@@ -218,8 +334,7 @@ class AssessmentService(
     return prisonerSearchResults
   }
 
-  private fun getCurrentAssessmentWithEligibilityProgress(offender: Offender): AssessmentWithEligibilityProgress {
-    val currentAssessment = offender.currentAssessment()
+  private fun getCurrentAssessmentWithEligibilityProgress(currentAssessment: Assessment): AssessmentWithEligibilityProgress {
     val policy = policyService.getVersionFromPolicy(currentAssessment.policyVersion)
     return AssessmentWithEligibilityProgress(
       assessmentEntity = currentAssessment,

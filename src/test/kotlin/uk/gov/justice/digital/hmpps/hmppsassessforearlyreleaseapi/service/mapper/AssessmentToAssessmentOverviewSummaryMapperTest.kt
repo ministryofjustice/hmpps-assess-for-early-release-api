@@ -15,9 +15,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import java.time.LocalDate
 
-class OffenderToAssessmentOverviewSummaryMapperTest {
+class AssessmentToAssessmentOverviewSummaryMapperTest {
 
-  private val toTest: OffenderToAssessmentOverviewSummaryMapper = OffenderToAssessmentOverviewSummaryMapper()
+  private val toTest = AssessmentToAssessmentOverviewSummaryMapper()
 
   @Test
   fun `maps offender to assessment overview summary correctly with Eligible and Suitable result`() {
@@ -94,7 +94,7 @@ class OffenderToAssessmentOverviewSummaryMapperTest {
     offender: Offender,
     result: String?,
   ) {
-    val expectedAssessment = offender.currentAssessment()
+    val expectedAssessment = offender.assessments.first()
 
     assertThat(assessmentOverviewSummary).isNotNull
     assertThat(assessmentOverviewSummary.crd).isEqualTo(offender.crd)

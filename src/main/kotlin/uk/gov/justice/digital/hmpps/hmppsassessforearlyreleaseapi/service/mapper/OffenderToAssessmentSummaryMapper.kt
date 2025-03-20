@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
@@ -14,8 +15,8 @@ class OffenderToAssessmentSummaryMapper(
   private val prisonService: PrisonService,
 ) {
 
-  fun map(offender: Offender): AssessmentSummary {
-    val currentAssessment = offender.currentAssessment()
+  fun map(currentAssessment: Assessment): AssessmentSummary {
+    val offender = currentAssessment.offender
     val prisonerSearchResults = getPrisonerDetails(offender)
     val prisonName = prisonService.getPrisonNameForId(offender.prisonId)
 

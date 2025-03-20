@@ -65,6 +65,8 @@ data class Assessment(
   @NotNull
   var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 
+  var deletedTimestamp: LocalDateTime? = null,
+
   @NotNull
   val policyVersion: String = "???",
 

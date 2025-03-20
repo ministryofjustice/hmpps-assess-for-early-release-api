@@ -33,4 +33,18 @@ class ProbationSearchMockServer : WireMockServer(PROBATION_SEARCH_WIREMOCK_PORT)
         ),
     )
   }
+  fun stubSearchForPersonOnProbationNoResult() {
+    stubFor(
+      post(urlEqualTo("/search"))
+        .willReturn(
+          aResponse().withHeader(
+            "Content-Type",
+            "application/json",
+          ).withBody(
+            """[]
+            """.trimMargin(),
+          ).withStatus(200),
+        ),
+    )
+  }
 }

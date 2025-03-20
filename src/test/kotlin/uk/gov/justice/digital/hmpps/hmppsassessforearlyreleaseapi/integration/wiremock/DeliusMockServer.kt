@@ -39,6 +39,16 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
     )
   }
 
+  fun stubGetOffenderManager404(crn: String = "X12345") {
+    stubFor(
+      get(urlEqualTo("/probation-case/$crn/responsible-community-manager")).willReturn(
+        aResponse().withHeader("Content-Type", "application/json").withBody(
+          """{}""",
+        ).withStatus(404),
+      ),
+    )
+  }
+
   fun stubGetStaffDetailsByUsername(username: String = "com-user") {
     stubFor(
       get(urlEqualTo("/staff/$username"))

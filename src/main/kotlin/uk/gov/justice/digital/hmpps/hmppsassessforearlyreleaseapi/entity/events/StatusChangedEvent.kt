@@ -19,7 +19,7 @@ class StatusChangedEvent(
   @Column(columnDefinition = "jsonb")
   val changes: StatusChange,
 
-  agent: Agent = Agent.Companion.SYSTEM_AGENT,
+  agent: Agent = Agent.SYSTEM_AGENT,
 ) : AssessmentEvent(
   id = id,
   assessment = assessment,

@@ -8,7 +8,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
@@ -35,8 +34,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
@@ -48,6 +45,7 @@ import java.util.function.Consumer
 
 private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
+private const val DELETE_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
 private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
 private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/postpone"
@@ -55,12 +53,6 @@ private const val SUBMIT_FOR_ADDRESS_CHECKS_URL = "/offender/$PRISON_NUMBER/curr
 private const val SUBMIT_FOR_PRE_DECISION_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-pre-decision-checks"
 
 class AssessmentResourceIntTest : SqsIntegrationTestBase() {
-
-  @Autowired
-  private lateinit var assessmentRepository: AssessmentRepository
-
-  @Autowired
-  private lateinit var offenderRepository: OffenderRepository
 
   @Nested
   inner class GetCurrentAssessment {
@@ -240,7 +232,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // Then
       result.expectStatus().isNoContent
 
-      val assessments = assessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
+      val assessments = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
       assertThat(assessments).hasSize(1)
 
       val assessment = assessments.first()
@@ -359,7 +351,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
-      val assessments = assessmentRepository.findByOffender(offender)
+      val assessments = testAssessmentRepository.findByOffender(offender)
       assertThat(assessments)
         .hasSize(1)
         .extracting(Assessment::status, Assessment::optOutReasonType, Assessment::optOutReasonOther)
@@ -428,7 +420,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
-      val assessment = assessmentRepository.findByOffender(offender)
+      val assessment = testAssessmentRepository.findByOffender(offender)
       assertThat(assessment.first().status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     }
   }

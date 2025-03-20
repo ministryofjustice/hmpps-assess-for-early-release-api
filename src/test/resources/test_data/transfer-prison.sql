@@ -15,3 +15,4 @@ values (1,
         1,
         'AWAITING_ADDRESS_AND_RISK_CHECKS',
         '1.0');
+

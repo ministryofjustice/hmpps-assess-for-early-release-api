@@ -105,7 +105,7 @@ class ResidentialChecksServiceTest {
 
   @Test
   fun `should save residential checks task answers`() {
-    val assessmentEntity = anOffender().currentAssessment()
+    val assessmentEntity = anOffender().assessments.first()
     val saveTaskAnswersRequest = SaveResidentialChecksTaskAnswersRequest(
       taskCode = "make-a-risk-management-decision",
       answers = mapOf(

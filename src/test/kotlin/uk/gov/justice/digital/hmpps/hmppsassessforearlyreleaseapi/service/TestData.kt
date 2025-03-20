@@ -204,7 +204,7 @@ object TestData {
     suitabilityProgress: Progress = Progress.none(),
   ): AssessmentWithEligibilityProgress {
     val offender = anOffender()
-    val assessment = offender.currentAssessment()
+    val assessment = offender.assessments.first()
     assessment.status = status
     assessment.previousStatus = previousStatus
     assessment.eligibilityCheckResults.clear()
@@ -298,7 +298,7 @@ object TestData {
       standardAddressCheckRequest = StandardAddressCheckRequest(
         dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
         preferencePriority = AddressPreferencePriority.FIRST,
-        assessment = anOffender().currentAssessment(),
+        assessment = anOffender().assessments.first(),
         address = anAddress(),
       ),
     ),
@@ -307,7 +307,7 @@ object TestData {
   fun aStandardAddressCheckRequest() = StandardAddressCheckRequest(
     dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
     preferencePriority = AddressPreferencePriority.FIRST,
-    assessment = anOffender().currentAssessment(),
+    assessment = anOffender().assessments.first(),
     address = anAddress(),
     residents = residents(),
   )
@@ -315,7 +315,7 @@ object TestData {
   fun aCasCheckRequest() = CasCheckRequest(
     dateRequested = LocalDateTime.of(2024, 9, 7, 15, 19),
     preferencePriority = AddressPreferencePriority.FIRST,
-    assessment = anOffender().currentAssessment(),
+    assessment = anOffender().assessments.first(),
     allocatedAddress = anAddress(),
   )
 
