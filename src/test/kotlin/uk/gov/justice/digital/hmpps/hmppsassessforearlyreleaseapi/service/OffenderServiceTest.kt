@@ -15,7 +15,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
@@ -56,7 +55,7 @@ class OffenderServiceTest {
     )
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any())).thenReturn(mockAssessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
@@ -66,8 +65,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "sentenceStartDate")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced, sentenceStartDate))
+      .extracting("prisonNumber", "forename", "surname", "hdced", "sentenceStartDate")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, hdced, sentenceStartDate))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
 
@@ -88,7 +87,7 @@ class OffenderServiceTest {
 
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any())).thenReturn(mockAssessment)
 
     // When
     service.createOrUpdateOffender(PRISON_NUMBER)
@@ -100,8 +99,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced", "crn")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced, caseReferenceNumber))
+      .extracting("prisonNumber", "forename", "surname", "hdced", "crn")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, hdced, caseReferenceNumber))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
 
@@ -120,7 +119,7 @@ class OffenderServiceTest {
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
 
     val mockAssessment = mock(Assessment::class.java)
-    whenever(assessmentService.createAssessment(any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any())).thenReturn(mockAssessment)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
 
     // When
@@ -133,8 +132,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, hdced))
+      .extracting("prisonNumber", "forename", "surname", "hdced")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, hdced))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
 
@@ -178,8 +177,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "hdced")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, updatedHdced))
+      .extracting("prisonNumber", "forename", "surname", "hdced")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, updatedHdced))
   }
 
   @Test
@@ -229,8 +228,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "bookingId", "forename", "surname", "sentenceStartDate")
-      .isEqualTo(listOf(PRISON_NUMBER, BOOKING_ID.toLong(), FORENAME, SURNAME, updatedSentenceStartDate))
+      .extracting("prisonNumber", "forename", "surname", "sentenceStartDate")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, updatedSentenceStartDate))
   }
 
   @Test

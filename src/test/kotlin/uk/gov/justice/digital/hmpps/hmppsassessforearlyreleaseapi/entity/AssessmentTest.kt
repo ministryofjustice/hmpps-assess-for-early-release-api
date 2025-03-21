@@ -42,6 +42,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anPostponeCaseRequest
@@ -55,7 +56,7 @@ class AssessmentTest {
 
   @Test
   fun `add new eligibility criteria check`() {
-    val assessment = Assessment(offender = anOffender())
+    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID)
 
     assessment.addOrReplaceEligibilityCriterionResult(
       ELIGIBILITY,
@@ -84,7 +85,7 @@ class AssessmentTest {
 
   @Test
   fun `update existing eligibility criteria check`() {
-    val assessment = Assessment(offender = anOffender())
+    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID)
 
     assessment.addOrReplaceEligibilityCriterionResult(
       ELIGIBILITY,
@@ -122,7 +123,7 @@ class AssessmentTest {
 
   @Test
   fun `records status changes`() {
-    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID)
     assessment.performTransition(EligibilityAnswerProvided(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
     assessment.performTransition(EligibilityAnswerProvided(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
     assessment.performTransition(EligibilityChecksPassed(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity)
@@ -157,7 +158,7 @@ class AssessmentTest {
 
   @Test
   fun `returns to previous state`() {
-    val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE)
+    val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE, bookingId = BOOKING_ID)
     val reasonType = NO_REASON_GIVEN
     val otherDescription = "No reason given"
 
@@ -184,7 +185,7 @@ class AssessmentTest {
 
   @Test
   fun `handles error side effect`() {
-    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED)
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID)
 
     assertThatThrownBy { assessment.performTransition(EligibilityChecksPassed(CriteriaType.ELIGIBILITY, criterion.code, answers), anAgentEntity) }
       .isInstanceOf(IllegalStateException::class.java)
@@ -206,7 +207,7 @@ class AssessmentTest {
   )
   fun `handles valid from states to postpone transition`(fromState: AssessmentStatus) {
     // Given
-    val assessment = Assessment(offender = anOffender(), status = fromState)
+    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID)
 
     // When
     assessment.performTransition(Postpone(anPostponeCaseRequest.reasonTypes), anAgentEntity)
@@ -236,7 +237,7 @@ class AssessmentTest {
   )
   fun `handles in-valid from states to postpone transition`(fromState: AssessmentStatus) {
     // Given
-    val assessment = Assessment(offender = anOffender(), status = fromState)
+    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID)
 
     // When
     val result = assertThatThrownBy { assessment.performTransition(Postpone(anPostponeCaseRequest.reasonTypes), anAgentEntity) }

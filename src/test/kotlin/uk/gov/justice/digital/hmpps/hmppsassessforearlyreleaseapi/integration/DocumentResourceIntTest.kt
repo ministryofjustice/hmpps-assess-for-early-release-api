@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
@@ -212,7 +213,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
       objectMapper.writeValueAsString(
         listOf(
           PrisonerSearchPrisoner(
-            bookingId = "123",
+            bookingId = BOOKING_ID,
             prisonerNumber = prisonNumber,
             prisonId = "HMI",
             firstName = "FIRST-1",

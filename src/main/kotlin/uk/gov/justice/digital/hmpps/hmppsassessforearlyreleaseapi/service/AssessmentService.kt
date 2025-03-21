@@ -229,7 +229,7 @@ class AssessmentService(
   }
 
   @Transactional
-  fun createAssessment(offender: Offender, prisonerNumber: String): Assessment {
+  fun createAssessment(offender: Offender, prisonerNumber: String, bookingId : Long): Assessment {
     log.debug("Creating assessment for prisonerNumber: {}", prisonerNumber)
 
     val deliusOffenderManager = offender.crn?.let {
@@ -243,6 +243,7 @@ class AssessmentService(
     }
 
     val assessment = Assessment(
+      bookingId = bookingId,
       offender = offender,
       policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
       responsibleCom = communityOffenderManager,
@@ -298,7 +299,7 @@ class AssessmentService(
 
     assessmentRepository.save(currentAssessment)
 
-    val newAssessment = createAssessment(offender, prisonerNumber = prisonerNumber)
+    val newAssessment = createAssessment(offender, prisonerNumber = prisonerNumber, currentAssessment.bookingId)
     offender.assessments.add(newAssessment)
   }
 

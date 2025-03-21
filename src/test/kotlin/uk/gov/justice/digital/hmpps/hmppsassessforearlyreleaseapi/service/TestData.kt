@@ -57,7 +57,7 @@ import java.time.LocalDateTime
 object TestData {
 
   const val PRISON_NUMBER = "A1234AA"
-  const val BOOKING_ID = "123"
+  const val BOOKING_ID = 123L
   const val FORENAME = "Bob"
   const val SURNAME = "Smith"
   const val PRISON_ID = "AFG"
@@ -74,7 +74,6 @@ object TestData {
   fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
     val offender = Offender(
       id = 1,
-      bookingId = BOOKING_ID.toLong(),
       prisonNumber = PRISON_NUMBER,
       prisonId = PRISON_ID,
       forename = FORENAME,
@@ -109,7 +108,8 @@ object TestData {
     agent = PRISON_CA_AGENT,
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED): Assessment = Assessment(offender = offender, status = status, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
+  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID.toLong()): Assessment
+  = Assessment(offender = offender, status = status, bookingId = bookingId ,policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,
@@ -126,6 +126,7 @@ object TestData {
   )
 
   fun anAssessmentSummary() = AssessmentSummary(
+    bookingId = BOOKING_ID,
     forename = FORENAME,
     surname = SURNAME,
     dateOfBirth = LocalDate.of(1981, 5, 23),

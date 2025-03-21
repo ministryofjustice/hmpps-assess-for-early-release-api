@@ -29,6 +29,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PolicyService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TRANSFERRED_EVENT_NAME
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.Duration
@@ -150,6 +151,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.crn).isEqualTo(crn)
 
     val assessment = createdOffender.assessments.first()
+    assertThat(assessment.bookingId).isEqualTo(BOOKING_ID)
     assertThat(assessment.status).isEqualTo(AssessmentStatus.NOT_STARTED)
     assertThat(assessment.deletedTimestamp).isNull()
     assertThat(assessment.createdTimestamp).isNotNull
@@ -366,12 +368,13 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     firstName: String,
     lastName: String,
     hdced: LocalDate?,
+    bookingId: Long = BOOKING_ID,
   ) {
     prisonerSearchApiMockServer.stubSearchPrisonersByNomisIds(
       objectMapper.writeValueAsString(
         listOf(
           PrisonerSearchPrisoner(
-            bookingId = "123",
+            bookingId = bookingId,
             prisonerNumber = prisonNumber,
             prisonId = "HMI",
             firstName = firstName,
