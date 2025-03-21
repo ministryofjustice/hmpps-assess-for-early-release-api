@@ -35,7 +35,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Postpone
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
@@ -98,7 +97,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = BOOKING_ID,
+              bookingId = 10L,
               prisonerNumber = PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -124,6 +123,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val assessment = result.expectBody(AssessmentOverviewSummary::class.java).returnResult().responseBody!!
       assertThat(assessment).isEqualTo(
         AssessmentOverviewSummary(
+          bookingId = 10L,
           forename = "FIRST-1",
           surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,
