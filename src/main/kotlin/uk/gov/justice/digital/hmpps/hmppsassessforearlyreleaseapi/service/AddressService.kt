@@ -4,15 +4,17 @@ import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddCasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CasAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
@@ -82,7 +84,7 @@ class AddressService(
         ppAdditionalInfo = addStandardAddressCheckRequest.ppAdditionalInfo,
         preferencePriority = addStandardAddressCheckRequest.preferencePriority,
         address = address!!,
-        assessment = currentAssessment,
+        assessments = mutableListOf(currentAssessment),
       ),
     )
 
@@ -100,19 +102,37 @@ class AddressService(
   fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary = getStandardAddressCheckRequest(requestId, prisonNumber).toSummary()
 
   @Transactional
-  fun addCasCheckRequest(
+  fun transferAddressChecks(
+    fromAssessment: Assessment,
+    toNewAssessment: Assessment) {
+
+    val addressCheckRequest = curfewAddressCheckRequestRepository.findByAssessments(mutableListOf(fromAssessment))
+
+    if (toNewAssessment.status != AssessmentStatus.NOT_STARTED) {
+      throw ItemNotFoundException(
+        "assessment: ${toNewAssessment.id} must not be started : ${toNewAssessment.status}",
+      )
+    }
+
+    addressCheckRequest.forEach {
+      it.assessments.add(toNewAssessment)
+    }
+  }
+
+  @Transactional
+  fun addCasAddressCheckRequest(
     prisonNumber: String,
     addCasCheckRequest: AddCasCheckRequest,
     agent: AgentDto,
   ): CasCheckRequestSummary {
     val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
 
-    val casCheckRequest = casCheckRequestRepository.save(
-      CasCheckRequest(
+    val casAddressCheckRequest = casCheckRequestRepository.save(
+      CasAddressCheckRequest(
         caAdditionalInfo = addCasCheckRequest.caAdditionalInfo,
         ppAdditionalInfo = addCasCheckRequest.ppAdditionalInfo,
         preferencePriority = addCasCheckRequest.preferencePriority,
-        assessment = currentAssessment,
+        assessments = mutableListOf(currentAssessment),
         allocatedAddress = null,
       ),
     )
@@ -122,13 +142,13 @@ class AddressService(
       agent = agent.toEntity(),
     )
     assessmentRepository.save(currentAssessment)
-    return casCheckRequest.toSummary()
+    return casAddressCheckRequest.toSummary()
   }
 
   @Transactional
   fun getCheckRequestsForAssessment(prisonNumber: String): List<CheckRequestSummary> {
-    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
-    val checkRequests = curfewAddressCheckRequestRepository.findByAssessment(assessment)
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val checkRequests = curfewAddressCheckRequestRepository.findByAssessments(mutableListOf(currentAssessment))
     return checkRequests.map { it.toSummary() }
   }
 
@@ -138,21 +158,23 @@ class AddressService(
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find standard address check request with id: $requestId")
 
-    if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+    if (isAnAssessmentAssociatedWithTheAddressCheck(curfewAddressCheckRequest, prisonNumber)) {
       throw ItemNotFoundException(
         "Standard address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
-    val assessmentEntity = curfewAddressCheckRequest.assessment
-    assessmentEntity.recordEvent(
-      changes = mapOf("deleteAddressCheckRequestId" to requestId),
-      eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agent.toEntity(),
-    )
-    assessmentRepository.save(assessmentEntity)
 
+    val changes = mapOf("deleteAddressCheckRequestId" to requestId)
+    recordEventsOnAssessment(curfewAddressCheckRequest, changes, AssessmentEventType.ADDRESS_UPDATED, agent)
+
+    assessmentRepository.saveAllAndFlush(curfewAddressCheckRequest.assessments)
     curfewAddressCheckRequestRepository.delete(curfewAddressCheckRequest)
   }
+
+  private fun isAnAssessmentAssociatedWithTheAddressCheck(
+    curfewAddressCheckRequest: CurfewAddressCheckRequest,
+    prisonNumber: String,
+  ) = curfewAddressCheckRequest.assessments.any { it.offender.prisonNumber == prisonNumber }
 
   @Transactional
   fun addResidents(
@@ -162,7 +184,6 @@ class AddressService(
     agent: AgentDto,
   ): List<ResidentSummary> {
     val addressCheckRequest = getStandardAddressCheckRequest(requestId, prisonNumber)
-    val assessmentEntity = addressCheckRequest.assessment
 
     // Retrieve existing residents linked to the requestId
     val existingResidents = residentRepository.findByStandardAddressCheckRequestId(requestId)
@@ -202,19 +223,17 @@ class AddressService(
         )
     }
 
-    assessmentEntity.recordEvent(
-      changes = mapOf(
-        "existingResidents" to existingResidents,
-        "newResidents" to addResidentsRequest.map { it.toSummary() },
-      ),
-      eventType = AssessmentEventType.RESIDENT_UPDATED,
-      agent = agent.toEntity(),
+    val changes = mapOf(
+      "existingResidents" to existingResidents,
+      "newResidents" to addResidentsRequest.map { it.toSummary() },
     )
-    assessmentRepository.save(assessmentEntity)
+    recordEventsOnAssessment(addressCheckRequest, changes, AssessmentEventType.RESIDENT_UPDATED, agent)
 
     val savedResidents = residentRepository.saveAllAndFlush(residentsToSave)
     return savedResidents.map { it!!.toSummary() }
   }
+
+
 
   @Transactional
   fun updateCaseAdminAdditionalInformation(
@@ -225,13 +244,10 @@ class AddressService(
   ) {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     curfewAddressCheckRequest.caAdditionalInfo = caseAdminInfoRequest.additionalInformation
-    val assessmentEntity = curfewAddressCheckRequest.assessment
-    assessmentEntity.recordEvent(
-      changes = mapOf("caseAdminAdditionalInformation" to caseAdminInfoRequest.additionalInformation),
-      eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agent.toEntity(),
+    val changes = mapOf(
+      "caseAdminAdditionalInformation" to caseAdminInfoRequest.additionalInformation,
     )
-    assessmentRepository.save(assessmentEntity)
+    recordEventsOnAssessment(curfewAddressCheckRequest, changes, AssessmentEventType.ADDRESS_UPDATED, agent)
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
   }
 
@@ -240,12 +256,27 @@ class AddressService(
       curfewAddressCheckRequestRepository.findByIdOrNull(requestId)
         ?: throw ItemNotFoundException("Cannot find curfew address check request with id: $requestId")
 
-    if (curfewAddressCheckRequest.assessment.offender.prisonNumber != prisonNumber) {
+    if (isAnAssessmentAssociatedWithTheAddressCheck(curfewAddressCheckRequest, prisonNumber)) {
       throw ItemNotFoundException(
         "Curfew address check request id: $requestId is not linked to offender with prison number: $prisonNumber",
       )
     }
     return curfewAddressCheckRequest
+  }
+
+  private fun recordEventsOnAssessment(
+    curfewAddressCheckRequest: CurfewAddressCheckRequest,
+    changes: Map<String, Any>,
+    eventType: AssessmentEventType,
+    agent: AgentDto,
+  ) {
+    curfewAddressCheckRequest.assessments.forEach { assessment ->
+      assessment.recordEvent(
+        changes = changes,
+        eventType = eventType,
+        agent = agent.toEntity(),
+      )
+    }
   }
 
   private fun getStandardAddressCheckRequest(requestId: Long, prisonNumber: String): StandardAddressCheckRequest {
@@ -293,7 +324,7 @@ class AddressService(
     residents = this.residents.map { it.toSummary() },
   )
 
-  private fun CasCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(
+  private fun CasAddressCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(
     requestId = this.id,
     caAdditionalInfo = this.caAdditionalInfo,
     ppAdditionalInfo = this.ppAdditionalInfo,
@@ -342,7 +373,7 @@ class AddressService(
 
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {
     is StandardAddressCheckRequest -> this.toSummary()
-    is CasCheckRequest -> this.toSummary()
+    is CasAddressCheckRequest -> this.toSummary()
     else -> error("Cannot transform request type of ${this::class.simpleName} to a check request summary")
   }
 }

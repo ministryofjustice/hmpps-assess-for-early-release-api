@@ -269,7 +269,7 @@ class AddressResource(private val addressService: AddressService, private val ag
   fun addCasCheckRequest(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @RequestBody @Valid addCasCheckRequest: AddCasCheckRequest,
-  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
+  ) = addressService.addCasAddressCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
   @DeleteMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

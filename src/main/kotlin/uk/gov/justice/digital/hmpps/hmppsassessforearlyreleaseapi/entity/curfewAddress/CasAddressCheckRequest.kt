@@ -7,14 +7,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import java.time.LocalDateTime
 
 @Entity
-class CasCheckRequest(
+class CasAddressCheckRequest(
   id: Long = -1,
   caAdditionalInfo: String? = null,
   ppAdditionalInfo: String? = null,
   dateRequested: LocalDateTime = LocalDateTime.now(),
   preferencePriority: AddressPreferencePriority,
   status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS,
-  assessment: Assessment,
+  assessments: MutableList<Assessment>,
   @ManyToOne
   @JoinColumn(name = "allocated_address_id", referencedColumnName = "id")
   val allocatedAddress: Address? = null,
@@ -25,5 +25,5 @@ class CasCheckRequest(
   dateRequested = dateRequested,
   preferencePriority = preferencePriority,
   status = status,
-  assessment = assessment,
+  assessments = assessments,
 )
