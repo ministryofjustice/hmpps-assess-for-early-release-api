@@ -8,6 +8,8 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
+import java.time.LocalDate
 
 @Service
 class PdfService(
@@ -15,6 +17,7 @@ class PdfService(
   private val gotenbergApiClient: GotenbergApiClient,
   @Value("\${assessments.url}") private val assessmentsUrl: String,
   private val assessmentService: AssessmentService,
+  private val workingDaysService: WorkingDaysService,
 ) {
 
   companion object {
@@ -23,10 +26,11 @@ class PdfService(
 
   fun generateOffenderPdf(prisonNumber: String, documentSubjectType: DocumentSubjectType): ByteArray? {
     val templatePathAndFile = getTemplateFile(documentSubjectType)
-    val data = HashMap<String, Any>()
+    val data = HashMap<String, Any?>()
 
     data["assessmentsUrl"] = assessmentsUrl
     data["docSubjectType"] = documentSubjectType.name
+    data["dateToday"] = LocalDate.now()
 
     addAssessmentDetails(documentSubjectType, prisonNumber, data)
 
@@ -42,10 +46,16 @@ class PdfService(
   private fun addAssessmentDetails(
     documentSubjectType: DocumentSubjectType,
     prisonNumber: String,
-    data: HashMap<String, Any>,
+    data: HashMap<String, Any?>,
   ) {
+    val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
+    data["currentAssessment"] = currentAssessment
+    data["fullName"] = "${currentAssessment.forename} ${currentAssessment.surname}".convertToTitleCase()
+
     when (documentSubjectType) {
-      DocumentSubjectType.OFFENDER_ELIGIBLE_FORM,
+      DocumentSubjectType.OFFENDER_ELIGIBLE_FORM -> {
+        data["taggingEndDate"] = currentAssessment.crd?.let { workingDaysService.workingDaysBefore(currentAssessment.crd).take(1).first() }
+      }
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM,
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_FORM,
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
@@ -59,13 +69,12 @@ class PdfService(
       DocumentSubjectType.OFFENDER_REFUSED_FORM,
       DocumentSubjectType.OFFENDER_NOT_SUITABLE_FORM,
       -> {
-        val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
-        data["currentAssessment"] = currentAssessment
+        // nothing yet, add any form specific data here
       }
     }
   }
 
-  private fun createHtmlContent(templatePathAndFile: String, details: Map<String, Any>): String {
+  private fun createHtmlContent(templatePathAndFile: String, details: Map<String, Any?>): String {
     log.debug("Creating html content using $templatePathAndFile")
     val context = Context()
     context.setVariables(details)
