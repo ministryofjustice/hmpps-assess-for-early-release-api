@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class DocumentResourceIntTest : SqsIntegrationTestBase() {
 
@@ -236,8 +237,19 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
       .jsonPath("$.developerMessage").isEqualTo(expectedErrorMessage)
   }
 
-  private fun assertDocument(documentSubjectType: DocumentSubjectType) {
-    assertThat(getThymeleafHtml()).isEqualToIgnoringWhitespace(getExpectedThymeleafHtml(documentSubjectType))
+  private fun assertDocument(documentSubjectType: DocumentSubjectType, dynamicFields: Map<String, LocalDate>? = null) {
+    val formatDate = { date: LocalDate -> date.format(DateTimeFormatter.ofPattern("dd MMM yyyy")) }
+    var expectedDoc = getExpectedThymeleafHtml(documentSubjectType)
+    expectedDoc = expectedDoc.replace("((current_date))", formatDate(LocalDate.now()))
+    expectedDoc = expectedDoc.replace("((release_date))", formatDate(LocalDate.now().plusDays(7)))
+
+    dynamicFields?.let {
+      it.keys.forEach { key ->
+        expectedDoc = expectedDoc.replace("(($key))", formatDate(it.get(key)!!))
+      }
+    }
+
+    assertThat(getThymeleafHtml()).isEqualToIgnoringWhitespace(expectedDoc)
   }
 
   private fun stubPrisonerSearch(prisonNumber: String) {
