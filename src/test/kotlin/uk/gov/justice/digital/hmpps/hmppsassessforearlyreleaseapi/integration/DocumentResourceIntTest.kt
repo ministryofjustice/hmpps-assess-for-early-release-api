@@ -13,6 +13,7 @@ import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GotenbergMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GovUkMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
@@ -23,6 +24,7 @@ import java.time.LocalDate
 class DocumentResourceIntTest : SqsIntegrationTestBase() {
 
   private val gotenbergMockServer = GotenbergMockServer()
+  private val govUkMockServer = GovUkMockServer()
   private val prisonerSearchApiMockServer = PrisonerSearchMockServer()
   private val prisonRegisterMockServer = PrisonRegisterMockServer()
 
@@ -34,14 +36,18 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
 
   @BeforeEach
   fun startMocks() {
-    gotenbergMockServer.start()
+    govUkMockServer.start()
     prisonerSearchApiMockServer.start()
     prisonRegisterMockServer.start()
+
+    gotenbergMockServer.start()
+    govUkMockServer.stubGetBankHolidays()
   }
 
   @AfterEach
   fun stopMocks() {
     gotenbergMockServer.stop()
+    govUkMockServer.stop()
     prisonerSearchApiMockServer.stop()
     prisonRegisterMockServer.stop()
   }
@@ -59,6 +65,32 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     documentSubjectType: DocumentSubjectType,
   ) {
     // Given
+    val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
+
+    gotenbergMockServer.stubPostPdf(pdfBytes)
+    prisonRegisterMockServer.stubGetPrisons()
+    stubPrisonerSearch(prisonNumber)
+
+    // When
+    val responseSpec = doGetRequestDocument(getOffenderDocumentUrl)
+
+    // Then
+    responseSpec.expectStatus().isOk
+
+    val result = responseSpec.expectBody(ByteArray::class.java)
+      .returnResult().responseBody
+    assertThat(result).isEqualTo(pdfBytes)
+    assertDocument(documentSubjectType)
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `gets offender eligible form`() {
+    // Given
+    val documentSubjectType = DocumentSubjectType.OFFENDER_ELIGIBLE_FORM
     val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
 
     gotenbergMockServer.stubPostPdf(pdfBytes)
