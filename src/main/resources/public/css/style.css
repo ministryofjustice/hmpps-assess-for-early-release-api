@@ -1,7 +1,22 @@
-h1 {
-    color: red !important;
+body {
+    font-family: Arial, sans-serif;
+    font-size: 11pt;
 }
 
-p {
-    color: blueviolet !important;
+.title {
+    font-size: 18pt;
+    margin: 20px 0;
+}
+
+.subtitle {
+    font-size: 16pt;
+}
+
+.offender-summary {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.offender-summary div {
+    width: 50%;
 }

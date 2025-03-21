@@ -19,4 +19,11 @@
       <div th:text="${#temporals.format(currentAssessment.crd, 'dd-MM-yyyy')}">hdce date</div>
   </div>
 </div>
-
+<div th:fragment="offender_summary">
+  <div class="offender-summary">
+    <div data-th-text="'Name: ' + ${fullName}">Name: a name</div>
+    <div data-th-text="'Location: ' + ${currentAssessment.location}">Location: a prison</div>
+    <div data-th-text="'Prison no: ' + ${currentAssessment.prisonNumber}">Prison no: GA2328C</div>
+    <div data-th-text="'Date: ' + ${#temporals.format(dateToday, 'dd MMM yyyy')}">Date: 30 Jun 2025</div>
+  </div>
+</div>

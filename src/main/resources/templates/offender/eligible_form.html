@@ -1,11 +1,50 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
 <head>
-  <title th:text="${docSubjectType}">Document Title</title>
+  <title data-th-text="${docSubjectType}">Document Title</title>
   <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
 </head>
   <body>
-    <div th:replace="~{offender/fragments/offender_details.html :: prisonNumber}"></div>
-    <div th:replace="~{offender/fragments/offender_details.html :: fullName}"></div>
+    <div class="title">Home Detention Curfew (tagging): Eligible</div>
+    <div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
+    <p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
+    <p>
+      You are eligible for early release from prison on Home Detention Curfew (tagging).
+    </p>
+    <div class="subtitle">
+      What this means for you
+    </div>
+    <p>
+      This means you could be released from prison on <span data-th-text="${#temporals.format(currentAssessment.hdced, 'dd MMM yyyy')}">15 July 2026</span> if you:
+    </p>
+    <ul>
+      <li>behave well in prison; and</li>
+      <li>have somewhere to live after you leave prison where you can be safely managed.</li>
+    </ul>
+    <p>
+      If you are released early you would have to:
+    </p>
+    <ul>
+      <li>stay at home during certain house (your curfew); and</li>
+      <li>wear an electronic tag - to make sure you follow your curfew.</li>
+      <li>allow EMS provider staff access to your home to check the equipment.</li>
+    </ul>
+    <p>
+      You would have a curfew and electronic tag until <span data-th-text="${#temporals.format(taggingEndDate, 'dd MMM yyyy')}"></span>
+    </p>
+    <div class="subtitle">
+      What happens next
+    </div>
+    <p>
+      Think about where you could live if you were released on <span data-th-text="${#temporals.format(currentAssessment.hdced, 'dd MMM yyyy')}">15-July-2026</span>.
+      We will give you a form to fill in with the address details closer to the date you can be released on Home Detention Curfew.
+    </p>
+    <p>
+      If you can, think of a second address in case your first choice is not suitable.
+    </p>
+    <p>
+      If you don't have a place to stay, the Community Accommodation Service Tier 2 (CAS2) could help you find somewhere.
+      We will pass your details to CAS2 if you need it.`
+    </p>
   </body>
 </html>

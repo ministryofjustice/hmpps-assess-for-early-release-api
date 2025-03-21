@@ -9,6 +9,7 @@ import org.mockito.kotlin.whenever
 import java.time.Clock
 import java.time.Instant
 import java.time.LocalDate
+import java.time.Month
 import java.time.ZoneId
 
 class WorkingDaysServiceTest {
@@ -65,17 +66,17 @@ class WorkingDaysServiceTest {
   }
 
   @Nested
-  inner class `Working days before a date` {
+  inner class `Working days until a date` {
     @Test
     fun `get working days until a week from now`() {
       val nextWeek = today.plusDays(7)
-      val workingDaysBefore = service.workingDaysBefore(nextWeek)
+      val workingDaysBefore = service.workingDaysUntil(nextWeek)
       assertThat(workingDaysBefore).isEqualTo(5)
     }
 
     @Test
     fun `No working days before today`() {
-      val workingDaysBefore = service.workingDaysBefore(today)
+      val workingDaysBefore = service.workingDaysUntil(today)
       assertThat(workingDaysBefore).isZero()
     }
 
@@ -85,8 +86,55 @@ class WorkingDaysServiceTest {
       val bankHolidays = listOf(today.plusDays(1), today.plusDays(2))
       whenever(bankHolidayService.getBankHolidaysForEnglandAndWales()).thenReturn(bankHolidays)
 
-      val workingDaysBefore = service.workingDaysBefore(today.plusDays(7))
+      val workingDaysBefore = service.workingDaysUntil(today.plusDays(7))
       assertThat(workingDaysBefore).isEqualTo(3)
+    }
+  }
+
+  @Nested
+  inner class `Working days before a date` {
+    @Test
+    fun `get previous working day on a weekday`() {
+      val today = LocalDate.of(2024, Month.MARCH, 21)
+      val previousWorkingDay = service.workingDaysBefore(today).take(1).first()
+      assertThat(LocalDate.of(2024, Month.MARCH, 20)).isEqualTo(previousWorkingDay)
+    }
+
+    @Test
+    fun `get previous working day on a Monday`() {
+      val today = LocalDate.of(2024, Month.MARCH, 25)
+      val previousWorkingDay = service.workingDaysBefore(today).take(1).first()
+      assertThat(LocalDate.of(2024, Month.MARCH, 22)).isEqualTo(previousWorkingDay)
+    }
+
+    @Test
+    fun `get previous working day on a bank holiday`() {
+      val today = LocalDate.of(2024, Month.MAY, 7)
+      val previousWorkingDay = service.workingDaysBefore(today).take(1).first()
+      assertThat(LocalDate.of(2024, Month.MAY, 3)).isEqualTo(previousWorkingDay)
+    }
+
+    @Test
+    fun `get previous working day on a multi day bank holiday`() {
+      val today = LocalDate.of(2024, 4, 2)
+      val previousWorkingDay = service.workingDaysBefore(today).take(1).first()
+      assertThat(LocalDate.of(2024, 3, 28)).isEqualTo(previousWorkingDay)
+    }
+
+    @Test
+    fun `check sequence is made up of only working days`() {
+      val today = LocalDate.of(2024, 3, 21)
+      val previousWorkingDays = service.workingDaysBefore(today).take(3)
+      previousWorkingDays.forEach {
+        assertThat(service.isNonWorkingDay(it)).isFalse()
+      }
+      assertThat(previousWorkingDays.toList()).isEqualTo(
+        listOf(
+          LocalDate.of(2024, 3, 20),
+          LocalDate.of(2024, 3, 19),
+          LocalDate.of(2024, 3, 18),
+        ),
+      )
     }
   }
 
