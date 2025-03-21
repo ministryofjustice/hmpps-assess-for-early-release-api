@@ -49,7 +49,6 @@ class OffenderService(
 
     val offender = offenderRepository.save(
       Offender(
-        bookingId = prisoner.bookingId!!.toLong(),
         prisonNumber = prisoner.prisonerNumber,
         prisonId = prisoner.prisonId!!,
         forename = prisoner.firstName,
@@ -62,7 +61,7 @@ class OffenderService(
       ),
     )
 
-    val assessment = assessmentService.createAssessment(offender, prisonerNumber = prisoner.prisonerNumber)
+    val assessment = assessmentService.createAssessment(offender, prisonerNumber = prisoner.prisonerNumber, prisoner.bookingId!!.toLong())
     offender.assessments.add(assessment)
     val changes = mapOf(
       "prisonNumber" to prisoner.prisonerNumber,

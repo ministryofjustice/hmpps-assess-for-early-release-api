@@ -97,7 +97,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = 10L,
               prisonerNumber = PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -123,6 +123,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val assessment = result.expectBody(AssessmentOverviewSummary::class.java).returnResult().responseBody!!
       assertThat(assessment).isEqualTo(
         AssessmentOverviewSummary(
+          bookingId = 10L,
           forename = "FIRST-1",
           surname = "LAST-1",
           prisonNumber = PRISON_NUMBER,

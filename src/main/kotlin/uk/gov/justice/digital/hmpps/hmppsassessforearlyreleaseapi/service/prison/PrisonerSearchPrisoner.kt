@@ -5,7 +5,8 @@ import java.time.LocalDate
 
 data class PrisonerSearchPrisoner(
   val prisonerNumber: String,
-  val bookingId: String? = null,
+
+  val bookingId: Long? = null,
 
   @JsonFormat(pattern = "yyyy-MM-dd")
   val homeDetentionCurfewEligibilityDate: LocalDate? = null,

@@ -21,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
@@ -83,7 +84,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = TestData.PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -164,7 +165,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = TestData.PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -245,7 +246,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = TestData.PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -322,7 +323,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = TestData.PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -383,7 +384,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = TestData.PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",

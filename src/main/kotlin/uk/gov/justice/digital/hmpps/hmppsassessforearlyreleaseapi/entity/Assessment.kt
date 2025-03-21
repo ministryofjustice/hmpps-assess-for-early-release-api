@@ -47,6 +47,9 @@ data class Assessment(
   @NotNull
   val id: Long = -1,
 
+  @NotNull
+  val bookingId: Long,
+
   @ManyToOne(optional = false, fetch = FetchType.EAGER)
   @JoinColumn(name = "offender_id", nullable = false)
   val offender: Offender,

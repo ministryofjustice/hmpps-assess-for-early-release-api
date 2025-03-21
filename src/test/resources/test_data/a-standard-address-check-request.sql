@@ -1,6 +1,4 @@
-insert into offender(id,
-                     booking_id,
-                     prison_number,
+insert into offender(prison_number,
                      prison_id,
                      forename,
                      surname,
@@ -8,9 +6,7 @@ insert into offender(id,
                      hdced,
                      crd,
                      status)
-values (1,
-        10,
-        'A1234AA',
+values ('A1234AA',
         'BMI',
         'forename',
         'surname',
@@ -19,16 +15,16 @@ values (1,
         '2020-11-14',
         'NOT_STARTED');
 
-insert into assessment(id, offender_id,
+insert into assessment(booking_id,
+                       offender_id,
                        status,
                        policy_version)
-values (1,
-        (select id from offender where booking_id = 10),
+values (10,
+        1,
         'AWAITING_ADDRESS_AND_RISK_CHECKS',
         '1.0');
 
-insert into address (id,
-                     uprn,
+insert into address (uprn,
                      first_line,
                      second_line,
                      town,
@@ -38,8 +34,7 @@ insert into address (id,
                      x_coordinate,
                      y_coordinate,
                      address_last_updated)
-values (1,
-        '200010019924',
+values ('200010019924',
         '4 ADANAC DRIVE',
         'NURSLING',
         'SOUTHAMPTON',
@@ -51,7 +46,7 @@ values (1,
         '2020-03-31');
 
 
-insert into curfew_address_check_request(id, preference_priority, status, assessment_id)
-values (1, 'FIRST', 'IN_PROGRESS', 1);
-insert into standard_address_check_request(id, address_id)
-values (1, 1);
+insert into curfew_address_check_request(preference_priority, status, assessment_id)
+values ('FIRST', 'IN_PROGRESS', 1);
+insert into standard_address_check_request(id,address_id)
+values (1,1);

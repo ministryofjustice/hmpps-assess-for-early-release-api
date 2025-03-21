@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.RESIDENTIAL_CHECK_TASK_CODE
@@ -77,7 +78,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
@@ -143,7 +144,7 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         objectMapper.writeValueAsString(
           listOf(
             PrisonerSearchPrisoner(
-              bookingId = "123",
+              bookingId = BOOKING_ID,
               prisonerNumber = PRISON_NUMBER,
               prisonId = "HMI",
               firstName = "FIRST-1",
