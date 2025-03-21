@@ -108,8 +108,7 @@ object TestData {
     agent = PRISON_CA_AGENT,
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID.toLong()): Assessment
-  = Assessment(offender = offender, status = status, bookingId = bookingId ,policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
+  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(offender = offender, status = status, bookingId = bookingId, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,

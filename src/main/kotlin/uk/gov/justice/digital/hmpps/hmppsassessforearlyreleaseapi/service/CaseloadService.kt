@@ -12,7 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workin
 class CaseloadService(
   private val assessmentRepository: AssessmentRepository,
   private val workingDaysService: WorkingDaysService,
-  private val offenderSummaryResponseMapper : OffenderSummaryResponseMapper
+  private val offenderSummaryResponseMapper: OffenderSummaryResponseMapper,
 ) {
 
   companion object {
@@ -28,7 +28,7 @@ class CaseloadService(
   @Transactional
   fun getComCaseload(staffCode: String): List<OffenderSummaryResponse> {
     val assessments = assessmentRepository.findByResponsibleComStaffCodeAndDeletedTimestampIsNull(staffCode)
-    return assessments.map { createOffenderSummary(it)  }
+    return assessments.map { createOffenderSummary(it) }
   }
 
   @Transactional
@@ -37,7 +37,5 @@ class CaseloadService(
     return assessments.map { createOffenderSummary(it) }
   }
 
-  fun createOffenderSummary(assessments : Assessment): OffenderSummaryResponse {
-    return offenderSummaryResponseMapper.map(assessments, workingDaysService.workingDaysUntil(assessments.offender.hdced))
-  }
+  fun createOffenderSummary(assessments: Assessment): OffenderSummaryResponse = offenderSummaryResponseMapper.map(assessments, workingDaysService.workingDaysUntil(assessments.offender.hdced))
 }

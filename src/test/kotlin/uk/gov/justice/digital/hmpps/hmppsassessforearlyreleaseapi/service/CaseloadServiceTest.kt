@@ -28,7 +28,7 @@ class CaseloadServiceTest {
     CaseloadService(
       assessmentRepository,
       workingDaysService,
-      offenderSummaryResponseMapper
+      offenderSummaryResponseMapper,
     )
 
   @Test

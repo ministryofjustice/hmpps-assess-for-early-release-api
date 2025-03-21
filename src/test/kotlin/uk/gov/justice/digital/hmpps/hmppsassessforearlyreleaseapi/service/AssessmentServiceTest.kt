@@ -271,7 +271,7 @@ class AssessmentServiceTest {
     val assessment = Assessment(
       offender = anOffender(),
       responsibleCom = com,
-      bookingId = BOOKING_ID
+      bookingId = BOOKING_ID,
     )
     whenever(assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())).thenReturn(
       listOf(assessment),

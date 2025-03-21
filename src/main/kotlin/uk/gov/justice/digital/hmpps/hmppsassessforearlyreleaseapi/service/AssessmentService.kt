@@ -229,7 +229,7 @@ class AssessmentService(
   }
 
   @Transactional
-  fun createAssessment(offender: Offender, prisonerNumber: String, bookingId : Long): Assessment {
+  fun createAssessment(offender: Offender, prisonerNumber: String, bookingId: Long): Assessment {
     log.debug("Creating assessment for prisonerNumber: {}", prisonerNumber)
 
     val deliusOffenderManager = offender.crn?.let {

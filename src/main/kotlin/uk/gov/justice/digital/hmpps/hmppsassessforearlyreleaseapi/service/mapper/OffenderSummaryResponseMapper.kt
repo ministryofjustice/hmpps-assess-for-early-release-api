@@ -10,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Caselo
 class OffenderSummaryResponseMapper {
 
   fun map(assessment: Assessment, workingDaysToHdced: Int): OffenderSummaryResponse {
-
     val offender = assessment.offender
 
     return OffenderSummaryResponse(
