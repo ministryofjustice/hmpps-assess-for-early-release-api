@@ -12,3 +12,14 @@ delete from assessment;
 delete from offender;
 delete from staff;
 delete from assessment_event;
+
+-- Reset auto id in all tables with auto id
+ALTER SEQUENCE resident_id_seq RESTART WITH 1;
+ALTER SEQUENCE residential_checks_task_answer_id_seq RESTART WITH 1;
+ALTER SEQUENCE curfew_address_check_request_id_seq RESTART WITH 1;
+ALTER SEQUENCE address_id_seq RESTART WITH 1;
+ALTER SEQUENCE eligibility_check_result_id_seq RESTART WITH 1;
+ALTER SEQUENCE assessment_id_seq RESTART WITH 1;
+ALTER SEQUENCE offender_id_seq RESTART WITH 1;
+ALTER SEQUENCE staff_id_seq RESTART WITH 1;
+ALTER SEQUENCE assessment_event_id_seq RESTART WITH 1;
