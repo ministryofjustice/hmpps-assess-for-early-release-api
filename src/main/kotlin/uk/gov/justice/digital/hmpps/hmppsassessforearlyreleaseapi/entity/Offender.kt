@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.hibernate.Hibernate
@@ -46,7 +47,8 @@ data class Offender(
   val sentenceStartDate: LocalDate? = null,
 
   @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-  val assessments: MutableSet<Assessment> = linkedSetOf(),
+  @OrderBy("id")
+  val assessments: MutableSet<Assessment> = mutableSetOf(),
 
   @NotNull
   @Enumerated(EnumType.STRING)
