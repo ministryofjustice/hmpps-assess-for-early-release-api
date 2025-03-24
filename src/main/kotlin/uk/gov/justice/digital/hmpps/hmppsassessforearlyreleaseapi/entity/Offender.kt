@@ -26,9 +26,6 @@ data class Offender(
   val id: Long = -1,
 
   @NotNull
-  val bookingId: Long,
-
-  @NotNull
   val prisonNumber: String,
 
   val prisonId: String,
