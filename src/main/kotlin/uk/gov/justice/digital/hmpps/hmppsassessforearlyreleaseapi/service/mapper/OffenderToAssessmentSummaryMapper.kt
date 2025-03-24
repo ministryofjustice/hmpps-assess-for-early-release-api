@@ -22,6 +22,7 @@ class OffenderToAssessmentSummaryMapper(
 
     val prisonerDetails = prisonerSearchResults.first()
     return AssessmentSummary(
+      bookingId = currentAssessment.bookingId,
       forename = offender.forename,
       surname = offender.surname,
       dateOfBirth = offender.dateOfBirth,

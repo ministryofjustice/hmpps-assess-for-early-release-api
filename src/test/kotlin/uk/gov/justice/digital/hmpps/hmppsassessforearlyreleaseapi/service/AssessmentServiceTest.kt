@@ -24,6 +24,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.FORENAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
@@ -270,6 +271,7 @@ class AssessmentServiceTest {
     val assessment = Assessment(
       offender = anOffender(),
       responsibleCom = com,
+      bookingId = BOOKING_ID,
     )
     whenever(assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())).thenReturn(
       listOf(assessment),

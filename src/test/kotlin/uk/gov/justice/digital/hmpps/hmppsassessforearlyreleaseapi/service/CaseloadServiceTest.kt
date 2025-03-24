@@ -12,6 +12,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Caselo
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderSummaryResponseMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.BankHolidayService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.time.Clock
@@ -21,11 +22,13 @@ class CaseloadServiceTest {
   private val assessmentRepository = mock<AssessmentRepository>()
   private val bankHolidayService = mock<BankHolidayService>()
   private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
+  private val offenderSummaryResponseMapper = OffenderSummaryResponseMapper()
 
   private val service: CaseloadService =
     CaseloadService(
       assessmentRepository,
       workingDaysService,
+      offenderSummaryResponseMapper,
     )
 
   @Test
@@ -34,13 +37,11 @@ class CaseloadServiceTest {
     val offender2 =
       offender1.copy(
         id = offender1.id + 1,
-        bookingId = offender1.bookingId + 29,
         prisonNumber = "ZX2318KD",
         sentenceStartDate = LocalDate.now().minusDays(11),
       )
     val offender3 = offender1.copy(
       id = offender1.id + 2,
-      bookingId = offender1.bookingId + 30,
       prisonNumber = "ZX2318KJ",
       sentenceStartDate = null,
     )
@@ -57,7 +58,7 @@ class CaseloadServiceTest {
     assertThat(caseload).containsExactlyInAnyOrder(
       OffenderSummaryResponse(
         prisonNumber = offender1.prisonNumber,
-        bookingId = offender1.bookingId,
+        bookingId = offender1.assessments.first().bookingId,
         forename = offender1.forename!!,
         surname = offender1.surname!!,
         hdced = offender1.hdced,
@@ -70,7 +71,7 @@ class CaseloadServiceTest {
       ),
       OffenderSummaryResponse(
         prisonNumber = offender2.prisonNumber,
-        bookingId = offender2.bookingId,
+        bookingId = offender1.assessments.first().bookingId,
         forename = offender2.forename!!,
         surname = offender2.surname!!,
         hdced = offender2.hdced,
@@ -83,7 +84,7 @@ class CaseloadServiceTest {
       ),
       OffenderSummaryResponse(
         prisonNumber = offender3.prisonNumber,
-        bookingId = offender3.bookingId,
+        bookingId = offender1.assessments.first().bookingId,
         forename = offender3.forename!!,
         surname = offender3.surname!!,
         hdced = offender3.hdced,
@@ -99,6 +100,7 @@ class CaseloadServiceTest {
 
   @Test
   fun `should get the com case load`() {
+    // Given
     val assessment1 =
       anOffender().assessments.first().copy(status = AssessmentStatus.ADDRESS_AND_RISK_CHECKS_IN_PROGRESS)
     val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
@@ -106,16 +108,21 @@ class CaseloadServiceTest {
       assessmentRepository.findByResponsibleComStaffCodeAndDeletedTimestampIsNull(STAFF_CODE),
     ).thenReturn(listOf(assessment1, assessment2))
 
+    // When
     val caseload = service.getComCaseload(STAFF_CODE)
+
+    // Then
     assertThat(caseload.size).isEqualTo(2)
+
     assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
-      assessment1.offender.bookingId,
-      assessment2.offender.bookingId,
+      assessment1.bookingId,
+      assessment2.bookingId,
     )
   }
 
   @Test
   fun `should get the decision maker case load`() {
+    // Given
     val assessment1 =
       anOffender().assessments.first().copy(status = AssessmentStatus.APPROVED)
     val assessment2 = anOffender().assessments.first().copy(status = AssessmentStatus.AWAITING_DECISION)
@@ -128,11 +135,14 @@ class CaseloadServiceTest {
       ),
     )
 
+    // When
     val caseload = service.getDecisionMakerCaseload(PRISON_ID)
+
+    // Then
     assertThat(caseload.size).isEqualTo(2)
     assertThat(caseload.map { it.bookingId }).containsExactlyInAnyOrder(
-      assessment1.offender.bookingId,
-      assessment2.offender.bookingId,
+      assessment1.bookingId,
+      assessment2.bookingId,
     )
   }
 }

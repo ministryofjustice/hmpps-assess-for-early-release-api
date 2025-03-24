@@ -8,6 +8,10 @@ import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
 data class AssessmentOverviewSummary(
+
+  @Schema(description = "The offender's booking id", example = "773722")
+  val bookingId: Long,
+
   @Schema(description = "The offender's first name", example = "Bob")
   val forename: String?,
 

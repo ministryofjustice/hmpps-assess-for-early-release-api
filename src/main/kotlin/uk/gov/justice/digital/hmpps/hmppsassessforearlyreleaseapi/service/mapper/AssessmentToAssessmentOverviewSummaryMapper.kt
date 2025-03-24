@@ -29,6 +29,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
     val suitability = assessmentWithEligibilityProgress.getSuitabilityProgress()
     val suitabilityStatus = suitability.toStatus()
     return AssessmentOverviewSummary(
+      bookingId = currentAssessment.bookingId,
       forename = offender.forename,
       surname = offender.surname,
       dateOfBirth = offender.dateOfBirth,
