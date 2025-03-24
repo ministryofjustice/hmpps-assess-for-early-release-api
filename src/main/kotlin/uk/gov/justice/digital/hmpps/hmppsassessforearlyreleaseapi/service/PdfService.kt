@@ -22,6 +22,7 @@ class PdfService(
 
   companion object {
     val log: Logger = LoggerFactory.getLogger(this::class.java)
+    const val WORKINGS_DAY_BEFORE_ADDRESS_FORM_DUE = 5
   }
 
   fun generateOffenderPdf(prisonNumber: String, documentSubjectType: DocumentSubjectType): ByteArray? {
@@ -58,7 +59,7 @@ class PdfService(
           currentAssessment.crd?.let { workingDaysService.workingDaysBefore(currentAssessment.crd).take(1).first() }
       }
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM -> {
-        data["addressFormDueDate"] = workingDaysService.workingDaysAfter(LocalDate.now()).take(5).last()
+        data["addressFormDueDate"] = workingDaysService.workingDaysAfter(LocalDate.now()).take(WORKINGS_DAY_BEFORE_ADDRESS_FORM_DUE).last()
       }
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_FORM,
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
