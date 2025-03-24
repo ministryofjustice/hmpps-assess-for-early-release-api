@@ -20,3 +20,11 @@ body {
 .offender-summary div {
     width: 50%;
 }
+
+.signature div {
+    margin-bottom: 15px;
+}
+
+.signature div:first-child {
+    margin-top: 30px;
+}
