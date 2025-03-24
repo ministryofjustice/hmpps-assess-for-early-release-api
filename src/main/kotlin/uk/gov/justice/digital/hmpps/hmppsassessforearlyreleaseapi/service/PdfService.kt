@@ -54,9 +54,12 @@ class PdfService(
 
     when (documentSubjectType) {
       DocumentSubjectType.OFFENDER_ELIGIBLE_FORM -> {
-        data["taggingEndDate"] = currentAssessment.crd?.let { workingDaysService.workingDaysBefore(currentAssessment.crd).take(1).first() }
+        data["taggingEndDate"] =
+          currentAssessment.crd?.let { workingDaysService.workingDaysBefore(currentAssessment.crd).take(1).first() }
       }
-      DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM,
+      DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM -> {
+        data["addressFormDueDate"] = workingDaysService.workingDaysAfter(LocalDate.now()).take(5).last()
+      }
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_FORM,
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
