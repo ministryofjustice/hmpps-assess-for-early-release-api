@@ -22,7 +22,11 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.OPTED_OUT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -132,7 +136,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           hdced = LocalDate.now().plusDays(7),
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
-          status = AssessmentStatus.NOT_STARTED,
+          status = NOT_STARTED,
           policyVersion = "1.0",
           optOutReasonType = OTHER,
           optOutReasonOther = "I have reason",
@@ -196,7 +200,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = DELETE_CURRENT_ASSESSMENT_URL
       val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
-      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
+      val authorisation = setAuthorisation(roles = roles, agent = PRISON_CA_AGENT)
       val crn = "DX12340A"
 
       probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
@@ -217,7 +221,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val lastEvent = deletedAssessment.assessmentEvents.last()
       assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
-      assertThat(lastEvent.agent.username).isEqualTo(TestData.PRISON_CA_AGENT.username)
+      assertThat(lastEvent.agent.username).isEqualTo(PRISON_CA_AGENT.username)
       assertThat(lastEvent).isOfAnyClassIn(GenericChangedEvent::class.java)
       val lastEventGeneric = lastEvent as GenericChangedEvent
       assertThat(lastEventGeneric.changes).isEqualTo(
@@ -241,7 +245,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessments).hasSize(2)
       assertThat(assessments.first().id).isEqualTo(initialAssessment.id)
       assertThat(assessments.last().deletedTimestamp).isNull()
-      assertThat(assessments.last().status).isEqualTo(AssessmentStatus.NOT_STARTED)
+      assertThat(assessments.last().status).isEqualTo(NOT_STARTED)
     }
   }
 
@@ -447,7 +451,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessments)
         .hasSize(1)
         .extracting(Assessment::status, Assessment::optOutReasonType, Assessment::optOutReasonOther)
-        .containsOnly(tuple(AssessmentStatus.OPTED_OUT, OTHER, "an opt-out reason"))
+        .containsOnly(tuple(OPTED_OUT, OTHER, "an opt-out reason"))
     }
 
     @Test
@@ -513,7 +517,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
       val assessment = testAssessmentRepository.findByOffender(offender)
-      assertThat(assessment.first().status).isEqualTo(AssessmentStatus.ELIGIBLE_AND_SUITABLE)
+      assertThat(assessment.first().status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     }
   }
 
@@ -567,7 +571,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
-      assertThat(updatedAssessment.status).isEqualTo(AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS)
+      assertThat(updatedAssessment.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
     }
   }
 
@@ -620,7 +624,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
-      assertThat(updatedAssessment.status).isEqualTo(AssessmentStatus.AWAITING_PRE_DECISION_CHECKS)
+      assertThat(updatedAssessment.status).isEqualTo(AWAITING_PRE_DECISION_CHECKS)
     }
   }
 
