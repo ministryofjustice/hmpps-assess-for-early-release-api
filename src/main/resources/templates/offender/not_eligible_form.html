@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
+<head>
+  <title data-th-text="${docSubjectType}">Document Title</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+</head>
+<body>
+<div class="title">Home Detention Curfew (tagging): Eligible</div>
+<div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
+<p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
+<p>We checked to see if you're eligible for release from prison on Home Detention Curfew (tagging).</p>
+<p>By law you are not eligible because . </p>
+<p>You cannot challenge this because it is based on the law, not on a decision by prison staff.</p>
+<div data-th-replace="~{offender/fragments/signature.html :: signature}"></div>
+</body>
+</html>
