@@ -138,6 +138,32 @@ class WorkingDaysServiceTest {
     }
   }
 
+  @Nested
+  inner class `Working days after a date` {
+    @Test
+    fun `get next working day on a weekday`() {
+      val today = LocalDate.of(2024, Month.MARCH, 21)
+      val nextWorkingDay = service.workingDaysAfter(today).take(1).first()
+      assertThat(LocalDate.of(2024, Month.MARCH, 22)).isEqualTo(nextWorkingDay)
+    }
+
+    @Test
+    fun `get next working day on a Friday with a bank holiday on Monday`() {
+      val today = LocalDate.of(2024, Month.MARCH, 29)
+      val nextWorkingDay = service.workingDaysAfter(today).take(1).first()
+      assertThat(LocalDate.of(2024, Month.APRIL, 2)).isEqualTo(nextWorkingDay)
+    }
+
+    @Test
+    fun `check sequence is made up of only working days`() {
+      val today = LocalDate.of(2024, 3, 21)
+      val nextWorkingDays = service.workingDaysAfter(today).take(3)
+      nextWorkingDays.forEach {
+        assertThat(service.isNonWorkingDay(it)).isFalse()
+      }
+    }
+  }
+
   private companion object {
     val someBankHolidays = listOf(
       LocalDate.parse("2024-03-29"),

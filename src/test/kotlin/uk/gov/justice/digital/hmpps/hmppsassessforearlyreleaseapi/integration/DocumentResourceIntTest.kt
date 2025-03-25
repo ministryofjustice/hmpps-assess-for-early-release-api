@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.kotlin.verify
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
@@ -19,11 +20,15 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class DocumentResourceIntTest : SqsIntegrationTestBase() {
+
+  @Autowired
+  private lateinit var workingDaysService: WorkingDaysService
 
   private val gotenbergMockServer = GotenbergMockServer()
   private val govUkMockServer = GovUkMockServer()
@@ -242,7 +247,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
     var expectedDoc = getExpectedThymeleafHtml(documentSubjectType)
     expectedDoc = expectedDoc.replace("((current_date))", formatDate(LocalDate.now()))
     expectedDoc = expectedDoc.replace("((release_date))", formatDate(LocalDate.now().plusDays(7)))
-
+    expectedDoc = expectedDoc.replace("((address_form_due_date))", formatDate(workingDaysService.workingDaysAfter(LocalDate.now()).take(5).last()))
     dynamicFields?.let {
       it.keys.forEach { key ->
         expectedDoc = expectedDoc.replace("(($key))", formatDate(it.get(key)!!))
