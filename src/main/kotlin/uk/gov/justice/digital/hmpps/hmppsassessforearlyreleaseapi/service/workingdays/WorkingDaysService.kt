@@ -26,6 +26,12 @@ class WorkingDaysService(private val bankHolidayService: BankHolidayService, pri
     .drop(1)
     .filterNot { isNonWorkingDay(it) }
 
+  fun workingDaysAfter(
+    date: LocalDate,
+  ): Sequence<LocalDate> = generateSequence(date) { it.plusDays(1) }
+    .drop(1)
+    .filterNot { isNonWorkingDay(it) }
+
   fun isWeekend(date: LocalDate): Boolean = date.dayOfWeek in weekend
 
   fun isNonWorkingDay(date: LocalDate): Boolean = isWeekend(date) || getBankHolidays().contains(date)

@@ -27,4 +27,13 @@ body {
 
 .signature div:first-child {
     margin-top: 30px;
+
+ul.unindented-list {
+    margin: 20px 0;
+    padding: 0;
+    list-style: square outside none;
+}
+
+ul.unindented-list li {
+    margin: 5px 0 0 5px;
 }
