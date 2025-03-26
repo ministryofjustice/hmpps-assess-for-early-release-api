@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
+<head>
+  <title data-th-text="${docSubjectType}">Document Title</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+</head>
+<body>
+<div class="title">Home Detention Curfew (tagging): Presumed Unsuitable</div>
+<div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
+<p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
+<p>We checked to see if you can be released from prison on Home Detention Curfew (tagging).</p>
+<p>Although you are eligible by law, you are presumed unsuitable for the scheme because .</p>
+<p>This means you would only be considered for Home Detention Curfew in exceptional circumstances.</p>
+<div class="subtitle">Think your case is exceptional?</div>
+<p class="representation-details">You may make representations to the Governor as to why you should be released on HDC. You will need to
+show that your case stands out and that HDC could be justified despite the presumption against it in your
+case.</p>
+<p>Ask prison staff about how to do this.</p>
+</body>
+</html>
