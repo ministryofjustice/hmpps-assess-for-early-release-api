@@ -21,6 +21,10 @@ data class OffenderSummaryResponse(
   @Schema(description = "The offender's surname", example = "Smith")
   val surname: String,
 
+  @Schema(description = "The offender's conditional release date date", example = "2026-08-23")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  val crd: LocalDate? = null,
+
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
   @JsonFormat(pattern = "yyyy-MM-dd")
   val hdced: LocalDate,
