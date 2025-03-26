@@ -43,3 +43,23 @@ ul.unindented-list li {
     margin-top: 10px;
     line-height: 20px;
 }
+
+.other-reason {
+    margin-top: 5px;
+    width: 680px;
+    height: 130px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: baseline;
+}
+
+.checkbox {
+    appearance: none;
+    border: 1px solid #000;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+}
+

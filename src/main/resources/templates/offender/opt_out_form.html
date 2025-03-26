@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en-GB">
+<head>
+  <title data-th-text="${docSubjectType}">Document Title</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+</head>
+<body>
+<div class="title">Home Detention Curfew (tagging): Opt-out</div>
+<div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
+<p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
+<p>I do not want to be considered for Home Detention Curfew (tagging) because:</p>
+<p>
+  <label class="checkbox-label">
+    <input class="checkbox" type="checkbox" name="nowhereToStay"/>
+    <span>I have nowhere to stay</span>
+  </label>
+</p>
+<p>
+  <label class="checkbox-label">
+    <input class="checkbox" type="checkbox" name="otherReason"/>
+    <span>Other reason:</span>
+  </label>
+  <label>
+    <input class="other-reason" type="text" name="otherReason"/>
+  </label>
+</p>
+<p>
+  If you don't have an address, the Community Accommodation Service Tier 2 (CAS2) will try to help you find
+  somewhere to stay. Ask prison staff for more information.
+</p>
+<p>
+  I understand that I will not be released until <span data-th-text="${#temporals.format(currentAssessment.crd, 'dd MMM yyyy')}"></span>
+</p>
+<div data-th-replace="~{offender/fragments/signature.html :: signature}"></div>
+</body>
+</html>
