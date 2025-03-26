@@ -32,9 +32,9 @@ class PdfService(
     data["assessmentsUrl"] = assessmentsUrl
     data["docSubjectType"] = documentSubjectType.name
     data["dateToday"] = LocalDate.now()
-    data["showSigned"] =  true
+    data["showSigned"] = true
     data["showName"] = true
-    if(documentSubjectType == DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM) {
+    if (documentSubjectType == DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM) {
       data["showGrade"] = true
       data["showDate"] = true
     }
