@@ -17,6 +17,7 @@ class OffenderSummaryResponseMapper {
       bookingId = assessment.bookingId,
       forename = offender.forename!!,
       surname = offender.surname!!,
+      crd = offender.crd,
       hdced = offender.hdced,
       workingDaysToHdced = workingDaysToHdced,
       probationPractitioner = assessment.responsibleCom?.fullName,
