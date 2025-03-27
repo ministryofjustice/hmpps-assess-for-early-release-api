@@ -1,17 +1,17 @@
 <div class="signature" th:fragment="signature">
-  <div>
+  <div th:if="${showSigned}">
     <span>Signed:</span>
   </div>
 
-  <div>
+  <div th:if="${showName}">
     <span>Name:</span>
   </div>
 
-  <div>
+  <div th:if="${showGrade}">
     <span>Grade:</span>
   </div>
 
-  <div>
+  <div th:if="${showDate}">
     <span>Date:</span>
   </div>
 </div>
