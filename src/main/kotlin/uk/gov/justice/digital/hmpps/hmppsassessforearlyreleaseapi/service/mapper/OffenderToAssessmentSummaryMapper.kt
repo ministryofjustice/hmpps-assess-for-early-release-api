@@ -36,6 +36,7 @@ class OffenderToAssessmentSummaryMapper(
       policyVersion = currentAssessment.policyVersion,
       optOutReasonType = currentAssessment.optOutReasonType,
       optOutReasonOther = currentAssessment.optOutReasonOther,
+      postponementReasons = currentAssessment.postponementReasons.map { reason -> reason.reasonType }.toList(),
       cellLocation = prisonerDetails.cellLocation,
       mainOffense = prisonerDetails.mostSeriousOffence,
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->

@@ -42,6 +42,7 @@
     },
     "optOutReasonType": null,
     "optOutReasonOther": null,
+    "postponementReasons": [],
     "cellLocation": "A-1-002",
     "mainOffense": "Robbery"
   },

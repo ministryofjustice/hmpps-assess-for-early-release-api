@@ -195,6 +195,32 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `gets postponed form`() {
+    // Given
+    val documentSubjectType = DocumentSubjectType.OFFENDER_POSTPONED_FORM
+    val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
+
+    gotenbergMockServer.stubPostPdf(pdfBytes)
+    prisonRegisterMockServer.stubGetPrisons()
+    stubPrisonerSearch(prisonNumber)
+
+    // When
+    val responseSpec = doGetRequestDocument(getOffenderDocumentUrl)
+
+    // Then
+    responseSpec.expectStatus().isOk
+
+    val result = responseSpec.expectBody(ByteArray::class.java)
+      .returnResult().responseBody
+    assertThat(result).isEqualTo(pdfBytes)
+    assertDocument(documentSubjectType)
+  }
+
+  @Test
   fun `should return unauthorized if no token`() {
     // Given
     val documentSubjectType = DocumentSubjectType.OFFENDER_APPROVED_FORM

@@ -14,6 +14,7 @@
     "policyVersion": "1.0",
     "optOutReasonType":null,
     "optOutReasonOther":null,
+    "postponementReasons": [],
     "tasks": {
       "PRISON_CA": [
         {
