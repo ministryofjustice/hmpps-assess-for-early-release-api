@@ -72,7 +72,8 @@ class PdfService(
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
       DocumentSubjectType.OFFENDER_ADDRESS_UNSUITABLE_FORM,
-      DocumentSubjectType.OFFENDER_POSTPONED_FORM -> {
+      DocumentSubjectType.OFFENDER_POSTPONED_FORM,
+      -> {
         val reason: PostponeCaseReasonType? = currentAssessment.postponementReasons.firstOrNull()
         if (reason != null) {
           data["postponementReasonDescription"] = PostponeCaseReasonType.getDescription(reason)
