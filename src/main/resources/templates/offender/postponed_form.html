@@ -8,7 +8,7 @@
 <div class="title">Home Detention Curfew (tagging): Postponed</div>
 <div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
 <p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
-<p>The decision to release you on HDC has been postponed because <span th:if="${currentAssessment.postponementReasons.size() > 0}" data-th-text="${currentAssessment.postponementReasons[0]}"></span>.</p>
+<p>The decision to release you on HDC has been postponed because <span th:if="${postponementReasonDescription != null}" data-th-text="${postponementReasonDescription}"></span>.</p>
 <p>If this is resolved in time to allow release, we will then make the decision and notify you.</p>
 <div data-th-replace="~{offender/fragments/signature.html :: signature}"></div>
 </body>

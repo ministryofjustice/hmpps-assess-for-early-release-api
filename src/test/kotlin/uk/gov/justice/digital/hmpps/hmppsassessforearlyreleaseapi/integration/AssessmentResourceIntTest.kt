@@ -46,6 +46,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.function.Consumer
 
@@ -218,7 +219,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val deletedAssessment = assessmentRepository.findById(initialAssessment.id).get()
       assertThat(deletedAssessment.deletedTimestamp).isNotNull()
-      assertThat(deletedAssessment.deletedTimestamp).isCloseToUtcNow((within(2, ChronoUnit.SECONDS)))
+      assertThat(deletedAssessment.deletedTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
 
       val lastEvent = deletedAssessment.assessmentEvents.last()
       assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
@@ -342,7 +343,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
             assertThat(it.id).isNotNegative()
             assertThat(it.assessment).isEqualTo(assessment)
             assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.ON_REMAND)
-            assertThat(it.createdTimestamp).isCloseToUtcNow(within(2, ChronoUnit.SECONDS))
+            assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
           },
         )
 
@@ -352,7 +353,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
             assertThat(it.id).isNotNegative()
             assertThat(it.assessment).isEqualTo(assessment)
             assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY)
-            assertThat(it.createdTimestamp).isCloseToUtcNow(within(2, ChronoUnit.SECONDS))
+            assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), (within(2, ChronoUnit.SECONDS)))
           },
         )
     }
