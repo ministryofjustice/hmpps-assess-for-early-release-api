@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
@@ -72,6 +73,12 @@ class PdfService(
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
       DocumentSubjectType.OFFENDER_ADDRESS_UNSUITABLE_FORM,
       DocumentSubjectType.OFFENDER_POSTPONED_FORM,
+      -> {
+        val reason: PostponeCaseReasonType? = currentAssessment.postponementReasons.firstOrNull()
+        if (reason != null) {
+          data["postponementReasonDescription"] = PostponeCaseReasonType.getDescription(reason)
+        }
+      }
       DocumentSubjectType.OFFENDER_NOT_ENOUGH_TIME_FORM,
       DocumentSubjectType.OFFENDER_APPROVED_FORM,
       DocumentSubjectType.OFFENDER_AGENCY_NOTIFICATION_FORM,
