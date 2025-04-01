@@ -33,8 +33,11 @@ class PdfService(
     data["assessmentsUrl"] = assessmentsUrl
     data["docSubjectType"] = documentSubjectType.name
     data["dateToday"] = LocalDate.now()
-    data["showSigned"] = true
-    data["showName"] = true
+
+    if(documentSubjectType.includesSignAndName) {
+      data["showSigned"] = true
+      data["showName"] = true
+    }
     if (documentSubjectType.includesGradeAndDate) {
       data["showGrade"] = true
       data["showDate"] = true
