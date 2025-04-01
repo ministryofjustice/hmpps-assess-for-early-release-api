@@ -13,5 +13,5 @@ enum class DocumentSubjectType(val includesGradeAndDate: Boolean) {
   OFFENDER_APPROVED_FORM(false),
   OFFENDER_AGENCY_NOTIFICATION_FORM(false),
   OFFENDER_CANCEL_AGENCY_NOTIFICATION_FORM(false),
-  OFFENDER_NOT_SUITABLE_FORM(false)
+  OFFENDER_NOT_SUITABLE_FORM(false),
 }
