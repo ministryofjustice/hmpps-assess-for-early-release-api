@@ -5,12 +5,15 @@
   <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
 </head>
 <body>
-<div class="title">Home Detention Curfew (tagging): Not Eligible</div>
+<div class="title">Home Detention Curfew (tagging): refused</div>
 <div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
 <p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
-<p>We checked to see if you're eligible for release from prison on Home Detention Curfew (tagging).</p>
-<p>By law you are not eligible because . </p>
-<p>You cannot challenge this because it is based on the law, not on a decision by prison staff.</p>
+<p>
+  We have assessed your case and decided that you will not be released on Home Detention Curfew<br>(tagging). This is because .
+</p>
+<p>
+  You will be released from prison on <span data-th-text="${#temporals.format(currentAssessment.crd, 'dd MMM yyyy')}"></span>
+</p>
 <div data-th-replace="~{offender/fragments/signature.html :: signature}"></div>
 </body>
 </html>
