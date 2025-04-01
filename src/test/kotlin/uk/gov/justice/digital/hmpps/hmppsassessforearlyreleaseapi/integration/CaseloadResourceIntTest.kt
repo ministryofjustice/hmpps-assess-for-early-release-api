@@ -229,9 +229,9 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
           PostponeCaseReasonType.ON_REMAND,
           PostponeCaseReasonType.SEGREGATED_AND_GOVERNOR_NEEDS_TO_APPROVE_RELEASE,
           PostponeCaseReasonType.NEEDS_TO_SPEND_7_DAYS_IN_NORMAL_LOCATION_AFTER_SEGREGATION,
-          PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
-          PostponeCaseReasonType.CONFISCATION_ORDER_NOT_PAID_AND_ENF_AGENCY_DEEMS_UNSUITABLE,
-          PostponeCaseReasonType.PENDING_APPLICATION_WITH_UNDULY_LENIENT_LENIENT_SCH,
+          PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON,
+          PostponeCaseReasonType.WOULD_NOT_FOLLOW_REQUIREMENTS_OF_CONFISCATION_ORDER,
+          PostponeCaseReasonType.PENDING_APPLICATION_WITH_UNDULY_LENIENT_SENTENCE_SCH,
         )
     }
   }
