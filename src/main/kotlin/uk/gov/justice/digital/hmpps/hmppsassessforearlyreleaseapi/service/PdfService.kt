@@ -34,7 +34,7 @@ class PdfService(
     data["docSubjectType"] = documentSubjectType.name
     data["dateToday"] = LocalDate.now()
 
-    if(documentSubjectType.includesSignAndName) {
+    if (documentSubjectType.includesSignAndName) {
       data["showSigned"] = true
       data["showName"] = true
     }
