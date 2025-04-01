@@ -102,7 +102,7 @@ object TestData {
     LinkedHashSet(
       listOf(
         PostponeCaseReasonType.ON_REMAND,
-        PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
+        PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON,
       ),
     ),
     agent = PRISON_CA_AGENT,
