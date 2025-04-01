@@ -35,7 +35,7 @@ class PdfService(
     data["dateToday"] = LocalDate.now()
     data["showSigned"] = true
     data["showName"] = true
-    if (documentSubjectType == DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM || documentSubjectType == DocumentSubjectType.OFFENDER_POSTPONED_FORM || documentSubjectType == DocumentSubjectType.OFFENDER_REFUSED_FORM) {
+    if (documentSubjectType.includesGradeAndDate) {
       data["showGrade"] = true
       data["showDate"] = true
     }
