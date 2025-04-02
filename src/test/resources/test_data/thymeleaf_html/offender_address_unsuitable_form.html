@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <title>OFFENDER_ADDRESS_UNSUITABLE_FORM</title>
+  <link rel="stylesheet" href="http://host.docker.internal:8089/css/style.css">
+</head>
+<body>
+  <div class="title">Home Detention Curfew (tagging): Address Unsuitable</div>
+  <div>
+  <div class="offender-summary">
+    <div>Name: First-1 Last-1</div>
+    <div>Location: Birmingham (HMP)</div>
+    <div>Prison no: A1234AA</div>
+    <div>Date: ((current_date))</div>
+  </div>
+</div>
+  <p>First-1 Last-1</p>
+  <p>
+    We have checked the address you gave us and decided it is not a suitable place for you to live while under
+    Home Detention Curfew (tagging).
+  </p>
+  <p>
+    You need to provide details of another address where you could live if you still want to be considered for
+    tagging.
+  </p>
+  <p>
+    If you cannot provide an address, Community Accommodation Service Tier 2 (CAS2) could help you find
+    somewhere to stay.
+  </p>
+  <p>
+    <input id="noLongerWantToBeConsidered" type="checkbox"/>
+    <label class="large-checkbox-label" for="noLongerWantToBeConsidered">I no longer want to be considered for tagging</label>
+  </p>
+  <p>
+    <input id="stillWantToBeConsidered" type="checkbox"/>
+    <label class="large-checkbox-label" for="stillWantToBeConsidered">I still want to be considered but do not have another address</label>
+  </p>
+  <p class="address-question">
+    What address would you prefer to live at?
+  </p>
+  <div class="bordered-box">
+    <p>Town:</p>
+    <p>County:</p>
+    <p>Signed:</p>
+    <p>Date:</p>
+  </div>
+  <p>
+    <input id="provideAnotherAddress" type="checkbox"/>
+    <label class="large-checkbox-label" for="provideAnotherAddress">I can provide another address</label>
+  </p>
+  <p class="address-question">
+    What address would you prefer to live at?
+  </p>
+  <div class="bordered-box">
+    <p>Address line 1:</p>
+    <p>Address line 2:</p>
+    <p>Town or city:</p>
+    <p>County:</p>
+    <p>Postcode:</p>
+    <p>Telephone:</p>
+  </div>
+  <div class="subtitle">
+    Who is the main person living at this address?
+  </div>
+  <p>
+    We will contact them to make sure the address is suitable for you to live there. Provide the landlord's details
+    if no one else lives there.
+  </p>
+  <div class="bordered-box">
+    <p>Name:</p>
+    <p>Telephone:</p>
+    <p>What is their relationship to you:</p>
+  </div>
+  <div class="subtitle">
+    Does anyone else live at this address?
+  </div>
+  <div class="inline-checkbox">
+    <input id="yesAnyoneElse" type="checkbox"/>
+    <label for="yesAnyoneElse">Yes</label>
+    <input id="noAnyoneElse" type="checkbox"/>
+    <label for="noAnyoneElse">No</label>
+  </div>
+  <div class="bordered-box page-break-after">
+    <p>
+      If you answered yes, provide details:
+    </p>
+    <br/>
+    <p>Name:</p>
+    <p>Relationship to you:</p>
+    <p>Age or date of birth (if under 18):</p>
+    <br/>
+    <p>Name:</p>
+    <p>Relationship to you:</p>
+    <p>Age or date of birth (if under 18):</p>
+    <br/>
+    <p>Name:</p>
+    <p>Relationship to you:</p>
+    <p>Age or date of birth (if under 18):</p>
+  </div>
+  <div class="subtitle">
+    Have you ever been in trouble with or offended against the people living here or with the neighbours?
+  </div>
+  <div class="inline-checkbox">
+    <input id="yesTrouble" type="checkbox"/>
+    <label for="yesTrouble">Yes</label>
+    <input id="noTrouble" type="checkbox"/>
+    <label for="noTrouble">No</label>
+  </div>
+  <p>
+    If you answered yes, provide details:
+  </p>
+  <label>
+    <input class="other-reason" type="text" name="otherReason"/>
+  </label>
+  <p>
+    As far as I know the information I provided is correct.
+  </p>
+  <p>
+    I am happy for the main person living at the address or the landlord to be contacted.
+  </p>
+  <p>
+    I am happy for details of my offending behaviour to be disclosed to the main person living at the address so
+    that they can give informed consent to me staying there on HDC.
+  </p>
+  <p>
+    Signed:
+  </p>
+  <p>
+    Date:
+  </p>
+</body>
+</html>

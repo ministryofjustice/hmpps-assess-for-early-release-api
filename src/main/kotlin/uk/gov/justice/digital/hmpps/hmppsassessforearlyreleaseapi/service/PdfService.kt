@@ -10,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.Pos
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
+import java.io.File
 import java.time.LocalDate
 
 @Service
@@ -46,6 +47,7 @@ class PdfService(
     addAssessmentDetails(documentSubjectType, prisonNumber, data)
 
     val htmlContent = createHtmlContent(templatePathAndFile, data)
+    File("unsuitable.html").writeText(htmlContent)
     return gotenbergApiClient.sendCreatePdfRequest(htmlContent)
   }
 
