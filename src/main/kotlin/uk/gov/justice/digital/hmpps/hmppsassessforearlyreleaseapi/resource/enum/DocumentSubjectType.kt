@@ -10,7 +10,7 @@ enum class DocumentSubjectType(val includesSignAndName: Boolean, val includesGra
   OFFENDER_OPT_OUT_FORM(true, false),
   OFFENDER_ADDRESS_UNSUITABLE_FORM(false, false),
   OFFENDER_NOT_ENOUGH_TIME_FORM(false, false),
-  OFFENDER_APPROVED_FORM(false, false),
+  OFFENDER_APPROVED_FORM(true, true),
   OFFENDER_AGENCY_NOTIFICATION_FORM(false, false),
   OFFENDER_CANCEL_AGENCY_NOTIFICATION_FORM(false, false),
   OFFENDER_NOT_SUITABLE_FORM(false, false),
