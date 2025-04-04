@@ -26,14 +26,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Assessme
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class AssessmentResource(
   private val assessmentService: AssessmentService,
-  private val agentHolder: AgentHolder,
 ) {
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")

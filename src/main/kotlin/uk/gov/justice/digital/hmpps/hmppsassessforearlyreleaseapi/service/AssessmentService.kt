@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import com.microsoft.applicationinsights.TelemetryClient
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -58,7 +57,6 @@ class AssessmentService(
   private val assessmentToAssessmentOverviewSummaryMapper: AssessmentToAssessmentOverviewSummaryMapper,
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
-  private val telemetryClient: TelemetryClient,
   private val staffRepository: StaffRepository,
   @org.springframework.context.annotation.Lazy
   private val probationService: ProbationService,
