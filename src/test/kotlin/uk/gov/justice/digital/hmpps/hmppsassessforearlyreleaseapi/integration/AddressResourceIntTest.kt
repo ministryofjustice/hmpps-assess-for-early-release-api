@@ -547,9 +547,9 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .bodyValue(invalidAddResidentRequest)
         .exchange()
         .expectStatus()
-        .isEqualTo(500)
+        .isEqualTo(400)
         .expectBody()
-        .jsonPath("$.userMessage").isEqualTo("Unexpected error: 400 BAD_REQUEST \"Validation failure\"")
+        .jsonPath("$.userMessage").isEqualTo("Validation failure: 400 BAD_REQUEST \"Validation failure\"")
     }
 
     private fun anAddResidentRequest(): List<AddResidentRequest> = listOf(

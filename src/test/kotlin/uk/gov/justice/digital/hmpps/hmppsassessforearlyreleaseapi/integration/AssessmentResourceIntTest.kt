@@ -8,7 +8,6 @@ import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import org.mockito.kotlin.verify
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
@@ -20,8 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
@@ -42,7 +39,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.Pos
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
@@ -52,7 +48,6 @@ import java.util.function.Consumer
 
 private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
-private const val DELETE_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
 private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
 private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/postpone"
@@ -162,96 +157,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class DeleteCurrentAssessment {
-    @Test
-    fun `should return unauthorized if no token`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .exchange()
-        .expectStatus()
-        .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden if no role`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .headers(setAuthorisation())
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Test
-    fun `should return forbidden if wrong role`() {
-      webTestClient.get()
-        .uri(DELETE_CURRENT_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Sql(
-      "classpath:test_data/reset.sql",
-      "classpath:test_data/some-offenders.sql",
-    )
-    @Test
-    fun `should soft delete current assigment for an offender`() {
-      // Given
-      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
-      val url = DELETE_CURRENT_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
-      val authorisation = setAuthorisation(roles = roles, agent = PRISON_CA_AGENT)
-      val crn = "DX12340A"
-
-      probationSearchApiMockServer.stubSearchForPersonOnProbation(crn)
-      deliusMockServer.stubGetOffenderManager(crn)
-
-      // When
-      val result = webTestClient.delete()
-        .uri(url)
-        .headers(authorisation)
-        .exchange()
-
-      // Then
-      result.expectStatus().isNoContent
-
-      val deletedAssessment = assessmentRepository.findById(initialAssessment.id).get()
-      assertThat(deletedAssessment.deletedTimestamp).isNotNull()
-      assertThat(deletedAssessment.deletedTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
-
-      val lastEvent = deletedAssessment.assessmentEvents.last()
-      assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
-      assertThat(lastEvent.agent.username).isEqualTo(PRISON_CA_AGENT.username)
-      assertThat(lastEvent).isOfAnyClassIn(GenericChangedEvent::class.java)
-      val lastEventGeneric = lastEvent as GenericChangedEvent
-      assertThat(lastEventGeneric.changes).isEqualTo(
-        mapOf(
-          "prisonerNumber" to "A1234AA",
-        ),
-      )
-
-      verify(telemetryClient).trackEvent(
-        TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME.key,
-        mapOf(
-          "prisonerNumber" to "A1234AA",
-          "agent" to "prisonUser",
-          "agentRole" to "PRISON_CA",
-          "id" to initialAssessment.id.toString(),
-        ),
-        null,
-      )
-
-      val assessments = deletedAssessment.offender.assessments
-      assertThat(assessments).hasSize(2)
-      assertThat(assessments.first().id).isEqualTo(initialAssessment.id)
-      assertThat(assessments.last().deletedTimestamp).isNull()
-      assertThat(assessments.last().status).isEqualTo(NOT_STARTED)
-    }
-  }
-
-  @Nested
   open inner class PostponeCase {
 
     private inner class PostponeCaseRequestNoAgent(
@@ -353,7 +258,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
             assertThat(it.id).isNotNegative()
             assertThat(it.assessment).isEqualTo(assessment)
             assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON)
-            assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), (within(2, ChronoUnit.SECONDS)))
+            assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
           },
         )
     }

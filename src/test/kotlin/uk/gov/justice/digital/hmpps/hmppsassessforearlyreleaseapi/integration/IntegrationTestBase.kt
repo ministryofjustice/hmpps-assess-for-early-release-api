@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.Postgr
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer.DB_PASSWORD
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.PostgresContainer.DB_USERNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.TestAssessmentRepository
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.TestOffenderRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
@@ -43,6 +44,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var testAssessmentRepository: TestAssessmentRepository
+
+  @Autowired
+  protected lateinit var testOffenderRepository: TestOffenderRepository
 
   @Autowired
   protected lateinit var jwtAuthHelper: JwtAuthorisationHelper

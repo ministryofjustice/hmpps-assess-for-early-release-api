@@ -24,17 +24,18 @@ class OffenderService(
   private val telemetryClient: TelemetryClient,
   private val assessmentService: AssessmentService,
 ) {
-  fun createOrUpdateOffender(nomisId: String) {
-    val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
+
+  fun createOrUpdateOffender(prisonNumber: String) {
+    val prisoners = prisonService.searchPrisonersByNomisIds(listOf(prisonNumber))
     if (prisoners.isEmpty()) {
-      val msg = "Could not find prisoner with prisonNumber $nomisId in prisoner search"
+      val msg = "Could not find prisoner with prisonNumber $prisonNumber in prisoner search"
       log.warn(msg)
       error(msg)
     }
 
     val prisoner = prisoners.first()
     if (prisoner.homeDetentionCurfewEligibilityDate != null) {
-      val offender = offenderRepository.findByPrisonNumber(nomisId)
+      val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       if (offender != null) {
         updateOffender(offender, prisoner)
       } else {
