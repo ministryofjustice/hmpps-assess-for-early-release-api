@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
@@ -56,6 +57,9 @@ data class AssessmentSummary(
 
   @Schema(description = "The opt out reason description if rhe optOutReasonType is OTHER")
   var optOutReasonOther: String? = null,
+
+  @Schema(description = "The reasons that the offender's current assessment was postponed", example = "ON_REMAND")
+  val postponementReasons: List<PostponeCaseReasonType> = listOf(),
 
   @Schema(description = "Prisoner cell location", example = "A-1-002", required = false)
   val cellLocation: String?,

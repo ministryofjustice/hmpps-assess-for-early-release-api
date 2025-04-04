@@ -5,11 +5,11 @@ body {
 
 .title {
     font-size: 18pt;
-    margin: 20px 0;
+    margin: 10px 0;
 }
 
 .subtitle {
-    font-size: 16pt;
+    font-size: 14pt;
 }
 
 .offender-summary {
@@ -55,6 +55,19 @@ ul.unindented-list li {
     align-items: baseline;
 }
 
+.large-checkbox-label {
+    font-size: larger;
+}
+
+.inline-checkbox {
+    font-size: larger;
+    margin: 30px 0 15px;
+}
+
+.inline-checkbox > label {
+    margin-right: 30px;
+}
+
 .checkbox {
     appearance: none;
     border: 1px solid #000;
@@ -63,3 +76,16 @@ ul.unindented-list li {
     margin-right: 8px;
 }
 
+.bordered-box {
+    border: 1px solid black;
+    padding-left: 10px;
+    margin-bottom: 20px;
+}
+
+.address-question {
+    margin: 5px;
+}
+
+.page-break-after {
+    break-after: page;
+}

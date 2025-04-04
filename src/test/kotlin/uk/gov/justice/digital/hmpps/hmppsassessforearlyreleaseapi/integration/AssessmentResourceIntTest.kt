@@ -177,7 +177,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       LinkedHashSet(
         listOf(
           PostponeCaseReasonType.ON_REMAND,
-          PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY,
+          PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON,
         ),
       ),
       agent = PRISON_CA_AGENT,
@@ -257,7 +257,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           Consumer {
             assertThat(it.id).isNotNegative()
             assertThat(it.assessment).isEqualTo(assessment)
-            assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.COMMITED_OFFENCE_REFERRED_TO_LAW_ENF_AGENCY)
+            assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON)
             assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
           },
         )

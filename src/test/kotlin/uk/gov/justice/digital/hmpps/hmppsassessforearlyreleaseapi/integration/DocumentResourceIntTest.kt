@@ -62,7 +62,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   @ParameterizedTest
   @EnumSource(
     value = DocumentSubjectType::class,
-    names = ["OFFENDER_ELIGIBLE_FORM", "OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM"],
+    names = ["OFFENDER_ELIGIBLE_FORM", "OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM", "OFFENDER_ADDRESS_UNSUITABLE_FORM"],
   )
   @Sql(
     "classpath:test_data/reset.sql",
@@ -176,6 +176,84 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   fun `gets opt out form`() {
     // Given
     val documentSubjectType = DocumentSubjectType.OFFENDER_OPT_OUT_FORM
+    val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
+
+    gotenbergMockServer.stubPostPdf(pdfBytes)
+    prisonRegisterMockServer.stubGetPrisons()
+    stubPrisonerSearch(prisonNumber)
+
+    // When
+    val responseSpec = doGetRequestDocument(getOffenderDocumentUrl)
+
+    // Then
+    responseSpec.expectStatus().isOk
+
+    val result = responseSpec.expectBody(ByteArray::class.java)
+      .returnResult().responseBody
+    assertThat(result).isEqualTo(pdfBytes)
+    assertDocument(documentSubjectType)
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `gets postponed form`() {
+    // Given
+    val documentSubjectType = DocumentSubjectType.OFFENDER_POSTPONED_FORM
+    val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
+
+    gotenbergMockServer.stubPostPdf(pdfBytes)
+    prisonRegisterMockServer.stubGetPrisons()
+    stubPrisonerSearch(prisonNumber)
+
+    // When
+    val responseSpec = doGetRequestDocument(getOffenderDocumentUrl)
+
+    // Then
+    responseSpec.expectStatus().isOk
+
+    val result = responseSpec.expectBody(ByteArray::class.java)
+      .returnResult().responseBody
+    assertThat(result).isEqualTo(pdfBytes)
+    assertDocument(documentSubjectType)
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `gets refused form`() {
+    // Given
+    val documentSubjectType = DocumentSubjectType.OFFENDER_REFUSED_FORM
+    val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
+
+    gotenbergMockServer.stubPostPdf(pdfBytes)
+    prisonRegisterMockServer.stubGetPrisons()
+    stubPrisonerSearch(prisonNumber)
+
+    // When
+    val responseSpec = doGetRequestDocument(getOffenderDocumentUrl)
+
+    // Then
+    responseSpec.expectStatus().isOk
+
+    val result = responseSpec.expectBody(ByteArray::class.java)
+      .returnResult().responseBody
+    assertThat(result).isEqualTo(pdfBytes)
+    assertDocument(documentSubjectType)
+  }
+
+  @Test
+  @Sql(
+    "classpath:test_data/reset.sql",
+    "classpath:test_data/some-offenders.sql",
+  )
+  fun `gets approved form`() {
+    // Given
+    val documentSubjectType = DocumentSubjectType.OFFENDER_APPROVED_FORM
     val getOffenderDocumentUrl = "/offender/$prisonNumber/document/$documentSubjectType"
 
     gotenbergMockServer.stubPostPdf(pdfBytes)
