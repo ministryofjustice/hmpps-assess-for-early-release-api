@@ -38,7 +38,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -50,7 +49,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -273,59 +271,6 @@ class AssessmentService(
       surname = offenderManager.name.surname,
     ),
   )
-
-  @Transactional
-  fun deleteCurrentAssessment(prisonerNumber: String, agent: AgentDto) {
-    log.debug("Deleting current assessment for prisonerNumber: {}", prisonerNumber)
-
-    val currentAssessment = this.getCurrentAssessment(prisonerNumber)
-    val offender = currentAssessment.offender
-
-    currentAssessment.deletedTimestamp = LocalDateTime.now()
-
-    val assessmentEventInfo = mutableMapOf(
-      "prisonerNumber" to prisonerNumber,
-    )
-
-    recordAssessmentEvent(AssessmentEventType.ASSESSMENT_DELETED, currentAssessment, assessmentEventInfo, agent)
-
-    val telemetryInfo = assessmentEventInfo + mapOf(
-      "agent" to agent.username,
-      "agentRole" to agent.role.name,
-      "id" to currentAssessment.id.toString(),
-    )
-
-    sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
-
-    assessmentRepository.save(currentAssessment)
-
-    val newAssessment = createAssessment(offender, prisonerNumber = prisonerNumber, currentAssessment.bookingId)
-    offender.assessments.add(newAssessment)
-  }
-
-  private fun recordAssessmentEvent(
-    type: AssessmentEventType,
-    assessment: Assessment,
-    info: MutableMap<String, String>,
-    agent: AgentDto,
-  ) {
-    assessment.recordEvent(
-      eventType = type,
-      info,
-      agent = agent.toEntity(),
-    )
-  }
-
-  private fun sendTelemetryInfo(
-    deleteInfo: Map<String, String>,
-    telemertyEvent: TelemertyEvent,
-  ) {
-    telemetryClient.trackEvent(
-      telemertyEvent.key,
-      deleteInfo,
-      null,
-    )
-  }
 
   private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
     val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
