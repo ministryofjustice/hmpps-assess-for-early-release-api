@@ -62,7 +62,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   @ParameterizedTest
   @EnumSource(
     value = DocumentSubjectType::class,
-    names = ["OFFENDER_ELIGIBLE_FORM", "OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM", "OFFENDER_ADDRESS_UNSUITABLE_FORM"],
+    names = ["OFFENDER_ELIGIBLE_FORM", "OFFENDER_ADDRESS_CHECKS_INFORMATION_FORM", "OFFENDER_ADDRESS_UNSUITABLE_FORM", "OFFENDER_ADDRESS_CHECKS_FORM"],
   )
   @Sql(
     "classpath:test_data/reset.sql",
