@@ -89,3 +89,15 @@ ul.unindented-list li {
 .page-break-after {
     break-after: page;
 }
+
+.agency-notification-title {
+    font-size: 18pt;
+    font-weight: bold;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.element {
+    position: absolute;
+    top: 0;
+}
