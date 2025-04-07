@@ -50,7 +50,7 @@ class SupportService(
 
   fun getAssessments(prisonNumber: String): List<AssessmentSearchResponse> {
     val assessments = assessmentRepository.findByOffenderPrisonNumberOrderById(prisonNumber)
-    AssessmentService.log.debug("Retrieved ${assessments.size} assessments using prisonNumber: $prisonNumber")
+    log.debug("Retrieved ${assessments.size} assessments using prisonNumber: $prisonNumber")
     return assessments
   }
 
@@ -63,14 +63,14 @@ class SupportService(
 
   @Transactional
   fun deleteAssessment(assessmentId: Long, agent: AgentDto) {
-    AssessmentService.log.debug("Deleting assessment for assessmentId {}", assessmentId)
+    log.debug("Deleting assessment for assessmentId {}", assessmentId)
     val assessment = assessmentRepository.findById(assessmentId).orElseThrow { ItemNotFoundException("Cannot find assessment with assessment id $assessmentId") }
     delete(assessment, agent)
   }
 
   @Transactional
   fun deleteCurrentAssessment(prisonerNumber: String, agent: AgentDto) {
-    AssessmentService.log.debug("Deleting current assessment for prisonerNumber: {}", prisonerNumber)
+    log.debug("Deleting current assessment for prisonerNumber: {}", prisonerNumber)
     val assessment = assessmentService.getCurrentAssessment(prisonerNumber)
     delete(assessment, agent)
   }
