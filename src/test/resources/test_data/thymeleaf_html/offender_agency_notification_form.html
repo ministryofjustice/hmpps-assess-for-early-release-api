@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en-GB">
 <head>
-  <title data-th-text="${docSubjectType}">Document Title</title>
-  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+  <title>OFFENDER_AGENCY_NOTIFICATION_FORM</title>
+  <link rel="stylesheet" href="http://host.docker.internal:8089/css/style.css">
 </head>
 <body style="margin: 0; padding: 0;">
 <header style="position: fixed; top: 0; width: 100%; align-content: start; padding-bottom: 40px;">
@@ -10,10 +10,10 @@
 </header>
 <main style="margin-top: 60px; padding: 20px;">
   <div class="bordered-box" style="font-weight: bold; padding-left: 1px;">
-      This form must be sent to the EMS provider, probation service and the home police force.<br><br>
+    This form must be sent to the EMS provider, probation service and the home police force.<br><br>
 
-      A copy of the prisoner’s licence must be sent as soon as possible on the day of release. All<br>
-      accompanying documentation should be sent to the probation service.
+    A copy of the prisoner’s licence must be sent as soon as possible on the day of release. All<br>
+    accompanying documentation should be sent to the probation service.
   </div>
   <!-- Prison details -->
   <div>
@@ -51,19 +51,19 @@
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">a. HDC release date</td>
-        <td style="width: 65%;"><span data-th-text="${#temporals.format(currentAssessment.hdced, 'dd MMM yyyy')}"></span></td>
+        <td style="width: 65%;"><span>11 Apr 2025</span></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">b. Name</td>
-        <td style="width: 65%;"><span data-th-text="${fullName}"></span></td>
+        <td style="width: 65%;"><span>First-1 Last-1</span></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">c. D.O.B</td>
-        <td style="width: 65%;"><span data-th-text="${currentAssessment.dateOfBirth}"></span></td>
+        <td style="width: 65%;"><span>1978-03-20</span></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">d. NOMIS ID</td>
-        <td style="width: 65%;"><span data-th-text="${currentAssessment.prisonNumber}"></span></td>
+        <td style="width: 65%;"><span>A1234AA</span></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">e. PNC ID</td>
@@ -75,7 +75,7 @@
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">g. Conditional release date</td>
-        <td style="width: 65%;"><span data-th-text="${#temporals.format(currentAssessment.crd, 'dd MMM yyyy')}"></span></td>
+        <td style="width: 65%;"><span>14 Nov 2020</span></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black;width: 35%;">h. Is an interpreter required? (If yes,
@@ -89,45 +89,45 @@
   <div style="padding-top: 30px;">
     <table style="width:100%; border-collapse: collapse; border: 1px solid black;">
       <thead>
-        <tr style="border-bottom: 1px solid black; background-color: #808080;">
-          <th style="text-align: left; color: white;"  colspan="4">
-            3. Type of electronic monitoring required<br>
-            <span style="font-style: italic; font-weight: 100;">Please confirm all that apply and provide the end date of the conditions</span>
-          </th>
-        </tr>
+      <tr style="border-bottom: 1px solid black; background-color: #808080;">
+        <th style="text-align: left; color: white;"  colspan="4">
+          3. Type of electronic monitoring required<br>
+          <span style="font-style: italic; font-weight: 100;">Please confirm all that apply and provide the end date of the conditions</span>
+        </th>
+      </tr>
       </thead>
       <tbody>
-        <tr style="border-bottom: 1px solid black;">
-          <td style="border-right: 1px solid black;width: 35%;">Curfew Monitoring (Yes/No)</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-          <td style="border-right: 1px solid black; width: 11%;">End date:</td>
-          <td style="border-right: 1px solid black;width: 27%;"></td>
-        </tr>
-        <tr style="border-bottom: 1px solid black;">
-          <td style="border-right: 1px solid black;width: 35%;">Exclusion(s) Monitoring
-            (Yes/No)</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-          <td style="border-right: 1px solid black; width: 11%;">End date:</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-        </tr>
-        <tr style="border-bottom: 1px solid black;">
-          <td style="border-right: 1px solid black;width: 35%;">Trail Monitoring (Yes/No)
-            This involves monitoring an
-            offender’s movements to
-            support discussions with their
-            offender manager about lifestyle
-            and behaviours</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-          <td style="border-right: 1px solid black; width: 11%;">End date:</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-        </tr>
-        <tr style="border-bottom: 1px solid black;">
-          <td style="border-right: 1px solid black;width: 35%;">Other monitoring requirement
-            (Yes/No)</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-          <td style="border-right: 1px solid black; width: 11%;">End date:</td>
-          <td style="border-right: 1px solid black; width: 27%;"></td>
-        </tr>
+      <tr style="border-bottom: 1px solid black;">
+        <td style="border-right: 1px solid black;width: 35%;">Curfew Monitoring (Yes/No)</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+        <td style="border-right: 1px solid black; width: 11%;">End date:</td>
+        <td style="border-right: 1px solid black;width: 27%;"></td>
+      </tr>
+      <tr style="border-bottom: 1px solid black;">
+        <td style="border-right: 1px solid black;width: 35%;">Exclusion(s) Monitoring
+          (Yes/No)</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+        <td style="border-right: 1px solid black; width: 11%;">End date:</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+      </tr>
+      <tr style="border-bottom: 1px solid black;">
+        <td style="border-right: 1px solid black;width: 35%;">Trail Monitoring (Yes/No)
+          This involves monitoring an
+          offender’s movements to
+          support discussions with their
+          offender manager about lifestyle
+          and behaviours</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+        <td style="border-right: 1px solid black; width: 11%;">End date:</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+      </tr>
+      <tr style="border-bottom: 1px solid black;">
+        <td style="border-right: 1px solid black;width: 35%;">Other monitoring requirement
+          (Yes/No)</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+        <td style="border-right: 1px solid black; width: 11%;">End date:</td>
+        <td style="border-right: 1px solid black; width: 27%;"></td>
+      </tr>
       </tbody>
     </table>
   </div>
@@ -281,7 +281,7 @@
       </tr>
       <tr style="border-bottom: 1px solid black;">
         <td style="border-right: 1px solid black; width: 35%; height: 180px !important; vertical-align: top;">
-        c. Describe the exclusion zone(s) fully
+          c. Describe the exclusion zone(s) fully
           (include zone collection reference if the Portal
           has been used to draw the zone(s)2)</td>
         <td style="width: 65%;"></td>
@@ -292,7 +292,7 @@
         <td style="width: 65%;"></td>
       </tr>
       <tr style="border-bottom: 1px solid black;">
-          <td style="border-right: 1px solid black;" colspan="2">e. If the answer above is no, provide the times when the exclusion(s) should be monitored </td>
+        <td style="border-right: 1px solid black;" colspan="2">e. If the answer above is no, provide the times when the exclusion(s) should be monitored </td>
       </tr>
     </table>
     <!-- Exclusion zone  -->
