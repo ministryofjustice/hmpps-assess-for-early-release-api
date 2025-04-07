@@ -38,7 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -295,7 +295,7 @@ class AssessmentService(
       "id" to currentAssessment.id.toString(),
     )
 
-    sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
+    sendTelemetryInfo(telemetryInfo, TelemetryEvent.ASSESSMENT_DELETE_EVENT_NAME)
 
     assessmentRepository.save(currentAssessment)
 
@@ -318,10 +318,10 @@ class AssessmentService(
 
   private fun sendTelemetryInfo(
     deleteInfo: Map<String, String>,
-    telemertyEvent: TelemertyEvent,
+    telemetryEvent: TelemetryEvent,
   ) {
     telemetryClient.trackEvent(
-      telemertyEvent.key,
+      telemetryEvent.key,
       deleteInfo,
       null,
     )
