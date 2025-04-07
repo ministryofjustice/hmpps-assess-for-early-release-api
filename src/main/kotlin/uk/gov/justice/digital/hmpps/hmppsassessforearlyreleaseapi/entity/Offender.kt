@@ -2,8 +2,6 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity
 
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
@@ -13,7 +11,6 @@ import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.hibernate.Hibernate
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -51,10 +48,6 @@ data class Offender(
   val assessments: MutableSet<Assessment> = mutableSetOf(),
 
   @NotNull
-  @Enumerated(EnumType.STRING)
-  val status: AssessmentStatus = AssessmentStatus.NOT_STARTED,
-
-  @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
@@ -74,5 +67,5 @@ data class Offender(
   override fun hashCode(): Int = javaClass.hashCode()
 
   @Override
-  override fun toString() = this::class.simpleName + "(id: $id, status: $status)"
+  override fun toString() = this::class.simpleName + "(id: $id)"
 }
