@@ -97,7 +97,159 @@ ul.unindented-list li {
     margin-bottom: 10px;
 }
 
-.element {
-    position: absolute;
+.fixed-header {
+    position: fixed;
     top: 0;
+    width: 100%;
+    align-content: start;
+    padding-bottom: 40px;
+}
+
+.body-styles {
+    margin: 0;
+    padding: 0;
+}
+
+.main-styles {
+    margin-top: 60px;
+    padding: 20px;
+}
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid black;
+}
+
+.header-row {
+    border-bottom: 1px solid black;
+    background-color: #808080;
+}
+
+.header-cell {
+    text-align: left;
+    color: white;
+}
+
+.data-row {
+    border-bottom: 1px solid black;
+}
+
+.data-cell {
+    border-right: 1px solid black;
+    width: 35%;
+}
+
+.data-cell:last-child {
+    width: 65%;
+}
+
+.prisoner-details {
+    padding-top: 20px;
+}
+
+.divider {
+    padding-top: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid black;
+}
+
+.electronic-monitoring {
+    padding-top: 30px;
+}
+
+.italic-light {
+    font-style: italic;
+    font-weight: 100;
+}
+
+.curfew-details {
+    padding-top: 60px;
+}
+
+.top-align {
+    height: 60px;
+    vertical-align: top;
+}
+
+.curfew-times {
+    padding-top: 40px;
+}
+
+.data-cell {
+    border-right: 1px solid black;
+    width: 20%;
+}
+
+.data-cell:last-child {
+    width: 20%;
+}
+
+.top-align {
+    vertical-align: top;
+}
+
+.half-width-table {
+    width: 50%;
+    border-collapse: collapse;
+    border: 1px solid black;
+    border-top: none;
+    height: 30px;
+}
+
+.exclusion-conditions {
+    padding-top: 115px;
+}
+
+.header-cell {
+    text-align: start;
+    color: white;
+}
+
+.tall-cell {
+    height: 70px !important;
+}
+
+.short-cell {
+    height: 18px;
+}
+
+.no-top-border {
+    border-top: none;
+}
+
+.trail-monitoring {
+    padding-top: 30px;
+}
+
+.other-monitoring-requirements {
+    padding-top: 55px;
+}
+
+.data-cell {
+    border-right: 1px solid black;
+}
+
+.tall-cell {
+    height: 90px;
+}
+
+.additional-information {
+    padding-top: 90px;
+}
+
+.taller-cell {
+    height: 100px;
+}
+
+.community-offender-manager-details {
+    padding-top: 60px;
+}
+
+.wide {
+    width: 40%;
+}
+
+.wider {
+    width: 60%;
 }
