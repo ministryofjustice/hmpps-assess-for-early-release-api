@@ -257,12 +257,13 @@ ul.unindented-list li {
 
 .wider {
     width: 60%;
+}
 
 .margin-top-bottom-medium {
     margin: 30px 0
 }
 
-.important {
+.font-weight-bold {
     font-weight: bold;
 }
 
