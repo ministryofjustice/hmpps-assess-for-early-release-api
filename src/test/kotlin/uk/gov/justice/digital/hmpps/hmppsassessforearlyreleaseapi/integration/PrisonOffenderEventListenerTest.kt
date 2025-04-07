@@ -30,7 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.PolicyService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TRANSFERRED_EVENT_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.Duration
 import java.time.Instant
@@ -327,7 +327,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     // Then
     awaitAtMost30Secs untilAsserted {
       verify(telemetryClient).trackEvent(
-        TelemertyEvent.PRISONER_UPDATED_EVENT_NAME.key,
+        TelemetryEvent.PRISONER_UPDATED_EVENT_NAME.key,
         mapOf(
           "prisonNumber" to PRISON_NUMBER,
           "firstName" to newFirstName,
@@ -393,7 +393,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
   private fun verifyTelemetryEvent(prisonNumber: String, hdced: LocalDate) {
     awaitAtMost30Secs untilAsserted {
       verify(telemetryClient).trackEvent(
-        TelemertyEvent.PRISONER_CREATED_EVENT_NAME.key,
+        TelemetryEvent.PRISONER_CREATED_EVENT_NAME.key,
         mapOf(
           "prisonNumber" to prisonNumber,
           "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),

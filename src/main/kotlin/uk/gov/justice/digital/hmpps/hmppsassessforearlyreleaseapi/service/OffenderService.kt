@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
@@ -70,7 +70,7 @@ class OffenderService(
     )
 
     telemetryClient.trackEvent(
-      TelemertyEvent.PRISONER_CREATED_EVENT_NAME.key,
+      TelemetryEvent.PRISONER_CREATED_EVENT_NAME.key,
       changes,
       null,
     )
@@ -108,7 +108,7 @@ class OffenderService(
       assessmentRepository.save(currentAssessment)
 
       telemetryClient.trackEvent(
-        TelemertyEvent.PRISONER_UPDATED_EVENT_NAME.key,
+        TelemetryEvent.PRISONER_UPDATED_EVENT_NAME.key,
         changes,
         null,
       )
