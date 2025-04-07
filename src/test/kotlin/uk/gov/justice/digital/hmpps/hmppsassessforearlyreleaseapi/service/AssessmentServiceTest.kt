@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
-import com.microsoft.applicationinsights.TelemetryClient
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentCaptor
@@ -50,7 +49,6 @@ class AssessmentServiceTest {
   private val prisonService = mock<PrisonService>()
   private val assessmentRepository = mock<AssessmentRepository>()
   private val policyService = PolicyService()
-  private val telemetryClient = mock<TelemetryClient>()
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
 
@@ -64,7 +62,6 @@ class AssessmentServiceTest {
       assessmentToAssessmentOverviewSummaryMapper,
       prisonService,
       policyService,
-      telemetryClient,
       staffRepository,
       probationService,
     )

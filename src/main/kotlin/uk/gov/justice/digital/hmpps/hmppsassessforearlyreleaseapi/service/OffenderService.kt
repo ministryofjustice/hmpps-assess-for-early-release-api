@@ -8,7 +8,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
@@ -24,17 +24,18 @@ class OffenderService(
   private val telemetryClient: TelemetryClient,
   private val assessmentService: AssessmentService,
 ) {
-  fun createOrUpdateOffender(nomisId: String) {
-    val prisoners = prisonService.searchPrisonersByNomisIds(listOf(nomisId))
+
+  fun createOrUpdateOffender(prisonNumber: String) {
+    val prisoners = prisonService.searchPrisonersByNomisIds(listOf(prisonNumber))
     if (prisoners.isEmpty()) {
-      val msg = "Could not find prisoner with prisonNumber $nomisId in prisoner search"
+      val msg = "Could not find prisoner with prisonNumber $prisonNumber in prisoner search"
       log.warn(msg)
       error(msg)
     }
 
     val prisoner = prisoners.first()
     if (prisoner.homeDetentionCurfewEligibilityDate != null) {
-      val offender = offenderRepository.findByPrisonNumber(nomisId)
+      val offender = offenderRepository.findByPrisonNumber(prisonNumber)
       if (offender != null) {
         updateOffender(offender, prisoner)
       } else {
@@ -69,7 +70,7 @@ class OffenderService(
     )
 
     telemetryClient.trackEvent(
-      TelemertyEvent.PRISONER_CREATED_EVENT_NAME.key,
+      TelemetryEvent.PRISONER_CREATED_EVENT_NAME.key,
       changes,
       null,
     )
@@ -107,7 +108,7 @@ class OffenderService(
       assessmentRepository.save(currentAssessment)
 
       telemetryClient.trackEvent(
-        TelemertyEvent.PRISONER_UPDATED_EVENT_NAME.key,
+        TelemetryEvent.PRISONER_UPDATED_EVENT_NAME.key,
         changes,
         null,
       )
