@@ -25,7 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderSearchResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
@@ -614,7 +614,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
     )
 
     verify(telemetryClient).trackEvent(
-      TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME.key,
+      TelemetryEvent.ASSESSMENT_DELETE_EVENT_NAME.key,
       mapOf(
         "prisonerNumber" to "A1234AA",
         "agent" to "prisonUser",
