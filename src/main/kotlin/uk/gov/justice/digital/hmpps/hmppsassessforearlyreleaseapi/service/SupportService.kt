@@ -16,7 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemertyEvent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.enums.TelemetryEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentResponseMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToOffenderResponseMapper
 import java.time.LocalDateTime
@@ -99,7 +99,7 @@ class SupportService(
       "id" to assessment.id.toString(),
     )
 
-    sendTelemetryInfo(telemetryInfo, TelemertyEvent.ASSESSMENT_DELETE_EVENT_NAME)
+    sendTelemetryInfo(telemetryInfo, TelemetryEvent.ASSESSMENT_DELETE_EVENT_NAME)
 
     assessmentRepository.save(assessment)
 
@@ -123,10 +123,10 @@ class SupportService(
 
   private fun sendTelemetryInfo(
     deleteInfo: Map<String, String>,
-    telemertyEvent: TelemertyEvent,
+    telemetryEvent: TelemetryEvent,
   ) {
     telemetryClient.trackEvent(
-      telemertyEvent.key,
+      telemetryEvent.key,
       deleteInfo,
       null,
     )

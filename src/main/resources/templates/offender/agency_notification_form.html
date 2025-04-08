@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <title data-th-text="${docSubjectType}">Document Title</title>
+  <link rel="stylesheet" th:href="${assessmentsUrl} + '/css/style.css'">
+</head>
+<body class="body-styles">
+<header class="fixed-header">
+  <div class="agency-notification-title">HOME DETENTION CURFEW: <br>AGENCY NOTIFICATION FORM</div>
+</header>
+<main class="main-styles">
+  <div class="bordered-box" style="font-weight: bold; padding-left: 1px;">
+      This form must be sent to the EMS provider, probation service and the home police force.<br><br>
+
+      A copy of the prisoner’s licence must be sent as soon as possible on the day of release. All<br>
+      accompanying documentation should be sent to the probation service.
+  </div>
+  <!-- Prison details -->
+  <div>
+    <table class="styled-table">
+      <tr class="header-row">
+        <th class="header-cell" colspan="2">1. Prison details</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">a. Prison</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">b. Address</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">c. Contact name</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">d. Telephone</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">e. Email</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Prisoner details -->
+  <div class="prisoner-details">
+    <table class="styled-table">
+      <tr class="header-row">
+        <th class="header-cell" colspan="2">2. Prisoner details</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">a. HDC release date</td>
+        <td class="data-cell"><span data-th-text="${#temporals.format(currentAssessment.hdced, 'dd MMM yyyy')}"></span></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">b. Name</td>
+        <td class="data-cell"><span data-th-text="${fullName}"></span></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">c. D.O.B</td>
+        <td class="data-cell"><span data-th-text="${currentAssessment.dateOfBirth}"></span></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">d. NOMIS ID</td>
+        <td class="data-cell"><span data-th-text="${currentAssessment.prisonNumber}"></span></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">e. PNC ID</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">f. Gender</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">g. Conditional release date</td>
+        <td class="data-cell"><span data-th-text="${#temporals.format(currentAssessment.crd, 'dd MMM yyyy')}"></span></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">h. Is an interpreter required? (If yes, provide the language)</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Electronic monitoring -->
+  <div class="electronic-monitoring">
+    <table class="styled-table">
+      <thead>
+      <tr class="header-row">
+        <th class="header-cell" colspan="4">
+          3. Type of electronic monitoring required<br>
+          <span class="italic-light">Please confirm all that apply and provide the end date of the conditions</span>
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="data-row">
+        <td class="data-cell">Curfew Monitoring (Yes/No)</td>
+        <td class="data-cell"></td>
+        <td class="data-cell">End date:</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Exclusion(s) Monitoring (Yes/No)</td>
+        <td class="data-cell"></td>
+        <td class="data-cell">End date:</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Trail Monitoring (Yes/No) This involves monitoring an offender’s movements to support discussions with their offender manager about lifestyle and behaviours</td>
+        <td class="data-cell"></td>
+        <td class="data-cell">End date:</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Other monitoring requirement (Yes/No)</td>
+        <td class="data-cell"></td>
+        <td class="data-cell">End date:</td>
+        <td class="data-cell"></td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Curfew details -->
+  <div class="curfew-details">
+    <table class="styled-table">
+      <tr class="header-row">
+        <th class="header-cell" colspan="2">4. Curfew details</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell top-align">a. Curfew address</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">b. Telephone</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">c. Mobile</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">d. Second curfew address (if required)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">e. Second telephone (if required)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">f. Name of main occupier</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">g. Responsible adult (required for children under 18 released on HDC)</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Curfew times -->
+  <div class="curfew-times">
+    <table class="styled-table">
+      <tr class="header-row">
+        <th class="header-cell" colspan="5">
+          5. Curfew times<br><br>
+          <span class="italic-light">Provide the curfew times the offender must remain at the address. Use the additional columns if the offender is to have multiple curfew periods on the same day</span>
+        </th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell top-align"></td>
+        <td class="data-cell">Time from</td>
+        <td class="data-cell">Time to</td>
+        <td class="data-cell">Split curfew only from</td>
+        <td class="data-cell">Split curfew only to</td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Daily</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Monday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Tuesday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Wednesday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Thursday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Friday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Saturday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Sunday</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell" colspan="5"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Curfew hours on day of release</td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell" colspan="5"></td>
+      </tr>
+    </table>
+    <table class="half-width-table">
+      <tr>
+        <td class="data-cell">HDC End Date:</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Exclusion conditions -->
+  <div class="exclusion-conditions">
+    <table class="styled-table">
+      <tr class="header-row top-align">
+        <th class="header-cell tall-cell" colspan="2">
+          6. Exclusion conditions to be electronically monitored<br>
+          <span class="italic-light">Provide details of any exclusion conditions that are to be electronically monitored</span>
+        </th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell tall-cell top-align">a. Is there an exclusion zone requirement? (Yes/No)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">b. Is a map of the exclusion zone(s) attached to this form? (Yes/No)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell tall-cell top-align">c. Describe the exclusion zone(s) fully (include zone collection reference if the Portal has been used to draw the zone(s)2)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">d. Are the exclusion(s) in place 24/7? (Yes/No)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell" colspan="2">e. If the answer above is no, provide the times when the exclusion(s) should be monitored</td>
+      </tr>
+    </table>
+
+    <!-- Exclusion zone -->
+    <table class="styled-table no-top-border">
+      <tr class="data-row">
+        <td class="data-cell">Exclusion zone</td>
+        <td class="data-cell">Time from</td>
+        <td class="data-cell">Time to</td>
+        <td class="data-cell">Days of the week</td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Trail monitoring condition -->
+  <div class="trail-monitoring">
+    <table class="styled-table">
+      <tr class="header-row top-align">
+        <th class="header-cell tall-cell" colspan="2">
+          7. Trail monitoring condition<br>
+          <span class="italic-light">The trail monitoring licence condition enables offender managers to request retrospective information about a subject’s whereabouts. The offender is mandated to wear the tag at all times for the purpose of their movements being recorded and reviewed.</span>
+        </th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">a. Is trail monitoring a requirement? (Yes/No)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell tall-cell top-align">Describe trail monitoring requirement</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Other electronic monitoring requirements -->
+  <div class="other-monitoring-requirements">
+    <table class="styled-table">
+      <tr class="header-row top-align">
+        <th class="header-cell" colspan="2">8. Other electronic monitoring requirements</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">a. Are there any other electronic monitoring requirements e.g. attendance, inclusion zones? (Yes/No)</td>
+        <td class="data-cell"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell tall-cell top-align">b. Describe requirement to be monitored</td>
+        <td class="data-cell"></td>
+      </tr>
+    </table>
+
+    <!-- Other Monitoring Requirement -->
+    <table class="styled-table no-top-border">
+      <tr class="data-row">
+        <td class="data-cell">Other Monitoring Requirement</td>
+        <td class="data-cell">Time from</td>
+        <td class="data-cell">Time to</td>
+        <td class="data-cell">Days of the week</td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+        <td class="data-cell short-cell"></td>
+      </tr>
+      <!-- Repeat the above row as needed -->
+    </table>
+  </div>
+
+  <!-- Additional information -->
+  <div class="additional-information">
+    <table class="styled-table">
+      <tr class="header-row top-align">
+        <th class="header-cell" colspan="2">11. Additional information</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell">Is there any additional information about the offender that the electronic monitoring provider should consider?<br><br>For example is the offender blind, partially sighted, deaf, hard of hearing, has learning difficulties or any condition that may affect the fitting of the tag such as a prosthetic leg.<br><br>Please provide further details or indicate that no additional information is relevant.</td>
+      </tr>
+      <tr class="data-row tall-cell">
+      <tr class="data-row">
+        <td class="data-cell">Is there any additional information to suggest that the offender presents a risk of harm or verbal abuse to the electronic monitoring provider’s staff?<br><br>Please provide further details or indicate that no additional information is relevant.</td>
+      </tr>
+      <tr class="data-row taller-cell">
+    </table>
+  </div>
+
+  <!-- Community offender manager details -->
+  <div class="community-offender-manager-details">
+    <table class="styled-table">
+      <tr class="header-row">
+        <th class="header-cell" colspan="2">12. Community offender manager details</th>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell wide">a. Community offender manager name</td>
+        <td class="data-cell wider"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell wide">b. Contact number</td>
+        <td class="data-cell wider"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell wide">c. Breach notification email or functional mailbox</td>
+        <td class="data-cell wider"></td>
+      </tr>
+      <tr class="data-row">
+        <td class="data-cell wide">d. Probation service</td>
+        <td class="data-cell wider"></td>
+      </tr>
+    </table>
+  </div>
+
+</main>
+</body>
+</html>
