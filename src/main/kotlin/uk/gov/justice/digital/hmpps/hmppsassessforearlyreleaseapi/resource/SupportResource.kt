@@ -81,8 +81,8 @@ class SupportResource(
   @GetMapping("/support/offender/{prisonNumber}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
-    summary = "Returns the offenders for the give prison number",
-    description = "Returns the offenders for the give prison number)",
+    summary = "Returns the offender for the give prison number",
+    description = "Returns the offender for the give prison number)",
     security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
