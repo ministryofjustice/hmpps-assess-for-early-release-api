@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
+
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentSearchResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderResponse
@@ -230,12 +230,6 @@ class SupportResource(
       ApiResponse(
         responseCode = "204",
         description = "Returns No Content status code",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = AssessmentOverviewSummary::class),
-          ),
-        ],
       ),
       ApiResponse(
         responseCode = "401",
@@ -276,12 +270,6 @@ class SupportResource(
       ApiResponse(
         responseCode = "204",
         description = "Returns No Content status code",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = AssessmentOverviewSummary::class),
-          ),
-        ],
       ),
       ApiResponse(
         responseCode = "401",
