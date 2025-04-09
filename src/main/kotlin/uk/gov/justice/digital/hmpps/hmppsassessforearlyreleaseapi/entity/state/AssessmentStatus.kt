@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CH
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONFIRM_RELEASE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONSULT_THE_VLO_AND_POM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CREATE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
@@ -73,7 +74,14 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
       PROBATION_COM to listOf(
-        TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, READY_TO_START),
+        TaskProgress.Dynamic(
+          CONSULT_THE_VLO_AND_POM,
+        ) {
+          if (it.victimContactSchemeOptedIn == true) COMPLETE else READY_TO_START
+        },
+        TaskProgress.Dynamic(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION) {
+          if (it.victimContactSchemeOptedIn == true) READY_TO_START else LOCKED
+        },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
@@ -92,6 +100,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(PRINT_LICENCE, LOCKED),
       ),
       PROBATION_COM to listOf(
+        TaskProgress.Fixed(CONSULT_THE_VLO_AND_POM, COMPLETE),
         TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, IN_PROGRESS),
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Dynamic(
