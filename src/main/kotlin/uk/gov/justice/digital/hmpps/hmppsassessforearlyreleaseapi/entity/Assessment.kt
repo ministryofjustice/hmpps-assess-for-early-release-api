@@ -100,6 +100,8 @@ data class Assessment(
   var optOutReasonType: OptOutReasonType? = null,
 
   var optOutReasonOther: String? = null,
+
+  var victimContactSchemeOptedIn: Boolean? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
