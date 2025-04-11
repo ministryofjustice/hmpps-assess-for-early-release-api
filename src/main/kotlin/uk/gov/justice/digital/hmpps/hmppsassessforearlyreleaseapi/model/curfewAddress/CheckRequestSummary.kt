@@ -43,7 +43,7 @@ sealed interface CheckRequestSummary {
   )
   val ppAdditionalInfo: String?
 
-  @get:Schema(description = "The date / time the check was requested on", example = "22/11/2026 10:43:28")
+  @get:Schema(description = "The date / time the check was requested on", example = "22/11/2026T10:43:28")
   @get:JsonFormat(pattern = API_DATE_TIME_FORMAT)
   val dateRequested: LocalDateTime
 
