@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_TIME_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import java.time.LocalDateTime
 
@@ -21,14 +22,14 @@ data class AssessmentSearchResponse(
   val previousStatus: AssessmentStatus?,
 
   @Schema(description = "The create timestamp for the assessment", example = "2020-01-11 12:13:00", required = true)
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(pattern = API_DATE_TIME_FORMAT)
   val createdTimestamp: LocalDateTime,
 
   @Schema(description = "The update timestamp for the assessment", example = "2020-01-11 12:13:00", required = false)
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(pattern = API_DATE_TIME_FORMAT)
   val lastUpdatedTimestamp: LocalDateTime?,
 
   @Schema(description = "The delete timestamp for the assessment", example = "2020-01-11 12:13:00", required = false)
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @JsonFormat(pattern = API_DATE_TIME_FORMAT)
   val deletedTimestamp: LocalDateTime?,
 )

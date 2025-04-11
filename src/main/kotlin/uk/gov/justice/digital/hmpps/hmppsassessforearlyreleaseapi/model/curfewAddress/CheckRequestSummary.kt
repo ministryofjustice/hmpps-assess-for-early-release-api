@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 import io.swagger.v3.oas.annotations.media.DiscriminatorMapping
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_TIME_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
 import java.time.LocalDateTime
@@ -43,7 +44,7 @@ sealed interface CheckRequestSummary {
   val ppAdditionalInfo: String?
 
   @get:Schema(description = "The date / time the check was requested on", example = "22/11/2026 10:43:28")
-  @get:JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+  @get:JsonFormat(pattern = API_DATE_TIME_FORMAT)
   val dateRequested: LocalDateTime
 
   @get:Schema(description = "The priority of the check request", example = "SECOND")
