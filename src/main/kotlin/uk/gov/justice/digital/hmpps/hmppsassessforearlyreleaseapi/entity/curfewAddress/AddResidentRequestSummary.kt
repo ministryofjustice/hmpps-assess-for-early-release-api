@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfew
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
@@ -22,7 +23,7 @@ data class AddResidentRequestSummary(
   val relation: String? = null,
 
   @Schema(description = "The resident's date of birth", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val dateOfBirth: LocalDate? = null,
 
   @Schema(description = "The resident's age", example = "42")

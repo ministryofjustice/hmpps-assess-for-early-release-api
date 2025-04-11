@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewA
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an address")
@@ -34,7 +35,7 @@ data class AddressSummary(
   val ycoordinate: Double,
 
   @Schema(description = "The date the address was last updated", example = "2021-05-23")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val addressLastUpdated: LocalDate,
 
 )
