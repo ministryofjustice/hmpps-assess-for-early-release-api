@@ -8,8 +8,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import java.time.LocalDate
 
-
-
 @Schema(description = "Response object which describes an assessment")
 data class AssessmentSummary(
 

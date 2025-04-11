@@ -30,10 +30,9 @@ class ClockConfiguration {
   fun javaTimeModule(): Module {
     val module = JavaTimeModule()
     module.addSerializer(LocalDateTimeSerializer(DATE_TIME_FORMATTER))
-    module.addDeserializer(LocalDateTime::class.java,LocalDateTimeDeserializer(DATE_TIME_FORMATTER))
+    module.addDeserializer(LocalDateTime::class.java, LocalDateTimeDeserializer(DATE_TIME_FORMATTER))
     module.addSerializer(LocalDateSerializer(DATE_FORMATTER))
     module.addDeserializer(LocalDate::class.java, LocalDateDeserializer(DATE_FORMATTER))
     return module
   }
-
 }
