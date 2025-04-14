@@ -34,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.S
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.assessmentStateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ValidNonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -41,6 +42,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent a
 
 @Entity
 @Table(name = "assessment")
+@ValidNonDisclosableInformation
 data class Assessment(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -100,6 +102,10 @@ data class Assessment(
   var optOutReasonType: OptOutReasonType? = null,
 
   var optOutReasonOther: String? = null,
+
+  var isNonDisclosable: Boolean? = null,
+
+  var nonDisclosableReason: String? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
