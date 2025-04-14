@@ -353,7 +353,7 @@ class AssessmentResource(
   @ApiResponses(
     value = [
       ApiResponse(
-        responseCode = "201",
+        responseCode = "204",
         description = "The offender's non disclosable information has been recorded.",
         content = [
           Content(
@@ -361,6 +361,10 @@ class AssessmentResource(
             array = ArraySchema(schema = Schema(implementation = Void::class)),
           ),
         ],
+      ),
+      ApiResponse(
+        responseCode = "204",
+        description = "The offender's non disclosable information has been recorded."
       ),
       ApiResponse(
         responseCode = "401",
