@@ -355,16 +355,6 @@ class AssessmentResource(
       ApiResponse(
         responseCode = "204",
         description = "The offender's non disclosable information has been recorded.",
-        content = [
-          Content(
-            mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = Void::class)),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "204",
-        description = "The offender's non disclosable information has been recorded.",
       ),
       ApiResponse(
         responseCode = "401",
