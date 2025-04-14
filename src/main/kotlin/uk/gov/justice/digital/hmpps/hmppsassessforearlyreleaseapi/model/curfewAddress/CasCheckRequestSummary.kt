@@ -1,6 +1,5 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonTypeName
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
@@ -23,7 +22,6 @@ data class CasCheckRequestSummary(
   override val ppAdditionalInfo: String?,
 
   @Schema(description = "The date / time the check was requested on", example = "22/11/2026 10:43:28")
-  @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
   override val dateRequested: LocalDateTime,
 
   @Schema(description = "The priority of the check request", example = "SECOND")
