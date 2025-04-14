@@ -29,8 +29,8 @@ class OffenderSummaryResponseMapper {
       currentTask = assessment.currentTask(),
       taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       crn = offender.crn,
-      isNonDisclosable = assessment.isNonDisclosable,
-      nonDisclosableReason = assessment.nonDisclosableReason,
+      hasNonDisclosableInformation = assessment.hasNonDisclosableInformation,
+      nonDisclosableInformation = assessment.nonDisclosableInformation,
     )
   }
 }

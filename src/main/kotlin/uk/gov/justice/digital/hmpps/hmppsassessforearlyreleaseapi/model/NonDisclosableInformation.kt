@@ -13,21 +13,21 @@ import kotlin.reflect.KClass
 data class NonDisclosableInformation(
   @Schema(description = "Is there any non disclosable information", example = "true")
   @field:NotNull
-  val isNonDisclosable: Boolean = false,
+  val hasNonDisclosableInformation: Boolean = false,
 
   @Schema(description = "Information that must not be disclosed to offender", example = "Give details of information that cannot be disclosed.")
-  val nonDisclosableReason: String?,
+  val nonDisclosableInformation: String?,
 )
 
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
 @Retention(AnnotationRetention.RUNTIME)
 @Constraint(validatedBy = [NonDisclosableInformationValidator::class])
 annotation class ValidNonDisclosableInformation(
-  val message: String = "If isNonDisclosable is true, nonDisclosableReason must not be null or empty",
+  val message: String = "If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty",
   val groups: Array<KClass<*>> = [],
   val payload: Array<KClass<out Payload>> = [],
 )
 
 class NonDisclosableInformationValidator : ConstraintValidator<ValidNonDisclosableInformation, NonDisclosableInformation> {
-  override fun isValid(value: NonDisclosableInformation, context: ConstraintValidatorContext?): Boolean = !value.isNonDisclosable || !value.nonDisclosableReason.isNullOrBlank()
+  override fun isValid(value: NonDisclosableInformation, context: ConstraintValidatorContext?): Boolean = !value.hasNonDisclosableInformation || !value.nonDisclosableInformation.isNullOrBlank()
 }

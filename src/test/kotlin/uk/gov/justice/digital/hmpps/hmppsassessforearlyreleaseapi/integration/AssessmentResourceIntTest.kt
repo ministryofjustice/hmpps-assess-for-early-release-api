@@ -542,18 +542,18 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
   inner class RecordNonDisclosableInformation {
 
     private val anNonDisclosableInformationWithNoReason = NonDisclosableInformation(
-      isNonDisclosable = false,
-      nonDisclosableReason = null,
+      hasNonDisclosableInformation = false,
+      nonDisclosableInformation = null,
     )
 
     private val anNonDisclosableInformationWithReason = NonDisclosableInformation(
-      isNonDisclosable = true,
-      nonDisclosableReason = "reason",
+      hasNonDisclosableInformation = true,
+      nonDisclosableInformation = "reason",
     )
 
     private val anNonDisclosableInformationWithNoReasonAndisNonDisclosableTrue = NonDisclosableInformation(
-      isNonDisclosable = true,
-      nonDisclosableReason = null,
+      hasNonDisclosableInformation = true,
+      nonDisclosableInformation = null,
     )
 
     @Test
@@ -604,8 +604,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
-      assertThat(updatedAssessment.isNonDisclosable).isFalse()
-      assertThat(updatedAssessment.nonDisclosableReason).isNull()
+      assertThat(updatedAssessment.hasNonDisclosableInformation).isFalse()
+      assertThat(updatedAssessment.nonDisclosableInformation).isNull()
     }
 
     @Sql(
@@ -624,8 +624,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
-      assertThat(updatedAssessment.isNonDisclosable).isEqualTo(anNonDisclosableInformationWithReason.isNonDisclosable)
-      assertThat(updatedAssessment.nonDisclosableReason).isEqualTo(anNonDisclosableInformationWithReason.nonDisclosableReason)
+      assertThat(updatedAssessment.hasNonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.hasNonDisclosableInformation)
+      assertThat(updatedAssessment.nonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.nonDisclosableInformation)
     }
 
     @Sql(
@@ -633,7 +633,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       "classpath:test_data/an-offender-with-address-checks-complete.sql",
     )
     @Test
-    fun `should throw validation error while trying to insert non disclosable reason with null value and isNonDisclosable true`() {
+    fun `should throw validation error while trying to insert non disclosable reason with null value and hasNonDisclosableInformation true`() {
       webTestClient.put()
         .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
@@ -642,7 +642,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isBadRequest
         .expectBody()
-        .jsonPath("$.userMessage").value(containsString("If isNonDisclosable is true, nonDisclosableReason must not be null or empty"))
+        .jsonPath("$.userMessage").value(containsString("If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty"))
     }
   }
 

@@ -101,9 +101,9 @@ data class Assessment(
 
   var optOutReasonOther: String? = null,
 
-  var isNonDisclosable: Boolean? = null,
+  var hasNonDisclosableInformation: Boolean? = null,
 
-  var nonDisclosableReason: String? = null,
+  var nonDisclosableInformation: String? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"

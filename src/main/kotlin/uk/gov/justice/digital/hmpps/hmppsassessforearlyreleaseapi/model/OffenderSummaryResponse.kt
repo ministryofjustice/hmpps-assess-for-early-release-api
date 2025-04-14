@@ -62,8 +62,8 @@ data class OffenderSummaryResponse(
   val crn: String? = null,
 
   @Schema(description = "Indicates whether the prisoner's information is non-disclosable", example = "false")
-  var isNonDisclosable: Boolean? = null,
+  var hasNonDisclosableInformation: Boolean? = null,
 
   @Schema(description = "Reason why the prisoner's information is non-disclosable", example = "Security concerns")
-  var nonDisclosableReason: String? = null,
+  var nonDisclosableInformation: String? = null,
 )

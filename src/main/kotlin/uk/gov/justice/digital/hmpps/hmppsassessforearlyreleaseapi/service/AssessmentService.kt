@@ -149,8 +149,8 @@ class AssessmentService(
   @Transactional
   fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.isNonDisclosable = nonDisclosableInformation.isNonDisclosable
-    assessmentEntity.nonDisclosableReason = nonDisclosableInformation.nonDisclosableReason
+    assessmentEntity.hasNonDisclosableInformation = nonDisclosableInformation.hasNonDisclosableInformation
+    assessmentEntity.nonDisclosableInformation = nonDisclosableInformation.nonDisclosableInformation
     assessmentRepository.save(assessmentEntity)
   }
 
