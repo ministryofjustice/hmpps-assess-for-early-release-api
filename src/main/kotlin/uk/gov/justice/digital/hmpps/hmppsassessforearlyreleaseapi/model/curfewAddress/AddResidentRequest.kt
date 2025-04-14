@@ -6,6 +6,7 @@ import jakarta.validation.Constraint
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 import jakarta.validation.Payload
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import java.time.LocalDate
 import kotlin.reflect.KClass
 
@@ -28,7 +29,7 @@ data class AddResidentRequest(
   val relation: String? = null,
 
   @Schema(description = "The resident's date of birth", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val dateOfBirth: LocalDate? = null,
 
   @Schema(description = "The resident's age", example = "42")

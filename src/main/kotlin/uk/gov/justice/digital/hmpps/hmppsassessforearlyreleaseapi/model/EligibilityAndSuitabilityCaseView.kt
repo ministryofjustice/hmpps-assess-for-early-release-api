@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotNull
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import java.time.LocalDate
 
 @Schema(
@@ -91,7 +92,7 @@ data class EligibilityCriterionProgress(
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: AgentDto?,
   @Schema(description = "The date when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val lastUpdated: LocalDate?,
 )
 
@@ -108,7 +109,7 @@ data class SuitabilityCriterionProgress(
   @Schema(description = "Details of the user that submitted the answers for this criterion")
   val agent: AgentDto?,
   @Schema(description = "The date when answers were last submitted for this criterion or null if no answers have been submitted yet", example = "16/08/2025")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val lastUpdated: LocalDate?,
 )
 

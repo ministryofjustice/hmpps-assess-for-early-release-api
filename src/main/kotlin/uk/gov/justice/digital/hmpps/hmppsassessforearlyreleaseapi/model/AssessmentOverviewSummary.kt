@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import java.time.LocalDate
@@ -19,18 +20,18 @@ data class AssessmentOverviewSummary(
   val surname: String?,
 
   @Schema(description = "The offender's date of birth", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val dateOfBirth: LocalDate,
 
   @Schema(description = "The offender's prison number", example = "A1234AA")
   val prisonNumber: String,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val hdced: LocalDate,
 
   @Schema(description = "The offender's conditional release date", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val crd: LocalDate?,
 
   @Schema(description = "The name of the prison the offender is in", example = "Foston Hall (HMP)")
@@ -64,7 +65,7 @@ data class AssessmentOverviewSummary(
   val mainOffense: String?,
 
   @Schema(description = "The assessment created date plus five days", example = "2002-02-20")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val toDoEligibilityAndSuitabilityBy: LocalDate?,
 
   @Schema(description = "The assessment's assess eligibility and suitability task result", example = "Ineligible")
