@@ -364,7 +364,7 @@ class AssessmentResource(
       ),
       ApiResponse(
         responseCode = "204",
-        description = "The offender's non disclosable information has been recorded."
+        description = "The offender's non disclosable information has been recorded.",
       ),
       ApiResponse(
         responseCode = "401",
