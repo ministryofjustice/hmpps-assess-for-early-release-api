@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
@@ -340,4 +341,55 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody agent: AgentDto,
   ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
+
+  @PutMapping("/offender/{prisonNumber}/current-assessment/record-non-disclosable-information")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Records an offender's non disclosable information",
+    description = "Create or update an offender's non disclosable information",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The offender's non disclosable information has been recorded.",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "Could not find an offender with the provided prison number",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun recordNonDisclosableInformation(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @Valid @RequestBody nonDisclosableInformation: NonDisclosableInformation,
+  ) = assessmentService.recordNonDisclosableInformation(prisonNumber, nonDisclosableInformation)
 }

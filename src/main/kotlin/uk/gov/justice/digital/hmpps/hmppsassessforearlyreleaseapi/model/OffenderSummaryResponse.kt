@@ -60,4 +60,10 @@ data class OffenderSummaryResponse(
 
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
+
+  @Schema(description = "Indicates whether the prisoner's information is non-disclosable", example = "false")
+  var hasNonDisclosableInformation: Boolean? = null,
+
+  @Schema(description = "Reason why the prisoner's information is non-disclosable", example = "Security concerns")
+  var nonDisclosableInformation: String? = null,
 )

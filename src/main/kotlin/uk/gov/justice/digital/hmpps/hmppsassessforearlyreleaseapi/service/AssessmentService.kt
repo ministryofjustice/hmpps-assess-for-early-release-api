@@ -25,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
@@ -142,6 +143,14 @@ class AssessmentService(
   fun submitForPreDecisionChecks(prisonNumber: String, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(CompleteAddressChecks, agentDto.toEntity())
+    assessmentRepository.save(assessmentEntity)
+  }
+
+  @Transactional
+  fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation) {
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
+    assessmentEntity.hasNonDisclosableInformation = nonDisclosableInformation.hasNonDisclosableInformation
+    assessmentEntity.nonDisclosableInformation = nonDisclosableInformation.nonDisclosableInformation
     assessmentRepository.save(assessmentEntity)
   }
 
