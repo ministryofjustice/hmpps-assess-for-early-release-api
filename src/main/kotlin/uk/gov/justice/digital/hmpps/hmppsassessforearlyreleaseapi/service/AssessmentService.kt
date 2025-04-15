@@ -147,10 +147,19 @@ class AssessmentService(
   }
 
   @Transactional
-  fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation) {
+  fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.hasNonDisclosableInformation = nonDisclosableInformation.hasNonDisclosableInformation
     assessmentEntity.nonDisclosableInformation = nonDisclosableInformation.nonDisclosableInformation
+    val changes = mapOf(
+      "hasNonDisclosableInformation" to nonDisclosableInformation.hasNonDisclosableInformation.toString(),
+      "nonDisclosableInformation" to nonDisclosableInformation.nonDisclosableInformation.toString(),
+    )
+    assessmentEntity.recordEvent(
+      AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY,
+      changes,
+      agentDto.toEntity(),
+    )
     assessmentRepository.save(assessmentEntity)
   }
 

@@ -20,6 +20,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
@@ -606,6 +608,17 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.hasNonDisclosableInformation).isFalse()
       assertThat(updatedAssessment.nonDisclosableInformation).isNull()
+
+      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      assertThat(assessmentEvents).isNotEmpty
+      assertThat(assessmentEvents).hasSize(1)
+      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(assessmentEvents.first().changes).isEqualTo(
+        mapOf(
+          "hasNonDisclosableInformation" to "false",
+          "nonDisclosableInformation" to "null",
+        ),
+      )
     }
 
     @Sql(
@@ -626,6 +639,17 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.hasNonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.hasNonDisclosableInformation)
       assertThat(updatedAssessment.nonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.nonDisclosableInformation)
+
+      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      assertThat(assessmentEvents).isNotEmpty
+      assertThat(assessmentEvents).hasSize(1)
+      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(assessmentEvents.first().changes).isEqualTo(
+        mapOf(
+          "hasNonDisclosableInformation" to "true",
+          "nonDisclosableInformation" to "reason",
+        ),
+      )
     }
 
     @Sql(
