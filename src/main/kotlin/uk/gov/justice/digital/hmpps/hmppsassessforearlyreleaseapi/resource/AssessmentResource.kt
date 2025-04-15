@@ -27,12 +27,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDiscl
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class AssessmentResource(
   private val assessmentService: AssessmentService,
+  private val agentHolder: AgentHolder,
 ) {
 
   @GetMapping("/offender/{prisonNumber}/current-assessment")
@@ -391,5 +393,5 @@ class AssessmentResource(
   fun recordNonDisclosableInformation(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @Valid @RequestBody nonDisclosableInformation: NonDisclosableInformation,
-  ) = assessmentService.recordNonDisclosableInformation(prisonNumber, nonDisclosableInformation)
+  ) = assessmentService.recordNonDisclosableInformation(prisonNumber, nonDisclosableInformation, agentHolder.getAgentOrThrow())
 }
