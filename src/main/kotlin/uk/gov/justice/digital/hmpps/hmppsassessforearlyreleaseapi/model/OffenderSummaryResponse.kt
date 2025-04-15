@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import io.swagger.v3.oas.annotations.media.Schema
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
@@ -22,11 +23,11 @@ data class OffenderSummaryResponse(
   val surname: String,
 
   @Schema(description = "The offender's conditional release date date", example = "2026-08-23")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val crd: LocalDate? = null,
 
   @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val hdced: LocalDate,
 
   @Schema(description = "The number of working days until the home detention curfew eligibility date", example = "15")
@@ -39,7 +40,7 @@ data class OffenderSummaryResponse(
   val isPostponed: Boolean = false,
 
   @Schema(description = "The date that the offender's current assessment was postponed", example = "2028-06-23", required = false)
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   val postponementDate: LocalDate? = null,
 
   @Schema(description = "The reasons that the offender's current assessment was postponed", example = "ON_REMAND")
@@ -59,4 +60,10 @@ data class OffenderSummaryResponse(
 
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
+
+  @Schema(description = "Indicates whether the prisoner's information is non-disclosable", example = "false")
+  var hasNonDisclosableInformation: Boolean? = null,
+
+  @Schema(description = "Reason why the prisoner's information is non-disclosable", example = "Security concerns")
+  var nonDisclosableInformation: String? = null,
 )

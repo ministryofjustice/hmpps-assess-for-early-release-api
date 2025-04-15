@@ -4,6 +4,7 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.tuple
 import org.assertj.core.api.Assertions.within
+import org.hamcrest.CoreMatchers.containsString
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -19,6 +20,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_PRE_DECISION_CHECKS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
@@ -30,6 +33,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -53,6 +57,7 @@ private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-asse
 private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/postpone"
 private const val SUBMIT_FOR_ADDRESS_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 private const val SUBMIT_FOR_PRE_DECISION_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-pre-decision-checks"
+private const val RECORD_NON_DISCLOSABLE_INFORMATION_URL = "/offender/$PRISON_NUMBER/current-assessment/record-non-disclosable-information"
 
 class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
@@ -532,6 +537,136 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.status).isEqualTo(AWAITING_PRE_DECISION_CHECKS)
+    }
+  }
+
+  @Nested
+  inner class RecordNonDisclosableInformation {
+
+    private val anNonDisclosableInformationWithNoReason = NonDisclosableInformation(
+      hasNonDisclosableInformation = false,
+      nonDisclosableInformation = null,
+    )
+
+    private val anNonDisclosableInformationWithReason = NonDisclosableInformation(
+      hasNonDisclosableInformation = true,
+      nonDisclosableInformation = "reason",
+    )
+
+    private val anNonDisclosableInformationWithNoReasonAndisNonDisclosableTrue = NonDisclosableInformation(
+      hasNonDisclosableInformation = true,
+      nonDisclosableInformation = null,
+    )
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .bodyValue(anNonDisclosableInformationWithNoReason)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .headers(setAuthorisation(agent = PROBATION_COM_AGENT))
+        .bodyValue(anNonDisclosableInformationWithNoReason)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PROBATION_COM_AGENT))
+        .bodyValue(anNonDisclosableInformationWithNoReason)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-address-checks-complete.sql",
+    )
+    @Test
+    fun `should record non disclosable reason with null value`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
+        .bodyValue(anNonDisclosableInformationWithNoReason)
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val updatedAssessment = assessmentRepository.findAll().first()
+      assertThat(updatedAssessment).isNotNull
+      assertThat(updatedAssessment.hasNonDisclosableInformation).isFalse()
+      assertThat(updatedAssessment.nonDisclosableInformation).isNull()
+
+      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      assertThat(assessmentEvents).isNotEmpty
+      assertThat(assessmentEvents).hasSize(1)
+      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(assessmentEvents.first().changes).isEqualTo(
+        mapOf(
+          "hasNonDisclosableInformation" to "false",
+          "nonDisclosableInformation" to "null",
+        ),
+      )
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-address-checks-complete.sql",
+    )
+    @Test
+    fun `should record non disclosable reason with non null value`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
+        .bodyValue(anNonDisclosableInformationWithReason)
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val updatedAssessment = assessmentRepository.findAll().first()
+      assertThat(updatedAssessment).isNotNull
+      assertThat(updatedAssessment.hasNonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.hasNonDisclosableInformation)
+      assertThat(updatedAssessment.nonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.nonDisclosableInformation)
+
+      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      assertThat(assessmentEvents).isNotEmpty
+      assertThat(assessmentEvents).hasSize(1)
+      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(assessmentEvents.first().changes).isEqualTo(
+        mapOf(
+          "hasNonDisclosableInformation" to "true",
+          "nonDisclosableInformation" to "reason",
+        ),
+      )
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-address-checks-complete.sql",
+    )
+    @Test
+    fun `should throw validation error while trying to insert non disclosable reason with null value and hasNonDisclosableInformation true`() {
+      webTestClient.put()
+        .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
+        .bodyValue(anNonDisclosableInformationWithNoReasonAndisNonDisclosableTrue)
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+        .expectBody()
+        .jsonPath("$.userMessage").value(containsString("If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty"))
     }
   }
 

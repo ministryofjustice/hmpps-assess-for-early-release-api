@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Past
 import jakarta.validation.constraints.Size
 import org.hibernate.annotations.Type
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import java.time.LocalDate
 
@@ -53,12 +54,12 @@ class PoliceChecksTaskAnswers(
 }
 
 data class PoliceChecksAnswers(
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   @field:NotNull(message = "Enter a valid date in the past that you requested information")
   @field:Past(message = "Enter a valid date in the past that you requested information")
   val informationRequested: LocalDate?,
 
-  @JsonFormat(pattern = "yyyy-MM-dd")
+  @JsonFormat(pattern = API_DATE_FORMAT)
   @field:NotNull(message = "Enter a valid date in the past that the information was sent")
   @field:Past(message = "Enter a valid date in the past that the information was sent")
   val informationSent: LocalDate?,
