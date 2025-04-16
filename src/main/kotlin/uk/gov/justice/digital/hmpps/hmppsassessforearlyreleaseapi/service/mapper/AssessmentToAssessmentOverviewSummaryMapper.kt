@@ -50,6 +50,8 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       },
       toDoEligibilityAndSuitabilityBy = getToDoByDate(offender),
       result = determineResult(eligibilityStatus, suitabilityStatus),
+      hasNonDisclosableInformation = currentAssessment.hasNonDisclosableInformation,
+      nonDisclosableInformation = currentAssessment.nonDisclosableInformation,
     )
   }
 
