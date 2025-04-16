@@ -70,4 +70,10 @@ data class AssessmentOverviewSummary(
 
   @Schema(description = "The assessment's assess eligibility and suitability task result", example = "Ineligible")
   val result: String?,
+
+  @Schema(description = "Indicates whether the prisoner's information is non-disclosable", example = "false")
+  var hasNonDisclosableInformation: Boolean? = null,
+
+  @Schema(description = "Reason why the prisoner's information is non-disclosable", example = "Security concerns")
+  var nonDisclosableInformation: String? = null,
 )
