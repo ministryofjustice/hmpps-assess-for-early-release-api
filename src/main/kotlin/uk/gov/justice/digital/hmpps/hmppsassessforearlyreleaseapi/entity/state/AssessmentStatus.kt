@@ -77,10 +77,10 @@ enum class AssessmentStatus {
         TaskProgress.Dynamic(
           CONSULT_THE_VLO_AND_POM,
         ) {
-          if (it.victimContactSchemeOptedIn == true) COMPLETE else READY_TO_START
+          if (it.victimContactSchemeOptedIn != null) COMPLETE else READY_TO_START
         },
         TaskProgress.Dynamic(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION) {
-          if (it.victimContactSchemeOptedIn == true) READY_TO_START else LOCKED
+          if (it.victimContactSchemeOptedIn != null) READY_TO_START else LOCKED
         },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),

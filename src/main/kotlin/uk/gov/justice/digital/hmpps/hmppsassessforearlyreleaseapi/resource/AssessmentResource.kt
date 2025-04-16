@@ -27,6 +27,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDiscl
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateVloAndPomConsultationRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService
 
@@ -343,6 +344,49 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody agent: AgentDto,
   ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
+
+  @PutMapping("/offender/{prisonNumber}/current-assessment/vlo-and-pom-consultation")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.NO_CONTENT)
+  @Operation(
+    summary = "Updates the vlo and pom consultation information for an assessment.",
+    description = "Updates the vlo and pom consultation information for an assessment",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The vlo and pom consultation information has been updated.",
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun updateVloAndPomConsultation(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Valid @RequestBody updateVloAndPomConsultationRequest: UpdateVloAndPomConsultationRequest,
+  ) {
+    assessmentService.updateVloAndPomConsultation(prisonNumber, updateVloAndPomConsultationRequest)
+  }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/record-non-disclosable-information")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

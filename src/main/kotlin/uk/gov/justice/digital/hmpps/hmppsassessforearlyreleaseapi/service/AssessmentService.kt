@@ -30,6 +30,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateVloAndPomConsultationRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
@@ -185,6 +186,25 @@ class AssessmentService(
       it.copy(team = team)
     }
     assessmentRepository.saveAll(comsAssessments)
+  }
+
+  @Transactional
+  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest) {
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
+    assessmentEntity.victimContactSchemeOptedIn = request.victimContactSchemeOptedIn
+    assessmentEntity.victimContactSchemeRequests = request.victimContactSchemeRequests
+    assessmentEntity.pomBehaviourInformation = request.pomBehaviourInformation
+
+    assessmentEntity.recordEvent(
+      changes = mapOf(
+        "victimContactSchemeOptedIn" to request.victimContactSchemeOptedIn,
+        "victimContactSchemeRequests" to (request.victimContactSchemeRequests ?: ""),
+        "pomBehaviourInformation" to (request.pomBehaviourInformation ?: ""),
+      ),
+      eventType = AssessmentEventType.VLO_AND_POM_CONSULTATION_UPDATED,
+      agent = request.agent.toEntity(),
+    )
+    assessmentRepository.save(assessmentEntity)
   }
 
   data class AssessmentWithEligibilityProgress(

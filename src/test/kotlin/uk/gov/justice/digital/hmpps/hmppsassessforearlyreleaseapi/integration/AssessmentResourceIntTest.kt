@@ -39,6 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateVloAndPomConsultationRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
@@ -58,6 +59,7 @@ private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-as
 private const val SUBMIT_FOR_ADDRESS_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-address-checks"
 private const val SUBMIT_FOR_PRE_DECISION_CHECKS_URL = "/offender/$PRISON_NUMBER/current-assessment/submit-for-pre-decision-checks"
 private const val RECORD_NON_DISCLOSABLE_INFORMATION_URL = "/offender/$PRISON_NUMBER/current-assessment/record-non-disclosable-information"
+private const val UPDATE_VLO_AND_POM_CONSULTATION_URL = "/offender/$PRISON_NUMBER/current-assessment/vlo-and-pom-consultation"
 
 class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
@@ -492,6 +494,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.put()
+        .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
         .bodyValue(PROBATION_COM_AGENT)
         .exchange()
         .expectStatus()
@@ -667,6 +670,69 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         .isBadRequest
         .expectBody()
         .jsonPath("$.userMessage").value(containsString("If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty"))
+    }
+  }
+
+  @Nested
+  inner class UpdateVloAndPomConsultation {
+    private val anUpdateVloAndPomConsultationRequest = UpdateVloAndPomConsultationRequest(
+      victimContactSchemeOptedIn = true,
+      victimContactSchemeRequests = "Do not come within an the area around where I work",
+      pomBehaviourInformation = "Behaviour in prison suggest they would be safe to release on HDC",
+      agent = PROBATION_COM_AGENT,
+    )
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.put()
+        .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
+        .bodyValue(anUpdateVloAndPomConsultationRequest)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.put()
+        .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
+        .headers(setAuthorisation())
+        .bodyValue(anUpdateVloAndPomConsultationRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.put()
+        .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(anUpdateVloAndPomConsultationRequest)
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/an-offender-with-address-checks-complete.sql",
+    )
+    @Test
+    fun `should update VLO and POM consultation information`() {
+      webTestClient.put()
+        .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(anUpdateVloAndPomConsultationRequest)
+        .exchange()
+        .expectStatus()
+        .isNoContent
+
+      val updatedAssessment = assessmentRepository.findAll().first()
+      assertThat(updatedAssessment).isNotNull
+      assertThat(updatedAssessment.victimContactSchemeOptedIn).isEqualTo(anUpdateVloAndPomConsultationRequest.victimContactSchemeOptedIn)
+      assertThat(updatedAssessment.victimContactSchemeRequests).isEqualTo(anUpdateVloAndPomConsultationRequest.victimContactSchemeRequests)
+      assertThat(updatedAssessment.pomBehaviourInformation).isEqualTo(anUpdateVloAndPomConsultationRequest.pomBehaviourInformation)
     }
   }
 

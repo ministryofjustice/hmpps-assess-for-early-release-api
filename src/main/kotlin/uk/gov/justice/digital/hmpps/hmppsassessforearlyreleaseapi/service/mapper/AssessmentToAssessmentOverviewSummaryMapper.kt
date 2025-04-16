@@ -50,6 +50,9 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       },
       toDoEligibilityAndSuitabilityBy = getToDoByDate(offender),
       result = determineResult(eligibilityStatus, suitabilityStatus),
+      victimContactSchemeOptedIn = currentAssessment.victimContactSchemeOptedIn,
+      victimContactSchemeRequests = currentAssessment.victimContactSchemeRequests,
+      pomBehaviourInformation = currentAssessment.pomBehaviourInformation,
     )
   }
 
