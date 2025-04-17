@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
@@ -30,6 +31,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRe
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateVloAndPomConsultationRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
@@ -59,7 +61,7 @@ class AssessmentService(
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
   private val staffRepository: StaffRepository,
-  @org.springframework.context.annotation.Lazy
+  @Lazy
   private val probationService: ProbationService,
 ) {
 
@@ -185,6 +187,25 @@ class AssessmentService(
       it.copy(team = team)
     }
     assessmentRepository.saveAll(comsAssessments)
+  }
+
+  @Transactional
+  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest, agentDto: AgentDto) {
+    val assessmentEntity = getCurrentAssessment(prisonNumber)
+    assessmentEntity.victimContactSchemeOptedIn = request.victimContactSchemeOptedIn
+    assessmentEntity.victimContactSchemeRequests = request.victimContactSchemeRequests
+    assessmentEntity.pomBehaviourInformation = request.pomBehaviourInformation
+
+    assessmentEntity.recordEvent(
+      changes = mapOf(
+        "victimContactSchemeOptedIn" to request.victimContactSchemeOptedIn,
+        "victimContactSchemeRequests" to (request.victimContactSchemeRequests ?: ""),
+        "pomBehaviourInformation" to (request.pomBehaviourInformation ?: ""),
+      ),
+      eventType = AssessmentEventType.VLO_AND_POM_CONSULTATION_UPDATED,
+      agent = agentDto.toEntity(),
+    )
+    assessmentRepository.save(assessmentEntity)
   }
 
   data class AssessmentWithEligibilityProgress(

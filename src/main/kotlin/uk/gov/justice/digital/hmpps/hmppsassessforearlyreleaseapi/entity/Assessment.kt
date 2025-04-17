@@ -104,6 +104,12 @@ data class Assessment(
   var hasNonDisclosableInformation: Boolean? = null,
 
   var nonDisclosableInformation: String? = null,
+
+  var victimContactSchemeOptedIn: Boolean? = null,
+
+  var victimContactSchemeRequests: String? = null,
+
+  var pomBehaviourInformation: String? = null,
 ) {
   @Override
   override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"

@@ -76,4 +76,13 @@ data class AssessmentOverviewSummary(
 
   @Schema(description = "Reason why the prisoner's information is non-disclosable", example = "Security concerns")
   var nonDisclosableInformation: String? = null,
+
+  @Schema(description = "Does the case qualify for and has the victim opted in for the Victim Contact Scheme", example = "true")
+  val victimContactSchemeOptedIn: Boolean? = null,
+
+  @Schema(description = "Details of any requests the victim has made", example = "Any exclusion zones that have been requested")
+  val victimContactSchemeRequests: String? = null,
+
+  @Schema(description = "Information that the POM has provided about the offender's behaviour in prison", example = "Any concerns about them being released on HDC")
+  val pomBehaviourInformation: String? = null,
 )

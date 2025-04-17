@@ -52,6 +52,9 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       result = determineResult(eligibilityStatus, suitabilityStatus),
       hasNonDisclosableInformation = currentAssessment.hasNonDisclosableInformation,
       nonDisclosableInformation = currentAssessment.nonDisclosableInformation,
+      victimContactSchemeOptedIn = currentAssessment.victimContactSchemeOptedIn,
+      victimContactSchemeRequests = currentAssessment.victimContactSchemeRequests,
+      pomBehaviourInformation = currentAssessment.pomBehaviourInformation,
     )
   }
 
