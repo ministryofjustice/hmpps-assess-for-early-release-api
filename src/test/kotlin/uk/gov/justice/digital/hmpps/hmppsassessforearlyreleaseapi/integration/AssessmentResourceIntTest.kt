@@ -679,7 +679,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       victimContactSchemeOptedIn = true,
       victimContactSchemeRequests = "Do not come within an the area around where I work",
       pomBehaviourInformation = "Behaviour in prison suggest they would be safe to release on HDC",
-      agent = PROBATION_COM_AGENT,
     )
 
     @Test
@@ -707,7 +706,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
         .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PROBATION_COM_AGENT))
         .bodyValue(anUpdateVloAndPomConsultationRequest)
         .exchange()
         .expectStatus()
@@ -722,7 +721,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should update VLO and POM consultation information`() {
       webTestClient.put()
         .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
         .bodyValue(anUpdateVloAndPomConsultationRequest)
         .exchange()
         .expectStatus()
