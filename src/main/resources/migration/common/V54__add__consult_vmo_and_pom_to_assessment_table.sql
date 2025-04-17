@@ -1,6 +1,7 @@
-ALTER table assessment ADD COLUMN victim_contact_scheme_opted_in BOOLEAN;
-ALTER table assessment ADD COLUMN victim_contact_scheme_requests TEXT;
-ALTER table assessment ADD COLUMN pom_behaviour_information TEXT;
+ALTER table assessment
+    ADD COLUMN victim_contact_scheme_opted_in BOOLEAN,
+    ADD COLUMN victim_contact_scheme_requests TEXT,
+    ADD COLUMN pom_behaviour_information TEXT;
 
 ALTER TABLE assessment_event DROP CONSTRAINT assessment_event_event_type_chk;
 ALTER TABLE assessment_event

@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import jakarta.transaction.Transactional
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
@@ -60,7 +61,7 @@ class AssessmentService(
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
   private val staffRepository: StaffRepository,
-  @org.springframework.context.annotation.Lazy
+  @Lazy
   private val probationService: ProbationService,
 ) {
 
@@ -189,7 +190,7 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest) {
+  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest, agentDto: AgentDto) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.victimContactSchemeOptedIn = request.victimContactSchemeOptedIn
     assessmentEntity.victimContactSchemeRequests = request.victimContactSchemeRequests
@@ -202,7 +203,7 @@ class AssessmentService(
         "pomBehaviourInformation" to (request.pomBehaviourInformation ?: ""),
       ),
       eventType = AssessmentEventType.VLO_AND_POM_CONSULTATION_UPDATED,
-      agent = request.agent.toEntity(),
+      agent = agentDto.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
   }

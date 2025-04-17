@@ -12,7 +12,4 @@ data class UpdateVloAndPomConsultationRequest(
 
   @Schema(description = "Information that the POM has provided about the offender's behaviour in prison", example = "Any concerns about them being released on HDC")
   val pomBehaviourInformation: String? = null,
-
-  @Schema(description = "Details of the agent who is updating VLO and POM consultation information", required = true)
-  val agent: AgentDto,
 )

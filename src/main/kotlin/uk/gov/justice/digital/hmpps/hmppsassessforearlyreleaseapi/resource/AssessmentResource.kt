@@ -385,7 +385,7 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Valid @RequestBody updateVloAndPomConsultationRequest: UpdateVloAndPomConsultationRequest,
   ) {
-    assessmentService.updateVloAndPomConsultation(prisonNumber, updateVloAndPomConsultationRequest)
+    assessmentService.updateVloAndPomConsultation(prisonNumber, updateVloAndPomConsultationRequest, agentHolder.getAgentOrThrow())
   }
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/record-non-disclosable-information")
