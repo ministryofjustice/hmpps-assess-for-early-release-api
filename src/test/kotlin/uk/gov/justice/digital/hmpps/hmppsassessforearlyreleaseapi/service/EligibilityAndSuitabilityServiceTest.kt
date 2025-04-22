@@ -115,6 +115,7 @@ class EligibilityAndSuitabilityServiceTest {
                 hint = it.hint,
                 name = it.name,
                 answer = true,
+                failureReason = TODO(),
               )
             },
           agent = PRISON_CA_AGENT,
@@ -133,6 +134,7 @@ class EligibilityAndSuitabilityServiceTest {
                 hint = it.hint,
                 name = it.name,
                 answer = null,
+                failureReason = TODO(),
               )
             },
           agent = null,
@@ -178,6 +180,7 @@ class EligibilityAndSuitabilityServiceTest {
               hint = it.hint,
               name = it.name,
               answer = true,
+              failureReason = TODO(),
             )
           },
           agent = PRISON_CA_AGENT,
@@ -195,6 +198,7 @@ class EligibilityAndSuitabilityServiceTest {
               hint = it.hint,
               name = it.name,
               answer = null,
+              failureReason = TODO(),
             )
           },
           agent = null,

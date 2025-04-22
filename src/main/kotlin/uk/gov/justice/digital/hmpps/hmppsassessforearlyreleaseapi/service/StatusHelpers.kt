@@ -28,9 +28,9 @@ object StatusHelpers {
     else -> SuitabilityStatus.NOT_STARTED
   }
 
-  fun List<SuitabilityCriterionProgress>.getUnsuitableReasons() = this.filter { it.status == UNSUITABLE }.map { it.taskName }
+  fun List<SuitabilityCriterionProgress>.getUnsuitableReasons() = this.filter { it.status == UNSUITABLE }.map { it.questions.map { it.failureReason } }.flatten()
 
-  fun List<EligibilityCriterionProgress>.getIneligibleReasons() = this.filter { it.status == INELIGIBLE }.map { it.taskName }
+  fun List<EligibilityCriterionProgress>.getIneligibleReasons() = this.filter { it.status == INELIGIBLE }.map { it.questions.map { it.failureReason } }.flatten()
 
   fun AssessmentWithEligibilityProgress.calculateAggregateEligibilityStatus(): EligibilityStatus {
     val eligibility = getEligibilityProgress()

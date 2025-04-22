@@ -117,6 +117,8 @@ data class SuitabilityCriterionProgress(
 data class Question(
   @Schema(description = "The question that is posed to the user", example = "a question...")
   val text: String,
+  @Schema(description = "The reason for failure", example = "a reason")
+  val failureReason: String,
   @Schema(description = "The hint html associated with this question", example = "<p>Some hint text</p>")
   val hint: String? = null,
   @Schema(description = "The name that the data will be stored under for this check", example = "question1")

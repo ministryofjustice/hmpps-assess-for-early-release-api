@@ -229,6 +229,7 @@ class AssessmentService(
       questions = questions.map {
         Question(
           text = it.text,
+          failureReason = it.failureReason,
           hint = it.hint,
           name = it.name,
           answer = eligibilityCheckResult.getAnswer(it.name),
@@ -253,6 +254,7 @@ class AssessmentService(
       questions = questions.map {
         Question(
           text = it.text,
+          failureReason =  it.failureReason,
           hint = it.hint,
           name = it.name,
           answer = eligibilityCheckResult.getAnswer(it.name),
