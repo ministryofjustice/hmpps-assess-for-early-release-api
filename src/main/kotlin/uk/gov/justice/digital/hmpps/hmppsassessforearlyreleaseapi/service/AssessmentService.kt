@@ -44,7 +44,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersApiClient
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -66,7 +66,7 @@ class AssessmentService(
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
   private val staffRepository: StaffRepository,
-  private val managedUsersApiClient: ManagedUsersApiClient,
+  private val managedUsersService: ManagedUsersService,
   @Lazy
   private val probationService: ProbationService,
 ) {
@@ -331,6 +331,7 @@ class AssessmentService(
     )
   }
 
+  @Transactional
   fun getContacts(prisonNumber: String): AssessmentContactsResponse {
     val currentAssessment = this.getCurrentAssessment(prisonNumber)
 
@@ -357,21 +358,31 @@ class AssessmentService(
   }
 
   private fun getEmailAddress(agent: Agent): String? {
-    with(agent) {
-      return when (role) {
-        UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username)?.email
-        UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersApiClient.getEmail(username)?.email
-        else -> null
+    try {
+      with(agent) {
+        return when (role) {
+          UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username)?.email
+          UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username)?.email
+          else -> null
+        }
       }
+    } catch (e: ItemNotFoundException) {
+      log.debug("Could not find email with given username and role {}", agent.role)
+      return null
     }
   }
 
   private fun getLocationName(agent: Agent): String? {
-    with(agent) {
-      return when (role) {
-        UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
-        else -> null
+    try {
+      with(agent) {
+        return when (role) {
+          UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
+          else -> null
+        }
       }
+    } catch (e: ItemNotFoundException) {
+      log.debug("Could not find Location with given username and role {}", agent.role)
+      return null
     }
   }
 }

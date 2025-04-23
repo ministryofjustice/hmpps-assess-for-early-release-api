@@ -38,7 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.saveResidentialChecksTaskAnswersRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersApiClient
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
@@ -52,7 +52,7 @@ class AssessmentServiceTest {
   private val policyService = PolicyService()
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
-  private val managedUsersApiClient = mock<ManagedUsersApiClient>()
+  private val managedUsersService = mock<ManagedUsersService>()
 
   private val offenderToAssessmentSummaryMapper = OffenderToAssessmentSummaryMapper(prisonService)
   private val assessmentToAssessmentOverviewSummaryMapper = AssessmentToAssessmentOverviewSummaryMapper()
@@ -65,7 +65,7 @@ class AssessmentServiceTest {
       prisonService,
       policyService,
       staffRepository,
-      managedUsersApiClient,
+      managedUsersService,
       probationService,
     )
 
