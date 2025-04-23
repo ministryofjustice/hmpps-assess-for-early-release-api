@@ -50,6 +50,25 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
     return communityApiResponse
   }
 
+  fun getStaffDetailsByStaffCode(username: String): User? {
+    val communityApiResponse = communityApiClient
+      .get()
+      .uri("/staff/bycode/{code}", username)
+      .accept(MediaType.APPLICATION_JSON)
+      .retrieve()
+      .bodyToMono(typeReference<User>())
+      .onErrorResume {
+        when {
+          it is WebClientResponseException && it.statusCode == HttpStatus.NOT_FOUND -> {
+            Mono.empty()
+          }
+          else -> Mono.error(it)
+        }
+      }
+      .block()
+    return communityApiResponse
+  }
+
   fun assignDeliusRole(username: String) {
     communityApiClient
       .put()
