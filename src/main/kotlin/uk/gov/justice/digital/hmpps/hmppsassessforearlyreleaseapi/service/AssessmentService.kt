@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
@@ -12,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent
@@ -23,8 +25,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentContactsResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ContactResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -40,6 +44,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -61,6 +66,7 @@ class AssessmentService(
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
   private val staffRepository: StaffRepository,
+  private val managedUsersApiClient: ManagedUsersApiClient,
   @Lazy
   private val probationService: ProbationService,
 ) {
@@ -323,5 +329,49 @@ class AssessmentService(
       assessmentEntity = currentAssessment,
       policy = policy,
     )
+  }
+
+  fun getContacts(prisonNumber: String): AssessmentContactsResponse {
+    val currentAssessment = this.getCurrentAssessment(prisonNumber)
+
+    // Currently we do not support Prison offender manager
+    val contactTypes = listOf(UserRole.PRISON_CA, UserRole.PRISON_DM, UserRole.PROBATION_COM)
+    val agents = getAgents(currentAssessment, contactTypes)
+
+    val contacts = agents.map {
+      with(it) {
+        ContactResponse(fullName, role, getEmailAddress(it), getLocationName(it))
+      }
+    }
+
+    return AssessmentContactsResponse(contacts)
+  }
+
+  private fun getAgents(
+    currentAssessment: Assessment,
+    contactTypes: List<UserRole>,
+  ): List<Agent> {
+    val contacts = currentAssessment.assessmentEvents.sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
+      .distinctBy { it.agent.role }.map { it.agent }
+    return contacts
+  }
+
+  private fun getEmailAddress(agent: Agent): String? {
+    with(agent) {
+      return when (role) {
+        UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username)?.email
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersApiClient.getEmail(username)?.email
+        else -> null
+      }
+    }
+  }
+
+  private fun getLocationName(agent: Agent): String? {
+    with(agent) {
+      return when (role) {
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
+        else -> null
+      }
+    }
   }
 }

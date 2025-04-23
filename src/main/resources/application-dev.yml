@@ -27,6 +27,10 @@ hmpps:
   probationsearch:
     api:
       url: "https://probation-offender-search-dev.hmpps.service.justice.gov.uk"
+  manageusers:
+    api:
+      url: "https://manage-users-api-dev.hmpps.service.justice.gov.uk"
+
 
 gotenberg:
   api:

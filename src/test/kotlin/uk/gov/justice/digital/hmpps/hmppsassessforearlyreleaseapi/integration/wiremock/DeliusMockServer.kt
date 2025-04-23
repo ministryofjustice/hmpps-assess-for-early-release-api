@@ -49,7 +49,7 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
     )
   }
 
-  fun stubGetStaffDetailsByUsername(username: String = "com-user") {
+  fun stubGetStaffDetailsByUsername(username: String = "com-user", email: String = "comuser@probation.gov.uk") {
     stubFor(
       get(urlEqualTo("/staff/$username"))
         .willReturn(
@@ -61,8 +61,8 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
             {
               "code": "AB00001",
               "id": 2000,
-              "username": "com-user",
-              "email": "comuser@probation.gov.uk",
+              "username": "$username",
+              "email": "$email",
               "teams": [],
               "name": {
               "forename": "com",
