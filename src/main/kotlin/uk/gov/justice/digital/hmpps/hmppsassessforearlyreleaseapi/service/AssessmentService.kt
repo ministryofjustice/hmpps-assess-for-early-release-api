@@ -367,7 +367,7 @@ class AssessmentService(
         }
       }
     } catch (e: ItemNotFoundException) {
-      log.debug("Could not find email with given username and role {}", agent.role)
+      log.debug("Could not find email with given username and role {}", agent.role, e)
       return null
     }
   }
@@ -381,7 +381,7 @@ class AssessmentService(
         }
       }
     } catch (e: ItemNotFoundException) {
-      log.debug("Could not find Location with given username and role {}", agent.role)
+      log.debug("Could not find Location with given username and role {}", agent.role, e)
       return null
     }
   }
