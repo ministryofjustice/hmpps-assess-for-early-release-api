@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state
 
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.APPROVE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION
@@ -11,8 +12,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CR
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.OPT_IN
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RECORD_NON_DISCLOSABLE_INFORMATION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RECORD_NON_DISCLOSABLE_INFORMATION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus
@@ -20,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
@@ -85,7 +85,7 @@ enum class AssessmentStatus {
         TaskProgress.Dynamic(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION) {
           if (it.victimContactSchemeOptedIn != null) READY_TO_START else LOCKED
         },
-        TaskProgress.Fixed(RECORD_NON_DISCLOSABLE_INFORMATION,  LOCKED),
+        TaskProgress.Fixed(RECORD_NON_DISCLOSABLE_INFORMATION, LOCKED),
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
@@ -236,12 +236,11 @@ enum class AssessmentStatus {
 
     fun inFlightStatuses(): List<AssessmentStatus> = entries.filter { it != TIMED_OUT && it != REFUSED && it != RELEASED_ON_HDC }
 
-    fun determineStatusForRecordNonDisclosableInformation(assessment: Assessment): TaskStatus =
-      when {
-         assessment.hasNonDisclosableInformation != null -> COMPLETE
-         !assessment.addressChecksComplete -> READY_TO_START
-         assessment.addressChecksComplete && assessment.victimContactSchemeOptedIn != null -> READY_TO_START
-         else -> LOCKED
-      }
+    fun determineStatusForRecordNonDisclosableInformation(assessment: Assessment): TaskStatus = when {
+      assessment.hasNonDisclosableInformation != null -> COMPLETE
+      !assessment.addressChecksComplete -> READY_TO_START
+      assessment.addressChecksComplete && assessment.victimContactSchemeOptedIn != null -> READY_TO_START
+      else -> LOCKED
+    }
   }
 }
