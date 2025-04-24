@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.NamedAttributeNode
+import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
@@ -40,6 +42,7 @@ import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent as AgentEntity
 
 @Entity
+@NamedEntityGraph(name = "Assessment.offender", attributeNodes = [NamedAttributeNode("offender")])
 @Table(name = "assessment")
 data class Assessment(
   @Id
