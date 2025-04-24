@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.any
@@ -15,6 +16,7 @@ import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
@@ -23,6 +25,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.inProgressStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.notStartedStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
 
@@ -30,6 +34,7 @@ class ResidentialChecksServiceTest {
   private val addressService = mock<AddressService>()
   private val assessmentService = mock<AssessmentService>()
   private val residentialChecksTaskAnswerRepository = mock<ResidentialChecksTaskAnswerRepository>()
+  private val curfewAddressCheckRequestRepository = mock<CurfewAddressCheckRequestRepository>()
   private val objectMapper = jacksonObjectMapper().registerModule(
     JavaTimeModule(),
   )
@@ -39,6 +44,7 @@ class ResidentialChecksServiceTest {
     addressService,
     assessmentService,
     residentialChecksTaskAnswerRepository,
+    curfewAddressCheckRequestRepository,
     objectMapper,
     validator,
   )
@@ -118,7 +124,7 @@ class ResidentialChecksServiceTest {
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessmentEntity)
     whenever(addressService.getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)).thenReturn(
-      aStandardAddressCheckRequest(),
+      aStandardAddressCheckRequest(true, true, true, true, true, true),
     )
     whenever(residentialChecksTaskAnswerRepository.save(any())).thenAnswer { it.arguments[0] }
     whenever(validator.validateObject(any())).thenReturn(SimpleErrors("RiskManagementDecisionAnswers"))
@@ -142,6 +148,39 @@ class ResidentialChecksServiceTest {
         assertThat(createdTimestamp).isNotNull()
         assertThat(lastUpdatedTimestamp).isNotNull()
       }
+    }
+  }
+
+  @Nested
+  inner class GetAddressesCheckStatus {
+    @Test
+    fun `test all suitable`() {
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(true, true, true, true, true, true)))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.SUITABLE)
+    }
+
+    @Test
+    fun `test any unsuitable`() {
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(false, true, true, true, true, true)))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.UNSUITABLE)
+    }
+
+    @Test
+    fun `test in progress`() {
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(inProgressStandardAddressCheckRequest()))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.IN_PROGRESS)
+    }
+
+    @Test
+    fun `test not started`() {
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(notStartedStandardAddressCheckRequest()))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.NOT_STARTED)
+    }
+
+    @Test
+    fun `test mixed statuses`() {
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(false, true, true, false, true, true)))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.UNSUITABLE)
     }
   }
 }

@@ -48,7 +48,7 @@ class AddressServiceTest {
   @Test
   fun `should get all check requests linked to an assessment`() {
     // Given
-    val addressCheckRequest = aStandardAddressCheckRequest()
+    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
     val casCheckRequest = aCasCheckRequest()
     val assessment = anOffender().assessments.first()
 
@@ -84,9 +84,9 @@ class AddressServiceTest {
 
   @Test
   fun `should delete a address check request`() {
-    val addressCheckRequest = aStandardAddressCheckRequest()
+    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
     val prisonNumber = addressCheckRequest.assessment.offender.prisonNumber
-    val requestId = aStandardAddressCheckRequest().id
+    val requestId = aStandardAddressCheckRequest(true, true, true, true, true, true).id
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(addressCheckRequest.assessment)
@@ -102,9 +102,9 @@ class AddressServiceTest {
 
   @Test
   fun `should not delete an address request that is not linked to the offender`() {
-    val addressCheckRequest = aStandardAddressCheckRequest()
+    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
     val prisonNumber = "invalid-prison-number"
-    val requestId = aStandardAddressCheckRequest().id
+    val requestId = aStandardAddressCheckRequest(true, true, true, true, true, true).id
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 

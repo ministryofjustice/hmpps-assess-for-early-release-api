@@ -16,6 +16,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
@@ -33,6 +34,7 @@ class ResidentialChecksService(
   private val addressService: AddressService,
   private val assessmentService: AssessmentService,
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
+  private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val objectMapper: ObjectMapper,
   private val validator: Validator,
 ) {
@@ -97,7 +99,9 @@ class ResidentialChecksService(
       residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, criterionMet, taskVersion))
     }
 
-    val checksStatus = getAddressCheckStatus(addressCheckRequest)
+    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val checkRequests = curfewAddressCheckRequestRepository.findByAssessment(assessment)
+    val checksStatus = getAddressesCheckStatus(checkRequests)
     assessmentService.updateAddressChecksStatus(prisonNumber, checksStatus, saveTaskAnswersRequest)
 
     return ResidentialChecksTaskAnswersSummary(
@@ -148,20 +152,29 @@ class ResidentialChecksService(
     }
   }
 
-  private fun getAddressCheckStatus(addressCheckRequest: CurfewAddressCheckRequest): ResidentialChecksStatus {
-    val taskAnswers = addressCheckRequest.taskAnswers
-    val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }.toTaskStatus() }
+  fun getAddressesCheckStatus(addressCheckRequests: List<CurfewAddressCheckRequest>): ResidentialChecksStatus {
+    var overallStatus = ResidentialChecksStatus.NOT_STARTED
 
-    val unsuitable = taskStatus.any { it == UNSUITABLE }
-    val suitable = taskStatus.all { it == SUITABLE }
-    val inProgress = taskStatus.any { it == SUITABLE }
+    addressCheckRequests.forEach { addressCheckRequest ->
+      val taskAnswers = addressCheckRequest.taskAnswers
+      val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }?.toTaskStatus() }
 
-    return when {
-      suitable -> ResidentialChecksStatus.SUITABLE
-      unsuitable -> ResidentialChecksStatus.UNSUITABLE
-      inProgress -> ResidentialChecksStatus.IN_PROGRESS
-      else -> ResidentialChecksStatus.NOT_STARTED
+      val currentStatus = when {
+        taskStatus.all { it == SUITABLE } -> ResidentialChecksStatus.SUITABLE
+        taskStatus.any { it == UNSUITABLE } -> ResidentialChecksStatus.UNSUITABLE
+        taskStatus.any { it == SUITABLE } -> ResidentialChecksStatus.IN_PROGRESS
+        else -> ResidentialChecksStatus.NOT_STARTED
+      }
+
+      overallStatus = when {
+        currentStatus == ResidentialChecksStatus.UNSUITABLE -> ResidentialChecksStatus.UNSUITABLE
+        currentStatus == ResidentialChecksStatus.SUITABLE && overallStatus != ResidentialChecksStatus.UNSUITABLE -> ResidentialChecksStatus.SUITABLE
+        currentStatus == ResidentialChecksStatus.IN_PROGRESS && overallStatus == ResidentialChecksStatus.NOT_STARTED -> ResidentialChecksStatus.IN_PROGRESS
+        else -> overallStatus
+      }
     }
+
+    return overallStatus
   }
 
   private fun ResidentialChecksTaskAnswer?.toTaskStatus(): TaskStatus = when (this?.criterionMet) {
