@@ -282,6 +282,6 @@ class AssessmentServiceTest {
     val assessmentCaptor = argumentCaptor<List<Assessment>>()
     verify(assessmentRepository).findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())
     verify(assessmentRepository).saveAll(assessmentCaptor.capture())
-    assessmentCaptor.firstValue.map { assertThat(it.team).isEqualTo(newTeamCode) }
+    assessmentCaptor.firstValue.map { assertThat(it.teamCode).isEqualTo(newTeamCode) }
   }
 }

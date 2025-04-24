@@ -88,7 +88,7 @@ data class Assessment(
   @JoinColumn(name = "responsible_com_id")
   var responsibleCom: CommunityOffenderManager? = null,
 
-  val team: String? = null,
+  val teamCode: String? = null,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("createdTimestamp ASC")

@@ -18,4 +18,6 @@ interface AssessmentRepository : JpaRepository<Assessment, Long> {
   fun findByOffenderPrisonNumberOrderById(prisonId: String): List<AssessmentSearchResponse>
 
   fun findByResponsibleComStaffCodeAndDeletedTimestampIsNull(staffCode: String): List<Assessment>
+
+  fun findByTeamCodeInAndDeletedTimestampIsNull(teamCodes: List<String>): List<Assessment>
 }

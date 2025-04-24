@@ -23,9 +23,14 @@ class ProbationService(
 
   fun getCurrentResponsibleOfficer(crn: String): DeliusOffenderManager? = deliusApiClient.getOffenderManager(crn)
 
-  fun getStaffDetailsByUsername(username: String): User? {
+  fun getStaffDetailsByUsername(username: String): User {
     val staffDetails = deliusApiClient.getStaffDetailsByUsername(username)
     return staffDetails ?: throw ItemNotFoundException("Cannot find staff with username $username")
+  }
+
+  fun getStaffDetailsByStaffCode(staffCode: String): User {
+    val staffDetails = deliusApiClient.getStaffDetailsByStaffCode(staffCode)
+    return staffDetails ?: throw ItemNotFoundException("Cannot find staff with staff code $staffCode")
   }
 
   fun offenderManagerChanged(crn: String) {

@@ -88,4 +88,39 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
         .willReturn(aResponse().withStatus(200)),
     )
   }
+
+  fun stubGetStaffDetailsByStaffCode(staffCode: String) {
+    stubFor(
+      get(urlEqualTo("/staff/bycode/$staffCode"))
+        .willReturn(
+          aResponse().withHeader(
+            "Content-Type",
+            "application/json",
+          ).withBody(
+            """
+            {
+              "code": "AB00001",
+              "id": 2000,
+              "username": "com-user",
+              "email": "comuser@probation.gov.uk",
+              "teams": [
+                {
+                  "code": "teamA",
+                  "description": "Team A"
+                },
+                {
+                  "code": "teamB",
+                  "description": "Team B"
+                }
+              ],
+              "name": {
+                "forename": "com",
+                "surname": "user"
+              }
+            }
+            """.trimIndent(),
+          ).withStatus(200),
+        ),
+    )
+  }
 }
