@@ -47,7 +47,7 @@ data class AssessmentResponse(
   val responsibleCom: ComSummary?,
 
   @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "N55LAU", required = false)
-  val team: String?,
+  val teamCode: String?,
 
   @Schema(description = "The postponement date", example = "2026-08-23", required = false)
   @JsonFormat(pattern = API_DATE_FORMAT)
