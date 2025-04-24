@@ -208,6 +208,11 @@ class AssessmentService(
     assessmentRepository.save(assessmentEntity)
   }
 
+  @Transactional
+  fun updateAssessmentDates(assessmentEntity: Assessment, hdced: LocalDate) {
+    assessmentEntity.hdced = hdced
+  }
+
   data class AssessmentWithEligibilityProgress(
     val assessmentEntity: Assessment,
     val policy: Policy,
@@ -264,7 +269,7 @@ class AssessmentService(
   }
 
   @Transactional
-  fun createAssessment(offender: Offender, prisonerNumber: String, bookingId: Long): Assessment {
+  fun createAssessment(offender: Offender, prisonerNumber: String, bookingId: Long, hdced: LocalDate): Assessment {
     log.debug("Creating assessment for prisonerNumber: {}", prisonerNumber)
 
     val deliusOffenderManager = offender.crn?.let {
@@ -283,11 +288,12 @@ class AssessmentService(
       policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
       responsibleCom = communityOffenderManager,
       teamCode = deliusOffenderManager?.team?.code,
+      hdced = hdced,
     )
 
     val changes = mapOf(
       "prisonNumber" to prisonerNumber,
-      "homeDetentionCurfewEligibilityDate" to offender.hdced.format(DateTimeFormatter.ISO_DATE),
+      "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
     )
 
     assessment.recordEvent(

@@ -113,9 +113,12 @@ data class Assessment(
   var victimContactSchemeRequests: String? = null,
 
   var pomBehaviourInformation: String? = null,
+
+  @NotNull
+  var hdced: LocalDate,
 ) {
   @Override
-  override fun toString(): String = this::class.simpleName + "(id: $id, status: $status)"
+  override fun toString(): String = this::class.simpleName + "(id: $id, status: $status, hdced: $hdced)"
 
   @Override
   override fun equals(other: Any?): Boolean {

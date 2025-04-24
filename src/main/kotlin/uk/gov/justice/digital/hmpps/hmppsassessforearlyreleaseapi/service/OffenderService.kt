@@ -4,6 +4,7 @@ import com.microsoft.applicationinsights.TelemetryClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
@@ -17,12 +18,12 @@ import java.time.format.DateTimeFormatter
 
 @Service
 class OffenderService(
-  private val assessmentRepository: AssessmentRepository,
   private val offenderRepository: OffenderRepository,
   private val prisonService: PrisonService,
   private val probationService: ProbationService,
   private val telemetryClient: TelemetryClient,
   private val assessmentService: AssessmentService,
+  private val assessmentRepository: AssessmentRepository,
 ) {
 
   fun createOrUpdateOffender(prisonNumber: String) {
@@ -55,18 +56,22 @@ class OffenderService(
         forename = prisoner.firstName,
         surname = prisoner.lastName,
         dateOfBirth = prisoner.dateOfBirth,
-        hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
         crd = prisoner.conditionalReleaseDate,
         crn = crn,
         sentenceStartDate = prisoner.sentenceStartDate,
       ),
     )
 
-    val assessment = assessmentService.createAssessment(offender, prisonerNumber = prisoner.prisonerNumber, prisoner.bookingId!!.toLong())
+    val assessment = assessmentService.createAssessment(
+      offender,
+      prisonerNumber = prisoner.prisonerNumber,
+      prisoner.bookingId!!.toLong(),
+      prisoner.homeDetentionCurfewEligibilityDate!!,
+    )
     offender.assessments.add(assessment)
     val changes = mapOf(
       "prisonNumber" to prisoner.prisonerNumber,
-      "homeDetentionCurfewEligibilityDate" to offender.hdced.format(DateTimeFormatter.ISO_DATE),
+      "homeDetentionCurfewEligibilityDate" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
     )
 
     telemetryClient.trackEvent(
@@ -79,17 +84,17 @@ class OffenderService(
   private fun updateOffender(offender: Offender, prisoner: PrisonerSearchPrisoner) {
     log.debug("Update offender for prisoner {}", prisoner)
 
-    if (hasOffenderBeenUpdated(offender, prisoner)) {
-      val updatedOffender = offender.copy(
-        forename = prisoner.firstName,
-        surname = prisoner.lastName,
-        dateOfBirth = prisoner.dateOfBirth,
-        hdced = prisoner.homeDetentionCurfewEligibilityDate!!,
-        crd = prisoner.conditionalReleaseDate,
-        sentenceStartDate = prisoner.sentenceStartDate,
-        lastUpdatedTimestamp = LocalDateTime.now(),
-      )
-      offenderRepository.save(updatedOffender)
+    val currentAssessment = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
+    if (hasOffenderBeenUpdated(offender, prisoner, currentAssessment)) {
+      currentAssessment.hdced = prisoner.homeDetentionCurfewEligibilityDate!!
+      offender.forename = prisoner.firstName
+      offender.surname = prisoner.lastName
+      offender.dateOfBirth = prisoner.dateOfBirth
+      offender.crd = prisoner.conditionalReleaseDate
+      offender.sentenceStartDate = prisoner.sentenceStartDate
+      offender.lastUpdatedTimestamp = LocalDateTime.now()
+
+      offenderRepository.save(offender)
 
       val changes = mapOf(
         "prisonNumber" to prisoner.prisonerNumber,
@@ -99,7 +104,6 @@ class OffenderService(
         "homeDetentionCurfewEligibilityDate" to prisoner.homeDetentionCurfewEligibilityDate.format(DateTimeFormatter.ISO_DATE),
       )
 
-      val currentAssessment = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
       currentAssessment.recordEvent(
         eventType = AssessmentEventType.PRISONER_UPDATED,
         changes,
@@ -115,7 +119,7 @@ class OffenderService(
     }
   }
 
-  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner) = offender.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner, currentAssessment: Assessment) = currentAssessment.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
     offender.sentenceStartDate != prisoner.sentenceStartDate ||
     offender.crd != prisoner.conditionalReleaseDate ||
     offender.forename != prisoner.firstName ||

@@ -66,7 +66,7 @@ class EligibilityAndSuitabilityServiceTest {
       // Then
       assertThat(caseView.assessmentSummary).isEqualTo(
         anAssessmentSummary().copy(
-          hdced = anOffender.hdced,
+          hdced = anOffender.assessments.first().hdced,
           crd = anOffender.crd,
         ),
       )
@@ -248,7 +248,6 @@ class EligibilityAndSuitabilityServiceTest {
 
     assertThat(assessmentSummary).isNotNull
     assertThat(assessmentSummary.crd).isEqualTo(assessmentWithEligibilityProgress.offender.crd)
-    assertThat(assessmentSummary.hdced).isEqualTo(assessmentWithEligibilityProgress.offender.hdced)
     assertThat(assessmentSummary.prisonNumber).isEqualTo(assessmentWithEligibilityProgress.offender.prisonNumber)
     assertThat(assessmentSummary.dateOfBirth).isEqualTo(assessmentWithEligibilityProgress.offender.dateOfBirth)
     assertThat(assessmentSummary.forename).isEqualTo(assessmentWithEligibilityProgress.offender.forename)
@@ -260,6 +259,7 @@ class EligibilityAndSuitabilityServiceTest {
     assertThat(assessmentSummary.team).isEqualTo(expectedAssessment.teamCode)
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
+    assertThat(assessmentSummary.hdced).isEqualTo(expectedAssessment.hdced)
 
     assertThat(assessmentSummary.tasks).isEqualTo(
       expectedAssessment.status.tasks()

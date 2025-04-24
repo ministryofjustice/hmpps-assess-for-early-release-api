@@ -12,7 +12,6 @@ class OffenderToOffenderResponseMapper {
     forename = offender.forename!!,
     surname = offender.surname!!,
     crd = offender.crd,
-    hdced = offender.hdced,
     crn = offender.crn,
     prisonId = offender.prisonId,
     dateOfBirth = offender.dateOfBirth,

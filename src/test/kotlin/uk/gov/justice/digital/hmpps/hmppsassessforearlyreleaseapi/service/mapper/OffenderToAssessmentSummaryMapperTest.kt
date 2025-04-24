@@ -62,7 +62,6 @@ class OffenderToAssessmentSummaryMapperTest {
 
     assertThat(assessmentSummary).isNotNull
     assertThat(assessmentSummary.crd).isEqualTo(offender.crd)
-    assertThat(assessmentSummary.hdced).isEqualTo(offender.hdced)
     assertThat(assessmentSummary.prisonNumber).isEqualTo(offender.prisonNumber)
     assertThat(assessmentSummary.dateOfBirth).isEqualTo(offender.dateOfBirth)
     assertThat(assessmentSummary.forename).isEqualTo(offender.forename)
@@ -75,6 +74,7 @@ class OffenderToAssessmentSummaryMapperTest {
     assertThat(assessmentSummary.team).isEqualTo(expectedAssessment.teamCode)
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
+    assertThat(assessmentSummary.hdced).isEqualTo(expectedAssessment.hdced)
 
     assertThat(assessmentSummary.tasks).isEqualTo(
       expectedAssessment.status.tasks().mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },

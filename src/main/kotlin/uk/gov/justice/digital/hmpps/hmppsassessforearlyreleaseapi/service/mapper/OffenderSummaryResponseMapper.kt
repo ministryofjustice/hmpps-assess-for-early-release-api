@@ -18,7 +18,7 @@ class OffenderSummaryResponseMapper {
       forename = offender.forename!!,
       surname = offender.surname!!,
       crd = offender.crd,
-      hdced = offender.hdced,
+      hdced = assessment.hdced,
       workingDaysToHdced = workingDaysToHdced,
       probationPractitioner = assessment.responsibleCom?.fullName,
       isPostponed = assessment.status == AssessmentStatus.POSTPONED,

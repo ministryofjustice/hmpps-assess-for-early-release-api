@@ -17,8 +17,9 @@ class OffenderSummaryResponseMapperTest {
   fun `should map assessment to offender summary`() {
     val workingDaysToHdced = 12
     val crd = LocalDate.of(2026, Month.MAY, 6)
+    val hdced = LocalDate.now().plusDays(20)
     val offender = anOffender().copy(crd = crd)
-    val anAssessment = anAssessment(offender)
+    val anAssessment = anAssessment(offender, hdced)
 
     val offenderSummary = mapper.map(anAssessment, workingDaysToHdced)
 
@@ -27,7 +28,7 @@ class OffenderSummaryResponseMapperTest {
     assertThat(offenderSummary.forename).isEqualTo(offender.forename)
     assertThat(offenderSummary.surname).isEqualTo(offender.surname)
     assertThat(offenderSummary.crd).isEqualTo(crd)
-    assertThat(offenderSummary.hdced).isEqualTo(offender.hdced)
+    assertThat(offenderSummary.hdced).isEqualTo(anAssessment.hdced)
     assertThat(offenderSummary.workingDaysToHdced).isEqualTo(workingDaysToHdced)
     assertThat(offenderSummary.probationPractitioner).isEqualTo(anAssessment.responsibleCom?.fullName)
     assertThat(offenderSummary.isPostponed).isEqualTo(anAssessment.status == AssessmentStatus.POSTPONED)

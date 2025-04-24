@@ -269,6 +269,7 @@ class AssessmentServiceTest {
       offender = anOffender(),
       responsibleCom = com,
       bookingId = BOOKING_ID,
+      hdced = LocalDate.now().plusDays(5),
     )
     whenever(assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())).thenReturn(
       listOf(assessment),

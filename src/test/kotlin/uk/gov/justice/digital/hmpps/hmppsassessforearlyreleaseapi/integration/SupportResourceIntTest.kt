@@ -315,7 +315,6 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenderResponse.forename).isEqualTo(offender.forename)
       assertThat(offenderResponse.surname).isEqualTo(offender.surname)
       assertThat(offenderResponse.dateOfBirth).isEqualTo(offender.dateOfBirth)
-      assertThat(offenderResponse.hdced).isEqualTo(offender.hdced)
       assertThat(offenderResponse.crd).isEqualTo(offender.crd)
       assertThat(offenderResponse.crn).isEqualTo(offender.crn)
       assertThat(offenderResponse.sentenceStartDate).isEqualTo(offender.sentenceStartDate)

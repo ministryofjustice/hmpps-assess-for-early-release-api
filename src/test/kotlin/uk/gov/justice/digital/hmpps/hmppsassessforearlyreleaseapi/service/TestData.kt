@@ -79,10 +79,9 @@ object TestData {
       forename = FORENAME,
       surname = SURNAME,
       dateOfBirth = LocalDate.of(1981, 5, 23),
-      hdced = hdced,
       sentenceStartDate = sentenceStartDate,
     )
-    offender.assessments.add(anAssessment(offender))
+    offender.assessments.add(anAssessment(offender, hdced))
     return offender
   }
 
@@ -108,7 +107,18 @@ object TestData {
     agent = PRISON_CA_AGENT,
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(offender = offender, status = status, bookingId = bookingId, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
+  fun anAssessment(
+    offender: Offender,
+    hdced: LocalDate,
+    status: AssessmentStatus = NOT_STARTED,
+    bookingId: Long = BOOKING_ID,
+  ): Assessment = Assessment(
+    offender = offender,
+    status = status,
+    bookingId = bookingId,
+    policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+    hdced = hdced,
+  )
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,
