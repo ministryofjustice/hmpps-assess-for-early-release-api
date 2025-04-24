@@ -50,10 +50,10 @@ class DeliusApiClient(@Qualifier("oauthDeliusApiClient") val communityApiClient:
     return communityApiResponse
   }
 
-  fun getStaffDetailsByStaffCode(username: String): User? {
+  fun getStaffDetailsByStaffCode(staffCode: String): User? {
     val communityApiResponse = communityApiClient
       .get()
-      .uri("/staff/bycode/{code}", username)
+      .uri("/staff/bycode/{code}", staffCode)
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .bodyToMono(typeReference<User>())
