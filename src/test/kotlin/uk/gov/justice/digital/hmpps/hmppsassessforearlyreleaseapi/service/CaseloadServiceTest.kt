@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.STAFF_CODE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderSummaryResponseMapper
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.ProbationService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.BankHolidayService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.time.Clock
@@ -23,12 +24,14 @@ class CaseloadServiceTest {
   private val bankHolidayService = mock<BankHolidayService>()
   private val workingDaysService = WorkingDaysService(bankHolidayService, Clock.systemDefaultZone())
   private val offenderSummaryResponseMapper = OffenderSummaryResponseMapper()
+  private val probationService = mock<ProbationService>()
 
   private val service: CaseloadService =
     CaseloadService(
       assessmentRepository,
       workingDaysService,
       offenderSummaryResponseMapper,
+      probationService,
     )
 
   @Test

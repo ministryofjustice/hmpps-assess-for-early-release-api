@@ -157,7 +157,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(assessment.createdTimestamp).isNotNull
     assertThat(assessment.offender).isEqualTo(createdOffender)
     assertThat(assessment.policyVersion).isEqualTo(PolicyService.CURRENT_POLICY_VERSION.code)
-    assertThat(assessment.team).isEqualTo("team-code-1")
+    assertThat(assessment.teamCode).isEqualTo("team-code-1")
     assertThat(assessment.responsibleCom).isNotNull
     assessment.responsibleCom?.let {
       assertThat(it.staffCode).isEqualTo("STAFF1")
@@ -209,7 +209,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.crn).isNull()
 
     val assessment = createdOffender.assessments.first()
-    assertThat(assessment.team).isNull()
+    assertThat(assessment.teamCode).isNull()
     assertThat(assessment.responsibleCom).isNull()
   }
 
@@ -243,7 +243,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.crn).isEqualTo(crn)
 
     val assessment = createdOffender.assessments.first()
-    assertThat(assessment.team).isNull()
+    assertThat(assessment.teamCode).isNull()
     assertThat(assessment.responsibleCom).isNull()
   }
 
@@ -278,7 +278,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     assertThat(createdOffender.crn).isEqualTo(crn)
 
     val assessment = createdOffender.assessments.first()
-    assertThat(assessment.team).isEqualTo("team-code-1")
+    assertThat(assessment.teamCode).isEqualTo("team-code-1")
     assertThat(assessment.responsibleCom).isNotNull
     assessment.responsibleCom?.let {
       assertThat(it.username).isEqualTo("a-com")
