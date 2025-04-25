@@ -19,7 +19,7 @@ class AssessmentToAssessmentResponseMapper {
     policyVersion = assessment.policyVersion,
     addressChecksComplete = assessment.addressChecksComplete,
     responsibleCom = assessment.responsibleCom?.toSummary(),
-    team = assessment.team,
+    team = assessment.teamCode,
     postponementDate = assessment.postponementDate,
     optOutReasonType = assessment.optOutReasonType,
     optOutReasonOther = assessment.optOutReasonOther,
