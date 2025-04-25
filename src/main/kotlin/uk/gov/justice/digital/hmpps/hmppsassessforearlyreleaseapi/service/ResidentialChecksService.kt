@@ -152,29 +152,18 @@ class ResidentialChecksService(
     }
   }
 
+  private fun isAddressSuitable(taskAnswers: MutableSet<ResidentialChecksTaskAnswer>): Boolean {
+     val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }?.toTaskStatus() }
+     return taskStatus.all { it == SUITABLE }
+  }
+
   fun getAddressesCheckStatus(addressCheckRequests: List<CurfewAddressCheckRequest>): ResidentialChecksStatus {
-    var overallStatus = ResidentialChecksStatus.NOT_STARTED
-
-    addressCheckRequests.forEach { addressCheckRequest ->
-      val taskAnswers = addressCheckRequest.taskAnswers
-      val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }?.toTaskStatus() }
-
-      val currentStatus = when {
-        taskStatus.all { it == SUITABLE } -> ResidentialChecksStatus.SUITABLE
-        taskStatus.any { it == UNSUITABLE } -> ResidentialChecksStatus.UNSUITABLE
-        taskStatus.any { it == SUITABLE } -> ResidentialChecksStatus.IN_PROGRESS
-        else -> ResidentialChecksStatus.NOT_STARTED
-      }
-
-      overallStatus = when {
-        currentStatus == ResidentialChecksStatus.UNSUITABLE -> ResidentialChecksStatus.UNSUITABLE
-        currentStatus == ResidentialChecksStatus.SUITABLE && overallStatus != ResidentialChecksStatus.UNSUITABLE -> ResidentialChecksStatus.SUITABLE
-        currentStatus == ResidentialChecksStatus.IN_PROGRESS && overallStatus == ResidentialChecksStatus.NOT_STARTED -> ResidentialChecksStatus.IN_PROGRESS
-        else -> overallStatus
-      }
-    }
-
-    return overallStatus
+     return when {
+       addressCheckRequests.any { isAddressSuitable(it.taskAnswers) } -> ResidentialChecksStatus.SUITABLE
+       addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == UNSUITABLE } } -> ResidentialChecksStatus.UNSUITABLE
+       addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == SUITABLE } } -> ResidentialChecksStatus.IN_PROGRESS
+       else -> ResidentialChecksStatus.NOT_STARTED
+       }
   }
 
   private fun ResidentialChecksTaskAnswer?.toTaskStatus(): TaskStatus = when (this?.criterionMet) {

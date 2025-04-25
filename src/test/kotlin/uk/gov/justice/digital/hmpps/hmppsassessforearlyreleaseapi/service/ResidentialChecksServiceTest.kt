@@ -155,7 +155,7 @@ class ResidentialChecksServiceTest {
   inner class GetAddressesCheckStatus {
     @Test
     fun `test all suitable`() {
-      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(true, true, true, true, true, true)))
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(true, true, true, true, true, true), aStandardAddressCheckRequest(false, false, true, true, true, true)))
       assertThat(result).isEqualTo(ResidentialChecksStatus.SUITABLE)
     }
 
