@@ -83,7 +83,7 @@ data class Assessment(
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  var addressChecksStatus: ResidentialChecksStatus? = null,
+  var addressChecksStatus: ResidentialChecksStatus? = ResidentialChecksStatus.NOT_STARTED,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),

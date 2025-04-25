@@ -22,7 +22,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aRiskManagementDecisionTaskAnswers
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequestWithAllChecksComplete
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequestWithFewChecksFailed
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.inProgressStandardAddressCheckRequest
@@ -124,7 +125,7 @@ class ResidentialChecksServiceTest {
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessmentEntity)
     whenever(addressService.getCurfewAddressCheckRequest(ADDRESS_REQUEST_ID, PRISON_NUMBER)).thenReturn(
-      aStandardAddressCheckRequest(true, true, true, true, true, true),
+      aStandardAddressCheckRequestWithAllChecksComplete(),
     )
     whenever(residentialChecksTaskAnswerRepository.save(any())).thenAnswer { it.arguments[0] }
     whenever(validator.validateObject(any())).thenReturn(SimpleErrors("RiskManagementDecisionAnswers"))
@@ -155,19 +156,19 @@ class ResidentialChecksServiceTest {
   inner class GetAddressesCheckStatus {
     @Test
     fun `test all suitable`() {
-      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(true, true, true, true, true, true), aStandardAddressCheckRequest(false, false, true, true, true, true)))
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequestWithAllChecksComplete(), aStandardAddressCheckRequestWithFewChecksFailed()))
       assertThat(result).isEqualTo(ResidentialChecksStatus.SUITABLE)
     }
 
     @Test
     fun `test any unsuitable`() {
-      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(false, true, true, true, true, true)))
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequestWithFewChecksFailed(), aStandardAddressCheckRequestWithFewChecksFailed()))
       assertThat(result).isEqualTo(ResidentialChecksStatus.UNSUITABLE)
     }
 
     @Test
     fun `test in progress`() {
-      val result = residentialChecksService.getAddressesCheckStatus(listOf(inProgressStandardAddressCheckRequest()))
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(inProgressStandardAddressCheckRequest(), notStartedStandardAddressCheckRequest()))
       assertThat(result).isEqualTo(ResidentialChecksStatus.IN_PROGRESS)
     }
 
@@ -179,8 +180,8 @@ class ResidentialChecksServiceTest {
 
     @Test
     fun `test mixed statuses`() {
-      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequest(false, true, true, false, true, true)))
-      assertThat(result).isEqualTo(ResidentialChecksStatus.UNSUITABLE)
+      val result = residentialChecksService.getAddressesCheckStatus(listOf(aStandardAddressCheckRequestWithFewChecksFailed(), inProgressStandardAddressCheckRequest(), notStartedStandardAddressCheckRequest()))
+      assertThat(result).isEqualTo(ResidentialChecksStatus.IN_PROGRESS)
     }
   }
 }

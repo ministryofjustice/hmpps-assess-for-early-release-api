@@ -19,7 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.inter
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCasCheckRequest
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequestWithAllChecksComplete
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
 import java.util.Optional
@@ -48,7 +48,7 @@ class AddressServiceTest {
   @Test
   fun `should get all check requests linked to an assessment`() {
     // Given
-    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
+    val addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete()
     val casCheckRequest = aCasCheckRequest()
     val assessment = anOffender().assessments.first()
 
@@ -84,9 +84,9 @@ class AddressServiceTest {
 
   @Test
   fun `should delete a address check request`() {
-    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
+    val addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete()
     val prisonNumber = addressCheckRequest.assessment.offender.prisonNumber
-    val requestId = aStandardAddressCheckRequest(true, true, true, true, true, true).id
+    val requestId = aStandardAddressCheckRequestWithAllChecksComplete().id
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(addressCheckRequest.assessment)
@@ -102,9 +102,9 @@ class AddressServiceTest {
 
   @Test
   fun `should not delete an address request that is not linked to the offender`() {
-    val addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true)
+    val addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete()
     val prisonNumber = "invalid-prison-number"
-    val requestId = aStandardAddressCheckRequest(true, true, true, true, true, true).id
+    val requestId = aStandardAddressCheckRequestWithAllChecksComplete().id
 
     whenever(curfewAddressCheckRequestRepository.findById(requestId)).thenReturn(Optional.of(addressCheckRequest))
 

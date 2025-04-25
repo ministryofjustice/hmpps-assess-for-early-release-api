@@ -336,7 +336,25 @@ object TestData {
     residents = residents(),
   )
 
-  fun aStandardAddressCheckRequest(addressDetailsTaskAnswersCriterionMet: Boolean, assessPersonsRiskTaskAnswersCriterionMet: Boolean, childrenServicesChecksTaskAnswersCriterionMet: Boolean, policeChecksTaskAnswersCriterionMet: Boolean, riskManagementDecisionTaskAnswersCriterionMet: Boolean, suitabilityDecisionTaskAnswersCriterionMet: Boolean): CurfewAddressCheckRequest {
+  fun aStandardAddressCheckRequestWithAllChecksComplete(): CurfewAddressCheckRequest = aStandardAddressCheckRequest(
+    addressDetailsTaskAnswersCriterionMet = true,
+    assessPersonsRiskTaskAnswersCriterionMet = true,
+    childrenServicesChecksTaskAnswersCriterionMet = true,
+    policeChecksTaskAnswersCriterionMet = true,
+    riskManagementDecisionTaskAnswersCriterionMet = true,
+    suitabilityDecisionTaskAnswersCriterionMet = true,
+  )
+
+  fun aStandardAddressCheckRequestWithFewChecksFailed(): CurfewAddressCheckRequest = aStandardAddressCheckRequest(
+    addressDetailsTaskAnswersCriterionMet = false,
+    assessPersonsRiskTaskAnswersCriterionMet = true,
+    childrenServicesChecksTaskAnswersCriterionMet = false,
+    policeChecksTaskAnswersCriterionMet = true,
+    riskManagementDecisionTaskAnswersCriterionMet = true,
+    suitabilityDecisionTaskAnswersCriterionMet = true,
+  )
+
+  private fun aStandardAddressCheckRequest(addressDetailsTaskAnswersCriterionMet: Boolean, assessPersonsRiskTaskAnswersCriterionMet: Boolean, childrenServicesChecksTaskAnswersCriterionMet: Boolean, policeChecksTaskAnswersCriterionMet: Boolean, riskManagementDecisionTaskAnswersCriterionMet: Boolean, suitabilityDecisionTaskAnswersCriterionMet: Boolean): CurfewAddressCheckRequest {
     val standardAddressCheckRequest = StandardAddressCheckRequest(
       dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
       preferencePriority = AddressPreferencePriority.FIRST,
@@ -430,7 +448,7 @@ object TestData {
 
   fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean, answers: RiskManagementDecisionAnswers = aRiskManagementDecisionAnswers()): RiskManagementDecisionTaskAnswers = RiskManagementDecisionTaskAnswers(
     id = 1,
-    addressCheckRequest = aStandardAddressCheckRequest(true, true, true, true, true, true),
+    addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = answers,
