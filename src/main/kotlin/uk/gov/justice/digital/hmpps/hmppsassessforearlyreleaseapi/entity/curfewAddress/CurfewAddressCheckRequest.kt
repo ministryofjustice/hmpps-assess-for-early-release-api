@@ -14,6 +14,12 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.validation.constraints.NotNull
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.SUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.UNSUITABLE
 import java.time.LocalDateTime
 
 @Entity
@@ -51,4 +57,26 @@ abstract class CurfewAddressCheckRequest(
 
   @NotNull
   val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
-)
+) {
+
+  private fun getPolicyTaskCodes(): List<String> = RESIDENTIAL_CHECKS_POLICY_V1.tasks.map { it.code }
+
+  private fun ResidentialChecksTaskAnswer?.toTaskStatus(): TaskStatus = when (this?.criterionMet) {
+    null -> NOT_STARTED
+    true -> SUITABLE
+    false -> UNSUITABLE
+  }
+
+  fun getStatus(taskAnswers: MutableSet<ResidentialChecksTaskAnswer>): TaskStatus {
+    val taskStatuses = getPolicyTaskCodes().map { taskCode ->
+      taskAnswers.find { it.taskCode == taskCode }?.toTaskStatus()
+    }
+
+    return when {
+      taskStatuses.all { it == SUITABLE } -> SUITABLE
+      taskStatuses.any { it == UNSUITABLE } -> UNSUITABLE
+      taskStatuses.any { it == SUITABLE } -> IN_PROGRESS
+      else -> NOT_STARTED
+    }
+  }
+}

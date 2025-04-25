@@ -282,6 +282,29 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       assertThat(taskAnswers).isNotNull
       assertThat(taskAnswers.taskCode).isEqualTo(saveResidentialChecksTaskAnswersRequest.taskCode)
       assertThat(taskAnswers.toAnswersMap()["electricitySupply"]).isEqualTo(false)
+
+      val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(answersEntities.first().addressCheckRequest.assessment.offender.prisonNumber)
+      assertThat(assessments.first().addressChecksComplete).isFalse()
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-residential_checks_task_answer.sql",
+    )
+    @Test
+    fun `should update addressChecksComplete flag`() {
+      webTestClient.post()
+        .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(saveResidentialChecksTaskAnswersRequest)
+        .exchange()
+        .expectStatus()
+        .isCreated
+
+      val answersEntities = residentialChecksTaskAnswerRepository.findAll()
+
+      val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(answersEntities.first().addressCheckRequest.assessment.offender.prisonNumber)
+      assertThat(assessments.first().addressChecksComplete).isTrue()
     }
 
     @Sql(

@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state
 
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.APPROVE_LICENCE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION
@@ -12,8 +13,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.EN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.MAKE_A_RISK_MANAGEMENT_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.OPT_IN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RECORD_NON_DISCLOSABLE_INFORMATION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.COMPLETE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
@@ -22,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 
 enum class AssessmentStatus {
   NOT_STARTED {
@@ -79,11 +83,14 @@ enum class AssessmentStatus {
         ) {
           if (it.victimContactSchemeOptedIn != null) COMPLETE else READY_TO_START
         },
-        TaskProgress.Dynamic(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION) {
-          if (it.victimContactSchemeOptedIn != null) READY_TO_START else LOCKED
+        TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, READY_TO_START),
+        TaskProgress.Dynamic(RECORD_NON_DISCLOSABLE_INFORMATION) {
+          if (it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
         },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
-        TaskProgress.Fixed(SEND_CHECKS_TO_PRISON, LOCKED),
+        TaskProgress.Dynamic(SEND_CHECKS_TO_PRISON) {
+          determineStatusForSendChecksToPrison(it)
+        },
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
     )
@@ -102,11 +109,14 @@ enum class AssessmentStatus {
       PROBATION_COM to listOf(
         TaskProgress.Fixed(CONSULT_THE_VLO_AND_POM, COMPLETE),
         TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, IN_PROGRESS),
+        TaskProgress.Dynamic(RECORD_NON_DISCLOSABLE_INFORMATION) {
+          if (it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
+        },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Dynamic(
           SEND_CHECKS_TO_PRISON,
         ) {
-          if (it.addressChecksComplete) READY_TO_START else LOCKED
+          determineStatusForSendChecksToPrison(it)
         },
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
       ),
@@ -228,5 +238,11 @@ enum class AssessmentStatus {
     }
 
     fun inFlightStatuses(): List<AssessmentStatus> = entries.filter { it != TIMED_OUT && it != REFUSED && it != RELEASED_ON_HDC }
+
+    fun determineStatusForSendChecksToPrison(assessment: Assessment): TaskStatus = when {
+      assessment.addressChecksStatus == ResidentialChecksStatus.UNSUITABLE -> READY_TO_START
+      assessment.addressChecksStatus == ResidentialChecksStatus.SUITABLE && assessment.victimContactSchemeOptedIn != null && assessment.hasNonDisclosableInformation != null -> READY_TO_START
+      else -> LOCKED
+    }
   }
 }

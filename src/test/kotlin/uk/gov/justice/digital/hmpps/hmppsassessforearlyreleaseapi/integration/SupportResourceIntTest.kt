@@ -468,7 +468,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
         assertThat(it.email).isEqualTo(assessment.responsibleCom?.email)
         assertThat(it.staffCode).isEqualTo(assessment.responsibleCom?.staffCode)
       }
-      assertThat(assessmentResponse.team).isEqualTo(assessment.teamCode)
+      assertThat(assessmentResponse.teamCode).isEqualTo(assessment.teamCode)
       assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
       assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
       assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
