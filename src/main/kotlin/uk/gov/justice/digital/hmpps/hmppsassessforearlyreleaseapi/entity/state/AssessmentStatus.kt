@@ -85,10 +85,10 @@ enum class AssessmentStatus {
         },
         TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, READY_TO_START),
         TaskProgress.Dynamic(RECORD_NON_DISCLOSABLE_INFORMATION) {
-          if(it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
+          if (it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
         },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
-        TaskProgress.Dynamic(SEND_CHECKS_TO_PRISON){
+        TaskProgress.Dynamic(SEND_CHECKS_TO_PRISON) {
           determineStatusForSendChecksToPrison(it)
         },
         TaskProgress.Fixed(CREATE_LICENCE, LOCKED),
@@ -110,7 +110,7 @@ enum class AssessmentStatus {
         TaskProgress.Fixed(CONSULT_THE_VLO_AND_POM, COMPLETE),
         TaskProgress.Fixed(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION, IN_PROGRESS),
         TaskProgress.Dynamic(RECORD_NON_DISCLOSABLE_INFORMATION) {
-          if(it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
+          if (it.hasNonDisclosableInformation != null) COMPLETE else READY_TO_START
         },
         TaskProgress.Fixed(MAKE_A_RISK_MANAGEMENT_DECISION, LOCKED),
         TaskProgress.Dynamic(

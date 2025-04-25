@@ -172,7 +172,7 @@ class AssessmentService(
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(event, request.agent.toEntity())
 
-    assessmentEntity.addressChecksStatus =  status
+    assessmentEntity.addressChecksStatus = status
     if (status == SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true
     } else if (status != SUITABLE && assessmentEntity.addressChecksComplete) {

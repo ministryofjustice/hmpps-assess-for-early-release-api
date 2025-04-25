@@ -153,17 +153,15 @@ class ResidentialChecksService(
   }
 
   private fun isAddressSuitable(taskAnswers: MutableSet<ResidentialChecksTaskAnswer>): Boolean {
-     val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }?.toTaskStatus() }
-     return taskStatus.all { it == SUITABLE }
+    val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }?.toTaskStatus() }
+    return taskStatus.all { it == SUITABLE }
   }
 
-  fun getAddressesCheckStatus(addressCheckRequests: List<CurfewAddressCheckRequest>): ResidentialChecksStatus {
-     return when {
-       addressCheckRequests.any { isAddressSuitable(it.taskAnswers) } -> ResidentialChecksStatus.SUITABLE
-       addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == UNSUITABLE } } -> ResidentialChecksStatus.UNSUITABLE
-       addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == SUITABLE } } -> ResidentialChecksStatus.IN_PROGRESS
-       else -> ResidentialChecksStatus.NOT_STARTED
-       }
+  fun getAddressesCheckStatus(addressCheckRequests: List<CurfewAddressCheckRequest>): ResidentialChecksStatus = when {
+    addressCheckRequests.any { isAddressSuitable(it.taskAnswers) } -> ResidentialChecksStatus.SUITABLE
+    addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == UNSUITABLE } } -> ResidentialChecksStatus.UNSUITABLE
+    addressCheckRequests.any { it.taskAnswers.any { answer -> answer.toTaskStatus() == SUITABLE } } -> ResidentialChecksStatus.IN_PROGRESS
+    else -> ResidentialChecksStatus.NOT_STARTED
   }
 
   private fun ResidentialChecksTaskAnswer?.toTaskStatus(): TaskStatus = when (this?.criterionMet) {
