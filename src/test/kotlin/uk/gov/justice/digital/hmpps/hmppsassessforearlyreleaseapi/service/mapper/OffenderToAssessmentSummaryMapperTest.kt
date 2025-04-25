@@ -72,7 +72,7 @@ class OffenderToAssessmentSummaryMapperTest {
     assertThat(assessmentSummary.optOutReasonOther).isEqualTo(expectedAssessment.optOutReasonOther)
     assertThat(assessmentSummary.optOutReasonType).isEqualTo(expectedAssessment.optOutReasonType)
     assertThat(assessmentSummary.postponementReasons).isEqualTo(expectedAssessment.postponementReasons)
-    assertThat(assessmentSummary.team).isEqualTo(expectedAssessment.team)
+    assertThat(assessmentSummary.team).isEqualTo(expectedAssessment.teamCode)
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
 

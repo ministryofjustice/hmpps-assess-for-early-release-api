@@ -110,6 +110,49 @@ class CaseloadResource(
   )
   fun getComCaseload(@Parameter(required = true) @PathVariable staffCode: String) = caseloadService.getComCaseload(staffCode)
 
+  @GetMapping("/probation/community-offender-manager/staff-code/{staffCode}/team-caseload")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @Operation(
+    summary = "Returns the team caseload for a community offender manager.",
+    description = "Returns the cases assigned to any of a community offender managers teams.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns a list of cases assigned to any of the teams that the user is assigned to",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = OffenderSummaryResponse::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getComTeamCaseload(@Parameter(required = true) @PathVariable staffCode: String) = caseloadService.getComTeamCaseload(staffCode)
+
   @GetMapping("/prison/{prisonCode}/decision-maker/caseload")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(

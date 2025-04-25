@@ -32,7 +32,7 @@ class OffenderToAssessmentSummaryMapper(
       location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
-      team = currentAssessment.team,
+      team = currentAssessment.teamCode,
       policyVersion = currentAssessment.policyVersion,
       optOutReasonType = currentAssessment.optOutReasonType,
       optOutReasonOther = currentAssessment.optOutReasonOther,
