@@ -55,7 +55,7 @@ class OffenderServiceTest {
     )
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
@@ -87,7 +87,7 @@ class OffenderServiceTest {
 
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
 
     // When
     service.createOrUpdateOffender(PRISON_NUMBER)
@@ -119,7 +119,7 @@ class OffenderServiceTest {
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
 
     val mockAssessment = mock(Assessment::class.java)
-    whenever(assessmentService.createAssessment(any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
 
     // When

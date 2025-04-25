@@ -1,21 +1,21 @@
-insert into offender(prison_number, prison_id, forename, surname, date_of_birth, crd, crn)
-values ('A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', '2020-11-14', 'DX12340A'),
-       ('A1234AB', 'BMI', 'FIRST-2', 'LAST-2', '1983-06-03', '2020-11-14', null),
-       ('A1234AC', 'EDF', 'FIRST-3', 'LAST-3', '1989-11-03', '2027-12-25', 'DX12340C'),
-       ('A1234AD', 'BMI', 'FIRST-4', 'LAST-4', '2001-12-25', '2022-03-21', 'DX12340D'),
-       ('C1234CC', 'MSD', 'FIRST-5', 'LAST-5', '1964-02-21', '2020-11-14', 'DX12340E'),
-       ('C1234CD', 'BMI', 'FIRST-6', 'LAST-6', '1987-04-18', '2023-06-01', 'DX12340F'),
-       ('B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', '2021-12-18', 'DX12340G');
+insert into offender(prison_number, prison_id, forename, surname, date_of_birth, crn)
+values ('A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', 'DX12340A'),
+       ('A1234AB', 'BMI', 'FIRST-2', 'LAST-2', '1983-06-03', null),
+       ('A1234AC', 'EDF', 'FIRST-3', 'LAST-3', '1989-11-03', 'DX12340C'),
+       ('A1234AD', 'BMI', 'FIRST-4', 'LAST-4', '2001-12-25', 'DX12340D'),
+       ('C1234CC', 'MSD', 'FIRST-5', 'LAST-5', '1964-02-21', 'DX12340E'),
+       ('C1234CD', 'BMI', 'FIRST-6', 'LAST-6', '1987-04-18', 'DX12340F'),
+       ('B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', 'DX12340G');
 
 
-insert into assessment(booking_id, offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date, created_timestamp, hdced)
-values (10,1, 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18', '2021-12-06', current_date + 7),
-       (20,2, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', null, null,null, '2021-12-06', current_date + 7),
-       (30,3, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7),
-       (40,4, 'AWAITING_PRE_DECISION_CHECKS', '1.0',null,null,null, '2021-12-06', current_date + 7),
-       (50,5, 'AWAITING_PRE_RELEASE_CHECKS', '1.0',null,null,null, '2021-12-06', current_date + 7),
-       (60,6, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7),
-       (70,7, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7);
+insert into assessment(booking_id, offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date, created_timestamp, hdced, crd)
+values (10,1, 'NOT_STARTED', '1.0','OTHER','I have reason','2021-12-18', '2021-12-06', current_date + 7, '2020-11-14'),
+       (20,2, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', null, null,null, '2021-12-06', current_date + 7, '2020-11-14'),
+       (30,3, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7, '2027-12-25'),
+       (40,4, 'AWAITING_PRE_DECISION_CHECKS', '1.0',null,null,null, '2021-12-06', current_date + 7, '2022-03-21'),
+       (50,5, 'AWAITING_PRE_RELEASE_CHECKS', '1.0',null,null,null, '2021-12-06', current_date + 7, '2020-11-14'),
+       (60,6, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7, '2023-06-01'),
+       (70,7, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7, '2021-12-18');
 
 INSERT INTO public.postponement_reason
 (assessment_id, reason_type)

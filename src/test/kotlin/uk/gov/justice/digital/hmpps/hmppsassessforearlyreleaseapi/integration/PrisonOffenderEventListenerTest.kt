@@ -342,10 +342,10 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val updatedOffender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("could not find updated offender")
     assertThat(updatedOffender.forename).isEqualTo(newFirstName)
     assertThat(updatedOffender.surname).isEqualTo(newLastName)
-    assertThat(updatedOffender.crd).isEqualTo(newCrd)
 
     val assessment = updatedOffender.assessments.first()
     assertThat(assessment.hdced).isEqualTo(newHdced)
+    assertThat(assessment.crd).isEqualTo(newCrd)
 
     val events = assessmentEventRepository.findByAssessmentId(assessment.id)
     assertThat(events).hasSize(1)

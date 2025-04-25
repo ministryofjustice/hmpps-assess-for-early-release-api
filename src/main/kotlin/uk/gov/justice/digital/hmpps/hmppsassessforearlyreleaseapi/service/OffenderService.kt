@@ -56,7 +56,6 @@ class OffenderService(
         forename = prisoner.firstName,
         surname = prisoner.lastName,
         dateOfBirth = prisoner.dateOfBirth,
-        crd = prisoner.conditionalReleaseDate,
         crn = crn,
         sentenceStartDate = prisoner.sentenceStartDate,
       ),
@@ -67,6 +66,7 @@ class OffenderService(
       prisonerNumber = prisoner.prisonerNumber,
       prisoner.bookingId!!.toLong(),
       prisoner.homeDetentionCurfewEligibilityDate!!,
+      prisoner.conditionalReleaseDate,
     )
     offender.assessments.add(assessment)
     val changes = mapOf(
@@ -87,10 +87,10 @@ class OffenderService(
     val currentAssessment = assessmentService.getCurrentAssessment(prisoner.prisonerNumber)
     if (hasOffenderBeenUpdated(offender, prisoner, currentAssessment)) {
       currentAssessment.hdced = prisoner.homeDetentionCurfewEligibilityDate!!
+      currentAssessment.crd = prisoner.conditionalReleaseDate
       offender.forename = prisoner.firstName
       offender.surname = prisoner.lastName
       offender.dateOfBirth = prisoner.dateOfBirth
-      offender.crd = prisoner.conditionalReleaseDate
       offender.sentenceStartDate = prisoner.sentenceStartDate
       offender.lastUpdatedTimestamp = LocalDateTime.now()
 
@@ -119,9 +119,13 @@ class OffenderService(
     }
   }
 
-  private fun hasOffenderBeenUpdated(offender: Offender, prisoner: PrisonerSearchPrisoner, currentAssessment: Assessment) = currentAssessment.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
+  private fun hasOffenderBeenUpdated(
+    offender: Offender,
+    prisoner: PrisonerSearchPrisoner,
+    currentAssessment: Assessment,
+  ) = currentAssessment.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
     offender.sentenceStartDate != prisoner.sentenceStartDate ||
-    offender.crd != prisoner.conditionalReleaseDate ||
+    currentAssessment.crd != prisoner.conditionalReleaseDate ||
     offender.forename != prisoner.firstName ||
     offender.surname != prisoner.lastName ||
     offender.dateOfBirth != prisoner.dateOfBirth

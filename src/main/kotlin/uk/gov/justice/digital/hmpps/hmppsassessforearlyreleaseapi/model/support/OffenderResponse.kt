@@ -25,10 +25,6 @@ data class OffenderResponse(
   @JsonFormat(pattern = API_DATE_FORMAT)
   val dateOfBirth: LocalDate,
 
-  @Schema(description = "The offender's conditional release date date", example = "2026-08-23")
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val crd: LocalDate? = null,
-
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
 

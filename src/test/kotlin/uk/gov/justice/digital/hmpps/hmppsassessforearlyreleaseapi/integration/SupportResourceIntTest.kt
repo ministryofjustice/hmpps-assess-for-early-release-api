@@ -315,7 +315,6 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenderResponse.forename).isEqualTo(offender.forename)
       assertThat(offenderResponse.surname).isEqualTo(offender.surname)
       assertThat(offenderResponse.dateOfBirth).isEqualTo(offender.dateOfBirth)
-      assertThat(offenderResponse.crd).isEqualTo(offender.crd)
       assertThat(offenderResponse.crn).isEqualTo(offender.crn)
       assertThat(offenderResponse.sentenceStartDate).isEqualTo(offender.sentenceStartDate)
       assertThat(offenderResponse.createdTimestamp).isCloseTo(offender.createdTimestamp, within(1, ChronoUnit.SECONDS))
@@ -471,6 +470,8 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
       assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
       assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
+      assertThat(assessmentResponse.hdced).isEqualTo(assessment.hdced)
+      assertThat(assessmentResponse.crd).isEqualTo(assessment.crd)
     }
   }
 

@@ -97,7 +97,6 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     val expectedAssessment = offender.assessments.first()
 
     assertThat(assessmentOverviewSummary).isNotNull
-    assertThat(assessmentOverviewSummary.crd).isEqualTo(offender.crd)
     assertThat(assessmentOverviewSummary.prisonNumber).isEqualTo(offender.prisonNumber)
     assertThat(assessmentOverviewSummary.dateOfBirth).isEqualTo(offender.dateOfBirth)
     assertThat(assessmentOverviewSummary.forename).isEqualTo(offender.forename)
@@ -110,6 +109,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     assertThat(assessmentOverviewSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentOverviewSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
     assertThat(assessmentOverviewSummary.hdced).isEqualTo(expectedAssessment.hdced)
+    assertThat(assessmentOverviewSummary.crd).isEqualTo(expectedAssessment.crd)
 
     assertThat(assessmentOverviewSummary.tasks).isEqualTo(
       expectedAssessment.status.tasks().mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },

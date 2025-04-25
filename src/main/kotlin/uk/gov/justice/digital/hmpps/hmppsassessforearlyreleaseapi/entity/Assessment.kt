@@ -116,9 +116,11 @@ data class Assessment(
 
   @NotNull
   var hdced: LocalDate,
+
+  var crd: LocalDate? = null,
 ) {
   @Override
-  override fun toString(): String = this::class.simpleName + "(id: $id, status: $status, hdced: $hdced)"
+  override fun toString(): String = this::class.simpleName + "(id: $id, status: $status, hdced: $hdced, crd $crd)"
 
   @Override
   override fun equals(other: Any?): Boolean {

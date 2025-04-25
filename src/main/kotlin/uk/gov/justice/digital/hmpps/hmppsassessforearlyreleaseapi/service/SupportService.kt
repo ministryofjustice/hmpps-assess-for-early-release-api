@@ -104,7 +104,13 @@ class SupportService(
     assessmentRepository.save(assessment)
 
     val newAssessment =
-      assessmentService.createAssessment(offender, prisonerNumber = prisonNumber, assessment.bookingId, assessment.hdced)
+      assessmentService.createAssessment(
+        offender,
+        prisonerNumber = prisonNumber,
+        assessment.bookingId,
+        assessment.hdced,
+        assessment.crd,
+      )
     offender.assessments.add(newAssessment)
   }
 

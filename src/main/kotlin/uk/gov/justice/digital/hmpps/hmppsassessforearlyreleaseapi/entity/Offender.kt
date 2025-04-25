@@ -34,8 +34,6 @@ data class Offender(
   @NotNull
   var dateOfBirth: LocalDate,
 
-  var crd: LocalDate? = null,
-
   val crn: String? = null,
 
   var sentenceStartDate: LocalDate? = null,

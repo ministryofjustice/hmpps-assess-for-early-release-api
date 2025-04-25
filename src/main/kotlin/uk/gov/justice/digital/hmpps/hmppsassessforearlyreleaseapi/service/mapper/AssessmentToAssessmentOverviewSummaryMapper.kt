@@ -35,7 +35,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       dateOfBirth = offender.dateOfBirth,
       prisonNumber = offender.prisonNumber,
       hdced = currentAssessment.hdced,
-      crd = offender.crd,
+      crd = currentAssessment.crd,
       location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),

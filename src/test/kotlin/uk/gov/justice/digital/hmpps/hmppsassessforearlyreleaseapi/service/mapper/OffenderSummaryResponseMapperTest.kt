@@ -18,8 +18,8 @@ class OffenderSummaryResponseMapperTest {
     val workingDaysToHdced = 12
     val crd = LocalDate.of(2026, Month.MAY, 6)
     val hdced = LocalDate.now().plusDays(20)
-    val offender = anOffender().copy(crd = crd)
-    val anAssessment = anAssessment(offender, hdced)
+    val offender = anOffender(hdced, null, crd)
+    val anAssessment = anAssessment(offender, hdced, crd)
 
     val offenderSummary = mapper.map(anAssessment, workingDaysToHdced)
 

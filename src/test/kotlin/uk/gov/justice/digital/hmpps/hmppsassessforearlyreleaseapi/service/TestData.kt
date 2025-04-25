@@ -71,7 +71,7 @@ object TestData {
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)
 
-  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
+  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null, crd: LocalDate? = null): Offender {
     val offender = Offender(
       id = 1,
       prisonNumber = PRISON_NUMBER,
@@ -81,7 +81,7 @@ object TestData {
       dateOfBirth = LocalDate.of(1981, 5, 23),
       sentenceStartDate = sentenceStartDate,
     )
-    offender.assessments.add(anAssessment(offender, hdced))
+    offender.assessments.add(anAssessment(offender, hdced, crd))
     return offender
   }
 
@@ -110,6 +110,7 @@ object TestData {
   fun anAssessment(
     offender: Offender,
     hdced: LocalDate,
+    crd: LocalDate?,
     status: AssessmentStatus = NOT_STARTED,
     bookingId: Long = BOOKING_ID,
   ): Assessment = Assessment(
@@ -118,6 +119,7 @@ object TestData {
     bookingId = bookingId,
     policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
     hdced = hdced,
+    crd = crd,
   )
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
