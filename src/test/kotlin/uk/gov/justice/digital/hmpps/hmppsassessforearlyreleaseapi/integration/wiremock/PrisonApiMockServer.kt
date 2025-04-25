@@ -28,4 +28,14 @@ class PrisonApiMockServer : WireMockServer(PRISON_API_WIREMOCK_PORT) {
       ),
     )
   }
+
+  fun stubGetUserDetails404(username: String = "a-prison-user") {
+    stubFor(
+      get(urlEqualTo("/api/users/$username"))
+        .willReturn(
+          aResponse()
+            .withStatus(404),
+        ),
+    )
+  }
 }

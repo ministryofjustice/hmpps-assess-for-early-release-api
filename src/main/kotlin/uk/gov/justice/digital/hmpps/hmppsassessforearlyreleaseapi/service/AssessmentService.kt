@@ -362,8 +362,8 @@ class AssessmentService(
     try {
       with(agent) {
         return when (role) {
-          UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username)?.email
-          UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username)?.email
+          UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username).email
+          UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username).email
           else -> null
         }
       }

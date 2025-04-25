@@ -847,5 +847,49 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         ContactResponse(fullName = "Aled Evans", userRole = PRISON_CA, email = "aled.evans@moj.gov.uk", locationName = "Acklington (HMP)"),
       )
     }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assesment-with-event-history.sql",
+    )
+    @Test
+    fun `should return the some contacts details even if external calls fail`() {
+      // Given
+      val usernameCA = "a-prison-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager404(usernameCA)
+      prisonApiMockServer.stubGetUserDetails404(usernameCA)
+
+      val usernameDM = "a-dm-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager404(usernameDM)
+      prisonApiMockServer.stubGetUserDetails404(usernameDM)
+
+      val usernamePB = "a-probation-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      deliusMockServer.stubPostStaffDetailsByUsername404(usernamePB)
+      prisonApiMockServer.stubGetUserDetails404(usernamePB)
+
+      // When
+      val result = webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+
+      // Then
+      result.expectStatus().isOk
+      val assessmentContactsResponse = result.expectBody(AssessmentContactsResponse::class.java).returnResult().responseBody!!
+      assertThat(assessmentContactsResponse).isNotNull
+      assertThat(assessmentContactsResponse.contacts).size().isEqualTo(3)
+
+      assertThat(assessmentContactsResponse.contacts).containsExactly(
+        ContactResponse(fullName = "Ceri Evans", userRole = PROBATION_COM, email = null, locationName = null),
+        ContactResponse(fullName = "Gwyn Evans", userRole = PRISON_DM, email = null, locationName = null),
+        ContactResponse(fullName = "Aled Evans", userRole = PRISON_CA, email = null, locationName = null),
+      )
+    }
   }
 }
