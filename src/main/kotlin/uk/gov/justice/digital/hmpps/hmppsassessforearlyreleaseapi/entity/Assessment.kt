@@ -40,6 +40,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.a
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent as AgentEntity
@@ -82,6 +83,10 @@ data class Assessment(
   @NotNull
   @Column(name = "address_checks_complete")
   var addressChecksComplete: Boolean = false,
+
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  var addressChecksStatus: ResidentialChecksStatus? = ResidentialChecksStatus.NOT_STARTED,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),

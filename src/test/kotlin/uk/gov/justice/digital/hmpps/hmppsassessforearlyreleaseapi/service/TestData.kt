@@ -19,10 +19,21 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CasCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsTaskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AssessPersonsRiskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AssessPersonsRiskTaskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ChildrenServicesChecksAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ChildrenServicesChecksTaskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.PoliceChecksAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.PoliceChecksTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.RiskManagementDecisionTaskAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.SuitabilityDecisionAnswers
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.SuitabilityDecisionTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.NOT_STARTED
@@ -45,6 +56,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.POLICY_1_0
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.VisitedAddress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonApiUserDetail
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.probation.DeliusOffenderManager
@@ -304,13 +316,63 @@ object TestData {
     ),
   )
 
-  fun aStandardAddressCheckRequest() = StandardAddressCheckRequest(
+  fun inProgressStandardAddressCheckRequest(): CurfewAddressCheckRequest {
+    val standardAddressCheckRequest = StandardAddressCheckRequest(
+      dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
+      preferencePriority = AddressPreferencePriority.FIRST,
+      assessment = anOffender().assessments.first(),
+      address = anAddress(),
+      residents = residents(),
+    )
+    standardAddressCheckRequest.taskAnswers.add(aAddressDetailsTaskAnswers(criterionMet = true))
+    return standardAddressCheckRequest
+  }
+
+  fun notStartedStandardAddressCheckRequest(): CurfewAddressCheckRequest = StandardAddressCheckRequest(
     dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
     preferencePriority = AddressPreferencePriority.FIRST,
     assessment = anOffender().assessments.first(),
     address = anAddress(),
     residents = residents(),
   )
+
+  fun aStandardAddressCheckRequestWithAllChecksComplete(): CurfewAddressCheckRequest = aStandardAddressCheckRequest(
+    addressDetailsTaskAnswersCriterionMet = true,
+    assessPersonsRiskTaskAnswersCriterionMet = true,
+    childrenServicesChecksTaskAnswersCriterionMet = true,
+    policeChecksTaskAnswersCriterionMet = true,
+    riskManagementDecisionTaskAnswersCriterionMet = true,
+    suitabilityDecisionTaskAnswersCriterionMet = true,
+  )
+
+  fun aStandardAddressCheckRequestWithFewChecksFailed(): CurfewAddressCheckRequest = aStandardAddressCheckRequest(
+    addressDetailsTaskAnswersCriterionMet = false,
+    assessPersonsRiskTaskAnswersCriterionMet = true,
+    childrenServicesChecksTaskAnswersCriterionMet = false,
+    policeChecksTaskAnswersCriterionMet = true,
+    riskManagementDecisionTaskAnswersCriterionMet = true,
+    suitabilityDecisionTaskAnswersCriterionMet = true,
+  )
+
+  private fun aStandardAddressCheckRequest(addressDetailsTaskAnswersCriterionMet: Boolean, assessPersonsRiskTaskAnswersCriterionMet: Boolean, childrenServicesChecksTaskAnswersCriterionMet: Boolean, policeChecksTaskAnswersCriterionMet: Boolean, riskManagementDecisionTaskAnswersCriterionMet: Boolean, suitabilityDecisionTaskAnswersCriterionMet: Boolean): CurfewAddressCheckRequest {
+    val standardAddressCheckRequest = StandardAddressCheckRequest(
+      dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
+      preferencePriority = AddressPreferencePriority.FIRST,
+      assessment = anOffender().assessments.first(),
+      address = anAddress(),
+      residents = residents(),
+    )
+    val taskAnswers = listOf(
+      aAddressDetailsTaskAnswers(criterionMet = addressDetailsTaskAnswersCriterionMet),
+      aAssessPersonsRiskTaskAnswers(criterionMet = assessPersonsRiskTaskAnswersCriterionMet),
+      aChildrenServicesChecksTaskAnswers(criterionMet = childrenServicesChecksTaskAnswersCriterionMet),
+      aPoliceChecksTaskAnswers(criterionMet = policeChecksTaskAnswersCriterionMet),
+      aRiskManagementDecisionTaskAnswers(criterionMet = riskManagementDecisionTaskAnswersCriterionMet),
+      aSuitabilityDecisionTaskAnswers(criterionMet = suitabilityDecisionTaskAnswersCriterionMet),
+    )
+    standardAddressCheckRequest.taskAnswers.addAll(taskAnswers)
+    return standardAddressCheckRequest
+  }
 
   fun aCasCheckRequest() = CasCheckRequest(
     dateRequested = LocalDateTime.of(2024, 9, 7, 15, 19),
@@ -346,18 +408,98 @@ object TestData {
     )
   }
 
+  private fun aAddressDetailsAnswers(): AddressDetailsAnswers = AddressDetailsAnswers(
+    electricitySupply = true,
+    visitedAddress = VisitedAddress.I_HAVE_NOT_VISITED_THE_ADDRESS_BUT_I_HAVE_SPOKEN_TO_THE_MAIN_OCCUPIER,
+    mainOccupierConsentGiven = true,
+  )
+
+  private fun aAssessPersonsRiskAnswers(): AssessPersonsRiskAnswers = AssessPersonsRiskAnswers(
+    pomPrisonBehaviourInformation = "description",
+    mentalHealthTreatmentNeeds = true,
+    vloOfficerForCase = true,
+    informationThatCannotBeDisclosed = true,
+  )
+
+  private fun aChildrenServicesChecksAnswers(): ChildrenServicesChecksAnswers = ChildrenServicesChecksAnswers(
+    informationRequested = LocalDate.now(),
+    informationSent = LocalDate.now(),
+    informationSummary = "summary",
+  )
+
+  private fun aPoliceChecksAnswers(): PoliceChecksAnswers = PoliceChecksAnswers(
+    informationRequested = LocalDate.now(),
+    informationSent = LocalDate.now(),
+    informationSummary = "summary",
+  )
+
   private fun aRiskManagementDecisionAnswers(): RiskManagementDecisionAnswers = RiskManagementDecisionAnswers(
     canOffenderBeManagedSafely = true,
     informationToSupportDecision = "reason",
     riskManagementPlanningActionsNeeded = false,
   )
 
+  private fun aSuitabilityDecisionAnswers(): SuitabilityDecisionAnswers = SuitabilityDecisionAnswers(
+    addressSuitable = true,
+    addressSuitableInformation = "information",
+    additionalInformationNeeded = true,
+    moreInformation = "information",
+  )
+
   fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean, answers: RiskManagementDecisionAnswers = aRiskManagementDecisionAnswers()): RiskManagementDecisionTaskAnswers = RiskManagementDecisionTaskAnswers(
     id = 1,
-    addressCheckRequest = aStandardAddressCheckRequest(),
+    addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = answers,
+  )
+
+  fun aAddressDetailsTaskAnswers(criterionMet: Boolean) = AddressDetailsTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aAddressDetailsAnswers(),
+  )
+
+  fun aAssessPersonsRiskTaskAnswers(criterionMet: Boolean) = AssessPersonsRiskTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aAssessPersonsRiskAnswers(),
+  )
+
+  fun aChildrenServicesChecksTaskAnswers(criterionMet: Boolean) = ChildrenServicesChecksTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aChildrenServicesChecksAnswers(),
+  )
+
+  fun aPoliceChecksTaskAnswers(criterionMet: Boolean) = PoliceChecksTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aPoliceChecksAnswers(),
+  )
+
+  fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean) = RiskManagementDecisionTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aRiskManagementDecisionAnswers(),
+  )
+
+  fun aSuitabilityDecisionTaskAnswers(criterionMet: Boolean) = SuitabilityDecisionTaskAnswers(
+    id = 1,
+    addressCheckRequest = aCasCheckRequest(),
+    criterionMet = criterionMet,
+    taskVersion = PolicyVersion.V1.name,
+    answers = aSuitabilityDecisionAnswers(),
   )
 
   fun aPrisonApiUserDetails(): PrisonApiUserDetail = PrisonApiUserDetail(
