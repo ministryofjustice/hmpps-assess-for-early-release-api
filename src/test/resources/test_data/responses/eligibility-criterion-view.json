@@ -10,7 +10,7 @@
     "location": "Birmingham (HMP)",
     "status": "NOT_STARTED",
     "responsibleCom": null,
-    "team": null,
+    "teamCode": null,
     "policyVersion": "1.0",
     "tasks": {
       "PRISON_CA": [
