@@ -264,7 +264,7 @@ class AssessmentTest {
     assertThat(anAssessment(offender, AWAITING_ADDRESS_AND_RISK_CHECKS).currentTask()).isEqualTo(CONSULT_THE_VLO_AND_POM)
     assertThat(anAssessment(offender, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
     assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(RECORD_NON_DISCLOSABLE_INFORMATION)
-    assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(SEND_CHECKS_TO_PRISON)
+    assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(RECORD_NON_DISCLOSABLE_INFORMATION)
     assertThat(anAssessment(offender, ADDRESS_UNSUITABLE).currentTask()).isNull()
     assertThat(anAssessment(offender, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(REVIEW_APPLICATION_AND_SEND_FOR_DECISION)
     assertThat(anAssessment(offender, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
