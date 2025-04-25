@@ -7,7 +7,6 @@ import org.springframework.validation.Validator
 import org.springframework.web.reactive.resource.NoResourceFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AnswerPayload
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswerType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.status
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.TaskAnswersValidationException
@@ -16,14 +15,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksTaskView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.ResidentialChecksView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentialChecksTaskAnswerRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.PolicyVersion
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskQuestion
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus.UNSUITABLE
 import java.time.LocalDateTime
@@ -33,6 +32,7 @@ class ResidentialChecksService(
   private val addressService: AddressService,
   private val assessmentService: AssessmentService,
   private val residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository,
+  private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val objectMapper: ObjectMapper,
   private val validator: Validator,
 ) {
@@ -97,7 +97,9 @@ class ResidentialChecksService(
       residentialChecksTaskAnswerRepository.save(answers.createTaskAnswersEntity(addressCheckRequest, criterionMet, taskVersion))
     }
 
-    val checksStatus = getAddressCheckStatus(addressCheckRequest)
+    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
+    val checkRequests = curfewAddressCheckRequestRepository.findByAssessment(assessment)
+    val checksStatus = getAddressesCheckStatus(checkRequests)
     assessmentService.updateAddressChecksStatus(prisonNumber, checksStatus, saveTaskAnswersRequest)
 
     return ResidentialChecksTaskAnswersSummary(
@@ -128,8 +130,6 @@ class ResidentialChecksService(
     it.questions
   }
 
-  private fun getPolicyTaskCodes(): List<String> = RESIDENTIAL_CHECKS_POLICY_V1.tasks.map { it.code }
-
   private fun getTaskAnswers(
     taskCode: String,
     answers: Map<String, Any>,
@@ -148,25 +148,13 @@ class ResidentialChecksService(
     }
   }
 
-  private fun getAddressCheckStatus(addressCheckRequest: CurfewAddressCheckRequest): ResidentialChecksStatus {
-    val taskAnswers = addressCheckRequest.taskAnswers
-    val taskStatus = getPolicyTaskCodes().map { taskAnswers.find { answer -> answer.taskCode == it }.toTaskStatus() }
-
-    val unsuitable = taskStatus.any { it == UNSUITABLE }
-    val suitable = taskStatus.all { it == SUITABLE }
-    val inProgress = taskStatus.any { it == SUITABLE }
-
+  fun getAddressesCheckStatus(addressCheckRequests: List<CurfewAddressCheckRequest>): ResidentialChecksStatus {
+    val statuses = addressCheckRequests.map { it.getStatus(it.taskAnswers) }
     return when {
-      suitable -> ResidentialChecksStatus.SUITABLE
-      unsuitable -> ResidentialChecksStatus.UNSUITABLE
-      inProgress -> ResidentialChecksStatus.IN_PROGRESS
+      statuses.any { it == SUITABLE } -> ResidentialChecksStatus.SUITABLE
+      statuses.all { it == UNSUITABLE } -> ResidentialChecksStatus.UNSUITABLE
+      statuses.any { it == IN_PROGRESS } -> ResidentialChecksStatus.IN_PROGRESS
       else -> ResidentialChecksStatus.NOT_STARTED
     }
-  }
-
-  private fun ResidentialChecksTaskAnswer?.toTaskStatus(): TaskStatus = when (this?.criterionMet) {
-    null -> NOT_STARTED
-    true -> SUITABLE
-    false -> UNSUITABLE
   }
 }
