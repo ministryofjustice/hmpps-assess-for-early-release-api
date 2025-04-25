@@ -1,4 +1,4 @@
-delete from assessment_event;
+
 delete from resident;
 TRUNCATE TABLE resident RESTART IDENTITY CASCADE;
 delete from postponement_reason;
@@ -8,10 +8,11 @@ delete from cas_check_request;
 delete from curfew_address_check_request;
 delete from address;
 delete from eligibility_check_result;
+delete from assessment_to_last_update_event;
+delete from assessment_event;
 delete from assessment;
 delete from offender;
 delete from staff;
-delete from assessment_event;
 
 -- Reset auto id in all tables with auto id
 ALTER SEQUENCE resident_id_seq RESTART WITH 1;

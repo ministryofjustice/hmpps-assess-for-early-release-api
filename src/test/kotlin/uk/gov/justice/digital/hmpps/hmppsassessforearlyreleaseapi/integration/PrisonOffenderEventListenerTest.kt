@@ -91,6 +91,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
+    assertThat(assessment.lastUpdateByUserEvent).isNull()
   }
 
   @Test
@@ -123,7 +124,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",
   )
-  fun `Should create a new offender `() {
+  fun `Should create a new offender`() {
     // Given
     val prisonNumber = "Z1234XY"
     val crn = "DX12340A"
@@ -177,7 +178,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
       ),
     )
-
+    assertThat(assessment.lastUpdateByUserEvent).isNull()
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
 
@@ -361,6 +362,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
+    assertThat(assessment.lastUpdateByUserEvent).isNull()
   }
 
   private fun stubSearchPrisonersByNomisIds(

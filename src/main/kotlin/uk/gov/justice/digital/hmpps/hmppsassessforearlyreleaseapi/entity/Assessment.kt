@@ -12,16 +12,19 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.NamedAttributeNode
 import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
@@ -85,7 +88,7 @@ data class Assessment(
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("eventTime DESC")
-  val assessmentEvents: MutableList<AssessmentEvent> = mutableListOf(),
+  private val assessmentEvents: MutableList<AssessmentEvent> = mutableListOf(),
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "responsible_com_id")
@@ -96,6 +99,16 @@ data class Assessment(
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("createdTimestamp ASC")
   val postponementReasons: MutableList<PostponementReasonEntity> = mutableListOf(),
+
+  @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+  @JoinTable(
+    name = "assessment_to_last_update_event",
+    joinColumns =
+    [ JoinColumn(name = "assessment_id", referencedColumnName = "id") ],
+    inverseJoinColumns =
+    [ JoinColumn(name = "event_id", referencedColumnName = "id") ],
+  )
+  var lastUpdateByUserEvent: AssessmentEvent? = null,
 
   var postponementDate: LocalDate? = null,
 
@@ -167,11 +180,11 @@ data class Assessment(
   private fun Any.label() = this::class.simpleName
 
   fun performTransition(
-    event: AssessmentLifecycleEvent,
+    lifecycleEvent: AssessmentLifecycleEvent,
     agent: AgentEntity,
   ): AssessmentState {
     val currentStatus = this.status.toState(this.previousStatus)
-    val transition = assessmentStateMachine.with { initialState(currentStatus) }.transition(event)
+    val transition = assessmentStateMachine.with { initialState(currentStatus) }.transition(lifecycleEvent)
     return when (transition) {
       is Invalid -> {
         error("Fail to transition Assessment: '${this.id}', triggered by '${transition.event.label()}' from '${transition.fromState.label()}'")
@@ -184,21 +197,20 @@ data class Assessment(
 
         log.info("Transitioning Assessment: '${this.id}', triggered by event: '${transition.event.label()}' from '${transition.fromState.label()}' to '${transition.toState.label()}'")
         if (currentStatus != transition.toState) {
-          assessmentEvents.add(
-            StatusChangedEvent(
-              assessment = this,
-              changes = StatusChange(
-                before = transition.fromState.status,
-                after = transition.toState.status,
-                context = event.getContext(),
-              ),
-              agent = agent,
+          val statusEvent = StatusChangedEvent(
+            assessment = this,
+            changes = StatusChange(
+              before = transition.fromState.status,
+              after = transition.toState.status,
+              context = lifecycleEvent.getContext(),
             ),
+            agent = agent,
           )
 
           this.previousStatus = currentStatus.status
           this.status = transition.toState.status
-          this.lastUpdatedTimestamp = LocalDateTime.now()
+
+          addEvent(statusEvent, agent)
         }
         transition.toState
       }
@@ -212,9 +224,21 @@ data class Assessment(
       eventType = eventType,
       agent = agent,
     )
-    this.assessmentEvents.add(genericChangedEvent)
-    this.lastUpdatedTimestamp = LocalDateTime.now()
+    this.addEvent(genericChangedEvent, agent)
   }
+
+  fun addEvent(
+    event: AssessmentEvent,
+    agent: Agent,
+  ) {
+    assessmentEvents.add(event)
+    lastUpdatedTimestamp = LocalDateTime.now()
+    if (agent.role != UserRole.SYSTEM) {
+      lastUpdateByUserEvent = event
+    }
+  }
+
+  fun getEvents(): List<AssessmentEvent> = this.assessmentEvents
 
   fun currentTask(): Task? {
     val tasksForAssessmentStatus = status.tasks().values.flatten()

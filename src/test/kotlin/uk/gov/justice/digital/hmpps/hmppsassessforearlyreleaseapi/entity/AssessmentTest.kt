@@ -132,8 +132,8 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
-    val agents = assessment.assessmentEvents.map { it.agent }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
+    val agents = assessment.getEvents().map { it.agent }
     assertThat(agents).containsOnly(anAgentEntity)
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
@@ -173,7 +173,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(OPTED_OUT)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
         before = INELIGIBLE_OR_UNSUITABLE,
@@ -195,7 +195,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(NOT_STARTED)
     assertThat(assessment.previousStatus).isNull()
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).isEmpty()
   }
 
@@ -217,7 +217,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(POSTPONED)
     assertThat(assessment.previousStatus).isEqualTo(fromState)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
         before = fromState,
@@ -249,7 +249,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(fromState)
     assertThat(assessment.previousStatus).isNull()
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).isEmpty()
   }
 
