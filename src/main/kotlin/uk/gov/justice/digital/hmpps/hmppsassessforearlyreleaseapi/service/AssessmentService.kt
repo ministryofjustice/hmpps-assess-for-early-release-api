@@ -255,22 +255,21 @@ class AssessmentService(
       return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?): EligibilityCriterionProgress =
-      EligibilityCriterionProgress(
-        code = code,
-        taskName = name,
-        status = eligibilityCheckResult.getEligibilityStatus(),
-        questions = questions.map {
-          Question(
-            text = it.text,
-            hint = it.hint,
-            name = it.name,
-            answer = eligibilityCheckResult.getAnswer(it.name),
-          )
-        },
-        agent = eligibilityCheckResult?.agent?.toModel(),
-        lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
-      )
+    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?): EligibilityCriterionProgress = EligibilityCriterionProgress(
+      code = code,
+      taskName = name,
+      status = eligibilityCheckResult.getEligibilityStatus(),
+      questions = questions.map {
+        Question(
+          text = it.text,
+          hint = it.hint,
+          name = it.name,
+          answer = eligibilityCheckResult.getAnswer(it.name),
+        )
+      },
+      agent = eligibilityCheckResult?.agent?.toModel(),
+      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
+    )
 
     fun getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
       val codeToChecks = this.assessmentEntity.eligibilityCheckResults
@@ -280,22 +279,21 @@ class AssessmentService(
       return policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
-      SuitabilityCriterionProgress(
-        code = code,
-        taskName = name,
-        status = eligibilityCheckResult.getSuitabilityStatus(),
-        questions = questions.map {
-          Question(
-            text = it.text,
-            hint = it.hint,
-            name = it.name,
-            answer = eligibilityCheckResult.getAnswer(it.name),
-          )
-        },
-        agent = eligibilityCheckResult?.agent?.toModel(),
-        lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
-      )
+    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) = SuitabilityCriterionProgress(
+      code = code,
+      taskName = name,
+      status = eligibilityCheckResult.getSuitabilityStatus(),
+      questions = questions.map {
+        Question(
+          text = it.text,
+          hint = it.hint,
+          name = it.name,
+          answer = eligibilityCheckResult.getAnswer(it.name),
+        )
+      },
+      agent = eligibilityCheckResult?.agent?.toModel(),
+      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
+    )
   }
 
   @Transactional
@@ -334,16 +332,15 @@ class AssessmentService(
     return assessmentRepository.save(assessment)
   }
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
-    staffRepository.save(
-      CommunityOffenderManager(
-        staffCode = offenderManager.code,
-        username = offenderManager.username,
-        email = offenderManager.email,
-        forename = offenderManager.name.forename,
-        surname = offenderManager.name.surname,
-      ),
-    )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
+    CommunityOffenderManager(
+      staffCode = offenderManager.code,
+      username = offenderManager.username,
+      email = offenderManager.email,
+      forename = offenderManager.name.forename,
+      surname = offenderManager.name.surname,
+    ),
+  )
 
   private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
     val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
@@ -368,7 +365,6 @@ class AssessmentService(
     // Currently we do not support Prison offender manager
     val contactTypes = listOf(UserRole.PRISON_CA, UserRole.PRISON_DM, UserRole.PROBATION_COM)
     val agents = getAgents(currentAssessment, contactTypes)
-
 
     val contacts = agents.map {
       with(it) {
