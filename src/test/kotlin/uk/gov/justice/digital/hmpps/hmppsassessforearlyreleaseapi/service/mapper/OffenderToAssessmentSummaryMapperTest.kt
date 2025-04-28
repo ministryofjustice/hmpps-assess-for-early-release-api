@@ -15,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anStatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 
 class OffenderToAssessmentSummaryMapperTest {
@@ -28,6 +29,8 @@ class OffenderToAssessmentSummaryMapperTest {
     // Given
     val offender = anOffender()
     val assessment = offender.assessments.first()
+    assessment.lastUpdateByUserEvent = anStatusChangedEvent(assessment)
+
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(listOf(aPrisonerSearchPrisoner()))
     whenever(prisonService.getPrisonNameForId(anyString())).thenReturn(PRISON_NAME)
     // When
@@ -83,5 +86,6 @@ class OffenderToAssessmentSummaryMapperTest {
     assertThat(assessmentSummary.cellLocation).isEqualTo("A-1-002")
     assertThat(assessmentSummary.location).isEqualTo("Birmingham (HMP)")
     assertThat(assessmentSummary.mainOffense).isEqualTo("Robbery")
+    assertThat(assessmentSummary.lastUpdateBy).isEqualTo("prison user")
   }
 }

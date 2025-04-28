@@ -44,7 +44,8 @@
       ]
     },
     "cellLocation":"A-1-002",
-    "mainOffense":"Robbery"
+    "mainOffense":"Robbery",
+    "lastUpdateBy":null
   },
   "taskConfig": {
     "code": "assess-this-persons-risk",

@@ -394,7 +394,7 @@ class AssessmentService(
     contactTypes: List<UserRole>,
   ): List<Agent> {
     val contacts =
-      currentAssessment.assessmentEvents.sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
+      currentAssessment.getEvents().sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
         .distinctBy { it.agent.role }.map { it.agent }
     return contacts
   }
