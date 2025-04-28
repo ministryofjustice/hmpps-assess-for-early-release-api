@@ -13,6 +13,8 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
+import jakarta.persistence.NamedAttributeNode
+import jakarta.persistence.NamedEntityGraph
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
@@ -35,11 +37,13 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.a
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import java.time.LocalDate
 import java.time.LocalDateTime
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent as AgentEntity
 
 @Entity
+@NamedEntityGraph(name = "Assessment.offender", attributeNodes = [NamedAttributeNode("offender")])
 @Table(name = "assessment")
 data class Assessment(
   @Id
@@ -77,6 +81,10 @@ data class Assessment(
   @Column(name = "address_checks_complete")
   var addressChecksComplete: Boolean = false,
 
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  var addressChecksStatus: ResidentialChecksStatus? = ResidentialChecksStatus.NOT_STARTED,
+
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),
 
@@ -88,7 +96,7 @@ data class Assessment(
   @JoinColumn(name = "responsible_com_id")
   var responsibleCom: CommunityOffenderManager? = null,
 
-  val team: String? = null,
+  val teamCode: String? = null,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("createdTimestamp ASC")

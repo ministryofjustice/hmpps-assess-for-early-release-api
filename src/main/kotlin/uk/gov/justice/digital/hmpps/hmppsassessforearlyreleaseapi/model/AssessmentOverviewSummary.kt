@@ -44,7 +44,7 @@ data class AssessmentOverviewSummary(
   val responsibleCom: ComSummary? = null,
 
   @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "N55LAU")
-  val team: String? = null,
+  val teamCode: String? = null,
 
   @Schema(description = "The version of the policy that this assessment has been carried out under", example = "1.0")
   val policyVersion: String,

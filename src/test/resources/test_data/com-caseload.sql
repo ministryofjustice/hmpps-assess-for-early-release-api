@@ -13,14 +13,14 @@ values ('A1234AA', 'BMI', 'FIRST-1', 'LAST-1', '1978-03-20', '2020-10-25 ', '202
        ('C1234CD', 'BMI', 'FIRST-6', 'LAST-6', '1987-04-18', '2020-10-25', '2023-06-01', 'NOT_STARTED', 'DX12340F'),
        ('B1234BB', 'ABC', 'FIRST-7', 'LAST-7', '1969-05-15', '2020-10-25', '2021-12-18', 'NOT_STARTED', 'DX12340G');
 
-insert into assessment(booking_id, offender_id, status, policy_version, responsible_com_id, postponement_date)
-values (10,1, 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2, null),
-       (20,2, 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 1, '2021-12-18'),
-       (30,3, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', 1, null),
-       (40,4, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', 2,null),
-       (50,5, 'NOT_STARTED', '1.0', 1, null),
-       (60,6, 'AWAITING_DECISION', '1.0', 2, null),
-       (70,7, 'AWAITING_DECISION', '1.0', 1, null);
+insert into assessment(booking_id, offender_id, status, policy_version, responsible_com_id, postponement_date, team_code)
+values (10,1, 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 2, null, 'teamA'),
+       (20,2, 'ADDRESS_AND_RISK_CHECKS_IN_PROGRESS', '1.0', 1, '2021-12-18', 'teamB'),
+       (30,3, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', 1, null, 'teamC'),
+       (40,4, 'AWAITING_ADDRESS_AND_RISK_CHECKS', '1.0', 2,null, 'teamB'),
+       (50,5, 'NOT_STARTED', '1.0', 1, null, 'teamA'),
+       (60,6, 'AWAITING_DECISION', '1.0', 2, null, 'teamA'),
+       (70,7, 'AWAITING_DECISION', '1.0', 1, null, 'teamC');
 
 INSERT INTO public.postponement_reason
 (assessment_id, reason_type)

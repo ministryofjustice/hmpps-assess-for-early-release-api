@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.GovUkMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OffenderSummaryResponse
@@ -17,7 +18,8 @@ import java.time.LocalDate
 private const val PRISON_CODE = "BMI"
 private const val STAFF_CODE = "STAFF1"
 private const val GET_CASE_ADMIN_CASELOAD_URL = "/prison/$PRISON_CODE/case-admin/caseload"
-private const val GET_COM_CASELOAD_URL = "/probation/community-offender-manager/staff-code/$STAFF_CODE/caseload"
+private const val GET_COM_STAFF_CASELOAD_URL = "/probation/community-offender-manager/staff-code/$STAFF_CODE/caseload"
+private const val GET_COM_TEAM_CASELOAD_URL = "/probation/community-offender-manager/staff-code/$STAFF_CODE/team-caseload"
 private const val GET_DECISION_MAKER_CASELOAD_URL = "/prison/$PRISON_CODE/decision-maker/caseload"
 
 class CaseloadResourceIntTest : SqsIntegrationTestBase() {
@@ -82,11 +84,11 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
   }
 
   @Nested
-  inner class GetComCaseload {
+  inner class GetComStaffCaseload {
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.get()
-        .uri(GET_COM_CASELOAD_URL)
+        .uri(GET_COM_STAFF_CASELOAD_URL)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -95,7 +97,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if no role`() {
       webTestClient.get()
-        .uri(GET_COM_CASELOAD_URL)
+        .uri(GET_COM_STAFF_CASELOAD_URL)
         .headers(setAuthorisation())
         .exchange()
         .expectStatus()
@@ -105,7 +107,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if wrong role`() {
       webTestClient.get()
-        .uri(GET_COM_CASELOAD_URL)
+        .uri(GET_COM_STAFF_CASELOAD_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .exchange()
         .expectStatus()
@@ -122,7 +124,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       // When
       val response = webTestClient.get()
-        .uri(GET_COM_CASELOAD_URL)
+        .uri(GET_COM_STAFF_CASELOAD_URL)
         .headers(setAuthorisation(roles = roles))
         .exchange()
 
@@ -136,6 +138,63 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder(null, "DX12340C", "DX12340E", "DX12340G")
       assertThat(offenders.map { it.probationPractitioner }).containsOnly("A Com")
       assertPostponeDetails(offenders, "A1234AB")
+    }
+  }
+
+  @Nested
+  inner class GetComTeamCaseload {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_COM_TEAM_CASELOAD_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_COM_TEAM_CASELOAD_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_COM_TEAM_CASELOAD_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/com-caseload.sql",
+    )
+    @Test
+    fun `should return offenders allocated to a COM users teams`() {
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+      deliusMockServer.stubGetStaffDetailsByStaffCode(STAFF_CODE)
+
+      // When
+      val response = webTestClient.get()
+        .uri(GET_COM_TEAM_CASELOAD_URL)
+        .headers(setAuthorisation(roles = roles))
+        .exchange()
+
+      // Then
+      response.expectStatus().isOk
+
+      val offenders = response.expectBody(typeReference<List<OffenderSummaryResponse>>())
+        .returnResult().responseBody!!
+      assertThat(offenders).hasSize(5)
+      assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CC", "C1234CD")
     }
   }
 
@@ -200,12 +259,14 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
   }
 
   private companion object {
+    val deliusMockServer = DeliusMockServer()
     val govUkMockServer = GovUkMockServer()
     val prisonRegisterMockServer = PrisonRegisterMockServer()
 
     @JvmStatic
     @BeforeAll
     fun startMocks() {
+      deliusMockServer.start()
       govUkMockServer.start()
       prisonRegisterMockServer.start()
     }
@@ -213,6 +274,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
     @JvmStatic
     @AfterAll
     fun stopMocks() {
+      deliusMockServer.stop()
       govUkMockServer.stop()
       prisonRegisterMockServer.stop()
     }

@@ -172,6 +172,7 @@ class AssessmentService(
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.performTransition(event, request.agent.toEntity())
 
+    assessmentEntity.addressChecksStatus = status
     if (status == SUITABLE && !assessmentEntity.addressChecksComplete) {
       assessmentEntity.addressChecksComplete = true
     } else if (status != SUITABLE && assessmentEntity.addressChecksComplete) {
@@ -184,7 +185,7 @@ class AssessmentService(
   fun updateTeamForResponsibleCom(staffCode: String, team: String) {
     var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, AssessmentStatus.inFlightStatuses())
     comsAssessments = comsAssessments.map {
-      it.copy(team = team)
+      it.copy(teamCode = team)
     }
     assessmentRepository.saveAll(comsAssessments)
   }
@@ -284,7 +285,7 @@ class AssessmentService(
       offender = offender,
       policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
       responsibleCom = communityOffenderManager,
-      team = deliusOffenderManager?.team?.code,
+      teamCode = deliusOffenderManager?.team?.code,
     )
 
     val changes = mapOf(
