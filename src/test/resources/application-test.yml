@@ -46,6 +46,9 @@ hmpps:
   probationsearch:
     api:
       url: http://localhost:8094
+  manageusers:
+    api:
+      url: http://localhost:8098
 
 gotenberg:
   api:

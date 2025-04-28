@@ -11,8 +11,10 @@ class PrisonService(
   private val prisonRegisterApiClient: PrisonRegisterApiClient,
   private val prisonerSearchApiClient: PrisonerSearchApiClient,
 ) {
-  fun getUserDetails(username: String): PrisonApiUserDetail? = prisonApiClient.getUserDetails(username)
+  fun getUserDetails(username: String): PrisonApiUserDetail = prisonApiClient.getUserDetails(username)
     ?: throw ItemNotFoundException("User not found")
+
+  fun getUserPrisonName(username: String): String? = this.getUserDetails(username).activeCaseLoadId?.let { getPrisonNameForId(it) }
 
   fun searchPrisonersByNomisIds(nomisIds: List<String>): List<PrisonerSearchPrisoner> {
     if (nomisIds.isEmpty()) return emptyList()

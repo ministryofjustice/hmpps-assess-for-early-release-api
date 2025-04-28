@@ -16,6 +16,7 @@ generic-service:
     HMPPS_PRISONERSEARCH_API_URL: "https://prisoner-search-preprod.prison.service.justice.gov.uk"
     HMPPS_PRISONREGISTER_API_URL: "https://prison-register-preprod.hmpps.service.justice.gov.uk"
     HMPPS_PROBATIONSEARCH_API_URL: "https://probation-offender-search-preprod.hmpps.service.justice.gov.uk"
+    HMPPS_MANAGE_USERS_API_URL: "https://manage-users-api-preprod.hmpps.service.justice.gov.uk"
     OS_PLACES_API_URL: "https://api.os.uk/search/places/v1"
 
 # CloudPlatform AlertManager receiver to route prometheus alerts to slack

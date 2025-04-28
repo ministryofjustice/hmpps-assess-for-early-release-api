@@ -8,7 +8,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 private const val PRISON_API_WIREMOCK_PORT = 8095
 
 class PrisonApiMockServer : WireMockServer(PRISON_API_WIREMOCK_PORT) {
-  fun stubGetUserDetails(username: String = "a-prison-user") {
+  fun stubGetUserDetails(username: String = "a-prison-user", prisonId: String = "MDI") {
     stubFor(
       get(urlEqualTo("/api/users/$username")).willReturn(
         aResponse().withHeader("Content-Type", "application/json").withBody(
@@ -17,7 +17,7 @@ class PrisonApiMockServer : WireMockServer(PRISON_API_WIREMOCK_PORT) {
             "username": "$username",
             "firstName": "Omu",
             "lastName": "User",
-            "activeCaseLoadId": "MDI",
+            "activeCaseLoadId": "$prisonId",
             "accountStatus": "ACTIVE",
             "lockedFlag": false,
             "expiredFlag": false,
@@ -26,6 +26,16 @@ class PrisonApiMockServer : WireMockServer(PRISON_API_WIREMOCK_PORT) {
           """,
         ).withStatus(200),
       ),
+    )
+  }
+
+  fun stubGetUserDetails404(username: String = "a-prison-user") {
+    stubFor(
+      get(urlEqualTo("/api/users/$username"))
+        .willReturn(
+          aResponse()
+            .withStatus(404),
+        ),
     )
   }
 }

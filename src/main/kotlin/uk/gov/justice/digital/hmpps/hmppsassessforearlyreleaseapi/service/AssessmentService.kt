@@ -5,6 +5,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Lazy
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent.Companion.SYSTEM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
@@ -12,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.PostponementReasonEntity
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent
@@ -23,8 +25,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentContactsResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ContactResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
@@ -40,6 +44,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.Sta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getSuitabilityStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers.ManagedUsersService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.AssessmentToAssessmentOverviewSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.Criterion
@@ -61,6 +66,7 @@ class AssessmentService(
   private val prisonService: PrisonService,
   private val policyService: PolicyService,
   private val staffRepository: StaffRepository,
+  private val managedUsersService: ManagedUsersService,
   @Lazy
   private val probationService: ProbationService,
 ) {
@@ -71,7 +77,8 @@ class AssessmentService(
 
   @Transactional
   fun getCurrentAssessment(prisonNumber: String): Assessment {
-    val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
+    val assessments =
+      assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
     if (assessments.isEmpty()) {
       throw ItemNotFoundException("Cannot find current assessment with prisonNumber $prisonNumber")
     }
@@ -93,7 +100,11 @@ class AssessmentService(
     val prisonerSearchResults = getPrisonerDetails(offender).first()
     val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(currentAssessment)
 
-    return assessmentToAssessmentOverviewSummaryMapper.map(assessmentWithEligibilityProgress, prisonName, prisonerSearchResults)
+    return assessmentToAssessmentOverviewSummaryMapper.map(
+      assessmentWithEligibilityProgress,
+      prisonName,
+      prisonerSearchResults,
+    )
   }
 
   @Transactional
@@ -106,7 +117,10 @@ class AssessmentService(
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
 
-    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agent.toEntity())
+    assessmentEntity.performTransition(
+      AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes),
+      postponeCaseRequest.agent.toEntity(),
+    )
 
     val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
       PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)
@@ -121,7 +135,10 @@ class AssessmentService(
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agent.toEntity())
+    assessmentEntity.performTransition(
+      OptOut(optOutRequest.reasonType, optOutRequest.otherDescription),
+      optOutRequest.agent.toEntity(),
+    )
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
     assessmentRepository.save(assessmentEntity)
@@ -149,7 +166,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation, agentDto: AgentDto) {
+  fun recordNonDisclosableInformation(
+    prisonNumber: String,
+    nonDisclosableInformation: NonDisclosableInformation,
+    agentDto: AgentDto,
+  ) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.hasNonDisclosableInformation = nonDisclosableInformation.hasNonDisclosableInformation
     assessmentEntity.nonDisclosableInformation = nonDisclosableInformation.nonDisclosableInformation
@@ -166,7 +187,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, request: SaveResidentialChecksTaskAnswersRequest) {
+  fun updateAddressChecksStatus(
+    prisonNumber: String,
+    status: ResidentialChecksStatus,
+    request: SaveResidentialChecksTaskAnswersRequest,
+  ) {
     val event = ResidentialCheckAnswerProvided(status, request.taskCode, request.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber)
@@ -183,7 +208,10 @@ class AssessmentService(
 
   @Transactional
   fun updateTeamForResponsibleCom(staffCode: String, team: String) {
-    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, AssessmentStatus.inFlightStatuses())
+    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(
+      staffCode,
+      AssessmentStatus.inFlightStatuses(),
+    )
     comsAssessments = comsAssessments.map {
       it.copy(teamCode = team)
     }
@@ -191,7 +219,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest, agentDto: AgentDto) {
+  fun updateVloAndPomConsultation(
+    prisonNumber: String,
+    request: UpdateVloAndPomConsultationRequest,
+    agentDto: AgentDto,
+  ) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.victimContactSchemeOptedIn = request.victimContactSchemeOptedIn
     assessmentEntity.victimContactSchemeRequests = request.victimContactSchemeRequests
@@ -324,5 +356,65 @@ class AssessmentService(
       assessmentEntity = currentAssessment,
       policy = policy,
     )
+  }
+
+  @Transactional
+  fun getContacts(prisonNumber: String): AssessmentContactsResponse {
+    val currentAssessment = this.getCurrentAssessment(prisonNumber)
+
+    // Currently we do not support Prison offender manager
+    val contactTypes = listOf(UserRole.PRISON_CA, UserRole.PRISON_DM, UserRole.PROBATION_COM)
+    val agents = getAgents(currentAssessment, contactTypes)
+
+    val contacts = agents.map {
+      with(it) {
+        var email: String? = null
+        try {
+          email = getEmailAddress(it)
+        } catch (e: ItemNotFoundException) {
+          log.warn("Could not find email with given username and role {}", it.role, e)
+        }
+
+        var location: String? = null
+        try {
+          location = getLocationName(it)
+        } catch (e: ItemNotFoundException) {
+          log.warn("Could not find Location with given username and role {}", it.role, e)
+        }
+
+        ContactResponse(fullName, role, email, location)
+      }
+    }
+
+    return AssessmentContactsResponse(contacts)
+  }
+
+  private fun getAgents(
+    currentAssessment: Assessment,
+    contactTypes: List<UserRole>,
+  ): List<Agent> {
+    val contacts =
+      currentAssessment.getEvents().sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
+        .distinctBy { it.agent.role }.map { it.agent }
+    return contacts
+  }
+
+  private fun getEmailAddress(agent: Agent): String? {
+    with(agent) {
+      return when (role) {
+        UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username).email
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username).email
+        else -> null
+      }
+    }
+  }
+
+  private fun getLocationName(agent: Agent): String? {
+    with(agent) {
+      return when (role) {
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
+        else -> null
+      }
+    }
   }
 }

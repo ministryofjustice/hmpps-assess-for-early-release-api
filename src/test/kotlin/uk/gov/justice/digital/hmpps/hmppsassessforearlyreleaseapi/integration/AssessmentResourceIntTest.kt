@@ -21,6 +21,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskSta
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.AWAITING_ADDRESS_AND_RISK_CHECKS
@@ -30,10 +32,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.OPTED_OUT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.DeliusMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ManagedUsersMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonApiMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentContactsResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.ContactResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.OTHER
@@ -54,6 +60,7 @@ import java.util.function.Consumer
 
 private const val PRISON_NUMBER = TestData.PRISON_NUMBER
 private const val GET_CURRENT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment"
+private const val GET_CURRENT_ASSESSMENT_CONTACTS_URL = "/offender/$PRISON_NUMBER/current-assessment/contacts"
 private const val OPT_OUT_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-out"
 private const val OPT_IN_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/opt-in"
 private const val POSTPONE_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/postpone"
@@ -69,6 +76,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     val prisonRegisterMockServer = PrisonRegisterMockServer()
     val probationSearchApiMockServer = ProbationSearchMockServer()
     val deliusMockServer = DeliusMockServer()
+    val managedUsersMockServer = ManagedUsersMockServer()
+    val prisonApiMockServer = PrisonApiMockServer()
 
     @JvmStatic
     @BeforeAll
@@ -77,6 +86,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       prisonRegisterMockServer.start()
       probationSearchApiMockServer.start()
       deliusMockServer.start()
+      managedUsersMockServer.start()
+      prisonApiMockServer.start()
     }
 
     @JvmStatic
@@ -86,6 +97,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       prisonRegisterMockServer.stop()
       probationSearchApiMockServer.stop()
       deliusMockServer.stop()
+      managedUsersMockServer.stop()
+      prisonApiMockServer.stop()
     }
   }
 
@@ -708,11 +721,11 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment.hasNonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.hasNonDisclosableInformation)
       assertThat(updatedAssessment.nonDisclosableInformation).isEqualTo(anNonDisclosableInformationWithReason.nonDisclosableInformation)
 
-      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      val assessmentEvents =
+        assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
       assertThat(assessmentEvents).isNotEmpty
       assertThat(assessmentEvents).hasSize(1)
       val eventProduced = assessmentEvents.first()
-
       assertThat(eventProduced.eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
       assertThat(eventProduced.changes).isEqualTo(
         mapOf(
@@ -740,7 +753,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         .expectStatus()
         .isBadRequest
         .expectBody()
-        .jsonPath("$.userMessage").value(containsString("If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty"))
+        .jsonPath("$.userMessage")
+        .value(containsString("If hasNonDisclosableInformation is true, nonDisclosableInformation must not be null or empty"))
     }
   }
 
@@ -811,6 +825,143 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment.victimContactSchemeRequests).isEqualTo(anUpdateVloAndPomConsultationRequest.victimContactSchemeRequests)
       assertThat(updatedAssessment.pomBehaviourInformation).isEqualTo(anUpdateVloAndPomConsultationRequest.pomBehaviourInformation)
       assertLastUpdateByUser(updatedAssessment)
+    }
+  }
+
+  @Nested
+  inner class GetAssessmentContactDetails {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assesment-with-event-history.sql",
+    )
+    @Test
+    fun `should return the latest contacts for current assessment`() {
+      // Given
+      val usernameCA = "a-prison-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager(usernameCA, email = "aled.evans@moj.gov.uk")
+      prisonApiMockServer.stubGetUserDetails(usernameCA, prisonId = "AKI")
+
+      val usernameDM = "a-dm-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager(usernameDM, email = "gwyn.evans@moj.gov.uk")
+      prisonApiMockServer.stubGetUserDetails(usernameDM, prisonId = "BMI")
+
+      val usernamePB = "a-probation-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      deliusMockServer.stubGetStaffDetailsByUsername(usernamePB, email = "ceri.evans@moj.gov.uk")
+      prisonApiMockServer.stubGetUserDetails(usernamePB, prisonId = "BMI")
+
+      // When
+      val result = webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+
+      // Then
+      result.expectStatus().isOk
+      val assessmentContactsResponse =
+        result.expectBody(AssessmentContactsResponse::class.java).returnResult().responseBody!!
+      assertThat(assessmentContactsResponse).isNotNull
+      assertThat(assessmentContactsResponse.contacts).size().isEqualTo(3)
+
+      assertThat(assessmentContactsResponse.contacts).containsExactly(
+        ContactResponse(
+          fullName = "Ceri Evans",
+          userRole = PROBATION_COM,
+          email = "ceri.evans@moj.gov.uk",
+          locationName = null,
+        ),
+        ContactResponse(
+          fullName = "Gwyn Evans",
+          userRole = PRISON_DM,
+          email = "gwyn.evans@moj.gov.uk",
+          locationName = "Birmingham (HMP)",
+        ),
+        ContactResponse(
+          fullName = "Aled Evans",
+          userRole = PRISON_CA,
+          email = "aled.evans@moj.gov.uk",
+          locationName = "Acklington (HMP)",
+        ),
+      )
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assesment-with-event-history.sql",
+    )
+    @Test
+    fun `should return the some contacts details even if external calls fail`() {
+      // Given
+      val usernameCA = "a-prison-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager404(usernameCA)
+      prisonApiMockServer.stubGetUserDetails404(usernameCA)
+
+      val usernameDM = "a-dm-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      managedUsersMockServer.stubGetOffenderManager404(usernameDM)
+      prisonApiMockServer.stubGetUserDetails404(usernameDM)
+
+      val usernamePB = "a-probation-user"
+
+      prisonRegisterMockServer.stubGetPrisons()
+      deliusMockServer.stubPostStaffDetailsByUsername404(usernamePB)
+      prisonApiMockServer.stubGetUserDetails404(usernamePB)
+
+      // When
+      val result = webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT_CONTACTS_URL)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .exchange()
+
+      // Then
+      result.expectStatus().isOk
+      val assessmentContactsResponse =
+        result.expectBody(AssessmentContactsResponse::class.java).returnResult().responseBody!!
+      assertThat(assessmentContactsResponse).isNotNull
+      assertThat(assessmentContactsResponse.contacts).size().isEqualTo(3)
+
+      assertThat(assessmentContactsResponse.contacts).containsExactly(
+        ContactResponse(fullName = "Ceri Evans", userRole = PROBATION_COM, email = null, locationName = null),
+        ContactResponse(fullName = "Gwyn Evans", userRole = PRISON_DM, email = null, locationName = null),
+        ContactResponse(fullName = "Aled Evans", userRole = PRISON_CA, email = null, locationName = null),
+      )
     }
   }
 
