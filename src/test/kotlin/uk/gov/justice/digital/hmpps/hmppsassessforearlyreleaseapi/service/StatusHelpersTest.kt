@@ -15,8 +15,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleTaskName
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableTaskName
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.FAILED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ResultType.PASSED
@@ -144,7 +144,7 @@ class StatusHelpersTest {
         anEligibilityCheckDetails(2).copy(status = NOT_STARTED, taskName = "Thing 2"),
         anEligibilityCheckDetails(3).copy(status = INELIGIBLE, taskName = "Thing 3"),
         anEligibilityCheckDetails(4).copy(status = IN_PROGRESS, taskName = "Thing 4"),
-      ).getIneligibleReasons()
+      ).getIneligibleTaskName()
 
       assertThat(reasons).containsExactly("Thing 1", "Thing 3")
     }
@@ -156,7 +156,7 @@ class StatusHelpersTest {
         anSuitabilityCheckDetails(2).copy(status = SuitabilityStatus.NOT_STARTED, taskName = "Thing 2"),
         anSuitabilityCheckDetails(3).copy(status = UNSUITABLE, taskName = "Thing 3"),
         anSuitabilityCheckDetails(4).copy(status = SuitabilityStatus.IN_PROGRESS, taskName = "Thing 4"),
-      ).getUnsuitableReasons()
+      ).getUnsuitableTaskName()
 
       assertThat(reasons).containsExactly("Thing 1", "Thing 3")
     }

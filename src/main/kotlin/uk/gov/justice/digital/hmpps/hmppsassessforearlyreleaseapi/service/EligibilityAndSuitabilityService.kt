@@ -21,7 +21,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleTaskName
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableTaskName
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 
@@ -125,7 +127,8 @@ class EligibilityAndSuitabilityService(
         suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
         else -> null
       },
-      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
+      failedCheckReasons = eligibility.getIneligibleTaskName() + suitability.getUnsuitableTaskName(),
+      documentFailureReason = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
     )
   }
 }

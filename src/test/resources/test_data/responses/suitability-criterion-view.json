@@ -55,7 +55,8 @@
         "text": "Is this person category A?",
         "hint": null,
         "name": "categoryA",
-        "answer": false
+        "answer": false,
+        "documentFailureReason": "you are a category A prisoner"
       }
     ],
     "agent": {
@@ -75,13 +76,15 @@
         "text": "Does this person have a high or very high risk of serious harm?",
         "hint": null,
         "name": "highOrVeryHighRoSH",
-        "answer": null
+        "answer": null,
+        "documentFailureReason": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
       },
       {
         "text": "Are they MAPPA level 2 or 3?",
         "hint": null,
         "name": "mappaLevel2Or3",
-        "answer": null
+        "answer": null,
+        "documentFailureReason": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
       }
     ],
     "agent": null,
