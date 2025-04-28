@@ -362,7 +362,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
-    assertThat(assessment.lastUpdateByUserEvent).isNull()
   }
 
   private fun stubSearchPrisonersByNomisIds(

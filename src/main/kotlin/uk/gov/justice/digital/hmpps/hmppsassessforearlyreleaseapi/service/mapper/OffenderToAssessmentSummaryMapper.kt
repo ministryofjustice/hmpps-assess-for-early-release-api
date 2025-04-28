@@ -42,7 +42,7 @@ class OffenderToAssessmentSummaryMapper(
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
-      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName
+      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }
 

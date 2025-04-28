@@ -29,7 +29,7 @@ class OffenderSummaryResponseMapper {
       currentTask = assessment.currentTask(),
       taskOverdueOn = offender.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       crn = offender.crn,
-      lastUpdateBy = assessment.lastUpdateByUserEvent?.agent?.fullName
+      lastUpdateBy = assessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }
 }

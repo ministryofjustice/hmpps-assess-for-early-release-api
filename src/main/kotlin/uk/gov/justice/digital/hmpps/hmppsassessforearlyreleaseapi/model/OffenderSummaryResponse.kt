@@ -62,5 +62,5 @@ data class OffenderSummaryResponse(
   val crn: String? = null,
 
   @Schema(description = "Last updated by", example = "Aled Evans")
-  val lastUpdateBy: String?=null
+  val lastUpdateBy: String? = null,
 )

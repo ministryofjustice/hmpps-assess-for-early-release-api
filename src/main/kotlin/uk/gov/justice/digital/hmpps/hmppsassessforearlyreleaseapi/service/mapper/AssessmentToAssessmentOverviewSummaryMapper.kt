@@ -55,7 +55,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       victimContactSchemeOptedIn = currentAssessment.victimContactSchemeOptedIn,
       victimContactSchemeRequests = currentAssessment.victimContactSchemeRequests,
       pomBehaviourInformation = currentAssessment.pomBehaviourInformation,
-      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName
+      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }
 

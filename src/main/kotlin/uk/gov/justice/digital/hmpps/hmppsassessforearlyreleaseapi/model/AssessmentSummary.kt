@@ -69,5 +69,5 @@ data class AssessmentSummary(
   val mainOffense: String?,
 
   @Schema(description = "Last updated by", example = "Aled Evans")
-  val lastUpdateBy: String?=null
+  val lastUpdateBy: String? = null,
 )

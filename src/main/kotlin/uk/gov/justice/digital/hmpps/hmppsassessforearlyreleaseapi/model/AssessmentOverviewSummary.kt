@@ -87,5 +87,5 @@ data class AssessmentOverviewSummary(
   val pomBehaviourInformation: String? = null,
 
   @Schema(description = "Last updated by", example = "Aled Evans")
-  val lastUpdateBy: String?=null
+  val lastUpdateBy: String? = null,
 )
