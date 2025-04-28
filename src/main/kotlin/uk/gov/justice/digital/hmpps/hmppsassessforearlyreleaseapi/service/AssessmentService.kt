@@ -372,14 +372,14 @@ class AssessmentService(
         try {
           email = getEmailAddress(it)
         } catch (e: ItemNotFoundException) {
-          log.debug("Could not find email with given username and role {}", it.role, e)
+          log.warn("Could not find email with given username and role {}", it.role, e)
         }
 
         var location: String? = null
         try {
           location = getLocationName(it)
         } catch (e: ItemNotFoundException) {
-          log.debug("Could not find Location with given username and role {}", it.role, e)
+          log.warn("Could not find Location with given username and role {}", it.role, e)
         }
 
         ContactResponse(fullName, role, email, location)
