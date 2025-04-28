@@ -77,7 +77,8 @@ class AssessmentService(
 
   @Transactional
   fun getCurrentAssessment(prisonNumber: String): Assessment {
-    val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
+    val assessments =
+      assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(prisonNumber)
     if (assessments.isEmpty()) {
       throw ItemNotFoundException("Cannot find current assessment with prisonNumber $prisonNumber")
     }
@@ -99,7 +100,11 @@ class AssessmentService(
     val prisonerSearchResults = getPrisonerDetails(offender).first()
     val assessmentWithEligibilityProgress = getCurrentAssessmentWithEligibilityProgress(currentAssessment)
 
-    return assessmentToAssessmentOverviewSummaryMapper.map(assessmentWithEligibilityProgress, prisonName, prisonerSearchResults)
+    return assessmentToAssessmentOverviewSummaryMapper.map(
+      assessmentWithEligibilityProgress,
+      prisonName,
+      prisonerSearchResults,
+    )
   }
 
   @Transactional
@@ -112,7 +117,10 @@ class AssessmentService(
   fun postponeCase(prisonNumber: String, postponeCaseRequest: PostponeCaseRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
 
-    assessmentEntity.performTransition(AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes), postponeCaseRequest.agent.toEntity())
+    assessmentEntity.performTransition(
+      AssessmentLifecycleEvent.Postpone(postponeCaseRequest.reasonTypes),
+      postponeCaseRequest.agent.toEntity(),
+    )
 
     val reasonTypes = postponeCaseRequest.reasonTypes.map { reasonType ->
       PostponementReasonEntity(reasonType = reasonType, assessment = assessmentEntity)
@@ -127,7 +135,10 @@ class AssessmentService(
   @Transactional
   fun optOut(prisonNumber: String, optOutRequest: OptOutRequest) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
-    assessmentEntity.performTransition(OptOut(optOutRequest.reasonType, optOutRequest.otherDescription), optOutRequest.agent.toEntity())
+    assessmentEntity.performTransition(
+      OptOut(optOutRequest.reasonType, optOutRequest.otherDescription),
+      optOutRequest.agent.toEntity(),
+    )
     assessmentEntity.optOutReasonType = optOutRequest.reasonType
     assessmentEntity.optOutReasonOther = optOutRequest.otherDescription
     assessmentRepository.save(assessmentEntity)
@@ -155,7 +166,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun recordNonDisclosableInformation(prisonNumber: String, nonDisclosableInformation: NonDisclosableInformation, agentDto: AgentDto) {
+  fun recordNonDisclosableInformation(
+    prisonNumber: String,
+    nonDisclosableInformation: NonDisclosableInformation,
+    agentDto: AgentDto,
+  ) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.hasNonDisclosableInformation = nonDisclosableInformation.hasNonDisclosableInformation
     assessmentEntity.nonDisclosableInformation = nonDisclosableInformation.nonDisclosableInformation
@@ -172,7 +187,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateAddressChecksStatus(prisonNumber: String, status: ResidentialChecksStatus, request: SaveResidentialChecksTaskAnswersRequest) {
+  fun updateAddressChecksStatus(
+    prisonNumber: String,
+    status: ResidentialChecksStatus,
+    request: SaveResidentialChecksTaskAnswersRequest,
+  ) {
     val event = ResidentialCheckAnswerProvided(status, request.taskCode, request.answers)
 
     val assessmentEntity = getCurrentAssessment(prisonNumber)
@@ -189,7 +208,10 @@ class AssessmentService(
 
   @Transactional
   fun updateTeamForResponsibleCom(staffCode: String, team: String) {
-    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(staffCode, AssessmentStatus.inFlightStatuses())
+    var comsAssessments = assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(
+      staffCode,
+      AssessmentStatus.inFlightStatuses(),
+    )
     comsAssessments = comsAssessments.map {
       it.copy(teamCode = team)
     }
@@ -197,7 +219,11 @@ class AssessmentService(
   }
 
   @Transactional
-  fun updateVloAndPomConsultation(prisonNumber: String, request: UpdateVloAndPomConsultationRequest, agentDto: AgentDto) {
+  fun updateVloAndPomConsultation(
+    prisonNumber: String,
+    request: UpdateVloAndPomConsultationRequest,
+    agentDto: AgentDto,
+  ) {
     val assessmentEntity = getCurrentAssessment(prisonNumber)
     assessmentEntity.victimContactSchemeOptedIn = request.victimContactSchemeOptedIn
     assessmentEntity.victimContactSchemeRequests = request.victimContactSchemeRequests
@@ -229,21 +255,22 @@ class AssessmentService(
       return policy.eligibilityCriteria.map { it.toEligibilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?): EligibilityCriterionProgress = EligibilityCriterionProgress(
-      code = code,
-      taskName = name,
-      status = eligibilityCheckResult.getEligibilityStatus(),
-      questions = questions.map {
-        Question(
-          text = it.text,
-          hint = it.hint,
-          name = it.name,
-          answer = eligibilityCheckResult.getAnswer(it.name),
-        )
-      },
-      agent = eligibilityCheckResult?.agent?.toModel(),
-      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
-    )
+    private fun Criterion.toEligibilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?): EligibilityCriterionProgress =
+      EligibilityCriterionProgress(
+        code = code,
+        taskName = name,
+        status = eligibilityCheckResult.getEligibilityStatus(),
+        questions = questions.map {
+          Question(
+            text = it.text,
+            hint = it.hint,
+            name = it.name,
+            answer = eligibilityCheckResult.getAnswer(it.name),
+          )
+        },
+        agent = eligibilityCheckResult?.agent?.toModel(),
+        lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
+      )
 
     fun getSuitabilityProgress(): List<SuitabilityCriterionProgress> {
       val codeToChecks = this.assessmentEntity.eligibilityCheckResults
@@ -253,21 +280,22 @@ class AssessmentService(
       return policy.suitabilityCriteria.map { it.toSuitabilityCriterionProgress(codeToChecks[it.code]) }
     }
 
-    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) = SuitabilityCriterionProgress(
-      code = code,
-      taskName = name,
-      status = eligibilityCheckResult.getSuitabilityStatus(),
-      questions = questions.map {
-        Question(
-          text = it.text,
-          hint = it.hint,
-          name = it.name,
-          answer = eligibilityCheckResult.getAnswer(it.name),
-        )
-      },
-      agent = eligibilityCheckResult?.agent?.toModel(),
-      lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
-    )
+    private fun Criterion.toSuitabilityCriterionProgress(eligibilityCheckResult: EligibilityCheckResult?) =
+      SuitabilityCriterionProgress(
+        code = code,
+        taskName = name,
+        status = eligibilityCheckResult.getSuitabilityStatus(),
+        questions = questions.map {
+          Question(
+            text = it.text,
+            hint = it.hint,
+            name = it.name,
+            answer = eligibilityCheckResult.getAnswer(it.name),
+          )
+        },
+        agent = eligibilityCheckResult?.agent?.toModel(),
+        lastUpdated = eligibilityCheckResult?.lastUpdatedTimestamp?.toLocalDate(),
+      )
   }
 
   @Transactional
@@ -306,15 +334,16 @@ class AssessmentService(
     return assessmentRepository.save(assessment)
   }
 
-  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager = staffRepository.save(
-    CommunityOffenderManager(
-      staffCode = offenderManager.code,
-      username = offenderManager.username,
-      email = offenderManager.email,
-      forename = offenderManager.name.forename,
-      surname = offenderManager.name.surname,
-    ),
-  )
+  private fun createCommunityOffenderManager(offenderManager: DeliusOffenderManager): CommunityOffenderManager =
+    staffRepository.save(
+      CommunityOffenderManager(
+        staffCode = offenderManager.code,
+        username = offenderManager.username,
+        email = offenderManager.email,
+        forename = offenderManager.name.forename,
+        surname = offenderManager.name.surname,
+      ),
+    )
 
   private fun getPrisonerDetails(offender: Offender): List<PrisonerSearchPrisoner> {
     val prisonerSearchResults = prisonService.searchPrisonersByNomisIds(listOf(offender.prisonNumber))
@@ -340,9 +369,24 @@ class AssessmentService(
     val contactTypes = listOf(UserRole.PRISON_CA, UserRole.PRISON_DM, UserRole.PROBATION_COM)
     val agents = getAgents(currentAssessment, contactTypes)
 
+
     val contacts = agents.map {
       with(it) {
-        ContactResponse(fullName, role, getEmailAddress(it), getLocationName(it))
+        var email: String? = null
+        try {
+          email = getEmailAddress(it)
+        } catch (e: ItemNotFoundException) {
+          log.debug("Could not find email with given username and role {}", it.role, e)
+        }
+
+        var location: String? = null
+        try {
+          location = getLocationName(it)
+        } catch (e: ItemNotFoundException) {
+          log.debug("Could not find Location with given username and role {}", it.role, e)
+        }
+
+        ContactResponse(fullName, role, email, location)
       }
     }
 
@@ -353,37 +397,28 @@ class AssessmentService(
     currentAssessment: Assessment,
     contactTypes: List<UserRole>,
   ): List<Agent> {
-    val contacts = currentAssessment.assessmentEvents.sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
-      .distinctBy { it.agent.role }.map { it.agent }
+    val contacts =
+      currentAssessment.assessmentEvents.sortedByDescending { it.eventTime }.filter { it.agent.role in contactTypes }
+        .distinctBy { it.agent.role }.map { it.agent }
     return contacts
   }
 
   private fun getEmailAddress(agent: Agent): String? {
-    try {
-      with(agent) {
-        return when (role) {
-          UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username).email
-          UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username).email
-          else -> null
-        }
+    with(agent) {
+      return when (role) {
+        UserRole.PROBATION_COM -> probationService.getStaffDetailsByUsername(username).email
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> managedUsersService.getEmail(username).email
+        else -> null
       }
-    } catch (e: ItemNotFoundException) {
-      log.debug("Could not find email with given username and role {}", agent.role, e)
-      return null
     }
   }
 
   private fun getLocationName(agent: Agent): String? {
-    try {
-      with(agent) {
-        return when (role) {
-          UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
-          else -> null
-        }
+    with(agent) {
+      return when (role) {
+        UserRole.PRISON_CA, UserRole.PRISON_DM -> prisonService.getUserPrisonName(username)
+        else -> null
       }
-    } catch (e: ItemNotFoundException) {
-      log.debug("Could not find Location with given username and role {}", agent.role, e)
-      return null
     }
   }
 }
