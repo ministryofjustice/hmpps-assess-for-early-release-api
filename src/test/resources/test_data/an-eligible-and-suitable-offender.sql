@@ -78,7 +78,7 @@ VALUES((select max(id) from assessment a), 'terrorist-offending-history', '1.0',
 
 INSERT INTO public.assessment_event
 (assessment_id, event_type, summary, event_time, changes)
-VALUES((select max(id) from assessment a), 'STATUS_CHANGE', 'status changed from: ''NOT_STARTED'', to: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS''', '2024-10-09 17:19:08.993', '{"after": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "before": "NOT_STARTED"}'::jsonb);
+VALUES((select max(id) from assessment a), 'STATUS_CHANGE', 'status changed from: ''NOT_STARTED'', to: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS''', '2024-10-09 17:19:08.993', '{"after": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "before": "NOT_STARTED", "context": {"code": "sex-offender-register", "type": "eligibility", "answers": {"requiredToSignSexOffenderRegister": false}}}'::jsonb);
 INSERT INTO public.assessment_event
 (assessment_id, event_type, summary, event_time, changes)
-VALUES((select max(id) from assessment a), 'STATUS_CHANGE', 'status changed from: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'', to: ''ELIGIBLE_AND_SUITABLE''', '2024-10-09 17:19:37.276', '{"after": "ELIGIBLE_AND_SUITABLE", "before": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS"}'::jsonb);
+VALUES((select max(id) from assessment a), 'STATUS_CHANGE', 'status changed from: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'', to: ''ELIGIBLE_AND_SUITABLE''', '2024-10-09 17:19:37.276', '{"after": "ELIGIBLE_AND_SUITABLE", "before": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "context": {"code": "terrorist-offending-history", "type": "suitability", "answers": {"terroristOffendingHistory": false}}}'::jsonb);

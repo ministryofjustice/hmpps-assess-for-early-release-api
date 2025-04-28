@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.ELIGIBILITY
@@ -22,6 +23,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChange
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsTaskAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AssessPersonsRiskAnswers
@@ -83,21 +86,6 @@ object TestData {
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)
 
-  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
-    val offender = Offender(
-      id = 1,
-      prisonNumber = PRISON_NUMBER,
-      prisonId = PRISON_ID,
-      forename = FORENAME,
-      surname = SURNAME,
-      dateOfBirth = LocalDate.of(1981, 5, 23),
-      hdced = hdced,
-      sentenceStartDate = sentenceStartDate,
-    )
-    offender.assessments.add(anAssessment(offender))
-    return offender
-  }
-
   val saveResidentialChecksTaskAnswersRequest =
     SaveResidentialChecksTaskAnswersRequest(
       taskCode = "address-details-and-informed-consent",
@@ -120,7 +108,34 @@ object TestData {
     agent = PRISON_CA_AGENT,
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(offender = offender, status = status, bookingId = bookingId, policyVersion = PolicyService.CURRENT_POLICY_VERSION.code)
+  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
+    val offender = Offender(
+      id = 1,
+      prisonNumber = PRISON_NUMBER,
+      prisonId = PRISON_ID,
+      forename = FORENAME,
+      surname = SURNAME,
+      dateOfBirth = LocalDate.of(1981, 5, 23),
+      hdced = hdced,
+      sentenceStartDate = sentenceStartDate,
+    )
+    offender.assessments.add(anAssessment(offender))
+    return offender
+  }
+
+  fun anStatusChangedEvent(assessment: Assessment): StatusChangedEvent = StatusChangedEvent(
+    id = 1L,
+    assessment = assessment,
+    changes = StatusChange(NOT_STARTED, AssessmentStatus.OPTED_OUT, mapOf()),
+    agent = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE"),
+  )
+
+  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(
+    offender = offender,
+    status = status,
+    bookingId = bookingId,
+    policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+  )
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
     PRISON_NUMBER,

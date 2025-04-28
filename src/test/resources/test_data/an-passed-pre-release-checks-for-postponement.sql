@@ -5,4 +5,4 @@ insert into assessment(booking_id,offender_id, status, policy_version)
 values (10,1, 'PASSED_PRE_RELEASE_CHECKS', '1.0');
 
 INSERT INTO public.assessment_event(assessment_id, event_type, summary, event_time, changes)
-VALUES(1, 'STATUS_CHANGE', 'status changed from: ''NOT_STARTED'', to: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS''', '2024-10-09 17:19:08.993', '{"after": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "before": "NOT_STARTED"}'::jsonb);
+VALUES(1, 'STATUS_CHANGE', 'status changed from: ''NOT_STARTED'', to: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS''', '2024-10-09 17:19:08.993', '{"after": "ELIGIBLE_AND_SUITABLE", "before": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "context": {"code": "terrorist-offending-history", "type": "suitability", "answers": {"terroristOffendingHistory": false}}}'::jsonb);

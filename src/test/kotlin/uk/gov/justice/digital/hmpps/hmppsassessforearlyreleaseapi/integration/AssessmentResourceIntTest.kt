@@ -19,6 +19,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PR
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
@@ -62,6 +63,31 @@ private const val RECORD_NON_DISCLOSABLE_INFORMATION_URL = "/offender/$PRISON_NU
 private const val UPDATE_VLO_AND_POM_CONSULTATION_URL = "/offender/$PRISON_NUMBER/current-assessment/vlo-and-pom-consultation"
 
 class AssessmentResourceIntTest : SqsIntegrationTestBase() {
+
+  private companion object {
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
+    val probationSearchApiMockServer = ProbationSearchMockServer()
+    val deliusMockServer = DeliusMockServer()
+
+    @JvmStatic
+    @BeforeAll
+    fun startMocks() {
+      prisonerSearchApiMockServer.start()
+      prisonRegisterMockServer.start()
+      probationSearchApiMockServer.start()
+      deliusMockServer.start()
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun stopMocks() {
+      prisonerSearchApiMockServer.stop()
+      prisonRegisterMockServer.stop()
+      probationSearchApiMockServer.stop()
+      deliusMockServer.stop()
+    }
+  }
 
   @Nested
   inner class GetCurrentAssessment {
@@ -158,6 +184,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           ),
           toDoEligibilityAndSuitabilityBy = LocalDate.now().plusDays(DAYS_TO_ADD),
           result = null,
+          lastUpdateBy = "Helen Reid",
         ),
       )
     }
@@ -245,29 +272,31 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val assessments = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
       assertThat(assessments).hasSize(1)
 
-      val assessment = assessments.first()
-      assertThat(assessment.postponementDate).isToday()
-      assertThat(assessment.postponementReasons).hasSize(2)
+      val updatedAssessment = assessments.first()
+      assertThat(updatedAssessment.postponementDate).isToday()
+      assertThat(updatedAssessment.postponementReasons).hasSize(2)
 
-      assertThat(assessment.postponementReasons[0])
+      assertThat(updatedAssessment.postponementReasons[0])
         .satisfies(
           Consumer {
             assertThat(it.id).isNotNegative()
-            assertThat(it.assessment).isEqualTo(assessment)
+            assertThat(it.assessment).isEqualTo(updatedAssessment)
             assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.ON_REMAND)
             assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
           },
         )
 
-      assertThat(assessment.postponementReasons[1])
+      assertThat(updatedAssessment.postponementReasons[1])
         .satisfies(
           Consumer {
             assertThat(it.id).isNotNegative()
-            assertThat(it.assessment).isEqualTo(assessment)
+            assertThat(it.assessment).isEqualTo(updatedAssessment)
             assertThat(it.reasonType).isEqualTo(PostponeCaseReasonType.BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON)
             assertThat(it.createdTimestamp).isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
           },
         )
+
+      assertLastUpdateByUser(updatedAssessment)
     }
 
     @Test
@@ -366,6 +395,8 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
         .hasSize(1)
         .extracting(Assessment::status, Assessment::optOutReasonType, Assessment::optOutReasonOther)
         .containsOnly(tuple(OPTED_OUT, OTHER, "an opt-out reason"))
+
+      assertLastUpdateByUser(assessments.last())
     }
 
     @Test
@@ -420,18 +451,27 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should opt-in an offender`() {
-      webTestClient.put()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+      val result = webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(PRISON_CA_AGENT)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isNoContent
 
       val offender = offenderRepository.findByPrisonNumber(PRISON_NUMBER)
         ?: Assertions.fail("couldn't find offender with prison number: $PRISON_NUMBER")
-      val assessment = testAssessmentRepository.findByOffender(offender)
-      assertThat(assessment.first().status).isEqualTo(ELIGIBLE_AND_SUITABLE)
+      val assessments = testAssessmentRepository.findByOffender(offender)
+      val updatedAssessment = assessments.first()
+
+      assertThat(updatedAssessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
+      assertLastUpdateByUser(updatedAssessment)
     }
   }
 
@@ -475,17 +515,24 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should submit an assessment for address checks`() {
-      webTestClient.put()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+      val result = webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(PRISON_CA_AGENT)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isNoContent
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.status).isEqualTo(AWAITING_ADDRESS_AND_RISK_CHECKS)
+      assertLastUpdateByUser(updatedAssessment)
     }
   }
 
@@ -529,17 +576,24 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should submit an assessment for pre-decision checks`() {
-      webTestClient.put()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+      val results = webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(PROBATION_COM_AGENT)
         .exchange()
-        .expectStatus()
+
+      // Then
+      results.expectStatus()
         .isNoContent
 
       val updatedAssessment = assessmentRepository.findAll().first()
       assertThat(updatedAssessment).isNotNull
       assertThat(updatedAssessment.status).isEqualTo(AWAITING_PRE_DECISION_CHECKS)
+      assertLastUpdateByUser(updatedAssessment)
     }
   }
 
@@ -599,12 +653,18 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should record non disclosable reason with null value`() {
-      webTestClient.put()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+      val result = webTestClient.put()
         .uri(RECORD_NON_DISCLOSABLE_INFORMATION_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
+        .headers(setAuthorisation(roles = roles, agent = PROBATION_COM_AGENT))
         .bodyValue(anNonDisclosableInformationWithNoReason)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isNoContent
 
       val updatedAssessment = assessmentRepository.findAll().first()
@@ -612,16 +672,21 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment.hasNonDisclosableInformation).isFalse()
       assertThat(updatedAssessment.nonDisclosableInformation).isNull()
 
-      val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
+      val assessmentEvents =
+        assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
       assertThat(assessmentEvents).isNotEmpty
       assertThat(assessmentEvents).hasSize(1)
-      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
-      assertThat(assessmentEvents.first().changes).isEqualTo(
+
+      val eventProduced = assessmentEvents.first()
+
+      assertThat(eventProduced.eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(eventProduced.changes).isEqualTo(
         mapOf(
           "hasNonDisclosableInformation" to "false",
           "nonDisclosableInformation" to "null",
         ),
       )
+      assertLastUpdateByUser(updatedAssessment)
     }
 
     @Sql(
@@ -646,13 +711,19 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val assessmentEvents = assessmentEventRepository.findByAssessmentId(updatedAssessment.id).filterIsInstance<GenericChangedEvent>()
       assertThat(assessmentEvents).isNotEmpty
       assertThat(assessmentEvents).hasSize(1)
-      assertThat(assessmentEvents.first().eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
-      assertThat(assessmentEvents.first().changes).isEqualTo(
+      val eventProduced = assessmentEvents.first()
+
+      assertThat(eventProduced.eventType).isEqualTo(AssessmentEventType.NONDISCLOSURE_INFORMATION_ENTRY)
+      assertThat(eventProduced.changes).isEqualTo(
         mapOf(
           "hasNonDisclosableInformation" to "true",
           "nonDisclosableInformation" to "reason",
         ),
       )
+
+      assertThat(updatedAssessment.lastUpdateByUserEvent).isNotNull
+      assertThat(updatedAssessment.lastUpdateByUserEvent).isEqualTo(eventProduced)
+      assertThat(updatedAssessment.lastUpdateByUserEvent!!.agent.role).isNotEqualTo(UserRole.SYSTEM)
     }
 
     @Sql(
@@ -719,12 +790,19 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update VLO and POM consultation information`() {
-      webTestClient.put()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+
+      val result = webTestClient.put()
         .uri(UPDATE_VLO_AND_POM_CONSULTATION_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PROBATION_COM_AGENT))
+        .headers(setAuthorisation(roles = roles, agent = PROBATION_COM_AGENT))
         .bodyValue(anUpdateVloAndPomConsultationRequest)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isNoContent
 
       val updatedAssessment = assessmentRepository.findAll().first()
@@ -732,31 +810,13 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(updatedAssessment.victimContactSchemeOptedIn).isEqualTo(anUpdateVloAndPomConsultationRequest.victimContactSchemeOptedIn)
       assertThat(updatedAssessment.victimContactSchemeRequests).isEqualTo(anUpdateVloAndPomConsultationRequest.victimContactSchemeRequests)
       assertThat(updatedAssessment.pomBehaviourInformation).isEqualTo(anUpdateVloAndPomConsultationRequest.pomBehaviourInformation)
+      assertLastUpdateByUser(updatedAssessment)
     }
   }
 
-  private companion object {
-    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
-    val probationSearchApiMockServer = ProbationSearchMockServer()
-    val deliusMockServer = DeliusMockServer()
-
-    @JvmStatic
-    @BeforeAll
-    fun startMocks() {
-      prisonerSearchApiMockServer.start()
-      prisonRegisterMockServer.start()
-      probationSearchApiMockServer.start()
-      deliusMockServer.start()
-    }
-
-    @JvmStatic
-    @AfterAll
-    fun stopMocks() {
-      prisonerSearchApiMockServer.stop()
-      prisonRegisterMockServer.stop()
-      probationSearchApiMockServer.stop()
-      deliusMockServer.stop()
-    }
+  private fun assertLastUpdateByUser(assessment: Assessment) {
+    assertThat(assessment.lastUpdateByUserEvent).isNotNull
+    assertThat(assessment.lastUpdateByUserEvent).isEqualTo(assessment.getEvents().first())
+    assertThat(assessment.lastUpdateByUserEvent!!.agent.role).isNotEqualTo(UserRole.SYSTEM)
   }
 }
