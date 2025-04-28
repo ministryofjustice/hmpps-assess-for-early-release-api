@@ -602,7 +602,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
     assertThat(deletedAssessment.deletedTimestamp)
       .isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
 
-    val lastEvent = deletedAssessment.assessmentEvents.last()
+    val lastEvent = deletedAssessment.getEvents().last()
     assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
     assertThat(lastEvent.agent.username).isEqualTo(TestData.PRISON_CA_AGENT.username)
     assertThat(lastEvent).isOfAnyClassIn(GenericChangedEvent::class.java)
