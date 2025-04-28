@@ -60,4 +60,7 @@ data class OffenderSummaryResponse(
 
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
+
+  @Schema(description = "Last updated by", example = "Aled Evans")
+  val lastUpdateBy: String?=null
 )

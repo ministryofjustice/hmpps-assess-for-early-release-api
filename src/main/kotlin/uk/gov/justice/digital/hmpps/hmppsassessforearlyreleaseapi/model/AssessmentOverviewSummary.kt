@@ -85,4 +85,7 @@ data class AssessmentOverviewSummary(
 
   @Schema(description = "Information that the POM has provided about the offender's behaviour in prison", example = "Any concerns about them being released on HDC")
   val pomBehaviourInformation: String? = null,
+
+  @Schema(description = "Last updated by", example = "Aled Evans")
+  val lastUpdateBy: String?=null
 )

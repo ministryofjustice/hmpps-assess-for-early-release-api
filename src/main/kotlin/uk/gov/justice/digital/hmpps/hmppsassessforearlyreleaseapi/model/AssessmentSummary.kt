@@ -67,4 +67,7 @@ data class AssessmentSummary(
 
   @Schema(description = "The main offense also know as the most serious offence", example = "Robbery", required = false)
   val mainOffense: String?,
+
+  @Schema(description = "Last updated by", example = "Aled Evans")
+  val lastUpdateBy: String?=null
 )

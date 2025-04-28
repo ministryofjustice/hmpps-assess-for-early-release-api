@@ -184,6 +184,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           ),
           toDoEligibilityAndSuitabilityBy = LocalDate.now().plusDays(DAYS_TO_ADD),
           result = null,
+          lastUpdateBy = "Helen Reid",
         ),
       )
     }

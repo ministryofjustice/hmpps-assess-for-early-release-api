@@ -44,7 +44,8 @@
     "optOutReasonOther": null,
     "postponementReasons": [],
     "cellLocation": "A-1-002",
-    "mainOffense": "Robbery"
+    "mainOffense": "Robbery",
+    "lastUpdateBy" : null
   },
   "overallStatus": "IN_PROGRESS",
   "eligibilityStatus": "ELIGIBLE",
