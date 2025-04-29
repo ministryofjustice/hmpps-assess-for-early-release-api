@@ -9,7 +9,7 @@
 <div data-th-replace="~{offender/fragments/offender_details.html :: offender_summary}"></div>
 <p data-th-text="${#temporals.format(dateToday, 'dd MMM yyyy')}"></p>
 <p>We checked to see if you can be released from prison on Home Detention Curfew (tagging).</p>
-<p>Although you are eligible by law, you are presumed unsuitable for the scheme because  <span data-th-text="${documentFailureReason}"></span>.</p>
+<p>Although you are eligible by law, you are presumed unsuitable for the scheme because  <span data-th-text="${failedQuestionDescription}"></span>.</p>
 <p>This means you would only be considered for Home Detention Curfew in exceptional circumstances.</p>
 <div class="subtitle">Think your case is exceptional?</div>
 <p class="representation-details">You may make representations to the Governor as to why you should be released on HDC. You will need to

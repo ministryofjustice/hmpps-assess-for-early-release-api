@@ -128,7 +128,7 @@ class EligibilityAndSuitabilityService(
         else -> null
       },
       failedCheckReasons = eligibility.getIneligibleTaskName() + suitability.getUnsuitableTaskName(),
-      documentFailureReason = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
+      failedQuestionDescription = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
     )
   }
 }

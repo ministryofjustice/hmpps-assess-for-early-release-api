@@ -115,7 +115,7 @@ class EligibilityAndSuitabilityServiceTest {
                 hint = it.hint,
                 name = it.name,
                 answer = true,
-                documentFailureReason = "of your conviction history",
+                failedQuestionDescription = "of your conviction history",
               )
             },
           agent = PRISON_CA_AGENT,
@@ -134,7 +134,7 @@ class EligibilityAndSuitabilityServiceTest {
                 hint = it.hint,
                 name = it.name,
                 answer = null,
-                documentFailureReason = "you are being considered for deportation",
+                failedQuestionDescription = "you are being considered for deportation",
               )
             },
           agent = null,
@@ -180,7 +180,7 @@ class EligibilityAndSuitabilityServiceTest {
               hint = it.hint,
               name = it.name,
               answer = true,
-              documentFailureReason = "you will be subject to sex offender registration on release",
+              failedQuestionDescription = "you will be subject to sex offender registration on release",
             )
           },
           agent = PRISON_CA_AGENT,
@@ -198,7 +198,7 @@ class EligibilityAndSuitabilityServiceTest {
               hint = it.hint,
               name = it.name,
               answer = null,
-              documentFailureReason = "you are serving an extended sentence",
+              failedQuestionDescription = "you are serving an extended sentence",
             )
           },
           agent = null,

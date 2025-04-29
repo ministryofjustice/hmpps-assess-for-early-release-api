@@ -76,7 +76,7 @@ class PdfService(
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
       -> {
-        data["documentFailureReason"] = caseView.documentFailureReason.firstOrNull()
+        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
       }
       DocumentSubjectType.OFFENDER_ADDRESS_UNSUITABLE_FORM,
       DocumentSubjectType.OFFENDER_POSTPONED_FORM,
@@ -93,7 +93,7 @@ class PdfService(
       DocumentSubjectType.OFFENDER_REFUSED_FORM,
       DocumentSubjectType.OFFENDER_NOT_SUITABLE_FORM,
       -> {
-        data["documentFailureReason"] = caseView.documentFailureReason.firstOrNull()
+        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
       }
     }
   }

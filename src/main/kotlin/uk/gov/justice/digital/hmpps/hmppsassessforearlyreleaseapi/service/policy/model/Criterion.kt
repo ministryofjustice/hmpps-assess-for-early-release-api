@@ -26,6 +26,6 @@ data class Criterion(
 data class Question(
   val text: String,
   val name: String,
-  val documentFailureReason: String,
+  val failedQuestionDescription: String,
   val hint: String? = null,
 )

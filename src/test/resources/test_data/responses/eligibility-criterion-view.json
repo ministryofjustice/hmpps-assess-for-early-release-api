@@ -57,7 +57,7 @@
         "hint": null,
         "name": "requiredToSignSexOffenderRegister",
         "answer": false,
-        "documentFailureReason": "you will be subject to sex offender registration on release"
+        "failedQuestionDescription": "you will be subject to sex offender registration on release"
       }
     ],
     "agent": {
@@ -78,7 +78,7 @@
         "hint": null,
         "name": "servingExtendedSentenceForViolentOrSexualOffence",
         "answer": false,
-        "documentFailureReason": "you are serving an extended sentence"
+        "failedQuestionDescription": "you are serving an extended sentence"
       }
     ],
     "agent": {

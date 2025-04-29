@@ -265,7 +265,7 @@ class AssessmentService(
           hint = it.hint,
           name = it.name,
           answer = eligibilityCheckResult.getAnswer(it.name),
-          documentFailureReason = it.documentFailureReason,
+          failedQuestionDescription = it.failedQuestionDescription,
         )
       },
       agent = eligibilityCheckResult?.agent?.toModel(),
@@ -287,7 +287,7 @@ class AssessmentService(
       questions = questions.map {
         Question(
           text = it.text,
-          documentFailureReason = it.documentFailureReason,
+          failedQuestionDescription = it.failedQuestionDescription,
           hint = it.hint,
           name = it.name,
           answer = eligibilityCheckResult.getAnswer(it.name),

@@ -179,7 +179,7 @@ object TestData {
   fun anEligibilityCheckDetails(n: Int) = EligibilityCriterionProgress(
     code = "code-$n",
     taskName = "task-$n",
-    questions = listOf(Question("question-$n", answer = true, documentFailureReason = "failure reason")),
+    questions = listOf(Question("question-$n", answer = true, failedQuestionDescription = "failure reason")),
     status = ELIGIBLE,
     agent = PRISON_CA_AGENT,
     lastUpdated = LocalDate.now(),
@@ -188,7 +188,7 @@ object TestData {
   fun anSuitabilityCheckDetails(n: Int) = SuitabilityCriterionProgress(
     code = "code-$n",
     taskName = "task-$n",
-    questions = listOf(Question("question-$n", answer = true, documentFailureReason = "failure reason")),
+    questions = listOf(Question("question-$n", answer = true, failedQuestionDescription = "failure reason")),
     status = SUITABLE,
     agent = PRISON_CA_AGENT,
     lastUpdated = LocalDate.now(),
