@@ -1,4 +1,4 @@
-package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
+package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.client.mangeUsers
 
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.http.HttpStatus
@@ -9,15 +9,15 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono
 
 @Service
-class PrisonApiClient(@Qualifier("oauthPrisonClient") val prisonApiWebClient: WebClient) {
+class ManagedUsersApiClient(@Qualifier("managedUsersApiWebClient") val managedUsersApiWebClient: WebClient) {
 
-  fun getUserDetails(username: String): PrisonApiUserDetail? {
-    val managedUserEmailResponse = prisonApiWebClient
+  fun getEmail(username: String): ManagedUserEmailResponse? {
+    val managedUserEmailResponse = managedUsersApiWebClient
       .get()
-      .uri("/api/users/$username")
+      .uri("/users/$username/email")
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
-      .bodyToMono(PrisonApiUserDetail::class.java)
+      .bodyToMono(ManagedUserEmailResponse::class.java)
       .onErrorResume {
         when {
           it is WebClientResponseException && it.statusCode == HttpStatus.NOT_FOUND -> {

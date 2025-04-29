@@ -28,6 +28,7 @@ class WebClientConfiguration(
   @Value("\${os.places.api.url}") private val osPlacesApiUrl: String,
   @Value("\${gotenberg.api.url}") private val gotenbergHost: String,
   @Value("\${hmpps.govuk.api.url}") private val govUkApiUrl: String,
+  @Value("\${hmpps.manageusers.api.url}") private val manageUsersApiUrl: String,
 ) {
   @Bean
   fun hmppsAuthHealthWebClient(builder: WebClient.Builder): WebClient = builder.healthWebClient(hmppsAuthBaseUri, healthTimeout)
@@ -46,112 +47,72 @@ class WebClientConfiguration(
 
   @Bean
   fun oauthPrisonerSearchClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
-
-    return WebClient.builder()
-      .baseUrl(prisonerSearchApiUrl)
-      .apply(oauth2Client.oauth2Configuration())
-      .exchangeStrategies(
-        ExchangeStrategies.builder()
-          .codecs { configurer ->
-            configurer.defaultCodecs()
-              .maxInMemorySize(-1)
-          }
-          .build(),
-      ).build()
+    val oauth2Client = getOAuthClient(authorizedClientManager)
+    return getWebClient(prisonerSearchApiUrl, oauth2Client)
   }
 
   @Bean
-  fun prisonRegisterClient(): WebClient = WebClient.builder()
-    .baseUrl(prisonRegisterApiUrl)
-    .exchangeStrategies(
-      ExchangeStrategies.builder()
-        .codecs { configurer ->
-          configurer.defaultCodecs()
-            .maxInMemorySize(-1)
-        }
-        .build(),
-    ).build()
-
-  @Bean
   fun oauthPrisonClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
-
-    return WebClient.builder()
-      .baseUrl(prisonApiUrl)
-      .apply(oauth2Client.oauth2Configuration())
-      .exchangeStrategies(
-        ExchangeStrategies.builder()
-          .codecs { configurer ->
-            configurer.defaultCodecs()
-              .maxInMemorySize(-1)
-          }
-          .build(),
-      ).build()
+    val oauth2Client = getOAuthClient(authorizedClientManager)
+    return getWebClient(prisonApiUrl, oauth2Client)
   }
 
   @Bean
   fun oauthDeliusApiClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
-
-    return WebClient.builder()
-      .baseUrl(deliusApiUrl)
-      .apply(oauth2Client.oauth2Configuration())
-      .exchangeStrategies(
-        ExchangeStrategies.builder()
-          .codecs { configurer ->
-            configurer.defaultCodecs()
-              .maxInMemorySize(-1)
-          }
-          .build(),
-      ).build()
+    val oauth2Client = getOAuthClient(authorizedClientManager)
+    return getWebClient(deliusApiUrl, oauth2Client)
   }
 
   @Bean
   fun oauthProbationSearchApiClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
-    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
-    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
-
-    return WebClient.builder()
-      .baseUrl(probationSearchApiUrl)
-      .apply(oauth2Client.oauth2Configuration())
-      .exchangeStrategies(
-        ExchangeStrategies.builder()
-          .codecs { configurer ->
-            configurer.defaultCodecs()
-              .maxInMemorySize(-1)
-          }
-          .build(),
-      ).build()
+    val oauth2Client = getOAuthClient(authorizedClientManager)
+    return getWebClient(probationSearchApiUrl, oauth2Client)
   }
 
   @Bean
-  fun osPlacesClient(): WebClient = WebClient.builder()
-    .baseUrl(osPlacesApiUrl)
-    .exchangeStrategies(
-      ExchangeStrategies.builder()
-        .codecs { configurer ->
-          configurer.defaultCodecs()
-            .maxInMemorySize(-1)
-        }
-        .build(),
-    ).build()
+  fun managedUsersApiWebClient(authorizedClientManager: OAuth2AuthorizedClientManager): WebClient {
+    val oauth2Client = getOAuthClient(authorizedClientManager)
+    return getWebClient(manageUsersApiUrl, oauth2Client)
+  }
 
   @Bean
-  fun gotenbergClient(): WebClient = WebClient.builder()
-    .baseUrl(gotenbergHost)
-    .exchangeStrategies(
-      ExchangeStrategies.builder()
-        .codecs { configurer ->
-          configurer.defaultCodecs()
-            .maxInMemorySize(-1)
-        }
-        .build(),
-    ).build()
+  fun osPlacesClient(): WebClient = getWebClient(osPlacesApiUrl)
+
+  @Bean
+  fun gotenbergClient(): WebClient = getWebClient(gotenbergHost)
+
+  @Bean
+  fun prisonRegisterClient(): WebClient = getWebClient(prisonRegisterApiUrl)
 
   @Bean
   fun govUkWebClient(): WebClient = WebClient.builder().baseUrl(govUkApiUrl).build()
+
+  private fun getOAuthClient(authorizedClientManager: OAuth2AuthorizedClientManager): ServletOAuth2AuthorizedClientExchangeFilterFunction {
+    val oauth2Client = ServletOAuth2AuthorizedClientExchangeFilterFunction(authorizedClientManager)
+    oauth2Client.setDefaultClientRegistrationId(HMPPS_AUTH)
+    return oauth2Client
+  }
+
+  private fun getWebClient(url: String, oauth2Client: ServletOAuth2AuthorizedClientExchangeFilterFunction): WebClient = WebClient.builder()
+    .baseUrl(url)
+    .apply(oauth2Client.oauth2Configuration())
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer ->
+          configurer.defaultCodecs()
+            .maxInMemorySize(-1)
+        }
+        .build(),
+    ).build()
+
+  private fun getWebClient(url: String): WebClient = WebClient.builder()
+    .baseUrl(url)
+    .exchangeStrategies(
+      ExchangeStrategies.builder()
+        .codecs { configurer ->
+          configurer.defaultCodecs()
+            .maxInMemorySize(-1)
+        }
+        .build(),
+    ).build()
 }

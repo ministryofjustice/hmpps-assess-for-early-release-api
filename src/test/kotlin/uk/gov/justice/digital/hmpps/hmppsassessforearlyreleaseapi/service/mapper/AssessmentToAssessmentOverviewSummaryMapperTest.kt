@@ -13,6 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anStatusChangedEvent
 import java.time.LocalDate
 
 class AssessmentToAssessmentOverviewSummaryMapperTest {
@@ -27,6 +28,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
       eligibilityProgress = Progress.allSuccessful(),
       suitabilityProgress = Progress.allSuccessful(),
     )
+    anAssessmentWithEligibilityProgress.assessmentEntity.lastUpdateByUserEvent = anStatusChangedEvent(anAssessmentWithEligibilityProgress.assessmentEntity)
     // When
     val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
@@ -41,6 +43,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
       eligibilityProgress = Progress.allFailed(),
       suitabilityProgress = Progress.allSuccessful(),
     )
+    anAssessmentWithEligibilityProgress.assessmentEntity.lastUpdateByUserEvent = anStatusChangedEvent(anAssessmentWithEligibilityProgress.assessmentEntity)
     // When
     val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
@@ -55,6 +58,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
       eligibilityProgress = Progress.allSuccessful(),
       suitabilityProgress = Progress.allFailed(),
     )
+    anAssessmentWithEligibilityProgress.assessmentEntity.lastUpdateByUserEvent = anStatusChangedEvent(anAssessmentWithEligibilityProgress.assessmentEntity)
     // When
     val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
@@ -69,6 +73,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
       eligibilityProgress = Progress.allFailed(),
       suitabilityProgress = Progress.allFailed(),
     )
+    anAssessmentWithEligibilityProgress.assessmentEntity.lastUpdateByUserEvent = anStatusChangedEvent(anAssessmentWithEligibilityProgress.assessmentEntity)
     // When
     val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
@@ -83,6 +88,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
       eligibilityProgress = Progress.none(),
       suitabilityProgress = Progress.none(),
     )
+    anAssessmentWithEligibilityProgress.assessmentEntity.lastUpdateByUserEvent = anStatusChangedEvent(anAssessmentWithEligibilityProgress.assessmentEntity)
     // When
     val result = toTest.map(anAssessmentWithEligibilityProgress, PRISON_NAME, aPrisonerSearchPrisoner())
     // Assert
@@ -120,5 +126,6 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     assertThat(assessmentOverviewSummary.mainOffense).isEqualTo("Robbery")
     assertThat(assessmentOverviewSummary.toDoEligibilityAndSuitabilityBy).isEqualTo(LocalDate.now().plusDays(DAYS_TO_ADD))
     assertThat(assessmentOverviewSummary.result).isEqualTo(result)
+    assertThat(assessmentOverviewSummary.lastUpdateBy).isEqualTo("prison user")
   }
 }
