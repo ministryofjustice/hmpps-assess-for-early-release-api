@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
@@ -9,6 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.AddressDetailsAnswers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -24,6 +28,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 private const val GET_RESIDENTIAL_CHECKS_VIEW_URL =
   "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/residential-checks"
@@ -35,6 +41,25 @@ private const val SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL =
 class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
   @Autowired
   private lateinit var residentialChecksTaskAnswerRepository: ResidentialChecksTaskAnswerRepository
+
+  private companion object {
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
+
+    @JvmStatic
+    @BeforeAll
+    fun startMocks() {
+      prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun stopMocks() {
+      prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
+    }
+  }
 
   @Nested
   inner class GetResidentialChecksView {
@@ -220,13 +245,18 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should save residential checks task answers`() {
-      webTestClient.post()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+      val result = webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(saveResidentialChecksTaskAnswersRequest)
         .exchange()
-        .expectStatus()
-        .isCreated
+
+      // Then
+      result.expectStatus().isCreated
 
       val answers = residentialChecksTaskAnswerRepository.findAll().first()
       assertThat(answers).isNotNull
@@ -238,6 +268,8 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
           mainOccupierConsentGiven = true,
         ),
       )
+
+      assertLastUpdatedByEvent(assessmentRepository.findAll().last())
     }
 
     @Sql(
@@ -267,13 +299,18 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
         "mainOccupierConsentGiven" to "false",
       )
       val newSaveAnswersRequest = saveResidentialChecksTaskAnswersRequest.copy(answers = newAnswers)
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
 
-      webTestClient.post()
+      // When
+      val result = webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(newSaveAnswersRequest)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isCreated
 
       answersEntities = residentialChecksTaskAnswerRepository.findAll()
@@ -284,7 +321,10 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
       assertThat(taskAnswers.toAnswersMap()["electricitySupply"]).isEqualTo(false)
 
       val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(answersEntities.first().addressCheckRequest.assessment.offender.prisonNumber)
-      assertThat(assessments.first().addressChecksComplete).isFalse()
+      val assessment = assessments.first()
+
+      assertThat(assessment.addressChecksComplete).isFalse()
+      assertLastUpdatedByEvent(assessment)
     }
 
     @Sql(
@@ -293,18 +333,26 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update addressChecksComplete flag`() {
-      webTestClient.post()
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+
+      // When
+
+      val result = webTestClient.post()
         .uri(SAVE_RESIDENTIAL_CHECKS_TASK_ANSWERS_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .headers(setAuthorisation(roles = roles))
         .bodyValue(saveResidentialChecksTaskAnswersRequest)
         .exchange()
-        .expectStatus()
+
+      // Then
+      result.expectStatus()
         .isCreated
 
       val answersEntities = residentialChecksTaskAnswerRepository.findAll()
-
       val assessments = assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(answersEntities.first().addressCheckRequest.assessment.offender.prisonNumber)
-      assertThat(assessments.first().addressChecksComplete).isTrue()
+      val assessment = assessments.first()
+      assertThat(assessment.addressChecksComplete).isTrue()
+      assertLastUpdatedByEvent(assessment)
     }
 
     @Sql(
@@ -341,26 +389,19 @@ class ResidentialChecksResourceIntTest : SqsIntegrationTestBase() {
     }
   }
 
+  private fun assertLastUpdatedByEvent(assessment: Assessment) {
+    assertThat(assessment.lastUpdateByUserEvent).isNotNull
+    assessment.lastUpdateByUserEvent?.let {
+      with(it) {
+        assertThat(eventType).isEqualTo(AssessmentEventType.STATUS_CHANGE)
+        assertThat(eventTime).isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(agent.role).isEqualTo(UserRole.PROBATION_COM)
+        assertThat(agent.username).isEqualTo("probationUser")
+      }
+    }
+  }
+
   private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
     StandardCharsets.UTF_8,
   ).readText()
-
-  private companion object {
-    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
-
-    @JvmStatic
-    @BeforeAll
-    fun startMocks() {
-      prisonRegisterMockServer.start()
-      prisonerSearchApiMockServer.start()
-    }
-
-    @JvmStatic
-    @AfterAll
-    fun stopMocks() {
-      prisonRegisterMockServer.stop()
-      prisonerSearchApiMockServer.stop()
-    }
-  }
 }
