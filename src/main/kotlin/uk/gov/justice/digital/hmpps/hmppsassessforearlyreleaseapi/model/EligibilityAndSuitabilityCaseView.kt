@@ -30,8 +30,6 @@ data class EligibilityAndSuitabilityCaseView(
   val failureType: FailureType?,
   @Schema(description = "TaskName why someone is ineligible or unsuitable", example = "ROTL failure to return")
   val failedCheckReasons: List<String>,
-  @Schema(description = "Document failed reasons why someone is ineligible or unsuitable", example = "you are serving an extended sentence")
-  val failedQuestionDescription: List<String>,
 )
 
 @Schema(
