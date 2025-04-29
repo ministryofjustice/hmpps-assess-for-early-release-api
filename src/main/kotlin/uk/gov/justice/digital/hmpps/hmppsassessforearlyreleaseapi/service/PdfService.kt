@@ -17,8 +17,8 @@ class PdfService(
   private val thymeleafEngine: TemplateEngine,
   private val gotenbergApiClient: GotenbergApiClient,
   @Value("\${assessments.url}") private val assessmentsUrl: String,
-  private val assessmentService: AssessmentService,
   private val workingDaysService: WorkingDaysService,
+  private val eligibilityAndSuitabilityService: EligibilityAndSuitabilityService,
 ) {
 
   companion object {
@@ -59,7 +59,8 @@ class PdfService(
     prisonNumber: String,
     data: HashMap<String, Any?>,
   ) {
-    val currentAssessment = assessmentService.getCurrentAssessmentSummary(prisonNumber)
+    val caseView = eligibilityAndSuitabilityService.getCaseView(prisonNumber)
+    val currentAssessment = caseView.assessmentSummary
     data["currentAssessment"] = currentAssessment
     data["fullName"] = "${currentAssessment.forename} ${currentAssessment.surname}".convertToTitleCase()
 
@@ -74,6 +75,9 @@ class PdfService(
       DocumentSubjectType.OFFENDER_ADDRESS_CHECKS_FORM,
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
+      -> {
+        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
+      }
       DocumentSubjectType.OFFENDER_ADDRESS_UNSUITABLE_FORM,
       DocumentSubjectType.OFFENDER_POSTPONED_FORM,
       -> {
@@ -89,7 +93,7 @@ class PdfService(
       DocumentSubjectType.OFFENDER_REFUSED_FORM,
       DocumentSubjectType.OFFENDER_NOT_SUITABLE_FORM,
       -> {
-        // nothing yet, add any form specific data here
+        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
       }
     }
   }

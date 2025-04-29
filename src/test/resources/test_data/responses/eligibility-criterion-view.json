@@ -56,7 +56,8 @@
         "text": "Is this person required to sign the sex offenders' register?",
         "hint": null,
         "name": "requiredToSignSexOffenderRegister",
-        "answer": false
+        "answer": false,
+        "failedQuestionDescription": "you will be subject to sex offender registration on release"
       }
     ],
     "agent": {
@@ -76,7 +77,8 @@
         "text": "Is this person serving an extended sentence for violent or sexual offences?",
         "hint": null,
         "name": "servingExtendedSentenceForViolentOrSexualOffence",
-        "answer": false
+        "answer": false,
+        "failedQuestionDescription": "you are serving an extended sentence"
       }
     ],
     "agent": {

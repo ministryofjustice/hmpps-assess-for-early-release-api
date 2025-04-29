@@ -28,8 +28,10 @@ data class EligibilityAndSuitabilityCaseView(
   val suitability: List<SuitabilityCriterionProgress>,
   @Schema(description = "The type of the failure", example = "INELIGIBLE")
   val failureType: FailureType?,
-  @Schema(description = "Reasons why someone is ineligible")
+  @Schema(description = "TaskName why someone is ineligible or unsuitable", example = "ROTL failure to return")
   val failedCheckReasons: List<String>,
+  @Schema(description = "Document failed reasons why someone is ineligible or unsuitable", example = "you are serving an extended sentence")
+  val failedQuestionDescription: List<String>,
 )
 
 @Schema(
@@ -117,6 +119,8 @@ data class SuitabilityCriterionProgress(
 data class Question(
   @Schema(description = "The question that is posed to the user", example = "a question...")
   val text: String,
+  @Schema(description = "The reason for failure", example = "a reason")
+  val failedQuestionDescription: String,
   @Schema(description = "The hint html associated with this question", example = "<p>Some hint text</p>")
   val hint: String? = null,
   @Schema(description = "The name that the data will be stored under for this check", example = "question1")
