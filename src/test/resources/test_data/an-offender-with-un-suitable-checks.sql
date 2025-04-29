@@ -27,57 +27,6 @@ VALUES(1, 'PLANNING_ACTIONS_CONFIRMATION_NEEDED_BY_PRACTITIONER'),
       (1, 'WOULD_NOT_FOLLOW_REQUIREMENTS_OF_CONFISCATION_ORDER'),
       (1, 'PENDING_APPLICATION_WITH_UNDULY_LENIENT_SENTENCE_SCH');
 
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES(1, 'sex-offender-register', '1.0', true, 'ELIGIBILITY', '{"requiredToSignSexOffenderRegister": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'extended-sentence-for-violent-or-sexual-offences', '1.0', true,'ELIGIBILITY','{"servingExtendedSentenceForViolentOrSexualOffence": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'rotl-failure-to-return', '1.0', true, 'ELIGIBILITY', '{"rotlFailedToReturn": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'community-order-curfew-breach', '1.0', true, 'ELIGIBILITY','{"communityOrderCurfewBreach": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'recalled-for-breaching-hdc-curfew', '1.0', true, 'ELIGIBILITY', '{"recalledForBreachingHdcCurfew": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'deportation-orders', '1.0', true, 'ELIGIBILITY','{"servedADecisionToDeport": false, "recommendedForDeportation": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'recalled-from-early-release-on-compassionate-grounds', '1.0', true,'ELIGIBILITY','{"recalledFromEarlyReleaseOnCompassionateGrounds": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, username, full_name, role, on_behalf_of, created_timestamp,
---  last_updated_timestamp, question_answers)
--- VALUES (1, 'terrorism', '1.0', true, 'ELIGIBILITY', '{"terroristSentenceOrOffending": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'two-thirds-release', '1.0', true, 'ELIGIBILITY','{"subjectToTwoThirdsReleaseCriteria": false, "retrospectiveTwoThirdsReleaseCriteria": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'section-244ZB-notice', '1.0', true, 'ELIGIBILITY', '{"served244ZBNoticeInForce": false}'::jsonb);
---
--- insert into eligibility_check_result
--- (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
--- VALUES (1, 'section-20b-release', '1.0', true, 'ELIGIBILITY', '{"schedule20BRelease": false}'::jsonb);
---
---
---
---
-
-
-
 insert into eligibility_check_result
 (assessment_id, criterion_code, criterion_version, criterion_met, criterion_type, question_answers)
 VALUES(1, 'sex-offender-register', '1.0', true, 'ELIGIBILITY', '{"requiredToSignSexOffenderRegister": false}'::jsonb);
