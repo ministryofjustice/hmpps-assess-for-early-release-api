@@ -8,6 +8,8 @@ import org.thymeleaf.TemplateEngine
 import org.thymeleaf.context.Context
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.PostponeCaseReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.enum.DocumentSubjectType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.gotenberg.GotenbergApiClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.workingdays.WorkingDaysService
 import java.time.LocalDate
@@ -76,7 +78,7 @@ class PdfService(
       DocumentSubjectType.OFFENDER_OPT_OUT_FORM,
       DocumentSubjectType.OFFENDER_NOT_ELIGIBLE_FORM,
       -> {
-        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
+        data["failedQuestionDescription"] = caseView.eligibility.getIneligibleReasons().firstOrNull()
       }
       DocumentSubjectType.OFFENDER_ADDRESS_UNSUITABLE_FORM,
       DocumentSubjectType.OFFENDER_POSTPONED_FORM,
@@ -93,7 +95,7 @@ class PdfService(
       DocumentSubjectType.OFFENDER_REFUSED_FORM,
       DocumentSubjectType.OFFENDER_NOT_SUITABLE_FORM,
       -> {
-        data["failedQuestionDescription"] = caseView.failedQuestionDescription.firstOrNull()
+        data["failedQuestionDescription"] = caseView.suitability.getUnsuitableReasons().firstOrNull()
       }
     }
   }
