@@ -424,6 +424,5 @@
     }
   ],
   "failureType": null,
-  "failedCheckReasons": [],
-  "failedQuestionDescription": []
+  "failedCheckReasons": []
 }
