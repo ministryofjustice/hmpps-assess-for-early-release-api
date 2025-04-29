@@ -1,12 +1,16 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
@@ -27,6 +31,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 private const val GET_ELIGIBILITY_AND_SUITABILITY_VIEW_URL =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability"
@@ -41,6 +47,25 @@ private const val PERFORM_CRITERIA_CHECK =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability-check"
 
 class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase() {
+
+  private companion object {
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
+
+    @JvmStatic
+    @BeforeAll
+    fun startMocks() {
+      prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun stopMocks() {
+      prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
+    }
+  }
 
   @Nested
   inner class GetEligibilityAndSuitabilityCaseView {
@@ -370,6 +395,8 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
+
+        assertLastUpdatedByEvent(testAssessmentRepository.findAll().first())
       }
     }
 
@@ -434,6 +461,19 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         assertThat(updatedCriteria).isNotNull()
         assertThat(updatedCriteria!!.status).isEqualTo(ELIGIBLE)
         assertThat(updatedCriteria.questions.first().answer).isEqualTo(false)
+        assertLastUpdatedByEvent(testAssessmentRepository.findAll().first())
+      }
+    }
+  }
+
+  private fun assertLastUpdatedByEvent(assessment: Assessment) {
+    assertThat(assessment.lastUpdateByUserEvent).isNotNull
+    assessment.lastUpdateByUserEvent?.let {
+      with(it) {
+        assertThat(eventType).isEqualTo(AssessmentEventType.STATUS_CHANGE)
+        assertThat(eventTime).isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.SECONDS))
+        assertThat(agent.role).isEqualTo(UserRole.PRISON_CA)
+        assertThat(agent.username).isEqualTo("prisonUser")
       }
     }
   }
@@ -441,23 +481,4 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
   private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
     StandardCharsets.UTF_8,
   ).readText()
-
-  private companion object {
-    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
-
-    @JvmStatic
-    @BeforeAll
-    fun startMocks() {
-      prisonRegisterMockServer.start()
-      prisonerSearchApiMockServer.start()
-    }
-
-    @JvmStatic
-    @AfterAll
-    fun stopMocks() {
-      prisonRegisterMockServer.stop()
-      prisonerSearchApiMockServer.stop()
-    }
-  }
 }
