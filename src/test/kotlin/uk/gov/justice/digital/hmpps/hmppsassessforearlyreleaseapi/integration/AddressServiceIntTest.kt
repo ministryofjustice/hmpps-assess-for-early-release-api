@@ -60,24 +60,32 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   }
 
   @Test
-  fun `should get addresses by post code`() {
+  fun `should find addresses by search string`() {
+    // Given
     val postcode = "AG121RW"
-    osPlacesMockServer.stubGetAddressesForPostcode(postcode)
+    osPlacesMockServer.stubSearchForAddresses(postcode)
 
-    val addresses = addressService.getAddressesForPostcode(postcode)
+    // Then
+    val addresses = addressService.searchForAddresses(postcode)
+
+    // When
     assertThat(addresses).size().isEqualTo(3)
     assertThat(addresses[0].uprn).isEqualTo("100120991537")
-    assertThat(addresses[1].postcode).isEqualTo(postcode)
+    assertThat(addresses[1].postcode).isEqualTo("SA420UQ")
     assertThat(addresses[2].xcoordinate).isEqualTo(401003.0)
     assertThat(addresses[2].addressLastUpdated).isEqualTo(LocalDate.of(2021, 5, 1))
   }
 
   @Test
-  fun `should return empty list of places for invalid post code`() {
+  fun `should return empty list of places for invalid search item`() {
+    // Given
     val postcode = "INVALID"
-    osPlacesMockServer.stubGetAddressesForPostcodeBadRequest(postcode)
+    osPlacesMockServer.stubSearchForAddressesBadRequest(postcode)
 
-    val addresses = addressService.getAddressesForPostcode(postcode)
+    // When
+    val addresses = addressService.searchForAddresses(postcode)
+
+    // Then
     assertThat(addresses).isEmpty()
   }
 
@@ -86,10 +94,14 @@ class AddressServiceTest : SqsIntegrationTestBase() {
   )
   @Test
   fun `should get address from OS places API when address doesn't exist in database`() {
+    // Given
     val uprn = "200010019924"
     osPlacesMockServer.stubGetAddressByUprn(uprn)
 
+    // When
     val address = addressService.getAddressForUprn(uprn)
+
+    // Then
     assertThat(address.postcode).isEqualTo("SO16 0AS")
     assertThat(address.uprn).isEqualTo(uprn)
     assertThat(address.firstLine).isEqualTo("ORDNANCE SURVEY, 4 ADANAC DRIVE")
