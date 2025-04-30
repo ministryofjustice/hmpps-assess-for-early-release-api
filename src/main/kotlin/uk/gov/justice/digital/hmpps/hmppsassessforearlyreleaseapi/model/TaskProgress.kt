@@ -1,8 +1,8 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model
 
 import io.swagger.v3.oas.annotations.media.Schema
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus
 
 @Schema(description = "The progress on a task")
 data class TaskProgress(

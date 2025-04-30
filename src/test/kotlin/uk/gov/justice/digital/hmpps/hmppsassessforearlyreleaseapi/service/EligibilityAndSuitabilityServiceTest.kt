@@ -19,7 +19,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
@@ -265,11 +264,7 @@ class EligibilityAndSuitabilityServiceTest {
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
 
-    assertThat(assessmentSummary.tasks).isEqualTo(
-      expectedAssessment.status.tasks()
-        .mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },
-    )
-
+    assertThat(assessmentSummary.tasks).isEqualTo(expectedAssessment.tasks())
     assertThat(assessmentSummary.cellLocation).isEqualTo("A-1-002")
     assertThat(assessmentSummary.location).isEqualTo("Birmingham (HMP)")
     assertThat(assessmentSummary.mainOffense).isEqualTo("Robbery")

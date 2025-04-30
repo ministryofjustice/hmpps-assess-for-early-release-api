@@ -36,10 +36,14 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.Companion.toState
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.SideEffect
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.IN_PROGRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.assessmentStateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import java.time.LocalDate
@@ -114,9 +118,9 @@ data class Assessment(
   @JoinTable(
     name = "assessment_to_last_update_event",
     joinColumns =
-    [ JoinColumn(name = "assessment_id", referencedColumnName = "id") ],
+    [JoinColumn(name = "assessment_id", referencedColumnName = "id")],
     inverseJoinColumns =
-    [ JoinColumn(name = "event_id", referencedColumnName = "id") ],
+    [JoinColumn(name = "event_id", referencedColumnName = "id")],
   )
   var lastUpdateByUserEvent: AssessmentEvent? = null,
 
@@ -250,16 +254,24 @@ data class Assessment(
 
   fun getEvents(): List<AssessmentEvent> = this.assessmentEvents
 
+  fun tasks(): Map<UserRole, List<TaskProgress>> = Task.TASKS_BY_ROLE.mapValues { (_, tasks) ->
+    tasks.mapNotNull {
+      it.taskStatus(this)?.let { taskStatus ->
+        TaskProgress(it, taskStatus)
+      }
+    }
+  }
+
   fun currentTask(): Task? {
-    val tasksForAssessmentStatus = status.tasks().values.flatten()
+    val tasksForAssessmentStatus = Task.TASKS_BY_ROLE.values.flatten()
     val availableTasks = tasksForAssessmentStatus.filter {
-      val taskStatus = it.status(this)
-      taskStatus == TaskStatus.READY_TO_START || taskStatus == TaskStatus.IN_PROGRESS
+      val taskStatus = it.taskStatus(this)
+      taskStatus == READY_TO_START || taskStatus == IN_PROGRESS
     }
 
-    val nextTask = availableTasks.firstOrNull { it.status(this) == TaskStatus.READY_TO_START }
-      ?: availableTasks.firstOrNull { it.status(this) == TaskStatus.IN_PROGRESS }
-    return nextTask?.task
+    val nextTask = availableTasks.firstOrNull { it.taskStatus(this) == READY_TO_START }
+      ?: availableTasks.firstOrNull { it.taskStatus(this) == IN_PROGRESS }
+    return nextTask
   }
 
   companion object {
