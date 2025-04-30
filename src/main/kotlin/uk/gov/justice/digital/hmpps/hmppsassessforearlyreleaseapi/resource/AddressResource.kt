@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.security.access.prepost.PreAuthorize
@@ -19,7 +20,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
@@ -38,18 +38,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.Addres
 @RestController
 @RequestMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
 class AddressResource(private val addressService: AddressService, private val agentHolder: AgentHolder) {
-  @GetMapping("/addresses")
+
+  @GetMapping("/addresses/search/{searchQuery}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
-    summary = "Returns addresses that match the postcode parameter",
-    description = "Returns addresses that match the postcode parameter",
+    summary = "Searches for addresses that match the given search text",
+    description = "Searches for addresses that match the given search text",
     security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
   )
   @ApiResponses(
     value = [
       ApiResponse(
         responseCode = "200",
-        description = "Returns addresses matching the supplied postcode",
+        description = "Returns addresses matching the given search text",
         content = [
           Content(
             mediaType = "application/json",
@@ -79,7 +80,7 @@ class AddressResource(private val addressService: AddressService, private val ag
       ),
     ],
   )
-  fun getAddressesForPostcode(@RequestParam(name = "postcode") postcode: String) = addressService.getAddressesForPostcode(postcode)
+  fun searchForAddresses(@Size(max = 100, min = 5) @PathVariable(name = "searchQuery") searchQuery: String): List<AddressSummary> = addressService.searchForAddresses(searchQuery)
 
   @GetMapping("/address/uprn/{uprn}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -222,7 +223,10 @@ class AddressResource(private val addressService: AddressService, private val ag
       ),
     ],
   )
-  fun getStandardAddressCheckRequest(@PathVariable(name = "prisonNumber") prisonNumber: String, @PathVariable(name = "requestId") requestId: Long) = addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
+  fun getStandardAddressCheckRequest(
+    @PathVariable(name = "prisonNumber") prisonNumber: String,
+    @PathVariable(name = "requestId") requestId: Long,
+  ) = addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
 
   @PostMapping("/offender/{prisonNumber}/current-assessment/cas-check-request")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
