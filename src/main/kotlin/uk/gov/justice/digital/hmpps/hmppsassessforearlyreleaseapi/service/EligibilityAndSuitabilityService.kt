@@ -93,6 +93,7 @@ class EligibilityAndSuitabilityService(
         else -> error("Should not be possible to have a status of $eligibilityStatus")
       }
 
+      assessmentEntity.eligibilityChecksStatus = eligibilityStatus
       assessmentService.transitionAssessment(assessmentEntity, event, answer.agent)
       return eligibilityAndSuitabilityCaseView(currentAssessment)
     }
@@ -115,7 +116,7 @@ class EligibilityAndSuitabilityService(
 
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
-      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
+      overallStatus = currentAssessment.assessmentEntity.eligibilityChecksStatus,
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
       suitability = suitability,

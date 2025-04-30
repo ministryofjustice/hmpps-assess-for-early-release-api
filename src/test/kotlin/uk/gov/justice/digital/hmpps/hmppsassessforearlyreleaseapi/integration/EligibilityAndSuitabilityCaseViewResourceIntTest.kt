@@ -1,24 +1,24 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
+import org.assertj.core.api.AbstractComparableAssert
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.within
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.json.JsonCompareMode
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
@@ -31,8 +31,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.typeReference
 import java.nio.charset.StandardCharsets
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 private const val GET_ELIGIBILITY_AND_SUITABILITY_VIEW_URL =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability"
@@ -374,6 +372,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(SUITABLE)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(IN_PROGRESS)
       }
 
       webTestClient.put()
@@ -395,8 +394,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
-
-        assertLastUpdatedByEvent(testAssessmentRepository.findAll().first())
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(INELIGIBLE)
       }
     }
 
@@ -426,13 +424,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         ),
       )
 
-      val payload = CriterionCheck(
-        code = "recalled-for-breaching-hdc-curfew",
-        type = CriteriaType.ELIGIBILITY,
-        answers = mapOf("recalledForBreachingHdcCurfew" to false),
-        agent = PRISON_CA_AGENT,
-      )
-
       run {
         val criterionView = webTestClient.get()
           .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("recalled-for-breaching-hdc-curfew"))
@@ -444,9 +435,17 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(NOT_STARTED)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(null)
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(NOT_STARTED)
       }
 
       run {
+        val payload = CriterionCheck(
+          code = "recalled-for-breaching-hdc-curfew",
+          type = CriteriaType.ELIGIBILITY,
+          answers = mapOf("recalledForBreachingHdcCurfew" to false),
+          agent = PRISON_CA_AGENT,
+        )
+
         val eligibilityAndSuitabilityView = webTestClient.put()
           .uri(PERFORM_CRITERIA_CHECK)
           .bodyValue(payload)
@@ -461,20 +460,15 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         assertThat(updatedCriteria).isNotNull()
         assertThat(updatedCriteria!!.status).isEqualTo(ELIGIBLE)
         assertThat(updatedCriteria.questions.first().answer).isEqualTo(false)
-        assertLastUpdatedByEvent(testAssessmentRepository.findAll().first())
+        assertOverallEligibilityStatus(eligibilityAndSuitabilityView.assessmentSummary).isEqualTo(IN_PROGRESS)
       }
     }
-  }
 
-  private fun assertLastUpdatedByEvent(assessment: Assessment) {
-    assertThat(assessment.lastUpdateByUserEvent).isNotNull
-    assessment.lastUpdateByUserEvent?.let {
-      with(it) {
-        assertThat(eventType).isEqualTo(AssessmentEventType.STATUS_CHANGE)
-        assertThat(eventTime).isCloseTo(LocalDateTime.now(), within(1, ChronoUnit.SECONDS))
-        assertThat(agent.role).isEqualTo(UserRole.PRISON_CA)
-        assertThat(agent.username).isEqualTo("prisonUser")
-      }
+    private fun assertOverallEligibilityStatus(summary: AssessmentSummary): AbstractComparableAssert<*, EligibilityStatus> {
+      val assessment =
+        assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(summary.prisonNumber)
+          .first()
+      return assertThat(assessment.eligibilityChecksStatus)
     }
   }
 
