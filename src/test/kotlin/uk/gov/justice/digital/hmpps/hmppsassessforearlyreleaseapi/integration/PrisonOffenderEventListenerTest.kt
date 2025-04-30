@@ -77,7 +77,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
-    val assessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+    val assessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
     val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment.id)
     assertThat(events).hasSize(1)
     val event = events.first() as GenericChangedEvent
