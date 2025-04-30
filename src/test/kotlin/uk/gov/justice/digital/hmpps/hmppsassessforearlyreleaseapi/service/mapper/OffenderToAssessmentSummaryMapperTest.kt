@@ -9,7 +9,6 @@ import org.mockito.kotlin.whenever
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
@@ -79,9 +78,7 @@ class OffenderToAssessmentSummaryMapperTest {
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
 
-    assertThat(assessmentSummary.tasks).isEqualTo(
-      expectedAssessment.status.tasks().mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },
-    )
+    assertThat(assessmentSummary.tasks).isEqualTo(expectedAssessment.tasks())
 
     assertThat(assessmentSummary.cellLocation).isEqualTo("A-1-002")
     assertThat(assessmentSummary.location).isEqualTo("Birmingham (HMP)")

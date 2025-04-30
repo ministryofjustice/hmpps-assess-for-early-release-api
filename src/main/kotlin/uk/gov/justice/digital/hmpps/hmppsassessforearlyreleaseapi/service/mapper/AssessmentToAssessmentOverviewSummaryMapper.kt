@@ -9,7 +9,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
@@ -45,9 +44,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       optOutReasonOther = currentAssessment.optOutReasonOther,
       cellLocation = prisonerSearchResults.cellLocation,
       mainOffense = prisonerSearchResults.mostSeriousOffence,
-      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
-      },
+      tasks = currentAssessment.tasks(),
       toDoEligibilityAndSuitabilityBy = getToDoByDate(offender),
       result = determineResult(eligibilityStatus, suitabilityStatus),
       hasNonDisclosableInformation = currentAssessment.hasNonDisclosableInformation,

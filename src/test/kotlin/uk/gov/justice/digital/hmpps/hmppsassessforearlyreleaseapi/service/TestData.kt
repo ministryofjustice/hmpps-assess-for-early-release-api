@@ -7,15 +7,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Criteri
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.CriterionType.SUITABILITY
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.EligibilityCheckResult
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ASSESS_ELIGIBILITY
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_14_DAY_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.COMPLETE_2_DAY_CHECKS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.PRINT_LICENCE
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.LOCKED
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
@@ -40,9 +33,18 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residen
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.staff.CommunityOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.NOT_STARTED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.ASSESS_ELIGIBILITY
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.COMPLETE_14_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.COMPLETE_2_DAY_CHECKS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.ENTER_CURFEW_ADDRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.PRINT_LICENCE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.LOCKED
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.READY_TO_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionProgress
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.PostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
@@ -81,7 +83,8 @@ object TestData {
   const val ADDRESS_REQUEST_ID = 1L
   const val RESIDENTIAL_CHECK_TASK_CODE = "assess-this-persons-risk"
   val PRISON_CA_AGENT = AgentDto("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE")
-  val PROBATION_COM_AGENT = AgentDto("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
+  val PROBATION_COM_AGENT =
+    AgentDto("probationUser", fullName = "probation user", role = PROBATION_COM, onBehalfOf = "ABC123")
   val criterion = POLICY_1_0.eligibilityCriteria[0]
   private val question = criterion.questions.first()
   val answers = mapOf(question.name to false)
@@ -119,7 +122,14 @@ object TestData {
       hdced = hdced,
       sentenceStartDate = sentenceStartDate,
     )
-    offender.assessments.add(anAssessment(offender))
+    offender.assessments.add(
+      anAssessment(
+        offender,
+        status = NOT_STARTED,
+        BOOKING_ID,
+        eligibilityStatus = EligibilityStatus.NOT_STARTED,
+      ),
+    )
     return offender
   }
 
@@ -130,11 +140,17 @@ object TestData {
     agent = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE"),
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(
+  fun anAssessment(
+    offender: Offender,
+    status: AssessmentStatus = NOT_STARTED,
+    bookingId: Long = BOOKING_ID,
+    eligibilityStatus: EligibilityStatus = ELIGIBLE,
+  ): Assessment = Assessment(
     offender = offender,
     status = status,
     bookingId = bookingId,
     policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+    eligibilityChecksStatus = eligibilityStatus,
   )
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(
@@ -173,6 +189,8 @@ object TestData {
         TaskProgress(name = COMPLETE_2_DAY_CHECKS, progress = LOCKED),
         TaskProgress(name = PRINT_LICENCE, progress = LOCKED),
       ),
+      PRISON_DM to emptyList(),
+      PROBATION_COM to emptyList(),
     ),
   )
 
@@ -369,7 +387,14 @@ object TestData {
     suitabilityDecisionTaskAnswersCriterionMet = true,
   )
 
-  private fun aStandardAddressCheckRequest(addressDetailsTaskAnswersCriterionMet: Boolean, assessPersonsRiskTaskAnswersCriterionMet: Boolean, childrenServicesChecksTaskAnswersCriterionMet: Boolean, policeChecksTaskAnswersCriterionMet: Boolean, riskManagementDecisionTaskAnswersCriterionMet: Boolean, suitabilityDecisionTaskAnswersCriterionMet: Boolean): CurfewAddressCheckRequest {
+  private fun aStandardAddressCheckRequest(
+    addressDetailsTaskAnswersCriterionMet: Boolean,
+    assessPersonsRiskTaskAnswersCriterionMet: Boolean,
+    childrenServicesChecksTaskAnswersCriterionMet: Boolean,
+    policeChecksTaskAnswersCriterionMet: Boolean,
+    riskManagementDecisionTaskAnswersCriterionMet: Boolean,
+    suitabilityDecisionTaskAnswersCriterionMet: Boolean,
+  ): CurfewAddressCheckRequest {
     val standardAddressCheckRequest = StandardAddressCheckRequest(
       dateRequested = LocalDateTime.of(2023, 6, 16, 11, 28),
       preferencePriority = AddressPreferencePriority.FIRST,
@@ -461,7 +486,10 @@ object TestData {
     moreInformation = "information",
   )
 
-  fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean, answers: RiskManagementDecisionAnswers = aRiskManagementDecisionAnswers()): RiskManagementDecisionTaskAnswers = RiskManagementDecisionTaskAnswers(
+  fun aRiskManagementDecisionTaskAnswers(
+    criterionMet: Boolean,
+    answers: RiskManagementDecisionAnswers = aRiskManagementDecisionAnswers(),
+  ): RiskManagementDecisionTaskAnswers = RiskManagementDecisionTaskAnswers(
     id = 1,
     addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete(),
     criterionMet = criterionMet,

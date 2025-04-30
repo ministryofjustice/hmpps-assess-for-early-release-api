@@ -1,6 +1,6 @@
 {
   "assessmentSummary": {
-    "bookingId":10,
+    "bookingId": 10,
     "forename": "FIRST-1",
     "surname": "LAST-1",
     "dateOfBirth": "1978-03-20",
@@ -16,7 +16,7 @@
       "PRISON_CA": [
         {
           "name": "ASSESS_ELIGIBILITY",
-          "progress": "READY_TO_START"
+          "progress": "IN_PROGRESS"
         },
         {
           "name": "ENTER_CURFEW_ADDRESS",
@@ -38,14 +38,16 @@
           "name": "PRINT_LICENCE",
           "progress": "LOCKED"
         }
-      ]
+      ],
+      "PROBATION_COM": [],
+      "PRISON_DM": []
     },
     "optOutReasonType": null,
     "optOutReasonOther": null,
     "postponementReasons": [],
     "cellLocation": "A-1-002",
     "mainOffense": "Robbery",
-    "lastUpdateBy" : null
+    "lastUpdateBy": null
   },
   "overallStatus": "IN_PROGRESS",
   "eligibilityStatus": "ELIGIBLE",
@@ -57,10 +59,10 @@
       "questions": [
         {
           "text": "Is this person required to sign the sex offenders' register?",
+          "failedQuestionDescription": "you will be subject to sex offender registration on release",
           "hint": null,
           "name": "requiredToSignSexOffenderRegister",
-          "answer": false,
-          "failedQuestionDescription": "you will be subject to sex offender registration on release"
+          "answer": false
         }
       ],
       "agent": {
@@ -78,10 +80,10 @@
       "questions": [
         {
           "text": "Is this person serving an extended sentence for violent or sexual offences?",
+          "failedQuestionDescription": "you are serving an extended sentence",
           "hint": null,
           "name": "servingExtendedSentenceForViolentOrSexualOffence",
-          "answer": false,
-          "failedQuestionDescription": "you are serving an extended sentence"
+          "answer": false
         }
       ],
       "agent": {
@@ -99,10 +101,10 @@
       "questions": [
         {
           "text": "Is this person serving a sentence for ROTL failure to return?",
+          "failedQuestionDescription": "you did not return from release on temporary licence (ROTL).",
           "hint": null,
           "name": "rotlFailedToReturn",
-          "answer": false,
-          "failedQuestionDescription": "you did not return from release on temporary licence (ROTL)."
+          "answer": false
         }
       ],
       "agent": {
@@ -120,10 +122,10 @@
       "questions": [
         {
           "text": "Is this person serving a sentence for breaching a community order curfew?",
+          "failedQuestionDescription": "you breached your community order curfew",
           "hint": null,
           "name": "communityOrderCurfewBreach",
-          "answer": false,
-          "failedQuestionDescription": "you breached your community order curfew"
+          "answer": false
         }
       ],
       "agent": {
@@ -141,10 +143,10 @@
       "questions": [
         {
           "text": "Has this person been recalled for breaching their HDC curfew within 2 years of their current sentence date",
+          "failedQuestionDescription": "you previously broke home detention curfew conditions and were recalled to prison",
           "hint": null,
           "name": "recalledForBreachingHdcCurfew",
-          "answer": false,
-          "failedQuestionDescription": "you previously broke home detention curfew conditions and were recalled to prison"
+          "answer": false
         }
       ],
       "agent": {
@@ -162,17 +164,17 @@
       "questions": [
         {
           "text": "Is this person a foreign national who has been recommended for deportation?",
+          "failedQuestionDescription": "the court recommended you should be deported from the UK",
           "hint": null,
           "name": "recommendedForDeportation",
-          "answer": false,
-          "failedQuestionDescription": "the court recommended you should be deported from the UK"
+          "answer": false
         },
         {
           "text": "Is this person a foreign national who is liable to deportation and been served with a decision to deport?",
+          "failedQuestionDescription": "the Home Office recommended you should be deported from the UK",
           "hint": null,
           "name": "servedADecisionToDeport",
-          "answer": false,
-          "failedQuestionDescription": "the Home Office recommended you should be deported from the UK"
+          "answer": false
         }
       ],
       "agent": {
@@ -190,10 +192,10 @@
       "questions": [
         {
           "text": "Is this person currently serving a recall from early release on compassionate grounds?",
+          "failedQuestionDescription": "you were recalled from early release on compassionate grounds",
           "hint": null,
           "name": "recalledFromEarlyReleaseOnCompassionateGrounds",
-          "answer": false,
-          "failedQuestionDescription": "you were recalled from early release on compassionate grounds"
+          "answer": false
         }
       ],
       "agent": {
@@ -211,10 +213,10 @@
       "questions": [
         {
           "text": "Is this person currently serving a sentence for terrorist or terrorist-connected offending?",
+          "failedQuestionDescription": "you are serving a sentence for a specified terrorist or terrorist connected offence",
           "hint": null,
           "name": "terroristSentenceOrOffending",
-          "answer": false,
-          "failedQuestionDescription": "you are serving a sentence for a specified terrorist or terrorist connected offence"
+          "answer": false
         }
       ],
       "agent": {
@@ -232,17 +234,17 @@
       "questions": [
         {
           "text": "Is this person serving an SDS+, DYOI+, or S250+ sentence subject to two-thirds release criteria?",
+          "failedQuestionDescription": "you are serving a sentence subject to two-thirds release criteria (SDS+, DYOI+ or S250+)",
           "hint": null,
           "name": "subjectToTwoThirdsReleaseCriteria",
-          "answer": false,
-          "failedQuestionDescription": "you are serving a sentence subject to two-thirds release criteria (SDS+, DYOI+ or S250+)"
+          "answer": false
         },
         {
           "text": "Would this person be serving an SDS+, DYOI+ or S250+ sentence if they had been sentenced after the Police and Crime Sentencing Act 2022 was introduced?",
+          "failedQuestionDescription": "you are serving a sentence which would have been subject to two-thirds release if you had been sentenced today",
           "hint": "\n            <p>This applies if a sentence of:</p>\n            <ul class=\"govuk-list govuk-list--bullet\" style=\"margin-top: 0px; margin-bottom: 20px;\">\n              <li>seven years or more was given before April 1 2020 for adults or before June 28 2022 for children for any of the serious sexual or violent offences in parts 1 and 2 of schedule 15 </li>\n              <li>between 4 and 7 years was given before 28 June 2022 for any of the serious sexual offences listed in Part 2 of schedule 15 or manslaughter, attempt/conspire/solicit/incite murder, and wounding with intent to do grievous bodily harm</li>\n            </ul>\n            ",
           "name": "retrospectiveTwoThirdsReleaseCriteria",
-          "answer": false,
-          "failedQuestionDescription": "you are serving a sentence which would have been subject to two-thirds release if you had been sentenced today"
+          "answer": false
         }
       ],
       "agent": {
@@ -260,10 +262,10 @@
       "questions": [
         {
           "text": "Has notice under section 244ZB been served that is still in force?",
+          "failedQuestionDescription": "the Secretary of State has referred your case to the Parole Board under section 244ZB of the Criminal Justice Act 2003",
           "hint": null,
           "name": "served244ZBNoticeInForce",
-          "answer": false,
-          "failedQuestionDescription": "the Secretary of State has referred your case to the Parole Board under section 244ZB of the Criminal Justice Act 2003"
+          "answer": false
         }
       ],
       "agent": {
@@ -281,10 +283,10 @@
       "questions": [
         {
           "text": "Is this person's release governed by schedule 20B of the Criminal Justice Act 2003?",
+          "failedQuestionDescription": "you are subject to the release provisions for long-term prisoners set out in the Criminal Justice Act 1991 (Schedule 20B of the 2003 Act)",
           "hint": null,
           "name": "schedule20BRelease",
-          "answer": false,
-          "failedQuestionDescription": "you are subject to the release provisions for long-term prisoners set out in the Criminal Justice Act 1991 (Schedule 20B of the 2003 Act)"
+          "answer": false
         }
       ],
       "agent": {
@@ -305,10 +307,10 @@
       "questions": [
         {
           "text": "Does this person have a history of sexual-offending but is not required to sign the sex offender's register?",
+          "failedQuestionDescription": "of your conviction history",
           "hint": null,
           "name": "historyOfSexualOffending",
-          "answer": null,
-          "failedQuestionDescription": "of your conviction history"
+          "answer": null
         }
       ],
       "agent": null,
@@ -321,10 +323,10 @@
       "questions": [
         {
           "text": "Is this person a foreign national who is liable to deportation but not yet served a decision to deport?",
+          "failedQuestionDescription": "you are being considered for deportation",
           "hint": null,
           "name": "liableToDeportation",
-          "answer": null,
-          "failedQuestionDescription": "you are being considered for deportation"
+          "answer": null
         }
       ],
       "agent": null,
@@ -337,10 +339,10 @@
       "questions": [
         {
           "text": "Has this person been recalled for poor behaviour on HDC within 2 years of their current HDC date?",
+          "failedQuestionDescription": "you were recalled to prison for poor behaviour during your previous home detention curfew release",
           "hint": null,
           "name": "poorBehaviourOnHdc",
-          "answer": null,
-          "failedQuestionDescription": "you were recalled to prison for poor behaviour during your previous home detention curfew release"
+          "answer": null
         }
       ],
       "agent": null,
@@ -353,10 +355,10 @@
       "questions": [
         {
           "text": "Is this person category A?",
+          "failedQuestionDescription": "you are a category A prisoner",
           "hint": null,
           "name": "categoryA",
-          "answer": false,
-          "failedQuestionDescription": "you are a category A prisoner"
+          "answer": false
         }
       ],
       "agent": {
@@ -374,17 +376,17 @@
       "questions": [
         {
           "text": "Does this person have a high or very high risk of serious harm?",
+          "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management",
           "hint": null,
           "name": "highOrVeryHighRoSH",
-          "answer": null,
-          "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
+          "answer": null
         },
         {
           "text": "Are they MAPPA level 2 or 3?",
+          "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management",
           "hint": null,
           "name": "mappaLevel2Or3",
-          "answer": null,
-          "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
+          "answer": null
         }
       ],
       "agent": null,
@@ -397,10 +399,10 @@
       "questions": [
         {
           "text": "Is this person serving a prison sentence for any of these categories of offence?",
+          "failedQuestionDescription": "of the type of offence you were convicted of",
           "hint": "<ul id=\"sentences-list\" class=\"govuk-list govuk-list--bullet\">\n   <li>Homicide</li>\n   <li>Explosives</li>\n   <li>Possession of an offensive weapon</li>\n   <li>Possession of firearms with intent</li>\n   <li>Cruelty to children</li>\n   <li>Racially aggravated offences</li>\n   <li>Stalking, harassment and other offences linked to domestic abuse</li>\n   <li>Terrorist offences not described in section 247A(2) of the Criminal Justice Act 2003</li>\n </ul>",
           "name": "presumedUnsuitableOffences",
-          "answer": null,
-          "failedQuestionDescription": "of the type of offence you were convicted of"
+          "answer": null
         }
       ],
       "agent": null,
@@ -413,10 +415,10 @@
       "questions": [
         {
           "text": "Does this person have a history of terrorist or terrorist connected offending?",
+          "failedQuestionDescription": "of your terrorist or terrorist connected offending history",
           "hint": null,
           "name": "terroristOffendingHistory",
-          "answer": null,
-          "failedQuestionDescription": "of your terrorist or terrorist connected offending history"
+          "answer": null
         }
       ],
       "agent": null,
