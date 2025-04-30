@@ -32,7 +32,7 @@ import java.time.LocalDate
 
 private const val POSTCODE = "SW1X9AH"
 private const val UPRN = "200010019924"
-private const val GET_ADDRESSES_FOR_POSTCODE_URL = "/addresses?postcode=$POSTCODE"
+private const val SEARCH_FOR_ADDRESSES_URL = "/addresses/search/$POSTCODE"
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
 private const val GET_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID"
@@ -48,11 +48,11 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   private lateinit var curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository
 
   @Nested
-  inner class GetAddressesForPostcode {
+  inner class SearchForAddresses {
     @Test
     fun `should return unauthorized if no token`() {
       webTestClient.get()
-        .uri(GET_ADDRESSES_FOR_POSTCODE_URL)
+        .uri(SEARCH_FOR_ADDRESSES_URL)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -61,7 +61,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if no role`() {
       webTestClient.get()
-        .uri(GET_ADDRESSES_FOR_POSTCODE_URL)
+        .uri(SEARCH_FOR_ADDRESSES_URL)
         .headers(setAuthorisation())
         .exchange()
         .expectStatus()
@@ -71,7 +71,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     @Test
     fun `should return forbidden if wrong role`() {
       webTestClient.get()
-        .uri(GET_ADDRESSES_FOR_POSTCODE_URL)
+        .uri(SEARCH_FOR_ADDRESSES_URL)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .exchange()
         .expectStatus()
@@ -79,20 +79,22 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     @Test
-    fun `should return addresses with a postcode`() {
-      osPlacesMockServer.stubGetAddressesForPostcode(POSTCODE)
+    fun `should return addresses with given search text`() {
+      // Given
+      osPlacesMockServer.stubSearchForAddresses(POSTCODE)
 
-      val addresses = webTestClient.get()
-        .uri(GET_ADDRESSES_FOR_POSTCODE_URL)
+      // When
+      val result = webTestClient.get()
+        .uri(SEARCH_FOR_ADDRESSES_URL)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
         .exchange()
-        .expectStatus()
-        .isOk
-        .expectBody(typeReference<List<AddressSummary>>())
-        .returnResult().responseBody!!
 
+      // Then
+
+      result.expectStatus().isOk
+      val addresses = result.expectBody(typeReference<List<AddressSummary>>()).returnResult().responseBody!!
       assertThat(addresses).hasSize(3)
-      assertThat(addresses.map { it.postcode }).containsOnly(POSTCODE)
+      assertThat(addresses.map { it.postcode }).containsOnly("SA420UQ")
     }
   }
 

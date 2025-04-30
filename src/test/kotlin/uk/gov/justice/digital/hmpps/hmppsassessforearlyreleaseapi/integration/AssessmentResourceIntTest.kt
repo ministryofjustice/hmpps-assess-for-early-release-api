@@ -284,7 +284,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // Then
       result.expectStatus().isNoContent
 
-      val assessments = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
+      val assessments = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER)
       assertThat(assessments).hasSize(1)
 
       val updatedAssessment = assessments.first()
