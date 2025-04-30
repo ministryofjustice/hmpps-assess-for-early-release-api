@@ -38,6 +38,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.SideEffect
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.assessmentStateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
@@ -86,7 +87,11 @@ data class Assessment(
 
   @NotNull
   @Enumerated(EnumType.STRING)
-  var addressChecksStatus: ResidentialChecksStatus? = ResidentialChecksStatus.NOT_STARTED,
+  var addressChecksStatus: ResidentialChecksStatus = ResidentialChecksStatus.NOT_STARTED,
+
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  var eligibilityChecksStatus: EligibilityStatus = EligibilityStatus.NOT_STARTED,
 
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   val eligibilityCheckResults: MutableSet<EligibilityCheckResult> = mutableSetOf(),

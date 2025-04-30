@@ -16,7 +16,7 @@ Note: this uses test containers to start a postgres instance on a random port to
 
 If you'd prefer to run tests against a postgres instance running externally via docker-compose, then you can start an instance using:
 ```
-docker-compose -f docker-compose-test.yml up
+docker compose -f docker-compose-test.yml up
 ```
 The tests should automatically detect this running on port 5433 and use it instead. 
 
