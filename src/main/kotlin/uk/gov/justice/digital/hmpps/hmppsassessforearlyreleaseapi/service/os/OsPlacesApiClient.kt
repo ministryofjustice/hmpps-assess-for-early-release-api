@@ -14,10 +14,10 @@ class OsPlacesApiClient(
   @Qualifier("osPlacesClient") private val osPlacesApiWebClient: WebClient,
   @Value("\${os.places.api.key}") private val apiKey: String,
 ) {
-  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiDPA> {
+  fun searchForAddresses(searchQuery: String): List<OsPlacesApiDPA> {
     val searchResult = osPlacesApiWebClient
       .get()
-      .uri("/postcode?postcode=$postcode&key=$apiKey")
+      .uri("/find?query=$searchQuery&key=$apiKey")
       .accept(MediaType.APPLICATION_JSON)
       .retrieve()
       .bodyToMono(OsPlacesApiResponse::class.java)
