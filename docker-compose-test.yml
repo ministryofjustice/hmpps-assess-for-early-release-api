@@ -23,7 +23,7 @@ services:
   gotenberg:
     image: gotenberg/gotenberg:8.0.0
     networks:
-      - hmpps
+      - hmpps-test
     container_name: gotenberg
     ports:
       - "3002:3000"

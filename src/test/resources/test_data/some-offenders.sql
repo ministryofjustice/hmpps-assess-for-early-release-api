@@ -26,3 +26,12 @@ VALUES(1, 'PLANNING_ACTIONS_CONFIRMATION_NEEDED_BY_PRACTITIONER'),
       (1, 'BEING_INVESTIGATED_FOR_OFFENCE_COMMITTED_IN_PRISON'),
       (1, 'WOULD_NOT_FOLLOW_REQUIREMENTS_OF_CONFISCATION_ORDER'),
       (1, 'PENDING_APPLICATION_WITH_UNDULY_LENIENT_SENTENCE_SCH');
+
+INSERT INTO public.assessment_event(assessment_id, event_type, summary, event_time, changes, username, full_name, role, on_behalf_of)
+VALUES(2, 'STATUS_CHANGE',
+       'status changed from: ''ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'', to: ''AWAITING_ADDRESS_AND_RISK_CHECKS''', '2024-10-09 17:19:08.993', '{"after": "ELIGIBLE_AND_SUITABLE", "before": "ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS", "context": {"code": "terrorist-offending-history", "type": "suitability", "answers": {"terroristOffendingHistory": false}}}'::jsonb,
+       'helenreid', 'Helen Reid', 'PRISON_CA', 'MDI');
+
+INSERT INTO public.assessment_to_last_update_event(assessment_id,event_id) VALUES (1,1);
+
+

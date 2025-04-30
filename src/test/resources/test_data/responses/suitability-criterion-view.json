@@ -10,7 +10,7 @@
     "location": "Birmingham (HMP)",
     "status": "NOT_STARTED",
     "responsibleCom": null,
-    "team": null,
+    "teamCode": null,
     "policyVersion": "1.0",
     "tasks": {
       "PRISON_CA": [
@@ -44,7 +44,8 @@
     "optOutReasonOther": null,
     "postponementReasons": [],
     "cellLocation": "A-1-002",
-    "mainOffense": "Robbery"
+    "mainOffense": "Robbery",
+    "lastUpdateBy":null
   },
   "criterion": {
     "code": "category-a",
@@ -55,7 +56,8 @@
         "text": "Is this person category A?",
         "hint": null,
         "name": "categoryA",
-        "answer": false
+        "answer": false,
+        "failedQuestionDescription": "you are a category A prisoner"
       }
     ],
     "agent": {
@@ -75,13 +77,15 @@
         "text": "Does this person have a high or very high risk of serious harm?",
         "hint": null,
         "name": "highOrVeryHighRoSH",
-        "answer": null
+        "answer": null,
+        "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
       },
       {
         "text": "Are they MAPPA level 2 or 3?",
         "hint": null,
         "name": "mappaLevel2Or3",
-        "answer": null
+        "answer": null,
+        "failedQuestionDescription": "you are at high risk of harm and subject to MAPPA level 2 or 3 management"
       }
     ],
     "agent": null,

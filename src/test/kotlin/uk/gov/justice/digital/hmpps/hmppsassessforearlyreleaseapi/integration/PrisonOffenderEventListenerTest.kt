@@ -77,7 +77,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
 
     assertThat(offenderRepository.findByPrisonNumber(PRISON_NUMBER)?.prisonId).isEqualTo(NEW_PRISON_CODE)
 
-    val assessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+    val assessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
     val events = assessmentEventRepository.findByAssessmentId(assessmentId = assessment.id)
     assertThat(events).hasSize(1)
     val event = events.first() as GenericChangedEvent
@@ -91,6 +91,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     )
 
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
+    assertThat(assessment.lastUpdateByUserEvent).isNull()
   }
 
   @Test
@@ -123,7 +124,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     "classpath:test_data/reset.sql",
     "classpath:test_data/some-offenders.sql",
   )
-  fun `Should create a new offender `() {
+  fun `Should create a new offender`() {
     // Given
     val prisonNumber = "Z1234XY"
     val crn = "DX12340A"
@@ -177,7 +178,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
         "homeDetentionCurfewEligibilityDate" to hdced.format(DateTimeFormatter.ISO_DATE),
       ),
     )
-
+    assertThat(assessment.lastUpdateByUserEvent).isNull()
     assertThat(getNumberOfMessagesCurrentlyOnQueue()).isEqualTo(0)
   }
 

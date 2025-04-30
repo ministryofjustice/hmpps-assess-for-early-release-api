@@ -39,7 +39,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
-      team = currentAssessment.teamCode,
+      teamCode = currentAssessment.teamCode,
       policyVersion = currentAssessment.policyVersion,
       optOutReasonType = currentAssessment.optOutReasonType,
       optOutReasonOther = currentAssessment.optOutReasonOther,
@@ -55,6 +55,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       victimContactSchemeOptedIn = currentAssessment.victimContactSchemeOptedIn,
       victimContactSchemeRequests = currentAssessment.victimContactSchemeRequests,
       pomBehaviourInformation = currentAssessment.pomBehaviourInformation,
+      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }
 

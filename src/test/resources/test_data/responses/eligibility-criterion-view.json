@@ -10,7 +10,7 @@
     "location": "Birmingham (HMP)",
     "status": "NOT_STARTED",
     "responsibleCom": null,
-    "team": null,
+    "teamCode": null,
     "policyVersion": "1.0",
     "tasks": {
       "PRISON_CA": [
@@ -44,7 +44,8 @@
     "optOutReasonOther": null,
     "postponementReasons": [],
     "cellLocation": "A-1-002",
-    "mainOffense": "Robbery"
+    "mainOffense": "Robbery",
+    "lastUpdateBy":null
   },
   "criterion": {
     "code": "sex-offender-register",
@@ -55,7 +56,8 @@
         "text": "Is this person required to sign the sex offenders' register?",
         "hint": null,
         "name": "requiredToSignSexOffenderRegister",
-        "answer": false
+        "answer": false,
+        "failedQuestionDescription": "you will be subject to sex offender registration on release"
       }
     ],
     "agent": {
@@ -75,7 +77,8 @@
         "text": "Is this person serving an extended sentence for violent or sexual offences?",
         "hint": null,
         "name": "servingExtendedSentenceForViolentOrSexualOffence",
-        "answer": false
+        "answer": false,
+        "failedQuestionDescription": "you are serving an extended sentence"
       }
     ],
     "agent": {

@@ -119,7 +119,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   @Test
   @Sql(
     "classpath:test_data/reset.sql",
-    "classpath:test_data/some-offenders.sql",
+    "classpath:test_data/an-offender-with-un-eligible-checks.sql",
   )
   fun `gets not eligible form`() {
     // Given
@@ -145,7 +145,7 @@ class DocumentResourceIntTest : SqsIntegrationTestBase() {
   @Test
   @Sql(
     "classpath:test_data/reset.sql",
-    "classpath:test_data/some-offenders.sql",
+    "classpath:test_data/an-offender-with-un-suitable-checks.sql",
   )
   fun `gets not suitable form`() {
     // Given

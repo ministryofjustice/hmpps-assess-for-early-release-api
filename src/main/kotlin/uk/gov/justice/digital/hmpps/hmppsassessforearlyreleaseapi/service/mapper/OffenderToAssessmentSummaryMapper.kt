@@ -32,7 +32,7 @@ class OffenderToAssessmentSummaryMapper(
       location = prisonName,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
-      team = currentAssessment.teamCode,
+      teamCode = currentAssessment.teamCode,
       policyVersion = currentAssessment.policyVersion,
       optOutReasonType = currentAssessment.optOutReasonType,
       optOutReasonOther = currentAssessment.optOutReasonOther,
@@ -42,6 +42,7 @@ class OffenderToAssessmentSummaryMapper(
       tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
         tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
       },
+      lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }
 

@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.CaseloadService.Companion.DAYS_BEFORE_SENTENCE_START
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anStatusChangedEvent
 import java.time.LocalDate
 import java.time.Month
 
@@ -17,11 +18,9 @@ class OffenderSummaryResponseMapperTest {
   fun `should map assessment to offender summary`() {
     val workingDaysToHdced = 12
     val crd = LocalDate.of(2026, Month.MAY, 6)
-    val hdced = LocalDate.now().plusDays(20)
-    val offender = anOffender(hdced, null, crd)
-//    val anAssessment = anAssessment(offender, hdced, crd)
-    val anAssessment = offender.assessments.first()
-
+    val offender = anOffender().copy(crd = crd)
+    val anAssessment = anAssessment(offender)
+    anAssessment.lastUpdateByUserEvent = anStatusChangedEvent(anAssessment)
     val offenderSummary = mapper.map(anAssessment, workingDaysToHdced)
 
     assertThat(offenderSummary.prisonNumber).isEqualTo(offender.prisonNumber)
@@ -39,5 +38,6 @@ class OffenderSummaryResponseMapperTest {
     assertThat(offenderSummary.currentTask).isEqualTo(anAssessment.currentTask())
     assertThat(offenderSummary.taskOverdueOn).isEqualTo(anAssessment.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START))
     assertThat(offenderSummary.crn).isEqualTo(offender.crn)
+    assertThat(offenderSummary.lastUpdateBy).isEqualTo("prison user")
   }
 }

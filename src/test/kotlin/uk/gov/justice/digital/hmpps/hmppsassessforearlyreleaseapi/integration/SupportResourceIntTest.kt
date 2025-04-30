@@ -361,7 +361,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = GET_ASSESSMENTS
-      val assessments = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
+      val assessments = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER)
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
 
       // When
@@ -465,7 +465,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
         assertThat(it.email).isEqualTo(assessment.responsibleCom?.email)
         assertThat(it.staffCode).isEqualTo(assessment.responsibleCom?.staffCode)
       }
-      assertThat(assessmentResponse.team).isEqualTo(assessment.teamCode)
+      assertThat(assessmentResponse.teamCode).isEqualTo(assessment.teamCode)
       assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
       assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
       assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
@@ -515,7 +515,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = DELETE_CURRENT_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
       val crn = "DX12340A"
 
@@ -573,7 +573,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = DELETE_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
       val crn = "DX12340A"
 
@@ -602,7 +602,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
     assertThat(deletedAssessment.deletedTimestamp)
       .isCloseTo(LocalDateTime.now(), within(2, ChronoUnit.SECONDS))
 
-    val lastEvent = deletedAssessment.assessmentEvents.last()
+    val lastEvent = deletedAssessment.getEvents().last()
     assertThat(lastEvent.eventType).isEqualTo(AssessmentEventType.ASSESSMENT_DELETED)
     assertThat(lastEvent.agent.username).isEqualTo(TestData.PRISON_CA_AGENT.username)
     assertThat(lastEvent).isOfAnyClassIn(GenericChangedEvent::class.java)

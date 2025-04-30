@@ -1,0 +1,53 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Type: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSEventType$val Value: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSMessage$val Message: String</ID>
+    <ID>ConstructorParameterNaming:OffenderManagerChangedEventListener.kt$HMPPSMessage$val MessageAttributes: HMPPSMessageAttributes</ID>
+    <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Type: String</ID>
+    <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSEventType$val Value: String</ID>
+    <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val Message: String</ID>
+    <ID>ConstructorParameterNaming:PrisonOffenderEventListener.kt$HMPPSMessage$val MessageAttributes: HMPPSMessageAttributes</ID>
+    <ID>CyclomaticComplexMethod:OpenApiConfiguration.kt$OpenApiConfiguration$@Bean fun openAPICustomizer(): OpenApiCustomizer</ID>
+    <ID>LongMethod:StaffService.kt$StaffService$@Transactional fun updateComDetails(comDetails: UpdateCom)</ID>
+    <ID>LongParameterList:AddressService.kt$AddressService$( private val addressRepository: AddressRepository, private val assessmentService: AssessmentService, private val casCheckRequestRepository: CasCheckRequestRepository, private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository, private val osPlacesApiClient: OsPlacesApiClient, private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository, private val residentRepository: ResidentRepository, private val assessmentRepository: AssessmentRepository, )</ID>
+    <ID>LongParameterList:AssessmentService.kt$AssessmentService$( private val assessmentRepository: AssessmentRepository, private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper, private val assessmentToAssessmentOverviewSummaryMapper: AssessmentToAssessmentOverviewSummaryMapper, private val prisonService: PrisonService, private val policyService: PolicyService, private val staffRepository: StaffRepository, private val managedUsersService: ManagedUsersService, @Lazy private val probationService: ProbationService, )</ID>
+    <ID>LongParameterList:CasCheckRequest.kt$CasCheckRequest$( id: Long = -1, caAdditionalInfo: String? = null, ppAdditionalInfo: String? = null, dateRequested: LocalDateTime = LocalDateTime.now(), preferencePriority: AddressPreferencePriority, status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS, assessment: Assessment, @ManyToOne @JoinColumn(name = "allocated_address_id", referencedColumnName = "id") val allocatedAddress: Address? = null, )</ID>
+    <ID>LongParameterList:CommunityOffenderManager.kt$CommunityOffenderManager$( id: Long = -1, val staffCode: String, username: String?, email: String?, forename: String?, surname: String?, lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(), )</ID>
+    <ID>LongParameterList:CommunityOffenderManager.kt$CommunityOffenderManager$( id: Long = this.id, staffCode: String = this.staffCode, username: String? = this.username, email: String? = this.email, forename: String? = this.forename, surname: String? = this.surname, lastUpdatedTimestamp: LocalDateTime = this.lastUpdatedTimestamp, )</ID>
+    <ID>LongParameterList:CurfewAddressCheckRequest.kt$CurfewAddressCheckRequest$( @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @NotNull val id: Long = -1, var caAdditionalInfo: String? = null, val ppAdditionalInfo: String? = null, @NotNull val dateRequested: LocalDateTime = LocalDateTime.now(), @NotNull @Enumerated(EnumType.STRING) val preferencePriority: AddressPreferencePriority, @NotNull @Enumerated(EnumType.STRING) val status: AddressCheckRequestStatus, @ManyToOne @JoinColumn(name = "assessment_id", referencedColumnName = "id", nullable = false) val assessment: uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment, @OneToMany(mappedBy = "addressCheckRequest", cascade = [CascadeType.ALL], orphanRemoval = true) val taskAnswers: MutableSet&lt;ResidentialChecksTaskAnswer&gt; = mutableSetOf(), @NotNull val createdTimestamp: LocalDateTime = LocalDateTime.now(), @NotNull val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(), )</ID>
+    <ID>LongParameterList:ResidentialChecksTaskAnswer.kt$ResidentialChecksTaskAnswer$( @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @NotNull val id: Long = -1, @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "address_check_request_id", nullable = false) val addressCheckRequest: CurfewAddressCheckRequest, @NotNull @Column(name = "task_code", insertable = false, updatable = false) val taskCode: String, @NotNull @Column(name = "criterion_met") var criterionMet: Boolean, @NotNull @Column(name = "task_version") val taskVersion: String, @NotNull val createdTimestamp: LocalDateTime = LocalDateTime.now(), @NotNull var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(), )</ID>
+    <ID>LongParameterList:Staff.kt$Staff$( @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @NotNull var id: Long = -1, @NotNull @Enumerated(EnumType.STRING) @Column(name = "kind", insertable = false, updatable = false) var kind: StaffKind, @Column(unique = true) val username: String?, val email: String?, val forename: String?, val surname: String?, val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(), )</ID>
+    <ID>LongParameterList:StandardAddressCheckRequest.kt$StandardAddressCheckRequest$( id: Long = -1, caAdditionalInfo: String? = null, ppAdditionalInfo: String? = null, dateRequested: LocalDateTime = LocalDateTime.now(), preferencePriority: AddressPreferencePriority, status: AddressCheckRequestStatus = AddressCheckRequestStatus.IN_PROGRESS, assessment: Assessment, @ManyToOne @JoinColumn(name = "address_id", referencedColumnName = "id") val address: Address, @OneToMany( mappedBy = "standardAddressCheckRequest", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, ) @OrderBy("createdTimestamp") val residents: MutableSet&lt;Resident&gt; = mutableSetOf(), )</ID>
+    <ID>LongParameterList:WebClientConfiguration.kt$WebClientConfiguration$( @Value("\${api.health-timeout:2s}") val healthTimeout: Duration, @Value("\${hmpps.auth.url}") val hmppsAuthBaseUri: String, @Value("\${hmpps.delius.api.url}") private val deliusApiUrl: String, @Value("\${hmpps.prison.api.url}") private val prisonApiUrl: String, @Value("\${hmpps.prisonregister.api.url}") private val prisonRegisterApiUrl: String, @Value("\${hmpps.prisonersearch.api.url}") private val prisonerSearchApiUrl: String, @Value("\${hmpps.probationsearch.api.url}") private val probationSearchApiUrl: String, @Value("\${os.places.api.url}") private val osPlacesApiUrl: String, @Value("\${gotenberg.api.url}") private val gotenbergHost: String, @Value("\${hmpps.govuk.api.url}") private val govUkApiUrl: String, @Value("\${hmpps.manageusers.api.url}") private val manageUsersApiUrl: String, )</ID>
+    <ID>NoNameShadowing:AssessmentService.kt$AssessmentService${ staffRepository.findByStaffCode(it.code) ?: createCommunityOffenderManager(it) }</ID>
+    <ID>SpreadOperator:HmppsAssessForEarlyReleaseApi.kt$(*args)</ID>
+    <ID>TooManyFunctions:AddressService.kt$AddressService</ID>
+    <ID>TooManyFunctions:AssessmentService.kt$AssessmentService</ID>
+    <ID>TooManyFunctions:ResidentialChecksService.kt$ResidentialChecksService</ID>
+    <ID>TooManyFunctions:WebClientConfiguration.kt$WebClientConfiguration</ID>
+    <ID>UnnecessaryAbstractClass:AssessmentEvent.kt$AssessmentEvent$AssessmentEvent</ID>
+    <ID>UnnecessaryAbstractClass:AssessmentState.kt$AssessmentState$AssessmentState</ID>
+    <ID>UnnecessaryAbstractClass:CurfewAddressCheckRequest.kt$CurfewAddressCheckRequest$CurfewAddressCheckRequest</ID>
+    <ID>UnnecessaryAbstractClass:Staff.kt$Staff$Staff</ID>
+    <ID>UnsafeCallOnNullableType:AddressService.kt$AddressService$address!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderService.kt$OffenderService$prisoner.bookingId!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderService.kt$OffenderService$prisoner.homeDetentionCurfewEligibilityDate!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderService.kt$OffenderService$prisoner.prisonId!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderSummaryResponseMapper.kt$OffenderSummaryResponseMapper$offender.forename!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderSummaryResponseMapper.kt$OffenderSummaryResponseMapper$offender.surname!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderToOffenderResponseMapper.kt$OffenderToOffenderResponseMapper$offender.forename!!</ID>
+    <ID>UnsafeCallOnNullableType:OffenderToOffenderResponseMapper.kt$OffenderToOffenderResponseMapper$offender.surname!!</ID>
+    <ID>UnsafeCallOnNullableType:OpenApiConfiguration.kt$OpenApiConfiguration$properties[propertyName]!!</ID>
+    <ID>UseOrEmpty:AssessmentService.kt$AssessmentService$request.pomBehaviourInformation ?: ""</ID>
+    <ID>UseOrEmpty:AssessmentService.kt$AssessmentService$request.victimContactSchemeRequests ?: ""</ID>
+    <ID>UseOrEmpty:OpenApiConfiguration.kt$OpenApiConfiguration$operation.description ?: ""</ID>
+    <ID>UseOrEmpty:OsPlacesApiClient.kt$OsPlacesApiClient$searchResult?.results?.map { it.dpa } ?: emptyList()</ID>
+    <ID>UseOrEmpty:PrisonRegisterApiClient.kt$PrisonRegisterApiClient$prisonRegisterApiWebClient .get() .uri("/prisons") .accept(MediaType.APPLICATION_JSON) .retrieve() .bodyToMono(typeReference&lt;List&lt;Prison&gt;&gt;()) .block() ?: emptyList()</ID>
+    <ID>UseOrEmpty:PrisonerSearchApiClient.kt$PrisonerSearchApiClient$prisonerSearchApiWebClient .post() .uri("/prisoner-search/prisoner-numbers") .accept(MediaType.APPLICATION_JSON) .bodyValue(PrisonerSearchByPrisonerNumbersRequest(nomisIds)) .retrieve() .bodyToMono(typeReference&lt;List&lt;PrisonerSearchPrisoner&gt;&gt;()) .block() ?: emptyList()</ID>
+    <ID>UseOrEmpty:ResidentialChecksService.kt$ResidentialChecksService$taskAnswers?.toAnswersMap() ?: emptyMap()</ID>
+    <ID>VarCouldBeVal:OpenApiConfiguration.kt$OpenApiConfiguration$@Autowired private lateinit var context: ApplicationContext</ID>
+  </CurrentIssues>
+</SmellBaseline>

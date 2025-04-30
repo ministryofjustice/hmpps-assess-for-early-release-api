@@ -20,8 +20,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Suitabil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.calculateAggregateEligibilityStatus
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleReasons
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableReasons
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getIneligibleTaskName
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getUnsuitableTaskName
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.OffenderToAssessmentSummaryMapper
 
@@ -93,6 +93,7 @@ class EligibilityAndSuitabilityService(
         else -> error("Should not be possible to have a status of $eligibilityStatus")
       }
 
+      assessmentEntity.eligibilityChecksStatus = eligibilityStatus
       assessmentService.transitionAssessment(assessmentEntity, event, answer.agent)
       return eligibilityAndSuitabilityCaseView(currentAssessment)
     }
@@ -115,7 +116,7 @@ class EligibilityAndSuitabilityService(
 
     return EligibilityAndSuitabilityCaseView(
       assessmentSummary = offenderToAssessmentSummaryMapper.map(currentAssessment.assessmentEntity),
-      overallStatus = currentAssessment.calculateAggregateEligibilityStatus(),
+      overallStatus = currentAssessment.assessmentEntity.eligibilityChecksStatus,
       eligibility = eligibility,
       eligibilityStatus = eligibilityStatus,
       suitability = suitability,
@@ -125,7 +126,7 @@ class EligibilityAndSuitabilityService(
         suitabilityStatus == UNSUITABLE -> FailureType.UNSUITABLE
         else -> null
       },
-      failedCheckReasons = eligibility.getIneligibleReasons() + suitability.getUnsuitableReasons(),
+      failedCheckReasons = eligibility.getIneligibleTaskName() + suitability.getUnsuitableTaskName(),
     )
   }
 }

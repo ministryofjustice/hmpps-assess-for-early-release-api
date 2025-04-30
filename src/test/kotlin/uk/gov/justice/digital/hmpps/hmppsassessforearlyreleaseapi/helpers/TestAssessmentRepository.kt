@@ -8,5 +8,5 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 @Repository
 interface TestAssessmentRepository : JpaRepository<Assessment, Long> {
   fun findByOffender(offender: Offender): List<Assessment>
-  fun findByOffenderPrisonNumber(prisonNumber: String): List<Assessment>
+  fun findByOffenderPrisonNumberOrderById(prisonNumber: String): List<Assessment>
 }

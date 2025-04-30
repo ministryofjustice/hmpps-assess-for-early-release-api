@@ -8,11 +8,11 @@ import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 private const val OS_PLACES_WIREMOCK_PORT = 8099
 
 class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_WIREMOCK_PORT) {
-  fun stubGetAddressesForPostcode(postcode: String) {
+  fun stubSearchForAddresses(searchQuery: String) {
     val json = """{
       "header": {
-        "uri": "https://api.os.uk/search/places/v1/postcode?postcode=$postcode",
-        "query": "postcode=$postcode",
+        "uri": "https://api.os.uk/search/places/v1/find?query=$searchQuery",
+        "query": "query=$searchQuery",
         "offset": 0,
         "totalresults": 29,
         "format": "JSON",
@@ -33,7 +33,7 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
             "THOROUGHFARE_NAME": "THE STREET",
             "DEPENDENT_LOCALITY": "MORTIMER",
             "POST_TOWN": "READING",
-            "POSTCODE": "$postcode",
+            "POSTCODE": "SA420UQ",
             "RPC": "1",
             "X_COORDINATE": 401024.0,
             "Y_COORDINATE": 154112.0,
@@ -70,7 +70,7 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
             "THOROUGHFARE_NAME": "A ROAD",
             "DEPENDENT_LOCALITY": "EASTERTON",
             "POST_TOWN": "READING",
-            "POSTCODE": "$postcode",
+            "POSTCODE": "SA420UQ",
             "RPC": "1",
             "X_COORDINATE": 401017.0,
             "Y_COORDINATE": 154112.0,
@@ -107,7 +107,7 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
             "THOROUGHFARE_NAME": "PARK ROAD",
             "DEPENDENT_LOCALITY": "WHITLEY",
             "POST_TOWN": "READING",
-            "POSTCODE": "$postcode",
+            "POSTCODE": "SA420UQ",
             "RPC": "1",
             "X_COORDINATE": 401003.0,
             "Y_COORDINATE": 154111.0,
@@ -139,7 +139,7 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
     """.trimIndent()
 
     stubFor(
-      get(urlEqualTo("/postcode?postcode=$postcode&key=$apiKey"))
+      get(urlEqualTo("/find?query=$searchQuery&key=$apiKey"))
         .willReturn(
           WireMock.aResponse().withHeader(
             "Content-Type",
@@ -151,9 +151,9 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
     )
   }
 
-  fun stubGetAddressesForPostcodeBadRequest(postcode: String) {
+  fun stubSearchForAddressesBadRequest(searchQuery: String) {
     stubFor(
-      get(urlEqualTo("/postcode?postcode=$postcode&key=$apiKey"))
+      get(urlEqualTo("/find?query=$searchQuery&key=$apiKey"))
         .willReturn(
           WireMock.aResponse().withHeader(
             "Content-Type",
@@ -162,6 +162,7 @@ class OsPlacesMockServer(private val apiKey: String) : WireMockServer(OS_PLACES_
         ),
     )
   }
+
   fun stubGetAddressByUprn(uprn: String) {
     val json = """
       {

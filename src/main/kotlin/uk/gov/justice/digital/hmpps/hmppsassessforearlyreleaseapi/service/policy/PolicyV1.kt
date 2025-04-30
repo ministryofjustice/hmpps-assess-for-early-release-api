@@ -14,6 +14,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "requiredToSignSexOffenderRegister",
         text = "Is this person required to sign the sex offenders' register?",
+        failedQuestionDescription = "you will be subject to sex offender registration on release",
       ),
     ),
     Criterion(
@@ -22,6 +23,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "servingExtendedSentenceForViolentOrSexualOffence",
         text = "Is this person serving an extended sentence for violent or sexual offences?",
+        failedQuestionDescription = "you are serving an extended sentence",
       ),
     ),
     Criterion(
@@ -30,6 +32,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "rotlFailedToReturn",
         text = "Is this person serving a sentence for ROTL failure to return?",
+        failedQuestionDescription = "you did not return from release on temporary licence (ROTL).",
       ),
     ),
     Criterion(
@@ -38,6 +41,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "communityOrderCurfewBreach",
         text = "Is this person serving a sentence for breaching a community order curfew?",
+        failedQuestionDescription = "you breached your community order curfew",
       ),
     ),
     Criterion(
@@ -46,6 +50,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "recalledForBreachingHdcCurfew",
         text = "Has this person been recalled for breaching their HDC curfew within 2 years of their current sentence date",
+        failedQuestionDescription = "you previously broke home detention curfew conditions and were recalled to prison",
       ),
     ),
     Criterion(
@@ -55,10 +60,12 @@ val POLICY_1_0 = Policy(
         Question(
           name = "recommendedForDeportation",
           text = "Is this person a foreign national who has been recommended for deportation?",
+          failedQuestionDescription = "the court recommended you should be deported from the UK",
         ),
         Question(
           name = "servedADecisionToDeport",
           text = "Is this person a foreign national who is liable to deportation and been served with a decision to deport?",
+          failedQuestionDescription = "the Home Office recommended you should be deported from the UK",
         ),
       ),
     ),
@@ -68,6 +75,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "recalledFromEarlyReleaseOnCompassionateGrounds",
         text = "Is this person currently serving a recall from early release on compassionate grounds?",
+        failedQuestionDescription = "you were recalled from early release on compassionate grounds",
       ),
     ),
     Criterion(
@@ -76,6 +84,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "terroristSentenceOrOffending",
         text = "Is this person currently serving a sentence for terrorist or terrorist-connected offending?",
+        failedQuestionDescription = "you are serving a sentence for a specified terrorist or terrorist connected offence",
       ),
     ),
     Criterion(
@@ -85,10 +94,12 @@ val POLICY_1_0 = Policy(
         Question(
           name = "subjectToTwoThirdsReleaseCriteria",
           text = "Is this person serving an SDS+, DYOI+, or S250+ sentence subject to two-thirds release criteria?",
+          failedQuestionDescription = "you are serving a sentence subject to two-thirds release criteria (SDS+, DYOI+ or S250+)",
         ),
         Question(
           name = "retrospectiveTwoThirdsReleaseCriteria",
           text = "Would this person be serving an SDS+, DYOI+ or S250+ sentence if they had been sentenced after the Police and Crime Sentencing Act 2022 was introduced?",
+          failedQuestionDescription = "you are serving a sentence which would have been subject to two-thirds release if you had been sentenced today",
           hint = """
             <p>This applies if a sentence of:</p>
             <ul class="govuk-list govuk-list--bullet" style="margin-top: 0px; margin-bottom: 20px;">
@@ -105,6 +116,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "served244ZBNoticeInForce",
         text = "Has notice under section 244ZB been served that is still in force?",
+        failedQuestionDescription = "the Secretary of State has referred your case to the Parole Board under section 244ZB of the Criminal Justice Act 2003",
       ),
     ),
     Criterion(
@@ -113,6 +125,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "schedule20BRelease",
         text = "Is this person's release governed by schedule 20B of the Criminal Justice Act 2003?",
+        failedQuestionDescription = "you are subject to the release provisions for long-term prisoners set out in the Criminal Justice Act 1991 (Schedule 20B of the 2003 Act)",
       ),
     ),
   ),
@@ -124,6 +137,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "historyOfSexualOffending",
         text = "Does this person have a history of sexual-offending but is not required to sign the sex offender's register?",
+        failedQuestionDescription = "of your conviction history",
       ),
     ),
     Criterion(
@@ -132,6 +146,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "liableToDeportation",
         text = "Is this person a foreign national who is liable to deportation but not yet served a decision to deport?",
+        failedQuestionDescription = "you are being considered for deportation",
       ),
     ),
     Criterion(
@@ -140,19 +155,24 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "poorBehaviourOnHdc",
         text = "Has this person been recalled for poor behaviour on HDC within 2 years of their current HDC date?",
+        failedQuestionDescription = "you were recalled to prison for poor behaviour during your previous home detention curfew release",
       ),
     ),
     Criterion(
       code = "category-a",
       name = "Category A",
-      question = Question(name = "categoryA", text = "Is this person category A?"),
+      question = Question(
+        name = "categoryA",
+        text = "Is this person category A?",
+        failedQuestionDescription = "you are a category A prisoner",
+      ),
     ),
     Criterion(
       code = "rosh-and-mappa",
       name = "RoSH and MAPPA",
       questions = listOf(
-        Question(name = "highOrVeryHighRoSH", text = "Does this person have a high or very high risk of serious harm?"),
-        Question(name = "mappaLevel2Or3", text = "Are they MAPPA level 2 or 3?"),
+        Question(name = "highOrVeryHighRoSH", text = "Does this person have a high or very high risk of serious harm?", failedQuestionDescription = "you are at high risk of harm and subject to MAPPA level 2 or 3 management"),
+        Question(name = "mappaLevel2Or3", text = "Are they MAPPA level 2 or 3?", failedQuestionDescription = "you are at high risk of harm and subject to MAPPA level 2 or 3 management"),
       ),
       evaluationStrategy = EvaluationStrategy.MET_IF_ANY_ARE_FALSE,
     ),
@@ -162,6 +182,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "presumedUnsuitableOffences",
         text = "Is this person serving a prison sentence for any of these categories of offence?",
+        failedQuestionDescription = "of the type of offence you were convicted of",
         hint = """
          <ul id="sentences-list" class="govuk-list govuk-list--bullet">
             <li>Homicide</li>
@@ -182,6 +203,7 @@ val POLICY_1_0 = Policy(
       question = Question(
         name = "terroristOffendingHistory",
         text = "Does this person have a history of terrorist or terrorist connected offending?",
+        failedQuestionDescription = "of your terrorist or terrorist connected offending history",
       ),
     ),
   ),

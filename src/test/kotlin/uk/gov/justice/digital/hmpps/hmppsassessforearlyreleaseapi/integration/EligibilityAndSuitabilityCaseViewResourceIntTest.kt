@@ -1,5 +1,6 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration
 
+import org.assertj.core.api.AbstractComparableAssert
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
@@ -10,11 +11,14 @@ import org.springframework.test.json.JsonCompareMode
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriteriaType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.CriterionCheck
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityAndSuitabilityCaseView
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityCriterionView
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.ELIGIBLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.INELIGIBLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus.NOT_STARTED
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionView
@@ -41,6 +45,25 @@ private const val PERFORM_CRITERIA_CHECK =
   "/offender/${TestData.PRISON_NUMBER}/current-assessment/eligibility-and-suitability-check"
 
 class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase() {
+
+  private companion object {
+    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
+    val prisonRegisterMockServer = PrisonRegisterMockServer()
+
+    @JvmStatic
+    @BeforeAll
+    fun startMocks() {
+      prisonRegisterMockServer.start()
+      prisonerSearchApiMockServer.start()
+    }
+
+    @JvmStatic
+    @AfterAll
+    fun stopMocks() {
+      prisonRegisterMockServer.stop()
+      prisonerSearchApiMockServer.stop()
+    }
+  }
 
   @Nested
   inner class GetEligibilityAndSuitabilityCaseView {
@@ -349,6 +372,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(SUITABLE)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(false)
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(IN_PROGRESS)
       }
 
       webTestClient.put()
@@ -370,6 +394,7 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(UNSUITABLE)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(true)
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(INELIGIBLE)
       }
     }
 
@@ -399,13 +424,6 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         ),
       )
 
-      val payload = CriterionCheck(
-        code = "recalled-for-breaching-hdc-curfew",
-        type = CriteriaType.ELIGIBILITY,
-        answers = mapOf("recalledForBreachingHdcCurfew" to false),
-        agent = PRISON_CA_AGENT,
-      )
-
       run {
         val criterionView = webTestClient.get()
           .uri(GET_ELIGIBILITY_CRITERION_VIEW_URL("recalled-for-breaching-hdc-curfew"))
@@ -417,9 +435,17 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
 
         assertThat(criterionView.criterion.status).isEqualTo(NOT_STARTED)
         assertThat(criterionView.criterion.questions.first().answer).isEqualTo(null)
+        assertOverallEligibilityStatus(criterionView.assessmentSummary).isEqualTo(NOT_STARTED)
       }
 
       run {
+        val payload = CriterionCheck(
+          code = "recalled-for-breaching-hdc-curfew",
+          type = CriteriaType.ELIGIBILITY,
+          answers = mapOf("recalledForBreachingHdcCurfew" to false),
+          agent = PRISON_CA_AGENT,
+        )
+
         val eligibilityAndSuitabilityView = webTestClient.put()
           .uri(PERFORM_CRITERIA_CHECK)
           .bodyValue(payload)
@@ -434,30 +460,19 @@ class EligibilityAndSuitabilityCaseViewResourceIntTest : SqsIntegrationTestBase(
         assertThat(updatedCriteria).isNotNull()
         assertThat(updatedCriteria!!.status).isEqualTo(ELIGIBLE)
         assertThat(updatedCriteria.questions.first().answer).isEqualTo(false)
+        assertOverallEligibilityStatus(eligibilityAndSuitabilityView.assessmentSummary).isEqualTo(IN_PROGRESS)
       }
+    }
+
+    private fun assertOverallEligibilityStatus(summary: AssessmentSummary): AbstractComparableAssert<*, EligibilityStatus> {
+      val assessment =
+        assessmentRepository.findByOffenderPrisonNumberAndDeletedTimestampIsNullOrderByCreatedTimestamp(summary.prisonNumber)
+          .first()
+      return assertThat(assessment.eligibilityChecksStatus)
     }
   }
 
   private fun serializedContent(name: String) = this.javaClass.getResourceAsStream("/test_data/responses/$name.json")!!.bufferedReader(
     StandardCharsets.UTF_8,
   ).readText()
-
-  private companion object {
-    val prisonerSearchApiMockServer = PrisonerSearchMockServer()
-    val prisonRegisterMockServer = PrisonRegisterMockServer()
-
-    @JvmStatic
-    @BeforeAll
-    fun startMocks() {
-      prisonRegisterMockServer.start()
-      prisonerSearchApiMockServer.start()
-    }
-
-    @JvmStatic
-    @AfterAll
-    fun stopMocks() {
-      prisonRegisterMockServer.stop()
-      prisonerSearchApiMockServer.stop()
-    }
-  }
 }

@@ -11,8 +11,8 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CH
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONFIRM_RELEASE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.CONSULT_THE_VLO_AND_POM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.ENTER_CURFEW_ADDRESS
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.RECORD_NON_DISCLOSABLE_INFORMATION
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.REVIEW_APPLICATION_AND_SEND_FOR_DECISION
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Task.SEND_CHECKS_TO_PRISON
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChange
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.StatusChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentLifecycleEvent.EligibilityAnswerProvided
@@ -136,8 +136,8 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(ELIGIBLE_AND_SUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
-    val agents = assessment.assessmentEvents.map { it.agent }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
+    val agents = assessment.getEvents().map { it.agent }
     assertThat(agents).containsOnly(anAgentEntity)
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
@@ -177,7 +177,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(INELIGIBLE_OR_UNSUITABLE)
     assertThat(assessment.previousStatus).isEqualTo(OPTED_OUT)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
         before = INELIGIBLE_OR_UNSUITABLE,
@@ -199,7 +199,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(NOT_STARTED)
     assertThat(assessment.previousStatus).isNull()
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).isEmpty()
   }
 
@@ -221,7 +221,7 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(POSTPONED)
     assertThat(assessment.previousStatus).isEqualTo(fromState)
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).containsExactly(
       StatusChange(
         before = fromState,
@@ -253,32 +253,32 @@ class AssessmentTest {
     assertThat(assessment.status).isEqualTo(fromState)
     assertThat(assessment.previousStatus).isNull()
 
-    val statusChangeEvents = assessment.assessmentEvents.map { it as StatusChangedEvent }.map { it.changes }
+    val statusChangeEvents = assessment.getEvents().map { it as StatusChangedEvent }.map { it.changes }
     assertThat(statusChangeEvents).isEmpty()
   }
 
   @Test
   fun `should get the current task based on the assessment state`() {
     val offender = anOffender()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, NOT_STARTED).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, INELIGIBLE_OR_UNSUITABLE).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_ADDRESS_AND_RISK_CHECKS).currentTask()).isEqualTo(CONSULT_THE_VLO_AND_POM)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(SEND_CHECKS_TO_PRISON)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_UNSUITABLE).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(REVIEW_APPLICATION_AND_SEND_FOR_DECISION)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, REFUSED).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, APPROVED).currentTask()).isEqualTo(Task.APPROVE_LICENCE)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, TIMED_OUT).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, POSTPONED).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
-    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, RELEASED_ON_HDC).currentTask()).isNull()
+    assertThat(anAssessment(offender, NOT_STARTED).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
+    assertThat(anAssessment(offender, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
+    assertThat(anAssessment(offender, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, INELIGIBLE_OR_UNSUITABLE).currentTask()).isNull()
+    assertThat(anAssessment(offender, AWAITING_ADDRESS_AND_RISK_CHECKS).currentTask()).isEqualTo(CONSULT_THE_VLO_AND_POM)
+    assertThat(anAssessment(offender, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
+    assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(RECORD_NON_DISCLOSABLE_INFORMATION)
+    assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(RECORD_NON_DISCLOSABLE_INFORMATION)
+    assertThat(anAssessment(offender, ADDRESS_UNSUITABLE).currentTask()).isNull()
+    assertThat(anAssessment(offender, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(REVIEW_APPLICATION_AND_SEND_FOR_DECISION)
+    assertThat(anAssessment(offender, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, REFUSED).currentTask()).isNull()
+    assertThat(anAssessment(offender, APPROVED).currentTask()).isEqualTo(Task.APPROVE_LICENCE)
+    assertThat(anAssessment(offender, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, TIMED_OUT).currentTask()).isNull()
+    assertThat(anAssessment(offender, POSTPONED).currentTask()).isNull()
+    assertThat(anAssessment(offender, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, RELEASED_ON_HDC).currentTask()).isNull()
   }
 }

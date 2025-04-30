@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentContactsResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType
@@ -438,4 +439,47 @@ class AssessmentResource(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @Valid @RequestBody nonDisclosableInformation: NonDisclosableInformation,
   ) = assessmentService.recordNonDisclosableInformation(prisonNumber, nonDisclosableInformation, agentHolder.getAgentOrThrow())
+
+  @GetMapping("/offender/{prisonNumber}/current-assessment/contacts")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @Operation(
+    summary = "Returns the current assessments contact details",
+    description = "Returns the current assessments contact details",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the current assessments contact details",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = AssessmentContactsResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getContacts(@Parameter(required = true) @PathVariable prisonNumber: String) = assessmentService.getContacts(prisonNumber)
 }
