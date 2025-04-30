@@ -108,7 +108,7 @@ object TestData {
     agent = PRISON_CA_AGENT,
   )
 
-  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null): Offender {
+  fun anOffender(hdced: LocalDate = LocalDate.now().plusDays(7), sentenceStartDate: LocalDate? = null, crd: LocalDate? = null): Offender {
     val offender = Offender(
       id = 1,
       prisonNumber = PRISON_NUMBER,
@@ -116,10 +116,8 @@ object TestData {
       forename = FORENAME,
       surname = SURNAME,
       dateOfBirth = LocalDate.of(1981, 5, 23),
-      hdced = hdced,
-      sentenceStartDate = sentenceStartDate,
     )
-    offender.assessments.add(anAssessment(offender))
+    offender.assessments.add(anAssessment(offender, hdced, crd, sentenceStartDate))
     return offender
   }
 
@@ -130,11 +128,14 @@ object TestData {
     agent = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE"),
   )
 
-  fun anAssessment(offender: Offender, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(
+  fun anAssessment(offender: Offender, hdced: LocalDate, crd: LocalDate?, sentenceStartDate: LocalDate?, status: AssessmentStatus = NOT_STARTED, bookingId: Long = BOOKING_ID): Assessment = Assessment(
     offender = offender,
     status = status,
     bookingId = bookingId,
     policyVersion = PolicyService.CURRENT_POLICY_VERSION.code,
+    hdced = hdced,
+    crd = crd,
+    sentenceStartDate = sentenceStartDate,
   )
 
   fun aPrisonerSearchPrisoner(hdced: LocalDate? = null, sentenceStartDate: LocalDate? = null) = PrisonerSearchPrisoner(

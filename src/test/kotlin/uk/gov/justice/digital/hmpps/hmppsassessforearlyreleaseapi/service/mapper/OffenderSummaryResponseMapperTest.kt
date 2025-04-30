@@ -18,8 +18,9 @@ class OffenderSummaryResponseMapperTest {
   fun `should map assessment to offender summary`() {
     val workingDaysToHdced = 12
     val crd = LocalDate.of(2026, Month.MAY, 6)
-    val offender = anOffender().copy(crd = crd)
-    val anAssessment = anAssessment(offender)
+    val hdced = LocalDate.now().plusDays(7)
+    val offender = anOffender(hdced, null, crd)
+    val anAssessment = offender.assessments.first()
     anAssessment.lastUpdateByUserEvent = anStatusChangedEvent(anAssessment)
     val offenderSummary = mapper.map(anAssessment, workingDaysToHdced)
 

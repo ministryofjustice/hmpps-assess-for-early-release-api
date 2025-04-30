@@ -861,7 +861,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/assesment-with-event-history.sql",
+      "classpath:test_data/assessment-with-event-history.sql",
     )
     @Test
     fun `should return the latest contacts for current assessment`() {
@@ -921,7 +921,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
     @Sql(
       "classpath:test_data/reset.sql",
-      "classpath:test_data/assesment-with-event-history.sql",
+      "classpath:test_data/assessment-with-event-history.sql",
     )
     @Test
     fun `should return the some contacts details even if external calls fail`() {
