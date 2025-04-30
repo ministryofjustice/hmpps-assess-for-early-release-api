@@ -47,7 +47,7 @@ class AddressService(
   private val residentRepository: ResidentRepository,
   private val assessmentRepository: AssessmentRepository,
 ) {
-  fun getAddressesForPostcode(postcode: String): List<AddressSummary> = osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
+  fun searchForAddresses(searchQuery: String): List<AddressSummary> = osPlacesApiClient.searchForAddresses(searchQuery).map { it.toAddressSummary() }
 
   @Transactional
   fun getAddressForUprn(uprn: String): AddressSummary {
