@@ -364,7 +364,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = GET_ASSESSMENTS
-      val assessments = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER)
+      val assessments = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER)
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
 
       // When
@@ -515,7 +515,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = DELETE_CURRENT_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
       val crn = "DX12340A"
 
@@ -573,7 +573,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       // Given
       val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
       val url = DELETE_ASSESSMENT_URL
-      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumber(PRISON_NUMBER).first()
+      val initialAssessment = testAssessmentRepository.findByOffenderPrisonNumberOrderById(PRISON_NUMBER).first()
       val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
       val crn = "DX12340A"
 
