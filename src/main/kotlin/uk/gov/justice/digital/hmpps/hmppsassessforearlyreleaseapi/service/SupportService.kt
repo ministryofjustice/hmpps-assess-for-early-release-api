@@ -110,6 +110,7 @@ class SupportService(
         assessment.bookingId,
         assessment.hdced,
         assessment.crd,
+        assessment.sentenceStartDate,
       )
     offender.assessments.add(newAssessment)
   }

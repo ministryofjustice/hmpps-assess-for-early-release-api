@@ -57,7 +57,6 @@ class OffenderService(
         surname = prisoner.lastName,
         dateOfBirth = prisoner.dateOfBirth,
         crn = crn,
-        sentenceStartDate = prisoner.sentenceStartDate,
       ),
     )
 
@@ -67,6 +66,7 @@ class OffenderService(
       prisoner.bookingId!!.toLong(),
       prisoner.homeDetentionCurfewEligibilityDate!!,
       prisoner.conditionalReleaseDate,
+      prisoner.sentenceStartDate,
     )
     offender.assessments.add(assessment)
     val changes = mapOf(
@@ -88,10 +88,10 @@ class OffenderService(
     if (hasOffenderBeenUpdated(offender, prisoner, currentAssessment)) {
       currentAssessment.hdced = prisoner.homeDetentionCurfewEligibilityDate!!
       currentAssessment.crd = prisoner.conditionalReleaseDate
+      currentAssessment.sentenceStartDate = prisoner.sentenceStartDate
       offender.forename = prisoner.firstName
       offender.surname = prisoner.lastName
       offender.dateOfBirth = prisoner.dateOfBirth
-      offender.sentenceStartDate = prisoner.sentenceStartDate
       offender.lastUpdatedTimestamp = LocalDateTime.now()
 
       offenderRepository.save(offender)
@@ -124,7 +124,7 @@ class OffenderService(
     prisoner: PrisonerSearchPrisoner,
     currentAssessment: Assessment,
   ) = currentAssessment.hdced != prisoner.homeDetentionCurfewEligibilityDate ||
-    offender.sentenceStartDate != prisoner.sentenceStartDate ||
+    currentAssessment.sentenceStartDate != prisoner.sentenceStartDate ||
     currentAssessment.crd != prisoner.conditionalReleaseDate ||
     offender.forename != prisoner.firstName ||
     offender.surname != prisoner.lastName ||

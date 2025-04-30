@@ -55,7 +55,7 @@ class OffenderServiceTest {
     )
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any(), any())).thenReturn(mockAssessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
@@ -65,8 +65,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "forename", "surname", "sentenceStartDate")
-      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, sentenceStartDate))
+      .extracting("prisonNumber", "forename", "surname")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME))
     assertThat(offenderCaptor.value.assessments).hasSize(1)
   }
 
@@ -87,7 +87,7 @@ class OffenderServiceTest {
 
     val mockAssessment = mock(Assessment::class.java)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
-    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any(), any())).thenReturn(mockAssessment)
 
     // When
     service.createOrUpdateOffender(PRISON_NUMBER)
@@ -119,7 +119,7 @@ class OffenderServiceTest {
     whenever(probationService.getCurrentResponsibleOfficer(PRISON_NUMBER)).thenReturn(offenderManager)
 
     val mockAssessment = mock(Assessment::class.java)
-    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any())).thenReturn(mockAssessment)
+    whenever(assessmentService.createAssessment(any(), any(), any(), any(), any(), any())).thenReturn(mockAssessment)
     whenever(offenderRepository.save(any())).then(AdditionalAnswers.returnsFirstArg<Offender>())
 
     // When
@@ -154,10 +154,8 @@ class OffenderServiceTest {
 
   @Test
   fun `should update an existing offender for a prisoner that has an HDCED`() {
-    // TODO
     val existingHdced = LocalDate.now().plusDays(6)
     val updatedHdced = LocalDate.now().plusDays(10)
-    val anOffender = anOffender(existingHdced)
 
     val prisonerSearchPrisoner = aPrisonerSearchPrisoner(hdced = updatedHdced)
     whenever(prisonService.searchPrisonersByNomisIds(listOf(PRISON_NUMBER))).thenReturn(
@@ -166,10 +164,11 @@ class OffenderServiceTest {
       ),
     )
     whenever(offenderRepository.findByPrisonNumber(PRISON_NUMBER)).thenReturn(
-      anOffender,
+      anOffender(existingHdced),
     )
 
-    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(anOffender.assessments.first())
+    val mockAssessment = mock(Assessment::class.java)
+    whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(mockAssessment)
 
     service.createOrUpdateOffender(PRISON_NUMBER)
 
@@ -232,8 +231,8 @@ class OffenderServiceTest {
     val offenderCaptor = ArgumentCaptor.forClass(Offender::class.java)
     verify(offenderRepository).save(offenderCaptor.capture())
     assertThat(offenderCaptor.value)
-      .extracting("prisonNumber", "forename", "surname", "sentenceStartDate")
-      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME, updatedSentenceStartDate))
+      .extracting("prisonNumber", "forename", "surname")
+      .isEqualTo(listOf(PRISON_NUMBER, FORENAME, SURNAME))
   }
 
   @Test

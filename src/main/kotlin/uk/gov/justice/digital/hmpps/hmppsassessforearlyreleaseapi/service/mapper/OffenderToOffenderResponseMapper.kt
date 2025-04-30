@@ -14,7 +14,6 @@ class OffenderToOffenderResponseMapper {
     crn = offender.crn,
     prisonId = offender.prisonId,
     dateOfBirth = offender.dateOfBirth,
-    sentenceStartDate = offender.sentenceStartDate,
     createdTimestamp = offender.createdTimestamp,
     lastUpdatedTimestamp = offender.lastUpdatedTimestamp,
   )

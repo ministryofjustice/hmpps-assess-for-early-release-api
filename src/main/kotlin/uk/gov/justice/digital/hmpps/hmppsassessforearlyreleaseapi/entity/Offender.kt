@@ -36,8 +36,6 @@ data class Offender(
 
   val crn: String? = null,
 
-  var sentenceStartDate: LocalDate? = null,
-
   @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("id")
   val assessments: MutableSet<Assessment> = mutableSetOf(),

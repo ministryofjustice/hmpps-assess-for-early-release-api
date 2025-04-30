@@ -25,5 +25,6 @@ class AssessmentToAssessmentResponseMapper {
     optOutReasonOther = assessment.optOutReasonOther,
     hdced = assessment.hdced,
     crd = assessment.crd,
+    sentenceStartDate = assessment.sentenceStartDate,
   )
 }

@@ -55,8 +55,9 @@ class AssessmentTest {
 
   private val anAgent = Agent("mtynan", fullName = "Mark Tynan", UserRole.PRISON_CA, "HPE")
   private val anAgentEntity = anAgent
-  private val hdced = LocalDate.now().plusDays(7)
+  private val hdced = LocalDate.now().plusDays(14)
   private val crd = LocalDate.now().plusDays(31)
+  private val sentenceStartDate = LocalDate.now().plusDays(1)
 
   @Test
   fun `add new eligibility criteria check`() {
@@ -259,25 +260,25 @@ class AssessmentTest {
   @Test
   fun `should get the current task based on the assessment state`() {
     val offender = anOffender()
-    assertThat(anAssessment(offender, hdced, crd, NOT_STARTED).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
-    assertThat(anAssessment(offender, hdced, crd, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
-    assertThat(anAssessment(offender, hdced, crd, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
-    assertThat(anAssessment(offender, hdced, crd, INELIGIBLE_OR_UNSUITABLE).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_ADDRESS_AND_RISK_CHECKS).currentTask()).isEqualTo(CONSULT_THE_VLO_AND_POM)
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
-    assertThat(anAssessment(offender, hdced, crd, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
-    assertThat(anAssessment(offender, hdced, crd, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(SEND_CHECKS_TO_PRISON)
-    assertThat(anAssessment(offender, hdced, crd, ADDRESS_UNSUITABLE).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(REVIEW_APPLICATION_AND_SEND_FOR_DECISION)
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
-    assertThat(anAssessment(offender, hdced, crd, REFUSED).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, APPROVED).currentTask()).isEqualTo(Task.APPROVE_LICENCE)
-    assertThat(anAssessment(offender, hdced, crd, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, TIMED_OUT).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, POSTPONED).currentTask()).isNull()
-    assertThat(anAssessment(offender, hdced, crd, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
-    assertThat(anAssessment(offender, hdced, crd, RELEASED_ON_HDC).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, NOT_STARTED).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS).currentTask()).isEqualTo(ASSESS_ELIGIBILITY)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, INELIGIBLE_OR_UNSUITABLE).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_ADDRESS_AND_RISK_CHECKS).currentTask()).isEqualTo(CONSULT_THE_VLO_AND_POM)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask()).isEqualTo(SEND_CHECKS_TO_PRISON)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_UNSUITABLE).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(REVIEW_APPLICATION_AND_SEND_FOR_DECISION)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, REFUSED).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, APPROVED).currentTask()).isEqualTo(Task.APPROVE_LICENCE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, TIMED_OUT).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, POSTPONED).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, RELEASED_ON_HDC).currentTask()).isNull()
   }
 }
