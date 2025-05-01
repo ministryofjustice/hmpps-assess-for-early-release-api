@@ -140,7 +140,7 @@ object TestData {
     changes = StatusChange(NOT_STARTED, AssessmentStatus.OPTED_OUT, mapOf()),
     agent = Agent("prisonUser", fullName = "prison user", role = PRISON_CA, onBehalfOf = "KXE"),
   )
-  
+
   fun anAssessment(
     offender: Offender,
     hdced: LocalDate,
