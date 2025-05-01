@@ -115,7 +115,7 @@ data class Assessment(
   @OrderBy("createdTimestamp ASC")
   val postponementReasons: MutableList<PostponementReasonEntity> = mutableListOf(),
 
-  @OneToOne(cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OneToOne(cascade = [CascadeType.MERGE, CascadeType.REFRESH])
   @JoinTable(
     name = "assessment_to_last_update_event",
     joinColumns =
