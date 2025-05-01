@@ -50,7 +50,7 @@ abstract class AssessmentEvent(
   val id: Long? = -1,
 
   @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "assessment_id", nullable = true)
+  @JoinColumn(name = "assessment_id", nullable = false)
   val assessment: Assessment,
 
   @Enumerated(EnumType.STRING)

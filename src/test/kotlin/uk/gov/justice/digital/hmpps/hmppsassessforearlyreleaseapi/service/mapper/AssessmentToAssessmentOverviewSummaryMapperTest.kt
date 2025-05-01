@@ -7,7 +7,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
@@ -117,9 +116,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     assertThat(assessmentOverviewSummary.hdced).isEqualTo(expectedAssessment.hdced)
     assertThat(assessmentOverviewSummary.crd).isEqualTo(expectedAssessment.crd)
 
-    assertThat(assessmentOverviewSummary.tasks).isEqualTo(
-      expectedAssessment.status.tasks().mapValues { (_, tasks) -> tasks.map { TaskProgress(it.task, it.status(expectedAssessment)) } },
-    )
+    assertThat(assessmentOverviewSummary.tasks).isEqualTo(expectedAssessment.tasks())
 
     assertThat(assessmentOverviewSummary.cellLocation).isEqualTo("A-1-002")
     assertThat(assessmentOverviewSummary.location).isEqualTo("Birmingham (HMP)")

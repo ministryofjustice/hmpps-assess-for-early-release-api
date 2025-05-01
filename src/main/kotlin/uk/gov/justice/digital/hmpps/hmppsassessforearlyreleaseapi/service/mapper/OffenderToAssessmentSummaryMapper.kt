@@ -5,7 +5,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.TaskProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonService
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
@@ -39,9 +38,7 @@ class OffenderToAssessmentSummaryMapper(
       postponementReasons = currentAssessment.postponementReasons.map { reason -> reason.reasonType }.toList(),
       cellLocation = prisonerDetails.cellLocation,
       mainOffense = prisonerDetails.mostSeriousOffence,
-      tasks = currentAssessment.status.tasks().mapValues { (_, tasks) ->
-        tasks.map { TaskProgress(it.task, it.status(currentAssessment)) }
-      },
+      tasks = currentAssessment.tasks(),
       lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
     )
   }

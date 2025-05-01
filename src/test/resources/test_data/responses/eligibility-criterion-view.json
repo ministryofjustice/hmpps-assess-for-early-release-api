@@ -1,6 +1,6 @@
 {
   "assessmentSummary": {
-    "bookingId":10,
+    "bookingId": 10,
     "forename": "FIRST-1",
     "surname": "LAST-1",
     "dateOfBirth": "1978-03-20",
@@ -16,7 +16,7 @@
       "PRISON_CA": [
         {
           "name": "ASSESS_ELIGIBILITY",
-          "progress": "READY_TO_START"
+          "progress": "IN_PROGRESS"
         },
         {
           "name": "ENTER_CURFEW_ADDRESS",
@@ -38,14 +38,16 @@
           "name": "PRINT_LICENCE",
           "progress": "LOCKED"
         }
-      ]
+      ],
+      "PROBATION_COM": [],
+      "PRISON_DM": []
     },
     "optOutReasonType": null,
     "optOutReasonOther": null,
     "postponementReasons": [],
     "cellLocation": "A-1-002",
     "mainOffense": "Robbery",
-    "lastUpdateBy":null
+    "lastUpdateBy": null
   },
   "criterion": {
     "code": "sex-offender-register",
@@ -54,10 +56,10 @@
     "questions": [
       {
         "text": "Is this person required to sign the sex offenders' register?",
+        "failedQuestionDescription": "you will be subject to sex offender registration on release",
         "hint": null,
         "name": "requiredToSignSexOffenderRegister",
-        "answer": false,
-        "failedQuestionDescription": "you will be subject to sex offender registration on release"
+        "answer": false
       }
     ],
     "agent": {
@@ -75,10 +77,10 @@
     "questions": [
       {
         "text": "Is this person serving an extended sentence for violent or sexual offences?",
+        "failedQuestionDescription": "you are serving an extended sentence",
         "hint": null,
         "name": "servingExtendedSentenceForViolentOrSexualOffence",
-        "answer": false,
-        "failedQuestionDescription": "you are serving an extended sentence"
+        "answer": false
       }
     ],
     "agent": {
