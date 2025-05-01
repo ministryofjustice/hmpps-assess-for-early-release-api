@@ -143,9 +143,9 @@ object TestData {
   
   fun anAssessment(
     offender: Offender,
-    hdced: LocalDate, 
-    crd: LocalDate?, 
-    sentenceStartDate: LocalDate?
+    hdced: LocalDate,
+    crd: LocalDate?,
+    sentenceStartDate: LocalDate?,
     status: AssessmentStatus = NOT_STARTED,
     bookingId: Long = BOOKING_ID,
     eligibilityStatus: EligibilityStatus = ELIGIBLE,

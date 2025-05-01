@@ -284,7 +284,7 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
-        hdced.
+        hdced,
         crd,
         sentenceStartDate,
         NOT_STARTED,
@@ -295,7 +295,7 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
-        hdced.
+        hdced,
         crd,
         sentenceStartDate,
         ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
@@ -305,12 +305,12 @@ class AssessmentTest {
       ASSESS_ELIGIBILITY,
     )
 
-    assertThat(anAssessment(offender, hdced. crd, sentenceStartDate, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
 
     assertThat(
       anAssessment(
         offender,
-        hdced.
+        hdced,
         crd,
         sentenceStartDate,
         INELIGIBLE_OR_UNSUITABLE,
@@ -320,7 +320,7 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
-        hdced.
+        hdced,
         crd,
         sentenceStartDate,
         AWAITING_ADDRESS_AND_RISK_CHECKS,
