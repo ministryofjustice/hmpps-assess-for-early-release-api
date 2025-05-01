@@ -39,6 +39,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.S
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.Task
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.READY_TO_START
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.TaskStatus.UNAVAILABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.assessmentStateMachine
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
@@ -256,7 +257,7 @@ data class Assessment(
 
   fun tasks(): Map<UserRole, List<TaskProgress>> = Task.TASKS_BY_ROLE.mapValues { (_, tasks) ->
     tasks.mapNotNull {
-      it.taskStatus(this)?.let { taskStatus ->
+      it.taskStatus(this).takeUnless { status -> status == UNAVAILABLE }?.let { taskStatus ->
         TaskProgress(it, taskStatus)
       }
     }
