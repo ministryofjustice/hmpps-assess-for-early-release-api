@@ -63,7 +63,7 @@ data class AssessmentResponse(
   @JsonFormat(pattern = API_DATE_FORMAT)
   val hdced: LocalDate,
 
-  @Schema(description = "The offender's conditional release date date", example = "2026-08-23",  required = false)
+  @Schema(description = "The offender's conditional release date date", example = "2026-08-23", required = false)
   @JsonFormat(pattern = API_DATE_FORMAT)
   val crd: LocalDate? = null,
 
