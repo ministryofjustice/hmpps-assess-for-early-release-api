@@ -472,8 +472,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // When
       val result = webTestClient.put()
         .uri(OPT_IN_ASSESSMENT_URL)
-        .headers(setAuthorisation(roles = roles))
-        .bodyValue(PRISON_CA_AGENT)
+        .headers(setAuthorisation(roles = roles, agent = PROBATION_COM_AGENT))
         .exchange()
 
       // Then
