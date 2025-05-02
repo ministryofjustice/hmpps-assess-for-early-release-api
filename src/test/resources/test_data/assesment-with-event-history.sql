@@ -1,8 +1,8 @@
-insert into offender(prison_number, prison_id, forename, surname, date_of_birth, crn)
-values ('A1234AA', 'AKI', 'FIRST-7', 'LAST-7', '1969-05-15', 'DX12340G');
+insert into offender(prison_number, prison_id, forename, surname, date_of_birth, hdced, crd, status, crn)
+values ('A1234AA', 'AKI', 'FIRST-7', 'LAST-7', '1969-05-15', current_date + 7, '2021-12-18', 'NOT_STARTED', 'DX12340G');
 
-insert into assessment(booking_id, offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date, created_timestamp, hdced, crd)
-values (70,1, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06', current_date + 7, '2021-12-18');
+insert into assessment(booking_id, offender_id, status, policy_version, opt_out_reason_type, opt_out_reason_other, postponement_date, created_timestamp)
+values (70,1, 'NOT_STARTED', '1.0','OTHER','I have reason',null, '2021-12-06');
 
 INSERT INTO public.assessment_event
 (assessment_id, event_type, summary, event_time, username, role, full_name)

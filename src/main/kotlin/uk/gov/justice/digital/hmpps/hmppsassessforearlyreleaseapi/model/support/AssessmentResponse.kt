@@ -58,16 +58,4 @@ data class AssessmentResponse(
 
   @Schema(description = "The opt out reason description if rhe optOutReasonType is OTHER", required = true)
   val optOutReasonOther: String?,
-
-  @Schema(description = "The home detention curfew eligibility date", example = "2026-08-23", required = true)
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val hdced: LocalDate,
-
-  @Schema(description = "The offender's conditional release date date", example = "2026-08-23", required = false)
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val crd: LocalDate? = null,
-
-  @Schema(description = "The sentence start date", example = "2028-06-23", required = false)
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val sentenceStartDate: LocalDate? = null,
 )

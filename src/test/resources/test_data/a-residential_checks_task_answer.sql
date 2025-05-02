@@ -2,25 +2,27 @@ insert into offender(prison_number,
                      prison_id,
                      forename,
                      surname,
-                     date_of_birth)
+                     date_of_birth,
+                     hdced,
+                     crd,
+                     status)
 values ('A1234AA',
         'BMI',
         'forename',
         'surname',
-        '1978-03-20');
+        '1978-03-20',
+        '2020-10-25',
+        '2020-11-14',
+        'NOT_STARTED');
 
 insert into assessment(booking_id,
                        offender_id,
                        status,
-                       policy_version,
-                       hdced,
-                       crd)
+                       policy_version)
 values (10,
         1,
         'AWAITING_ADDRESS_AND_RISK_CHECKS',
-        '1.0',
-        '2020-10-25',
-        '2020-11-14');
+        '1.0');
 
 insert into address (uprn,
                      first_line,

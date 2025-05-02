@@ -295,47 +295,4 @@ class SupportResource(
   fun deleteAssessment(@Parameter(required = true) @PathVariable assessmentId: Long) {
     supportService.deleteAssessment(assessmentId, agentHolder.agent)
   }
-
-  @GetMapping("/support/offender/assessment/current/{prisonNumber}")
-  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
-  @Operation(
-    summary = "Returns the current assessment for the given prisoner",
-    description = "Returns the current assessment for the given prisoner",
-    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "200",
-        description = "Returned the current assessment for the given prisoner",
-        content = [
-          Content(
-            mediaType = "application/json",
-            array = ArraySchema(schema = Schema(implementation = AssessmentResponse::class)),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorised, requires a valid Oauth2 token",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an appropriate role",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-    ],
-  )
-  fun getCurrentAssessment(@Parameter(required = true) @PathVariable prisonNumber: String) = supportService.getCurrentAssessment(prisonNumber)
 }

@@ -147,6 +147,7 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val createdOffender = offenderRepository.findByPrisonNumber(prisonNumber) ?: fail("offender not created")
     assertThat(createdOffender.forename).isEqualTo(firstName)
     assertThat(createdOffender.surname).isEqualTo(lastName)
+    assertThat(createdOffender.hdced).isEqualTo(hdced)
     assertThat(createdOffender.assessments).hasSize(1)
     assertThat(createdOffender.crn).isEqualTo(crn)
 
@@ -166,7 +167,6 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       assertThat(it.forename).isEqualTo("Jimmy")
       assertThat(it.surname).isEqualTo("Vivers")
     }
-    assertThat(assessment.hdced).isEqualTo(hdced)
 
     val events = assessmentEventRepository.findByAssessmentId(assessment.id)
     assertThat(events).hasSize(1)
@@ -343,11 +343,10 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
     val updatedOffender = offenderRepository.findByPrisonNumber(PRISON_NUMBER) ?: fail("could not find updated offender")
     assertThat(updatedOffender.forename).isEqualTo(newFirstName)
     assertThat(updatedOffender.surname).isEqualTo(newLastName)
+    assertThat(updatedOffender.hdced).isEqualTo(newHdced)
+    assertThat(updatedOffender.crd).isEqualTo(newCrd)
 
     val assessment = updatedOffender.assessments.first()
-    assertThat(assessment.hdced).isEqualTo(newHdced)
-    assertThat(assessment.crd).isEqualTo(newCrd)
-
     val events = assessmentEventRepository.findByAssessmentId(assessment.id)
     assertThat(events).hasSize(1)
     val event = events.first() as GenericChangedEvent

@@ -50,5 +50,5 @@ class CaseloadService(
     return assessments.map { createOffenderSummary(it) }
   }
 
-  fun createOffenderSummary(assessments: Assessment): OffenderSummaryResponse = offenderSummaryResponseMapper.map(assessments, workingDaysService.workingDaysUntil(assessments.hdced))
+  fun createOffenderSummary(assessments: Assessment): OffenderSummaryResponse = offenderSummaryResponseMapper.map(assessments, workingDaysService.workingDaysUntil(assessments.offender.hdced))
 }
