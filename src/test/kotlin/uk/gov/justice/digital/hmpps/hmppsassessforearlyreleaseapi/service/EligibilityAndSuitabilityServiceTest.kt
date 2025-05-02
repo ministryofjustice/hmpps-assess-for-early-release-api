@@ -65,8 +65,8 @@ class EligibilityAndSuitabilityServiceTest {
       // Then
       assertThat(caseView.assessmentSummary).isEqualTo(
         anAssessmentSummary().copy(
-          hdced = anOffender.hdced,
-          crd = anOffender.crd,
+          hdced = anOffender.assessments.first().hdced,
+          crd = anOffender.assessments.first().crd,
         ),
       )
 
@@ -250,8 +250,6 @@ class EligibilityAndSuitabilityServiceTest {
     val expectedAssessment = assessmentWithEligibilityProgress.assessmentEntity
 
     assertThat(assessmentSummary).isNotNull
-    assertThat(assessmentSummary.crd).isEqualTo(assessmentWithEligibilityProgress.offender.crd)
-    assertThat(assessmentSummary.hdced).isEqualTo(assessmentWithEligibilityProgress.offender.hdced)
     assertThat(assessmentSummary.prisonNumber).isEqualTo(assessmentWithEligibilityProgress.offender.prisonNumber)
     assertThat(assessmentSummary.dateOfBirth).isEqualTo(assessmentWithEligibilityProgress.offender.dateOfBirth)
     assertThat(assessmentSummary.forename).isEqualTo(assessmentWithEligibilityProgress.offender.forename)
@@ -263,6 +261,8 @@ class EligibilityAndSuitabilityServiceTest {
     assertThat(assessmentSummary.teamCode).isEqualTo(expectedAssessment.teamCode)
     assertThat(assessmentSummary.policyVersion).isEqualTo(expectedAssessment.policyVersion)
     assertThat(assessmentSummary.responsibleCom).isEqualTo(expectedAssessment.responsibleCom?.toSummary())
+    assertThat(assessmentSummary.hdced).isEqualTo(expectedAssessment.hdced)
+    assertThat(assessmentSummary.crd).isEqualTo(expectedAssessment.crd)
 
     assertThat(assessmentSummary.tasks).isEqualTo(expectedAssessment.tasks())
     assertThat(assessmentSummary.cellLocation).isEqualTo("A-1-002")
