@@ -296,7 +296,7 @@ class SupportResource(
     supportService.deleteAssessment(assessmentId, agentHolder.agent)
   }
 
-  @GetMapping("/support/offender/assessment/current/{prisonNumber}")
+  @GetMapping("/support/offender/{prisonNumber}/assessment/current")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @Operation(
     summary = "Returns the current assessment for the given prisoner",

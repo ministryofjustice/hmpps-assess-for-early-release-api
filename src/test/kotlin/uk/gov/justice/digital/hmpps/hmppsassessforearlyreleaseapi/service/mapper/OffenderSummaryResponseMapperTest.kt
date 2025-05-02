@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.CaseloadService.Companion.DAYS_BEFORE_SENTENCE_START
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anStatusChangedEvent
 import java.time.LocalDate

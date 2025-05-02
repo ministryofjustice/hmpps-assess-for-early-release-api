@@ -41,7 +41,7 @@ private const val SEARCH_FOR_OFFENDERS = "/support/offender/search/"
 private const val GET_OFFENDER = "/support/offender/$PRISON_NUMBER"
 private const val GET_ASSESSMENT = "/support/offender/assessment/$ASSESSMENT_ID"
 private const val GET_ASSESSMENTS = "/support/offender/$PRISON_NUMBER/assessments"
-private const val GET_CURRENT_ASSESSMENT = "/support/offender/assessment/current/$PRISON_NUMBER"
+private const val GET_CURRENT_ASSESSMENT = "/support/offender/$PRISON_NUMBER/assessment/current"
 
 class SupportResourceIntTest : SqsIntegrationTestBase() {
 
