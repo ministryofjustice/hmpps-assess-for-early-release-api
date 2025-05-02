@@ -143,9 +143,9 @@ object TestData {
 
   fun anAssessment(
     offender: Offender,
-    hdced: LocalDate,
-    crd: LocalDate?,
-    sentenceStartDate: LocalDate?,
+    hdced: LocalDate = LocalDate.now().plusDays(14),
+    crd: LocalDate? = LocalDate.now().plusDays(31),
+    sentenceStartDate: LocalDate? = LocalDate.now().plusDays(1),
     status: AssessmentStatus = NOT_STARTED,
     bookingId: Long = BOOKING_ID,
     eligibilityStatus: EligibilityStatus = ELIGIBLE,
