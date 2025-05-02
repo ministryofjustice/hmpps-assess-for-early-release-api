@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
@@ -500,4 +501,62 @@ class AddressResource(private val addressService: AddressService, private val ag
     @Parameter(required = true) @PathVariable requestId: Long,
     @RequestBody @Valid updateCaseAdminAdditionInfoRequest: UpdateCaseAdminAdditionInfoRequest,
   ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequest, agentHolder.getAgentOrThrow())
+
+  @PostMapping("/offender/{prisonNumber}/current-assessment/address-delete-reason/{requestId}")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.CREATED)
+  @Operation(
+    summary = "Adds a address deletion reason.",
+    description = "Adds a reason for deleting an address in the context of an offender's current assessment.",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "204",
+        description = "The address deletion reason has been added.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = Void::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "404",
+        description = "An address check request with the specified id does not exist for the offender.",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun addressDeleteReason(
+    @Parameter(required = true) @PathVariable prisonNumber: String,
+    @Parameter(required = true) @PathVariable requestId: Long,
+    @RequestBody @Valid addressDeleteReason: AddressDeleteReason,
+  ) = addressService.addressDeleteReason(prisonNumber, requestId, addressDeleteReason, agentHolder.getAgentOrThrow())
 }

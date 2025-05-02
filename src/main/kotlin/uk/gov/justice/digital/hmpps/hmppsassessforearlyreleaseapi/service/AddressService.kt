@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional
 import jakarta.validation.Valid
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDeletionEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddCasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddStandardAddressCheckRequestSummary
@@ -14,6 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
@@ -146,7 +148,7 @@ class AddressService(
     val assessmentEntity = curfewAddressCheckRequest.assessment
     assessmentEntity.recordEvent(
       changes = mapOf("deleteAddressCheckRequestId" to requestId),
-      eventType = AssessmentEventType.ADDRESS_UPDATED,
+      eventType = AssessmentEventType.ADDRESS_DELETED,
       agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
@@ -232,6 +234,34 @@ class AddressService(
       agent = agent.toEntity(),
     )
     assessmentRepository.save(assessmentEntity)
+    curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
+  }
+
+  @Transactional
+  fun addressDeleteReason(
+    prisonNumber: String,
+    requestId: Long,
+    addressDeleteReason: AddressDeleteReason,
+    agent: AgentDto,
+  ) {
+    val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
+    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
+    currentAssessment.recordEvent(
+      changes = mapOf(
+        "addressDeleteReasonType" to addressDeleteReason.addressDeleteReasonType.toString(),
+        "otherDeleteReasonDetails" to addressDeleteReason.addressDeleteOtherReason.toString(),
+      ),
+      eventType = AssessmentEventType.ADDRESS_DELETED,
+      agent = agent.toEntity(),
+    )
+    assessmentRepository.save(currentAssessment)
+
+    val addressDeletionEvent = AddressDeletionEvent(
+      addressDeleteReasonType = addressDeleteReason.addressDeleteReasonType,
+      addressDeleteOtherReason = addressDeleteReason.addressDeleteOtherReason,
+      assessmentEvent = currentAssessment.lastUpdateByUserEvent,
+    )
+    curfewAddressCheckRequest.addressDeletionEvent = addressDeletionEvent
     curfewAddressCheckRequestRepository.save(curfewAddressCheckRequest)
   }
 
