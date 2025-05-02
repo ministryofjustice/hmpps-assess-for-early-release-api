@@ -12,6 +12,7 @@ import org.springframework.test.context.jdbc.Sql
 import org.springframework.test.web.reactive.server.WebTestClient
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
@@ -20,6 +21,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wi
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonerSearchMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.ProbationSearchMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentEventResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentSearchResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderResponse
@@ -37,12 +39,24 @@ private const val ASSESSMENT_ID = 1L
 
 private const val DELETE_CURRENT_ASSESSMENT_URL = "/support/offender/$PRISON_NUMBER/assessment/current"
 private const val DELETE_ASSESSMENT_URL = "/support/offender/assessment/$ASSESSMENT_ID"
+private const val GET_ASSESSMENT_EVENTS_URL = "/support/offender/assessment/$ASSESSMENT_ID/events"
 private const val SEARCH_FOR_OFFENDERS = "/support/offender/search/"
 private const val GET_OFFENDER = "/support/offender/$PRISON_NUMBER"
 private const val GET_ASSESSMENT = "/support/offender/assessment/$ASSESSMENT_ID"
 private const val GET_ASSESSMENTS = "/support/offender/$PRISON_NUMBER/assessments"
 
 class SupportResourceIntTest : SqsIntegrationTestBase() {
+
+  protected class TestAssessmentEventResponseDto(
+    override val eventType: AssessmentEventType,
+    override val eventTime: LocalDateTime,
+    override val summary: String,
+    override val username: String,
+    override val fullName: String,
+    override val role: UserRole,
+    override val onBehalfOf: String?,
+    override val changes: String?,
+  ) : AssessmentEventResponse
 
   private companion object {
     val prisonerSearchApiMockServer = PrisonerSearchMockServer()
@@ -472,6 +486,135 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
       assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
       assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
+    }
+  }
+
+  @Nested
+  inner class GetAssessmentEvents {
+
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_ASSESSMENT_EVENTS_URL)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_ASSESSMENT_EVENTS_URL)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_ASSESSMENT_EVENTS_URL)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assessment-with-event-history.sql",
+    )
+    @Test
+    fun `should get assessment events with given prison number`() {
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+      val url = GET_ASSESSMENT_EVENTS_URL
+      val assessment = testAssessmentRepository.findById(1).get()
+      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
+
+      // When
+      val response = webTestClient.get()
+        .uri(url)
+        .headers(authorisation)
+        .exchange()
+
+      // Then
+      response.expectStatus().isOk
+      val assessmentEventList = response.expectBody(typeReference<List<TestAssessmentEventResponseDto>>())
+        .returnResult().responseBody!!
+      assertThat(assessmentEventList).hasSize(assessment.getEvents().size)
+
+      val firstAssessmentEvent = assessmentEventList[0]
+      assertThat(firstAssessmentEvent.eventType).isEqualTo(AssessmentEventType.STATUS_CHANGE)
+      assertThat(firstAssessmentEvent.eventTime).isEqualTo(LocalDateTime.of(2024, 10, 1, 17, 19, 8))
+      assertThat(firstAssessmentEvent.username).isEqualTo("a-prison-user-old")
+      assertThat(firstAssessmentEvent.role).isEqualTo(UserRole.PRISON_CA)
+      assertThat(firstAssessmentEvent.changes).contains("ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS")
+      assertThat(firstAssessmentEvent.fullName).isEqualTo("Hefin Evans")
+      assertThat(firstAssessmentEvent.onBehalfOf).isEqualTo("HEI")
+      assertThat(firstAssessmentEvent.summary).isEqualTo("status changed from: 'NOT_STARTED', to: 'ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'")
+
+      val lastAssessmentEvent = assessmentEventList.last()
+      assertThat(lastAssessmentEvent.eventType).isEqualTo(AssessmentEventType.STATUS_CHANGE)
+      assertThat(lastAssessmentEvent.eventTime).isEqualTo(LocalDateTime.of(2024, 10, 11, 17, 19, 8))
+      assertThat(lastAssessmentEvent.username).isEqualTo("a-probation-user")
+      assertThat(lastAssessmentEvent.role).isEqualTo(UserRole.PROBATION_COM)
+      assertThat(lastAssessmentEvent.changes).contains("NOT_STARTED")
+      assertThat(lastAssessmentEvent.fullName).isEqualTo("Ceri Evans")
+      assertThat(lastAssessmentEvent.onBehalfOf).isEqualTo("BRI")
+      assertThat(lastAssessmentEvent.summary).isEqualTo("status changed from: 'NOT_STARTED', to: 'ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'")
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assessment-with-event-history.sql",
+    )
+    @Test
+    fun `should get assessment events using given prison number and event type`() {
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+      val url = GET_ASSESSMENT_EVENTS_URL + "?filter=${AssessmentEventType.STATUS_CHANGE}"
+      val assessment = testAssessmentRepository.findById(1).get()
+      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
+
+      // When
+      val response = webTestClient.get()
+        .uri(url)
+        .headers(authorisation)
+        .exchange()
+
+      // Then
+      response.expectStatus().isOk
+      val assessmentEventList = response.expectBody(typeReference<List<TestAssessmentEventResponseDto>>())
+        .returnResult().responseBody!!
+      assertThat(assessmentEventList.count { it.eventType == AssessmentEventType.STATUS_CHANGE })
+        .isEqualTo(assessment.getEvents().count { it.eventType == AssessmentEventType.STATUS_CHANGE })
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/assessment-with-event-history.sql",
+    )
+    @Test
+    fun `should get assessment events using given prison number and event types`() {
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+      val url = GET_ASSESSMENT_EVENTS_URL + "?filter=${AssessmentEventType.STATUS_CHANGE},${AssessmentEventType.RESIDENT_UPDATED}"
+      val assessment = testAssessmentRepository.findById(1).get()
+      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
+
+      // When
+      val response = webTestClient.get()
+        .uri(url)
+        .headers(authorisation)
+        .exchange()
+
+      // Then
+      response.expectStatus().isOk
+      val assessmentEventList = response.expectBody(typeReference<List<TestAssessmentEventResponseDto>>())
+        .returnResult().responseBody!!
+      assertThat(assessmentEventList).hasSize(assessment.getEvents().size)
     }
   }
 

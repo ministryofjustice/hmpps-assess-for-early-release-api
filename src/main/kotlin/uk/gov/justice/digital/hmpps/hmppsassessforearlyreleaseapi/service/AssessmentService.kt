@@ -37,8 +37,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Question
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityCriterionProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.UpdateVloAndPomConsultationRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.residentialChecks.SaveResidentialChecksTaskAnswersRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentEventResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toModel
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.getAnswer
@@ -61,6 +63,7 @@ import java.time.format.DateTimeFormatter
 @Service
 class AssessmentService(
   private val assessmentRepository: AssessmentRepository,
+  private val assessmentEventRepository: AssessmentEventRepository,
   private val offenderToAssessmentSummaryMapper: OffenderToAssessmentSummaryMapper,
   private val assessmentToAssessmentOverviewSummaryMapper: AssessmentToAssessmentOverviewSummaryMapper,
   private val prisonService: PrisonService,
@@ -389,6 +392,12 @@ class AssessmentService(
     }
 
     return AssessmentContactsResponse(contacts)
+  }
+
+  fun getAssessmentEvents(assessmentId: Long, filter: List<AssessmentEventType>?): List<AssessmentEventResponse> = if (filter.isNullOrEmpty()) {
+    assessmentEventRepository.findByAssessmentIdOrderByEventTime(assessmentId)
+  } else {
+    assessmentEventRepository.findByAssessmentIdAndEventTypeInOrderByEventTime(assessmentId, filter.map { it.name })
   }
 
   private fun getAgents(
