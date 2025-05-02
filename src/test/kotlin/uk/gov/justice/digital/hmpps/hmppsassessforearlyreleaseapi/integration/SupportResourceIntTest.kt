@@ -41,6 +41,7 @@ private const val SEARCH_FOR_OFFENDERS = "/support/offender/search/"
 private const val GET_OFFENDER = "/support/offender/$PRISON_NUMBER"
 private const val GET_ASSESSMENT = "/support/offender/assessment/$ASSESSMENT_ID"
 private const val GET_ASSESSMENTS = "/support/offender/$PRISON_NUMBER/assessments"
+private const val GET_CURRENT_ASSESSMENT = "/support/offender/assessment/current/$PRISON_NUMBER"
 
 class SupportResourceIntTest : SqsIntegrationTestBase() {
 
@@ -315,10 +316,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenderResponse.forename).isEqualTo(offender.forename)
       assertThat(offenderResponse.surname).isEqualTo(offender.surname)
       assertThat(offenderResponse.dateOfBirth).isEqualTo(offender.dateOfBirth)
-      assertThat(offenderResponse.hdced).isEqualTo(offender.hdced)
-      assertThat(offenderResponse.crd).isEqualTo(offender.crd)
       assertThat(offenderResponse.crn).isEqualTo(offender.crn)
-      assertThat(offenderResponse.sentenceStartDate).isEqualTo(offender.sentenceStartDate)
       assertThat(offenderResponse.createdTimestamp).isCloseTo(offender.createdTimestamp, within(1, ChronoUnit.SECONDS))
       assertThat(offenderResponse.lastUpdatedTimestamp).isCloseTo(offender.lastUpdatedTimestamp, within(1, ChronoUnit.SECONDS))
     }
@@ -472,6 +470,9 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
       assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
       assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
+      assertThat(assessmentResponse.hdced).isEqualTo(assessment.hdced)
+      assertThat(assessmentResponse.crd).isEqualTo(assessment.crd)
+      assertThat(assessmentResponse.sentenceStartDate).isEqualTo(assessment.sentenceStartDate)
     }
   }
 
@@ -588,6 +589,87 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
 
       // Then
       assertDelete(result, initialAssessment)
+    }
+  }
+
+  @Nested
+  inner class GetCurrentAssessment {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT)
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT)
+        .headers(setAuthorisation())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.get()
+        .uri(GET_CURRENT_ASSESSMENT)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/offenders_with_assessments.sql",
+    )
+    @Test
+    fun `should get current assessment when prison number given`() {
+      // Given
+      val roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")
+      val url = GET_CURRENT_ASSESSMENT
+      val assessment = testAssessmentRepository.findById(2).get()
+      val authorisation = setAuthorisation(roles = roles, agent = TestData.PRISON_CA_AGENT)
+
+      // When
+      val response = webTestClient.get()
+        .uri(url)
+        .headers(authorisation)
+        .exchange()
+
+      // Then
+      response.expectStatus().isOk
+
+      val assessmentResponse = response.expectBody(typeReference<AssessmentResponse>())
+        .returnResult().responseBody!!
+      assertThat(assessmentResponse.id).isEqualTo(assessment.id)
+      assertThat(assessmentResponse.bookingId).isEqualTo(assessment.bookingId)
+      assertThat(assessmentResponse.status).isEqualTo(assessment.status)
+      assertThat(assessmentResponse.previousStatus).isEqualTo(assessment.previousStatus)
+      assertThat(assessmentResponse.createdTimestamp).isCloseTo(assessment.createdTimestamp, within(1, ChronoUnit.SECONDS))
+      assertThat(assessmentResponse.lastUpdatedTimestamp).isCloseTo(assessment.lastUpdatedTimestamp, within(1, ChronoUnit.SECONDS))
+      assertThat(assessmentResponse.deletedTimestamp).isNull()
+      assertThat(assessmentResponse.policyVersion).isEqualTo(assessment.policyVersion)
+      assertThat(assessmentResponse.addressChecksComplete).isEqualTo(assessment.addressChecksComplete)
+      assertThat(assessmentResponse.responsibleCom).isNotNull
+      assessmentResponse.responsibleCom?.let {
+        assertThat(it.surname).isEqualTo(assessment.responsibleCom?.surname)
+        assertThat(it.forename).isEqualTo(assessment.responsibleCom?.forename)
+        assertThat(it.username).isEqualTo(assessment.responsibleCom?.username)
+        assertThat(it.email).isEqualTo(assessment.responsibleCom?.email)
+        assertThat(it.staffCode).isEqualTo(assessment.responsibleCom?.staffCode)
+      }
+      assertThat(assessmentResponse.teamCode).isEqualTo(assessment.teamCode)
+      assertThat(assessmentResponse.postponementDate).isEqualTo(assessment.postponementDate)
+      assertThat(assessmentResponse.optOutReasonType).isEqualTo(assessment.optOutReasonType)
+      assertThat(assessmentResponse.optOutReasonOther).isEqualTo(assessment.optOutReasonOther)
+      assertThat(assessmentResponse.hdced).isEqualTo(assessment.hdced)
+      assertThat(assessmentResponse.crd).isEqualTo(assessment.crd)
+      assertThat(assessmentResponse.sentenceStartDate).isEqualTo(assessment.sentenceStartDate)
     }
   }
 

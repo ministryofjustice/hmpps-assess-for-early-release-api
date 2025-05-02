@@ -62,6 +62,13 @@ class SupportService(
   }
 
   @Transactional
+  fun getCurrentAssessment(prisonNumber: String): AssessmentResponse {
+    val assessment = assessmentService.getCurrentAssessment(prisonNumber)
+    log.debug("Found assessment ${assessment.id}")
+    return assessmentToAssessmentResponseMapper.map(assessment)
+  }
+
+  @Transactional
   fun deleteAssessment(assessmentId: Long, agent: AgentDto) {
     log.debug("Deleting assessment for assessmentId {}", assessmentId)
     val assessment = assessmentRepository.findById(assessmentId).orElseThrow { ItemNotFoundException("Cannot find assessment with assessment id $assessmentId") }
@@ -104,7 +111,14 @@ class SupportService(
     assessmentRepository.save(assessment)
 
     val newAssessment =
-      assessmentService.createAssessment(offender, prisonerNumber = prisonNumber, assessment.bookingId)
+      assessmentService.createAssessment(
+        offender,
+        prisonerNumber = prisonNumber,
+        assessment.bookingId,
+        assessment.hdced,
+        assessment.crd,
+        assessment.sentenceStartDate,
+      )
     offender.assessments.add(newAssessment)
   }
 

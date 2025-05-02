@@ -6,6 +6,7 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.times
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -33,6 +34,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.Progress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.SURNAME
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCommunityOffenderManager
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aDeliusOffenderManager
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aPrisonerSearchPrisoner
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithCompleteEligibilityChecks
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anAssessmentWithSomeProgress
@@ -272,6 +274,7 @@ class AssessmentServiceTest {
       offender = anOffender(),
       responsibleCom = com,
       bookingId = BOOKING_ID,
+      hdced = LocalDate.now().plusDays(5),
     )
     whenever(assessmentRepository.findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())).thenReturn(
       listOf(assessment),
@@ -283,5 +286,61 @@ class AssessmentServiceTest {
     verify(assessmentRepository).findByResponsibleComStaffCodeAndStatusInAndDeletedTimestampIsNull(com.staffCode, AssessmentStatus.inFlightStatuses())
     verify(assessmentRepository).saveAll(assessmentCaptor.capture())
     assessmentCaptor.firstValue.map { assertThat(it.teamCode).isEqualTo(newTeamCode) }
+  }
+
+  @Test
+  fun `should create an assessment`() {
+    val hdced = LocalDate.now().plusDays(1)
+    val crd = LocalDate.now().plusDays(1)
+    val sentenceStartDate = LocalDate.now().plusDays(1)
+
+    val prisonerNumber = "A1234AA"
+    val bookingId = 123456L
+    val offender = anOffender()
+    val offenderManager = aDeliusOffenderManager()
+    val com = aCommunityOffenderManager()
+
+    val mockAssessment = mock(Assessment::class.java)
+    whenever(probationService.getCurrentResponsibleOfficer(any())).thenReturn(offenderManager)
+    whenever(staffRepository.findByStaffCode(any())).thenReturn(com)
+    whenever(assessmentRepository.save(any())).thenReturn(mockAssessment)
+
+    service.createAssessment(offender, prisonerNumber, bookingId, hdced, crd, sentenceStartDate)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository, times(1)).save(assessmentCaptor.capture())
+
+    val assessment = assessmentCaptor.value
+    assertThat(hdced).isEqualTo(assessment.hdced)
+    assertThat(crd).isEqualTo(assessment.crd)
+    assertThat(sentenceStartDate).isEqualTo(assessment.sentenceStartDate)
+  }
+
+  @Test
+  fun `should update assessment dates`() {
+    val hdced = LocalDate.now().plusDays(1)
+    val crd = LocalDate.now().plusDays(1)
+    val sentenceStartDate = LocalDate.now().plusDays(1)
+
+    val prisonerNumber = "A1234AA"
+    val bookingId = 123456L
+    val offender = anOffender()
+    val offenderManager = aDeliusOffenderManager()
+    val com = aCommunityOffenderManager()
+
+    val mockAssessment = mock(Assessment::class.java)
+    whenever(probationService.getCurrentResponsibleOfficer(any())).thenReturn(offenderManager)
+    whenever(staffRepository.findByStaffCode(any())).thenReturn(com)
+    whenever(assessmentRepository.save(any())).thenReturn(mockAssessment)
+
+    service.createAssessment(offender, prisonerNumber, bookingId, hdced, crd, sentenceStartDate)
+
+    val assessmentCaptor = ArgumentCaptor.forClass(Assessment::class.java)
+    verify(assessmentRepository, times(1)).save(assessmentCaptor.capture())
+
+    val assessment = assessmentCaptor.value
+    assertThat(hdced).isEqualTo(assessment.hdced)
+    assertThat(crd).isEqualTo(assessment.crd)
+    assertThat(sentenceStartDate).isEqualTo(assessment.sentenceStartDate)
   }
 }

@@ -51,15 +51,19 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anPostponeCaseRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.answers
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.criterion
+import java.time.LocalDate
 
 class AssessmentTest {
 
   private val anAgent = Agent("mtynan", fullName = "Mark Tynan", UserRole.PRISON_CA, "HPE")
   private val anAgentEntity = anAgent
+  private val hdced = LocalDate.now().plusDays(14)
+  private val crd = LocalDate.now().plusDays(31)
+  private val sentenceStartDate = LocalDate.now().plusDays(1)
 
   @Test
   fun `add new eligibility criteria check`() {
-    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID, hdced = hdced)
 
     assessment.addOrReplaceEligibilityCriterionResult(
       ELIGIBILITY,
@@ -88,7 +92,7 @@ class AssessmentTest {
 
   @Test
   fun `update existing eligibility criteria check`() {
-    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), bookingId = BOOKING_ID, hdced = hdced)
 
     assessment.addOrReplaceEligibilityCriterionResult(
       ELIGIBILITY,
@@ -126,7 +130,7 @@ class AssessmentTest {
 
   @Test
   fun `records status changes`() {
-    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID, hdced = hdced)
     assessment.performTransition(
       EligibilityAnswerProvided(CriteriaType.ELIGIBILITY, criterion.code, answers),
       anAgentEntity,
@@ -170,7 +174,7 @@ class AssessmentTest {
 
   @Test
   fun `returns to previous state`() {
-    val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE, bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), status = INELIGIBLE_OR_UNSUITABLE, bookingId = BOOKING_ID, hdced = hdced)
     val reasonType = NO_REASON_GIVEN
     val otherDescription = "No reason given"
 
@@ -197,7 +201,7 @@ class AssessmentTest {
 
   @Test
   fun `handles error side effect`() {
-    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), status = NOT_STARTED, bookingId = BOOKING_ID, hdced = hdced)
 
     assertThatThrownBy {
       assessment.performTransition(
@@ -228,7 +232,7 @@ class AssessmentTest {
   )
   fun `handles valid from states to postpone transition`(fromState: AssessmentStatus) {
     // Given
-    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID, hdced = hdced)
 
     // When
     assessment.performTransition(Postpone(anPostponeCaseRequest.reasonTypes), anAgentEntity)
@@ -258,7 +262,7 @@ class AssessmentTest {
   )
   fun `handles in-valid from states to postpone transition`(fromState: AssessmentStatus) {
     // Given
-    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID)
+    val assessment = Assessment(offender = anOffender(), status = fromState, bookingId = BOOKING_ID, hdced = hdced)
 
     // When
     val result =
@@ -280,6 +284,9 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
+        hdced,
+        crd,
+        sentenceStartDate,
         NOT_STARTED,
         eligibilityStatus = EligibilityStatus.NOT_STARTED,
       ).currentTask(),
@@ -288,6 +295,9 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
+        hdced,
+        crd,
+        sentenceStartDate,
         ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS,
         eligibilityStatus = EligibilityStatus.IN_PROGRESS,
       ).currentTask(),
@@ -295,11 +305,14 @@ class AssessmentTest {
       ASSESS_ELIGIBILITY,
     )
 
-    assertThat(anAssessment(offender, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ELIGIBLE_AND_SUITABLE).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
 
     assertThat(
       anAssessment(
         offender,
+        hdced,
+        crd,
+        sentenceStartDate,
         INELIGIBLE_OR_UNSUITABLE,
       ).copy(eligibilityChecksStatus = EligibilityStatus.INELIGIBLE).currentTask(),
     ).isNull()
@@ -307,46 +320,49 @@ class AssessmentTest {
     assertThat(
       anAssessment(
         offender,
+        hdced,
+        crd,
+        sentenceStartDate,
         AWAITING_ADDRESS_AND_RISK_CHECKS,
       ).currentTask(),
     ).isEqualTo(CONSULT_THE_VLO_AND_POM)
 
     assertThat(
-      anAssessment(offender, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask(),
+      anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_ADDRESS_AND_RISK_CHECKS).copy(victimContactSchemeOptedIn = true).currentTask(),
     ).isEqualTo(CHECK_ADDRESSES_OR_COMMUNITY_ACCOMMODATION)
 
-    assertThat(anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).currentTask()).isEqualTo(
       RECORD_NON_DISCLOSABLE_INFORMATION,
     )
 
     assertThat(
-      anAssessment(offender, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask(),
+      anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_AND_RISK_CHECKS_IN_PROGRESS).copy(addressChecksComplete = true).currentTask(),
     ).isEqualTo(RECORD_NON_DISCLOSABLE_INFORMATION)
 
-    assertThat(anAssessment(offender, ADDRESS_UNSUITABLE).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, ADDRESS_UNSUITABLE).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_DECISION_CHECKS).currentTask()).isEqualTo(
       REVIEW_APPLICATION_AND_SEND_FOR_DECISION,
     )
 
-    assertThat(anAssessment(offender, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_DECISION).currentTask()).isEqualTo(CONFIRM_RELEASE)
 
-    assertThat(anAssessment(offender, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_REFUSAL).currentTask()).isEqualTo(CONFIRM_RELEASE)
 
-    assertThat(anAssessment(offender, REFUSED).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, REFUSED).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, APPROVED).currentTask()).isEqualTo(APPROVE_LICENCE)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, APPROVED).currentTask()).isEqualTo(APPROVE_LICENCE)
 
-    assertThat(anAssessment(offender, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, AWAITING_PRE_RELEASE_CHECKS).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, PASSED_PRE_RELEASE_CHECKS).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, TIMED_OUT).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, TIMED_OUT).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, POSTPONED).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, POSTPONED).currentTask()).isNull()
 
-    assertThat(anAssessment(offender, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, OPTED_OUT).currentTask()).isEqualTo(ENTER_CURFEW_ADDRESS)
 
-    assertThat(anAssessment(offender, RELEASED_ON_HDC).currentTask()).isNull()
+    assertThat(anAssessment(offender, hdced, crd, sentenceStartDate, RELEASED_ON_HDC).currentTask()).isNull()
   }
 }

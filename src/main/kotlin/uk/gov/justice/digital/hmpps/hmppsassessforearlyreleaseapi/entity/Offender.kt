@@ -27,21 +27,14 @@ data class Offender(
 
   val prisonId: String,
 
-  val forename: String? = null,
+  var forename: String? = null,
 
-  val surname: String? = null,
-
-  @NotNull
-  val dateOfBirth: LocalDate,
+  var surname: String? = null,
 
   @NotNull
-  val hdced: LocalDate,
-
-  val crd: LocalDate? = null,
+  var dateOfBirth: LocalDate,
 
   val crn: String? = null,
-
-  val sentenceStartDate: LocalDate? = null,
 
   @OneToMany(mappedBy = "offender", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("id")
@@ -51,7 +44,7 @@ data class Offender(
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),
 
   @NotNull
-  val lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
+  var lastUpdatedTimestamp: LocalDateTime = LocalDateTime.now(),
 ) {
 
   @Override
@@ -67,5 +60,5 @@ data class Offender(
   override fun hashCode(): Int = javaClass.hashCode()
 
   @Override
-  override fun toString() = this::class.simpleName + "(id: $id)"
+  override fun toString() = this::class.simpleName + "(id: $id, assessments: $assessments)"
 }

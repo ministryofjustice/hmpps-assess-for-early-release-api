@@ -37,16 +37,29 @@ class CaseloadServiceTest {
   @Test
   fun `should get the case admin case load`() {
     val offender1 = anOffender(sentenceStartDate = LocalDate.now().minusDays(5))
+    val assessment1 = offender1.assessments.first()
+
     val offender2 =
       offender1.copy(
         id = offender1.id + 1,
         prisonNumber = "ZX2318KD",
-        sentenceStartDate = LocalDate.now().minusDays(11),
+        assessments = mutableSetOf(
+          assessment1.copy(
+            id = assessment1.id + 1,
+            sentenceStartDate = LocalDate.now().minusDays(11),
+          ),
+        ),
       )
+
     val offender3 = offender1.copy(
       id = offender1.id + 2,
       prisonNumber = "ZX2318KJ",
-      sentenceStartDate = null,
+      assessments = mutableSetOf(
+        assessment1.copy(
+          id = assessment1.id + 2,
+          sentenceStartDate = null,
+        ),
+      ),
     )
     whenever(assessmentRepository.findByOffenderPrisonIdAndDeletedTimestampIsNull(PRISON_ID)).thenReturn(
       listOf(
@@ -64,33 +77,33 @@ class CaseloadServiceTest {
         bookingId = offender1.assessments.first().bookingId,
         forename = offender1.forename!!,
         surname = offender1.surname!!,
-        hdced = offender1.hdced,
+        hdced = offender1.assessments.first().hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender1.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
         currentTask = Task.ASSESS_ELIGIBILITY,
-        taskOverdueOn = offender1.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
+        taskOverdueOn = offender1.assessments.first().sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
       OffenderSummaryResponse(
         prisonNumber = offender2.prisonNumber,
         bookingId = offender1.assessments.first().bookingId,
         forename = offender2.forename!!,
         surname = offender2.surname!!,
-        hdced = offender2.hdced,
+        hdced = offender2.assessments.first().hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender2.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,
         addressChecksComplete = false,
         currentTask = Task.ASSESS_ELIGIBILITY,
-        taskOverdueOn = offender2.sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
+        taskOverdueOn = offender2.assessments.first().sentenceStartDate?.plusDays(DAYS_BEFORE_SENTENCE_START),
       ),
       OffenderSummaryResponse(
         prisonNumber = offender3.prisonNumber,
         bookingId = offender1.assessments.first().bookingId,
         forename = offender3.forename!!,
         surname = offender3.surname!!,
-        hdced = offender3.hdced,
+        hdced = offender3.assessments.first().hdced,
         workingDaysToHdced = 5,
         probationPractitioner = offender3.assessments.first().responsibleCom?.fullName,
         status = AssessmentStatus.NOT_STARTED,

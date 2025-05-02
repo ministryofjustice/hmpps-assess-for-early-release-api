@@ -25,19 +25,8 @@ data class OffenderResponse(
   @JsonFormat(pattern = API_DATE_FORMAT)
   val dateOfBirth: LocalDate,
 
-  @Schema(description = "The offender's home detention curfew eligibility date", example = "2026-08-23")
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val hdced: LocalDate,
-
-  @Schema(description = "The offender's conditional release date date", example = "2026-08-23")
-  @JsonFormat(pattern = API_DATE_FORMAT)
-  val crd: LocalDate? = null,
-
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
-
-  @Schema(description = "The sentence start date", example = "2028-06-23", required = false)
-  val sentenceStartDate: LocalDate? = null,
 
   @Schema(description = "The create timestamp for the afer offender", example = "2020-01-11T12:13:00", required = true)
   @JsonFormat(pattern = API_DATE_TIME_FORMAT)
