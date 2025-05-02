@@ -17,9 +17,12 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentEventResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentSearchResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderResponse
@@ -295,6 +298,53 @@ class SupportResource(
   fun deleteAssessment(@Parameter(required = true) @PathVariable assessmentId: Long) {
     supportService.deleteAssessment(assessmentId, agentHolder.agent)
   }
+
+  @GetMapping("/support/offender/assessment/{assessmentId}/events")
+  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
+  @ResponseStatus(code = HttpStatus.OK)
+  @Operation(
+    summary = "Gets the assessment events for the given id and filter",
+    description = "Gets the assessment events for the given id and filter",
+    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
+  )
+  @ApiResponses(
+    value = [
+      ApiResponse(
+        responseCode = "200",
+        description = "Returns the assessments events",
+        content = [
+          Content(
+            mediaType = "application/json",
+            array = ArraySchema(schema = Schema(implementation = AssessmentEventResponse::class)),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "401",
+        description = "Unauthorised, requires a valid Oauth2 token",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+      ApiResponse(
+        responseCode = "403",
+        description = "Forbidden, requires an appropriate role",
+        content = [
+          Content(
+            mediaType = "application/json",
+            schema = Schema(implementation = ErrorResponse::class),
+          ),
+        ],
+      ),
+    ],
+  )
+  fun getEvents(
+    @Parameter(required = true) @PathVariable assessmentId: Long,
+    @RequestParam(required = false, name = "filter") filter: List<AssessmentEventType>?,
+  ): List<AssessmentEventResponse> = supportService.getAssessmentEvents(assessmentId, filter)
 
   @GetMapping("/support/offender/assessment/current/{prisonNumber}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

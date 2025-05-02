@@ -9,6 +9,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessm
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentEventResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.AssessmentSearchResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.support.OffenderResponse
@@ -81,6 +82,8 @@ class SupportService(
     val assessment = assessmentService.getCurrentAssessment(prisonerNumber)
     delete(assessment, agent)
   }
+
+  fun getAssessmentEvents(assessmentId: Long, filter: List<AssessmentEventType>?): List<AssessmentEventResponse> = assessmentService.getAssessmentEvents(assessmentId, filter)
 
   private fun delete(
     assessment: Assessment,
