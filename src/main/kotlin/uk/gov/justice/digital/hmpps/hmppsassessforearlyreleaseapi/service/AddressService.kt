@@ -15,7 +15,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReasonDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
@@ -241,7 +241,7 @@ class AddressService(
   fun withdrawAddress(
     prisonNumber: String,
     requestId: Long,
-    addressDeleteReason: AddressDeleteReason,
+    addressDeleteReason: AddressDeleteReasonDto,
     agent: AgentDto,
   ) {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
@@ -257,8 +257,8 @@ class AddressService(
     assessmentRepository.save(currentAssessment)
 
     val addressDeletionEvent = AddressDeletionEvent(
-      addressDeleteReasonType = addressDeleteReason.addressDeleteReasonType,
-      addressDeleteOtherReason = addressDeleteReason.addressDeleteOtherReason,
+      reasonType = addressDeleteReason.addressDeleteReasonType,
+      otherReason = addressDeleteReason.addressDeleteOtherReason,
       assessmentEvent = currentAssessment.lastUpdateByUserEvent,
     )
     curfewAddressCheckRequest.addressDeletionEvent = addressDeletionEvent
@@ -321,9 +321,9 @@ class AddressService(
     status = this.status,
     address = this.address.toAddressSummary(),
     residents = this.residents.map { it.toSummary() },
-    deleteReason = AddressDeleteReason(
-      this.addressDeletionEvent?.addressDeleteReasonType,
-      this.addressDeletionEvent?.addressDeleteOtherReason,
+    deleteReason = AddressDeleteReasonDto(
+      this.addressDeletionEvent?.reasonType,
+      this.addressDeletionEvent?.otherReason,
     ),
   )
 

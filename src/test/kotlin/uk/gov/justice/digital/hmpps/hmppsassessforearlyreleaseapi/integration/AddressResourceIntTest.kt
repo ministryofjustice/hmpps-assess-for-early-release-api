@@ -13,7 +13,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReasonDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
@@ -683,11 +683,11 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .bodyValue(anAddressDeleteReasonRequest())
         .exchange()
         .expectStatus()
-        .isCreated
+        .isNoContent
 
       val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
-      assertThat(addressCheckRequest?.addressDeletionEvent?.addressDeleteReasonType).isEqualTo(anAddressDeleteReasonRequest().addressDeleteReasonType)
-      assertThat(addressCheckRequest?.addressDeletionEvent?.addressDeleteOtherReason).isEqualTo(anAddressDeleteReasonRequest().addressDeleteOtherReason)
+      assertThat(addressCheckRequest?.addressDeletionEvent?.reasonType).isEqualTo(anAddressDeleteReasonRequest().addressDeleteReasonType)
+      assertThat(addressCheckRequest?.addressDeletionEvent?.otherReason).isEqualTo(anAddressDeleteReasonRequest().addressDeleteOtherReason)
     }
 
     @Sql(
@@ -696,7 +696,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should return bad request for null address delete other reason if reason type is other reason`() {
-      val updateAddressDeleteReasonRequest = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, null)
+      val updateAddressDeleteReasonRequest = AddressDeleteReasonDto(AddressDeleteReasonType.OTHER_REASON, null)
 
       webTestClient.post()
         .uri(ADDRESS_DELETE_REASON)
@@ -707,7 +707,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .isBadRequest
     }
 
-    private fun anAddressDeleteReasonRequest() = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, "other reason")
+    private fun anAddressDeleteReasonRequest() = AddressDeleteReasonDto(AddressDeleteReasonType.OTHER_REASON, "other reason")
   }
 
   private companion object {

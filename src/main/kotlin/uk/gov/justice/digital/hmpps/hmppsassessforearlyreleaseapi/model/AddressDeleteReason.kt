@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
 
 @ValidAddressDeleteReason
 @Schema(description = "Records an offender's non disclosable information")
-data class AddressDeleteReason(
+data class AddressDeleteReasonDto(
   @Schema(description = "The reason why address deleted", example = "NO_LONGER_WANTS_TO_BE_RELEASED_HERE")
   @field:NotNull
   val addressDeleteReasonType: AddressDeleteReasonType?,
@@ -29,6 +29,6 @@ annotation class ValidAddressDeleteReason(
   val payload: Array<KClass<out Payload>> = [],
 )
 
-class AddressDeleteReasonValidator : ConstraintValidator<ValidAddressDeleteReason, AddressDeleteReason> {
-  override fun isValid(value: AddressDeleteReason, context: ConstraintValidatorContext?): Boolean = !(value.addressDeleteReasonType == AddressDeleteReasonType.OTHER_REASON && value.addressDeleteOtherReason.isNullOrBlank())
+class AddressDeleteReasonValidator : ConstraintValidator<ValidAddressDeleteReason, AddressDeleteReasonDto> {
+  override fun isValid(value: AddressDeleteReasonDto, context: ConstraintValidatorContext?): Boolean = !(value.addressDeleteReasonType == AddressDeleteReasonType.OTHER_REASON && value.addressDeleteOtherReason.isNullOrBlank())
 }

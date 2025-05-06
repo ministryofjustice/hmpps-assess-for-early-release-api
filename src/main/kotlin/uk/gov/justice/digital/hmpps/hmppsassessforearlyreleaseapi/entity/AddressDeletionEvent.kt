@@ -23,9 +23,9 @@ data class AddressDeletionEvent(
   val id: Long = -1,
 
   @Enumerated(EnumType.STRING)
-  var addressDeleteReasonType: AddressDeleteReasonType? = null,
+  var reasonType: AddressDeleteReasonType? = null,
 
-  var addressDeleteOtherReason: String? = null,
+  var otherReason: String? = null,
 
   @OneToOne(cascade = [CascadeType.ALL])
   @JoinColumn(name = "assessment_event_id", referencedColumnName = "id")
@@ -33,8 +33,8 @@ data class AddressDeletionEvent(
 ) {
   override fun toString(): String = "AddressDeletionEvent(" +
     "id=$id, " +
-    "addressDeleteReasonType=$addressDeleteReasonType, " +
-    "addressDeleteOtherReason=$addressDeleteOtherReason, " +
+    "addressDeleteReasonType=$reasonType, " +
+    "addressDeleteOtherReason=$otherReason, " +
     "assessmentEvent=${assessmentEvent?.id}" +
     ")"
 

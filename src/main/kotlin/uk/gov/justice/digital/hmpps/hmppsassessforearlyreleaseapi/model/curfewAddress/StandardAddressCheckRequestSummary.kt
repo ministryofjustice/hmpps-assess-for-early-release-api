@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonTypeName
 import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReasonDto
 import java.time.LocalDateTime
 
 @Schema(description = "Response object which describes a standard address check request")
@@ -38,5 +38,5 @@ data class StandardAddressCheckRequestSummary(
   val residents: List<ResidentSummary>,
 
   @Schema(description = "The reason for deleting address", example = "See reason type and text")
-  val deleteReason: AddressDeleteReason,
+  val deleteReason: AddressDeleteReasonDto? = null,
 ) : CheckRequestSummary
