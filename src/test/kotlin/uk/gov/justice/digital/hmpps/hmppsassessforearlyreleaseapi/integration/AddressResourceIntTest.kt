@@ -679,8 +679,6 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update case admin additional information`() {
-      val agentHolder = AgentHolder()
-      agentHolder.agent = PRISON_CA_AGENT
       webTestClient.post()
         .uri(ADDRESS_DELETE_REASON)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
