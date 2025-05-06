@@ -42,7 +42,6 @@ data class AddressDeletionEvent(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
-    if (other !is AddressDeletionEvent) return false
     if (!super.equals(other)) return false
     return true
   }
