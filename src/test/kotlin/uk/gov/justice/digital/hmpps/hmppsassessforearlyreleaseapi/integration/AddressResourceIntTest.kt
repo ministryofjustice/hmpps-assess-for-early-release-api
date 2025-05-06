@@ -641,7 +641,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
   inner class AddressDeleteReasonTests {
     @Test
     fun `should return unauthorized if no token`() {
-      webTestClient.post()
+      webTestClient.put()
         .uri(ADDRESS_DELETE_REASON)
         .bodyValue(anAddressDeleteReasonRequest())
         .exchange()
@@ -651,7 +651,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should return forbidden if no role`() {
-      webTestClient.post()
+      webTestClient.put()
         .uri(ADDRESS_DELETE_REASON)
         .headers(setAuthorisation())
         .bodyValue(anAddressDeleteReasonRequest())
@@ -662,7 +662,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
 
     @Test
     fun `should return forbidden if wrong role`() {
-      webTestClient.post()
+      webTestClient.put()
         .uri(ADDRESS_DELETE_REASON)
         .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
         .bodyValue(anAddressDeleteReasonRequest())
@@ -677,7 +677,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     )
     @Test
     fun `should update curfew address with address deletion reason`() {
-      webTestClient.post()
+      webTestClient.put()
         .uri(ADDRESS_DELETE_REASON)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
         .bodyValue(anAddressDeleteReasonRequest())
@@ -698,7 +698,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     fun `should return bad request for null address delete other reason if reason type is other reason`() {
       val updateAddressDeleteReasonRequest = AddressDeleteReasonDto(AddressDeleteReasonType.OTHER_REASON, null)
 
-      webTestClient.post()
+      webTestClient.put()
         .uri(ADDRESS_DELETE_REASON)
         .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
         .bodyValue(updateAddressDeleteReasonRequest)
