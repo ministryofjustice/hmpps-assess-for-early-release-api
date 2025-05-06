@@ -257,7 +257,7 @@ class AddressService(
     assessmentRepository.save(currentAssessment)
 
     val addressDeletionEvent = AddressDeletionEvent(
-      addressDeleteReasonType = addressDeleteReason.reasonType,
+      addressDeleteReasonType = addressDeleteReason.addressDeleteReasonType,
       addressDeleteOtherReason = addressDeleteReason.addressDeleteOtherReason,
       assessmentEvent = currentAssessment.lastUpdateByUserEvent,
     )
@@ -323,8 +323,8 @@ class AddressService(
     residents = this.residents.map { it.toSummary() },
     deleteReason = AddressDeleteReason(
       this.addressDeletionEvent?.addressDeleteReasonType,
-      this.addressDeletionEvent?.addressDeleteOtherReason
-    )
+      this.addressDeletionEvent?.addressDeleteOtherReason,
+    ),
   )
 
   private fun CasCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(

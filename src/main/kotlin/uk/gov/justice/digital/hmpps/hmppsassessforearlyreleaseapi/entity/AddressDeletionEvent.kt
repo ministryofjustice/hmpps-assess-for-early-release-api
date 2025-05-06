@@ -31,19 +31,19 @@ data class AddressDeletionEvent(
   @JoinColumn(name = "assessment_event_id", referencedColumnName = "id")
   val assessmentEvent: AssessmentEvent? = null,
 ) {
-   override fun toString(): String = "AddressDeletionEvent(" +
-   "id=$id, " +
-   "addressDeleteReasonType=$addressDeleteReasonType, " +
-   "addressDeleteOtherReason=$addressDeleteOtherReason, " +
-   "assessmentEvent=${assessmentEvent?.id}" +
-   ")"
+  override fun toString(): String = "AddressDeletionEvent(" +
+    "id=$id, " +
+    "addressDeleteReasonType=$addressDeleteReasonType, " +
+    "addressDeleteOtherReason=$addressDeleteOtherReason, " +
+    "assessmentEvent=${assessmentEvent?.id}" +
+    ")"
 
-   override fun equals(other: Any?): Boolean {
-     if (this === other) return true
-     if (other !is AddressDeletionEvent) return false
-     if (!super.equals(other)) return false
-     return true
-     }
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is AddressDeletionEvent) return false
+    if (!super.equals(other)) return false
+    return true
+  }
 
-   override fun hashCode(): Int = super.hashCode()
+  override fun hashCode(): Int = super.hashCode()
 }
