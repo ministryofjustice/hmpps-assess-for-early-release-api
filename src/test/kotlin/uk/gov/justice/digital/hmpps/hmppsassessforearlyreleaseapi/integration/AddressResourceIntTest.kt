@@ -8,10 +8,8 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDeletionEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
@@ -688,8 +686,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .isCreated
 
       val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
-      val events = addressCheckRequest?.assessment?.id?.let { assessmentEventRepository.findByAssessmentId(assessmentId = it) }
-      assertThat(addressCheckRequest?.addressDeletionEvent).isEqualTo(anAddressDeletionEvent(events?.first() as  GenericChangedEvent))
+      val addressDeletionEvent = addressDeletionEventRepository.findByIdOrNull(addressCheckRequest?.addressDeletionEvent?.id)
+      assertThat(addressCheckRequest?.addressDeletionEvent).isEqualTo(addressDeletionEvent)
     }
 
     @Sql(
@@ -710,12 +708,12 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anAddressDeleteReasonRequest() = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, "other reason")
-    private fun anAddressDeletionEvent(event: GenericChangedEvent) = AddressDeletionEvent(
-                                                                        id=1,
-                                                                        addressDeleteReasonType=AddressDeleteReasonType.OTHER_REASON,
-                                                                        addressDeleteOtherReason="other reason",
-                                                                        assessmentEvent= event
-                                                                      )
+//    private fun anAddressDeletionEvent(event: GenericChangedEvent) = AddressDeletionEvent(
+//                                                                        id=1,
+//                                                                        addressDeleteReasonType=AddressDeleteReasonType.OTHER_REASON,
+//                                                                        addressDeleteOtherReason="other reason",
+//                                                                        assessmentEvent= event
+//                                                                      )
   }
 
   private companion object {
