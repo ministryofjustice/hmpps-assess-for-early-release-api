@@ -708,12 +708,6 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anAddressDeleteReasonRequest() = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, "other reason")
-//    private fun anAddressDeletionEvent(event: GenericChangedEvent) = AddressDeletionEvent(
-//                                                                        id=1,
-//                                                                        addressDeleteReasonType=AddressDeleteReasonType.OTHER_REASON,
-//                                                                        addressDeleteOtherReason="other reason",
-//                                                                        assessmentEvent= event
-//                                                                      )
   }
 
   private companion object {
