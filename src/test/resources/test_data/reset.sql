@@ -9,6 +9,7 @@ delete from curfew_address_check_request;
 delete from address;
 delete from eligibility_check_result;
 delete from assessment_to_last_update_event;
+delete from address_deletion_event;
 delete from assessment_event;
 delete from assessment;
 delete from offender;
