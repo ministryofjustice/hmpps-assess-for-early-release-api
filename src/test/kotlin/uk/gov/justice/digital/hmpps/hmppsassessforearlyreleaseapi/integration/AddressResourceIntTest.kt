@@ -686,8 +686,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
         .isCreated
 
       val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
-      val addressDeletionEvent = addressDeletionEventRepository.findByIdOrNull(addressCheckRequest?.addressDeletionEvent?.id)
-      assertThat(addressCheckRequest?.addressDeletionEvent).isEqualTo(addressDeletionEvent)
+      assertThat(addressCheckRequest?.addressDeletionEvent?.addressDeleteReasonType).isEqualTo(anAddressDeleteReasonRequest().addressDeleteReasonType)
+      assertThat(addressCheckRequest?.addressDeletionEvent?.addressDeleteOtherReason).isEqualTo(anAddressDeleteReasonRequest().addressDeleteOtherReason)
     }
 
     @Sql(

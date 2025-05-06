@@ -554,9 +554,9 @@ class AddressResource(private val addressService: AddressService, private val ag
       ),
     ],
   )
-  fun addressDeleteReason(
+  fun withdrawAddress(
     @Parameter(required = true) @PathVariable prisonNumber: String,
     @Parameter(required = true) @PathVariable requestId: Long,
     @RequestBody @Valid addressDeleteReason: AddressDeleteReason,
-  ) = addressService.addressDeleteReason(prisonNumber, requestId, addressDeleteReason, agentHolder.getAgentOrThrow())
+  ) = addressService.withdrawAddress(prisonNumber, requestId, addressDeleteReason, agentHolder.getAgentOrThrow())
 }

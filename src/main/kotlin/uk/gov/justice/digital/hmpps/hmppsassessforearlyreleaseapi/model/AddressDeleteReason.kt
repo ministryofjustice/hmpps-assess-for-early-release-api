@@ -14,7 +14,7 @@ import kotlin.reflect.KClass
 data class AddressDeleteReason(
   @Schema(description = "The reason why address deleted", example = "NO_LONGER_WANTS_TO_BE_RELEASED_HERE")
   @field:NotNull
-  val addressDeleteReasonType: AddressDeleteReasonType,
+  val addressDeleteReasonType: AddressDeleteReasonType?,
 
   @Schema(description = "Other reason to delete address", example = "Give details of information regards delete address")
   val addressDeleteOtherReason: String?,

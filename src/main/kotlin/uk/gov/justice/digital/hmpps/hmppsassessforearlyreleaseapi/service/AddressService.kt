@@ -238,7 +238,7 @@ class AddressService(
   }
 
   @Transactional
-  fun addressDeleteReason(
+  fun withdrawAddress(
     prisonNumber: String,
     requestId: Long,
     addressDeleteReason: AddressDeleteReason,
@@ -257,7 +257,7 @@ class AddressService(
     assessmentRepository.save(currentAssessment)
 
     val addressDeletionEvent = AddressDeletionEvent(
-      addressDeleteReasonType = addressDeleteReason.addressDeleteReasonType,
+      addressDeleteReasonType = addressDeleteReason.reasonType,
       addressDeleteOtherReason = addressDeleteReason.addressDeleteOtherReason,
       assessmentEvent = currentAssessment.lastUpdateByUserEvent,
     )
@@ -321,6 +321,10 @@ class AddressService(
     status = this.status,
     address = this.address.toAddressSummary(),
     residents = this.residents.map { it.toSummary() },
+    deleteReason = AddressDeleteReason(
+      this.addressDeletionEvent?.addressDeleteReasonType,
+      this.addressDeletionEvent?.addressDeleteOtherReason
+    )
   )
 
   private fun CasCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(
