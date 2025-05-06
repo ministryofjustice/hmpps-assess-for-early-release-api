@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
+import org.hibernate.Hibernate
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.AddressDeleteReasonType
 
@@ -33,13 +34,14 @@ data class AddressDeletionEvent(
 ) {
   override fun toString(): String = "AddressDeletionEvent(" +
     "id=$id, " +
-    "addressDeleteReasonType=$reasonType, " +
-    "addressDeleteOtherReason=$otherReason, " +
+    "reasonType=$reasonType, " +
+    "otherReason=$otherReason, " +
     "assessmentEvent=${assessmentEvent?.id}" +
     ")"
 
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
+    if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
     if (other !is AddressDeletionEvent) return false
     if (!super.equals(other)) return false
     return true
