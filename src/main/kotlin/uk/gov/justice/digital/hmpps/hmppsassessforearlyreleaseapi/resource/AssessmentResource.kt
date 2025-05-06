@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentContactsResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.NonDisclosableInformation
@@ -285,8 +284,7 @@ class AssessmentResource(
   )
   fun submitForAddressChecks(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @Valid @RequestBody agentDto: AgentDto,
-  ) = assessmentService.submitAssessmentForAddressChecks(prisonNumber, agentDto)
+  ) = assessmentService.submitAssessmentForAddressChecks(prisonNumber, agentHolder.getAgentOrThrow())
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/submit-for-pre-decision-checks")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
@@ -342,8 +340,7 @@ class AssessmentResource(
   )
   fun submitForPreDecisionChecks(
     @Parameter(required = true) @PathVariable prisonNumber: String,
-    @Valid @RequestBody agent: AgentDto,
-  ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agent)
+  ) = assessmentService.submitForPreDecisionChecks(prisonNumber, agentHolder.getAgentOrThrow())
 
   @PutMapping("/offender/{prisonNumber}/current-assessment/vlo-and-pom-consultation")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

@@ -495,7 +495,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -505,7 +504,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if no role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation())
+        .headers(setAuthorisation(agent = PROBATION_COM_AGENT))
         .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
@@ -516,8 +515,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(PRISON_CA_AGENT)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PRISON_CA_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -535,8 +533,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // When
       val result = webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation(roles = roles))
-        .bodyValue(PRISON_CA_AGENT)
+        .headers(setAuthorisation(roles = roles, agent = PRISON_CA_AGENT))
         .exchange()
 
       // Then
@@ -556,7 +553,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .bodyValue(PROBATION_COM_AGENT)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -566,8 +562,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if no role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation())
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(agent = PROBATION_COM_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -577,8 +572,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PROBATION_COM_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -596,8 +590,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // When
       val results = webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation(roles = roles))
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(roles = roles, agent = PROBATION_COM_AGENT))
         .exchange()
 
       // Then
