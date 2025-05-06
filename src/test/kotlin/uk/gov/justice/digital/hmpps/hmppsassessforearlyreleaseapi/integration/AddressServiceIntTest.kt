@@ -309,8 +309,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     assertThat(assessmentEvents).hasSize(1)
 
     val firstEvent = assessmentEvents?.first() as GenericChangedEvent
-    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_UPDATED")
+    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_DELETED)
+    assertThat(firstEvent.summary).isEqualTo("generic change event with type: ADDRESS_DELETED")
     assertThat(firstEvent.changes["deleteAddressCheckRequestId"]).isEqualTo(requestId.toInt())
   }
 

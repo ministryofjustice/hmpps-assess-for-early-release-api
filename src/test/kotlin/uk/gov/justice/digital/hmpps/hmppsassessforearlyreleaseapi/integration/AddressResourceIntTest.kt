@@ -8,11 +8,14 @@ import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.test.context.jdbc.Sql
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDeletionEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressCheckRequestStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReason
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
@@ -22,6 +25,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAd
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.UpdateCaseAdminAdditionInfoRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.enum.AddressDeleteReasonType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.ADDRESS_REQUEST_ID
@@ -41,6 +45,7 @@ private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/c
 private const val GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/address-check-requests"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
 private const val UPDATE_CASE_AMIN_ADDITIONAL_INFO = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/case-admin-additional-information"
+private const val ADDRESS_DELETE_REASON = "/offender/$PRISON_NUMBER/current-assessment/address-delete-reason/$ADDRESS_REQUEST_ID"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
 
@@ -632,6 +637,87 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
     }
 
     private fun anUpdateCaAdditionalInfoRequest() = UpdateCaseAdminAdditionInfoRequest("some information")
+  }
+
+  @Nested
+  inner class AddressDeleteReasonTests {
+    @Test
+    fun `should return unauthorized if no token`() {
+      webTestClient.post()
+        .uri(ADDRESS_DELETE_REASON)
+        .bodyValue(anAddressDeleteReasonRequest())
+        .exchange()
+        .expectStatus()
+        .isUnauthorized
+    }
+
+    @Test
+    fun `should return forbidden if no role`() {
+      webTestClient.post()
+        .uri(ADDRESS_DELETE_REASON)
+        .headers(setAuthorisation())
+        .bodyValue(anAddressDeleteReasonRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Test
+    fun `should return forbidden if wrong role`() {
+      webTestClient.post()
+        .uri(ADDRESS_DELETE_REASON)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
+        .bodyValue(anAddressDeleteReasonRequest())
+        .exchange()
+        .expectStatus()
+        .isForbidden
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should update case admin additional information`() {
+      val agentHolder = AgentHolder()
+      agentHolder.agent = PRISON_CA_AGENT
+      webTestClient.post()
+        .uri(ADDRESS_DELETE_REASON)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
+        .bodyValue(anAddressDeleteReasonRequest())
+        .exchange()
+        .expectStatus()
+        .isCreated
+
+      val addressCheckRequest = curfewAddressCheckRequestRepository.findByIdOrNull(ADDRESS_REQUEST_ID)
+      val events = addressCheckRequest?.assessment?.id?.let { assessmentEventRepository.findByAssessmentId(assessmentId = it) }
+      assertThat(addressCheckRequest?.addressDeletionEvent).isEqualTo(anAddressDeletionEvent(events?.first() as  GenericChangedEvent))
+    }
+
+    @Sql(
+      "classpath:test_data/reset.sql",
+      "classpath:test_data/a-standard-address-check-request.sql",
+    )
+    @Test
+    fun `should return bad request for null address delete other reason if reason type is other reason`() {
+      val updateAddressDeleteReasonRequest = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, null)
+
+      webTestClient.post()
+        .uri(ADDRESS_DELETE_REASON)
+        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN")))
+        .bodyValue(updateAddressDeleteReasonRequest)
+        .exchange()
+        .expectStatus()
+        .isBadRequest
+    }
+
+    private fun anAddressDeleteReasonRequest() = AddressDeleteReason(AddressDeleteReasonType.OTHER_REASON, "other reason")
+    private fun anAddressDeletionEvent(event: GenericChangedEvent) = AddressDeletionEvent(
+                                                                        id=1,
+                                                                        addressDeleteReasonType=AddressDeleteReasonType.OTHER_REASON,
+                                                                        addressDeleteOtherReason="other reason",
+                                                                        assessmentEvent= event
+                                                                      )
   }
 
   private companion object {
