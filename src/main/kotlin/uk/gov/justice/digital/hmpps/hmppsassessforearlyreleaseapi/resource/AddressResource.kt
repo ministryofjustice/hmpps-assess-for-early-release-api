@@ -502,7 +502,7 @@ class AddressResource(private val addressService: AddressService, private val ag
     @RequestBody @Valid updateCaseAdminAdditionInfoRequest: UpdateCaseAdminAdditionInfoRequest,
   ) = addressService.updateCaseAdminAdditionalInformation(prisonNumber, requestId, updateCaseAdminAdditionInfoRequest, agentHolder.getAgentOrThrow())
 
-  @PutMapping("/offender/{prisonNumber}/current-assessment/address-delete-reason/{requestId}")
+  @PutMapping("/offender/{prisonNumber}/current-assessment/withdraw-address/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
   @ResponseStatus(code = HttpStatus.NO_CONTENT)
   @Operation(

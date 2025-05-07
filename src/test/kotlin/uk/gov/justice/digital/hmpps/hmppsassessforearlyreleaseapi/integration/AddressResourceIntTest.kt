@@ -43,7 +43,7 @@ private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/c
 private const val GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/address-check-requests"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
 private const val UPDATE_CASE_AMIN_ADDITIONAL_INFO = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID/case-admin-additional-information"
-private const val ADDRESS_DELETE_REASON = "/offender/$PRISON_NUMBER/current-assessment/address-delete-reason/$ADDRESS_REQUEST_ID"
+private const val ADDRESS_DELETE_REASON = "/offender/$PRISON_NUMBER/current-assessment/withdraw-address/$ADDRESS_REQUEST_ID"
 
 class AddressResourceIntTest : SqsIntegrationTestBase() {
 
