@@ -30,6 +30,10 @@ sealed class AssessmentLifecycleEvent {
     override fun getContext(): Map<String, Any> = mapOf("type" to type, "code" to code, "answers" to answers)
   }
 
+  data object SubmitForAddressChecks : AssessmentLifecycleEvent()
+
+  data object StartAddressChecks : AssessmentLifecycleEvent()
+
   data class ResidentialCheckAnswerProvided(
     val checkStatus: ResidentialChecksStatus,
     val taskCode: String,
@@ -37,10 +41,6 @@ sealed class AssessmentLifecycleEvent {
   ) : AssessmentLifecycleEvent() {
     override fun getContext(): Map<String, Any> = mapOf("checkStatus" to checkStatus, "taskCode" to taskCode, "answers" to answers)
   }
-
-  data object SubmitForAddressChecks : AssessmentLifecycleEvent()
-
-  data object StartAddressChecks : AssessmentLifecycleEvent()
 
   data object CompleteAddressChecks : AssessmentLifecycleEvent()
 
