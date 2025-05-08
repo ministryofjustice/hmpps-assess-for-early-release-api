@@ -52,6 +52,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -180,6 +181,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
           status = NOT_STARTED,
+          addressChecksStatus = ResidentialChecksStatus.NOT_STARTED,
           policyVersion = "1.0",
           optOutReasonType = OTHER,
           optOutReasonOther = "I have reason",
