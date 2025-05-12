@@ -3,6 +3,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mappe
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.accommodation.assessment.cas.CasStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.ELIGIBLE_AND_SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus.INELIGIBLE_OR_UNSUITABLE
@@ -124,5 +125,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     assertThat(assessmentOverviewSummary.toDoEligibilityAndSuitabilityBy).isEqualTo(LocalDate.now().plusDays(DAYS_TO_ADD))
     assertThat(assessmentOverviewSummary.result).isEqualTo(result)
     assertThat(assessmentOverviewSummary.lastUpdateBy).isEqualTo("prison user")
+    assertThat(assessmentOverviewSummary.currentCasAccommodationStatusInfo?.reference).isEqualTo(1L)
+    assertThat(assessmentOverviewSummary.currentCasAccommodationStatusInfo?.status).isEqualTo(CasStatus.PROPOSED)
   }
 }

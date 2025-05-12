@@ -24,11 +24,9 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.ErrorResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReasonDto
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddressSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
@@ -228,53 +226,6 @@ class AddressResource(private val addressService: AddressService, private val ag
     @PathVariable(name = "prisonNumber") prisonNumber: String,
     @PathVariable(name = "requestId") requestId: Long,
   ) = addressService.getStandardAddressCheckRequest(prisonNumber, requestId)
-
-  @PostMapping("/offender/{prisonNumber}/current-assessment/cas-check-request")
-  @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")
-  @ResponseStatus(code = HttpStatus.CREATED)
-  @Operation(
-    summary = "Adds a CAS check request for an offender.",
-    description = "Adds a CAS check request for an offender's current assessment.",
-    security = [SecurityRequirement(name = "assess-for-early-release-admin-role")],
-  )
-  @ApiResponses(
-    value = [
-      ApiResponse(
-        responseCode = "201",
-        description = "The CAS check request has been added to the current assessment for the offender.",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = CasCheckRequestSummary::class),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "401",
-        description = "Unauthorised, requires a valid Oauth2 token",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-      ApiResponse(
-        responseCode = "403",
-        description = "Forbidden, requires an appropriate role",
-        content = [
-          Content(
-            mediaType = "application/json",
-            schema = Schema(implementation = ErrorResponse::class),
-          ),
-        ],
-      ),
-    ],
-  )
-  fun addCasCheckRequest(
-    @Parameter(required = true) @PathVariable prisonNumber: String,
-    @RequestBody @Valid addCasCheckRequest: AddCasCheckRequest,
-  ) = addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
 
   @DeleteMapping("/offender/{prisonNumber}/current-assessment/address-request/{requestId}")
   @PreAuthorize("hasAnyRole('ASSESS_FOR_EARLY_RELEASE_ADMIN')")

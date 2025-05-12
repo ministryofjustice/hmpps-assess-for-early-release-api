@@ -8,7 +8,7 @@ import java.time.LocalDate
 @Schema(description = "Response object which describes an address")
 data class AddressSummary(
   @Schema(description = "The address's UPRN", example = "200010019924")
-  val uprn: String,
+  val uprn: String? = null,
 
   @Schema(description = "The address's first line", example = "34 Maryport Street")
   val firstLine: String? = null,
@@ -20,19 +20,19 @@ data class AddressSummary(
   val town: String,
 
   @Schema(description = "The address's county", example = "Shropshire")
-  val county: String,
+  val county: String? = null,
 
   @Schema(description = "The address's postcode", example = "RG13HS")
   val postcode: String,
 
   @Schema(description = "The address's country", example = "Wales")
-  val country: String,
+  val country: String? = null,
 
   @Schema(description = "The address's x-coordinate", example = "401003.0,")
-  val xcoordinate: Double,
+  val xcoordinate: Double? = null,
 
   @Schema(description = "The address's y-coordinate", example = "154111.0")
-  val ycoordinate: Double,
+  val ycoordinate: Double? = null,
 
   @Schema(description = "The date the address was last updated", example = "2021-05-23")
   @JsonFormat(pattern = API_DATE_FORMAT)

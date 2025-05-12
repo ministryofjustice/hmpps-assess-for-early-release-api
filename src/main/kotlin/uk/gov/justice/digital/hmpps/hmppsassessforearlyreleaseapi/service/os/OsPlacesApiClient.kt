@@ -26,6 +26,18 @@ class OsPlacesApiClient(
     return searchResult?.results?.map { it.dpa } ?: emptyList()
   }
 
+  fun getAddressesForPostcode(postcode: String): List<OsPlacesApiDPA> {
+    val searchResult = osPlacesApiWebClient
+      .get()
+      .uri("/postcode?postcode=$postcode&key=$apiKey")
+      .accept(MediaType.APPLICATION_JSON)
+      .retrieve()
+      .bodyToMono(OsPlacesApiResponse::class.java)
+      .onErrorResume { e -> if (e is WebClientResponseException && e.statusCode == HttpStatus.BAD_REQUEST) Mono.empty() else Mono.error(e) }
+      .block()
+    return searchResult?.results?.map { it.dpa } ?: emptyList()
+  }
+
   fun getAddressForUprn(uprn: String): OsPlacesApiDPA {
     val searchResult = osPlacesApiWebClient
       .get()

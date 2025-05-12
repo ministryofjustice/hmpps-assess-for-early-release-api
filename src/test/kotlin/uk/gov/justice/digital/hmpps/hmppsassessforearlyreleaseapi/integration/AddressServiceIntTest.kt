@@ -18,12 +18,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.base.SqsIntegrationTestBase
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.UpdateCaseAdminAdditionInfoRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
@@ -38,9 +36,6 @@ const val OS_API_KEY = "os-places-api-key"
 class AddressServiceTest : SqsIntegrationTestBase() {
   @Autowired
   private lateinit var addressRepository: AddressRepository
-
-  @Autowired
-  private lateinit var casCheckRequestRepository: CasCheckRequestRepository
 
   @Autowired
   private lateinit var standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository
@@ -207,77 +202,6 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val exception = assertThrows<Exception> {
       addressService.addStandardAddressCheckRequest(prisonNumber, addStandardAddressCheckRequest, agentHolder.getAgentOrThrow())
     }
-    assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
-  }
-
-  @Sql(
-    "classpath:test_data/reset.sql",
-    "classpath:test_data/some-offenders.sql",
-    "classpath:test_data/an-address.sql",
-  )
-  @Test
-  fun `should add a cas check request`() {
-    val prisonNumber = "C1234CC"
-    val caAdditionalInfo = "ca info"
-    val ppAdditionalInfo = "pp info"
-    val preferencePriority = AddressPreferencePriority.SECOND
-    val addCasCheckRequest = AddCasCheckRequest(
-      caAdditionalInfo = caAdditionalInfo,
-      ppAdditionalInfo = ppAdditionalInfo,
-      preferencePriority = preferencePriority,
-    )
-    val agentHolder = AgentHolder()
-    agentHolder.agent = PRISON_CA_AGENT
-
-    addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
-
-    val dbCasCheckRequests = casCheckRequestRepository.findAll()
-    assertThat(dbCasCheckRequests).hasSize(1)
-    val dbCasCheckRequest = dbCasCheckRequests.first()
-    assertThat(dbCasCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
-    assertThat(dbCasCheckRequest.caAdditionalInfo).isEqualTo(caAdditionalInfo)
-    assertThat(dbCasCheckRequest.ppAdditionalInfo).isEqualTo(ppAdditionalInfo)
-    assertThat(dbCasCheckRequest.preferencePriority).isEqualTo(preferencePriority)
-
-    val assessmentEvents = assessmentEventRepository.findByAssessmentId(dbCasCheckRequest.assessment.id)
-    assertThat(assessmentEvents).isNotEmpty
-    assertThat(assessmentEvents).hasSize(1)
-
-    val firstEvent = assessmentEvents.first() as GenericChangedEvent
-    assertThat(firstEvent.eventType).isEqualTo(AssessmentEventType.ADDRESS_UPDATED)
-    assertThat(firstEvent.changes["casCheckRequest"]).isEqualTo(
-      mapOf(
-        "caAdditionalInfo" to caAdditionalInfo,
-        "ppAdditionalInfo" to ppAdditionalInfo,
-        "preferencePriority" to preferencePriority.toString(),
-      ),
-    )
-    assertThat(firstEvent.agent.role).isEqualTo(PRISON_CA_AGENT.role)
-    assertThat(firstEvent.agent.fullName).isEqualTo(PRISON_CA_AGENT.fullName)
-  }
-
-  @Sql(
-    "classpath:test_data/reset.sql",
-    "classpath:test_data/some-offenders.sql",
-    "classpath:test_data/an-address.sql",
-  )
-  @Test
-  fun `should throw agent not initialized error`() {
-    val prisonNumber = "C1234CC"
-    val caAdditionalInfo = "ca info"
-    val ppAdditionalInfo = "pp info"
-    val preferencePriority = AddressPreferencePriority.SECOND
-    val addCasCheckRequest = AddCasCheckRequest(
-      caAdditionalInfo = caAdditionalInfo,
-      ppAdditionalInfo = ppAdditionalInfo,
-      preferencePriority = preferencePriority,
-    )
-    val agentHolder = AgentHolder()
-
-    val exception = assertThrows<Exception> {
-      addressService.addCasCheckRequest(prisonNumber, addCasCheckRequest, agentHolder.getAgentOrThrow())
-    }
-
     assertThat(exception.message).isEqualTo("Agent is missing from the request headers")
   }
 

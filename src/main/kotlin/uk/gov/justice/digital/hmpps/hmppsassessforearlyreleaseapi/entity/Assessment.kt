@@ -25,6 +25,7 @@ import org.hibernate.Hibernate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Agent
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.accommodation.assessment.cas.CasAccommodationAssessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.AssessmentEventType
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.events.GenericChangedEvent
@@ -104,6 +105,10 @@ data class Assessment(
   @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
   @OrderBy("eventTime DESC")
   private val assessmentEvents: MutableList<AssessmentEvent> = mutableListOf(),
+
+  @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
+  @OrderBy("createdTimestamp DESC")
+  val casAccommodationAssessments: MutableList<CasAccommodationAssessment> = mutableListOf(),
 
   @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "responsible_com_id")

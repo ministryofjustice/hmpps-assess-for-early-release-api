@@ -14,11 +14,9 @@ import java.time.LocalDateTime
 data class Address(
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
-  @NotNull
   val id: Long = -1,
 
-  @NotNull
-  val uprn: String,
+  val uprn: String? = null,
 
   val firstLine: String? = null,
 
@@ -28,19 +26,19 @@ data class Address(
   val town: String,
 
   @NotNull
-  val county: String,
+  val county: String? = null,
 
   @NotNull
   val postcode: String,
 
   @NotNull
-  val country: String,
+  val country: String? = null,
 
   @NotNull
-  val xCoordinate: Double,
+  val xCoordinate: Double? = null,
 
   @NotNull
-  val yCoordinate: Double,
+  val yCoordinate: Double? = null,
 
   @NotNull
   val addressLastUpdated: LocalDate,

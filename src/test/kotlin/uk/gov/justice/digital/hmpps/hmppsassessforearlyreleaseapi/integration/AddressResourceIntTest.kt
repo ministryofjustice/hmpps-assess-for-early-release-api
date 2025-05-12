@@ -14,11 +14,9 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.ba
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.OsPlacesMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.PrisonRegisterMockServer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AddressDeleteReasonDto
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddressSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
@@ -38,7 +36,6 @@ private const val SEARCH_FOR_ADDRESSES_URL = "/addresses/search/$POSTCODE"
 private const val GET_ADDRESS_FOR_UPRN_URL = "/address/uprn/$UPRN"
 private const val ADD_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request"
 private const val GET_STANDARD_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID"
-private const val ADD_CAS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/cas-check-request"
 private const val DELETE_ADDRESS_CHECK_REQUEST_URL = "/offender/$PRISON_NUMBER/current-assessment/address-request/$ADDRESS_REQUEST_ID"
 private const val GET_ADDRESS_CHECK_REQUESTS_FOR_ASSESSMENT_URL = "/offender/$PRISON_NUMBER/current-assessment/address-check-requests"
 private const val ADD_RESIDENT_URL = "/offender/$PRISON_NUMBER/current-assessment/standard-address-check-request/$ADDRESS_REQUEST_ID/resident"
@@ -282,69 +279,6 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.residents).hasSize(3)
       assertThat(addressCheckRequest.residents.first().residentId).isEqualTo(2)
     }
-  }
-
-  @Nested
-  inner class AddCasCheckRequestTests {
-    private val caInfo = "ca info"
-    private val ppInfo = "pp info"
-    private val priority = AddressPreferencePriority.SECOND
-
-    @Test
-    fun `should return unauthorized if no token`() {
-      webTestClient.post()
-        .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .bodyValue(addCasCheckRequest())
-        .exchange()
-        .expectStatus()
-        .isUnauthorized
-    }
-
-    @Test
-    fun `should return forbidden if no role`() {
-      webTestClient.post()
-        .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation())
-        .bodyValue(addCasCheckRequest())
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Test
-    fun `should return forbidden if wrong role`() {
-      webTestClient.post()
-        .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(addCasCheckRequest())
-        .exchange()
-        .expectStatus()
-        .isForbidden
-    }
-
-    @Sql(
-      "classpath:test_data/reset.sql",
-      "classpath:test_data/some-offenders.sql",
-      "classpath:test_data/an-address.sql",
-    )
-    @Test
-    fun `should add a CAS check request`() {
-      val addressCheckRequest = webTestClient.post()
-        .uri(ADD_CAS_CHECK_REQUEST_URL)
-        .headers(setAuthorisation(roles = listOf("ASSESS_FOR_EARLY_RELEASE_ADMIN"), agent = PRISON_CA_AGENT))
-        .bodyValue(addCasCheckRequest())
-        .exchange()
-        .expectStatus()
-        .isCreated
-        .expectBody(typeReference<CasCheckRequestSummary>())
-        .returnResult().responseBody!!
-
-      assertThat(addressCheckRequest.caAdditionalInfo).isEqualTo(caInfo)
-      assertThat(addressCheckRequest.ppAdditionalInfo).isEqualTo(ppInfo)
-      assertThat(addressCheckRequest.preferencePriority).isEqualTo(priority)
-    }
-
-    private fun addCasCheckRequest() = AddCasCheckRequest(caInfo, ppInfo, priority)
   }
 
   @Nested

@@ -2,6 +2,7 @@ package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service
 
 import jakarta.transaction.Transactional
 import jakarta.validation.Valid
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDeletionEvent
@@ -9,7 +10,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddResidentRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddStandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
@@ -21,7 +21,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAd
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddResidentRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddStandardAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.AddressSummary
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CasCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.CheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.ResidentSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
@@ -29,7 +28,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAd
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toEntity
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
@@ -42,7 +40,6 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.toA
 class AddressService(
   private val addressRepository: AddressRepository,
   private val assessmentService: AssessmentService,
-  private val casCheckRequestRepository: CasCheckRequestRepository,
   private val curfewAddressCheckRequestRepository: CurfewAddressCheckRequestRepository,
   private val osPlacesApiClient: OsPlacesApiClient,
   private val standardAddressCheckRequestRepository: StandardAddressCheckRequestRepository,
@@ -50,6 +47,10 @@ class AddressService(
   private val assessmentRepository: AssessmentRepository,
 ) {
   fun searchForAddresses(searchQuery: String): List<AddressSummary> = osPlacesApiClient.searchForAddresses(searchQuery).map { it.toAddressSummary() }
+
+  fun searchForAddressesWithPostcode(postcode: String): List<AddressSummary> = osPlacesApiClient.getAddressesForPostcode(postcode).map { it.toAddressSummary() }
+
+  fun isValidPostcode(postcode: String): Boolean = postcode.matches(Regex("[A-Z]{1,2}[0-9R][0-9A-Z]?[0-9][ABD-HJLNP-UW-Z]{2}\$"))
 
   @Transactional
   fun getAddressForUprn(uprn: String): AddressSummary {
@@ -100,32 +101,6 @@ class AddressService(
 
   @Transactional
   fun getStandardAddressCheckRequest(prisonNumber: String, requestId: Long): StandardAddressCheckRequestSummary = getStandardAddressCheckRequest(requestId, prisonNumber).toSummary()
-
-  @Transactional
-  fun addCasCheckRequest(
-    prisonNumber: String,
-    addCasCheckRequest: AddCasCheckRequest,
-    agent: AgentDto,
-  ): CasCheckRequestSummary {
-    val currentAssessment = assessmentService.getCurrentAssessment(prisonNumber)
-
-    val casCheckRequest = casCheckRequestRepository.save(
-      CasCheckRequest(
-        caAdditionalInfo = addCasCheckRequest.caAdditionalInfo,
-        ppAdditionalInfo = addCasCheckRequest.ppAdditionalInfo,
-        preferencePriority = addCasCheckRequest.preferencePriority,
-        assessment = currentAssessment,
-        allocatedAddress = null,
-      ),
-    )
-    currentAssessment.recordEvent(
-      changes = mapOf("casCheckRequest" to addCasCheckRequest.toSummary()),
-      eventType = AssessmentEventType.ADDRESS_UPDATED,
-      agent = agent.toEntity(),
-    )
-    assessmentRepository.save(currentAssessment)
-    return casCheckRequest.toSummary()
-  }
 
   @Transactional
   fun getCheckRequestsForAssessment(prisonNumber: String): List<CheckRequestSummary> {
@@ -278,6 +253,19 @@ class AddressService(
     return curfewAddressCheckRequest
   }
 
+  @Cacheable("countyAndCountryForPostCode")
+  fun getCountyAndCountryForPostCode(postCode: String): Pair<String?, String?> {
+    if (isValidPostcode(postCode)) {
+      val results = searchForAddressesWithPostcode(postCode)
+      if (results.isNotEmpty()) {
+        with(results.first()) {
+          return Pair(county, country)
+        }
+      }
+    }
+    return Pair(null, null)
+  }
+
   private fun getStandardAddressCheckRequest(requestId: Long, prisonNumber: String): StandardAddressCheckRequest {
     val curfewAddressCheckRequest = getCurfewAddressCheckRequest(requestId, prisonNumber)
     if (curfewAddressCheckRequest !is StandardAddressCheckRequest) {
@@ -327,16 +315,6 @@ class AddressService(
     ),
   )
 
-  private fun CasCheckRequest.toSummary(): CasCheckRequestSummary = CasCheckRequestSummary(
-    requestId = this.id,
-    caAdditionalInfo = this.caAdditionalInfo,
-    ppAdditionalInfo = this.ppAdditionalInfo,
-    preferencePriority = this.preferencePriority,
-    dateRequested = this.dateRequested,
-    status = this.status,
-    allocatedAddress = this.allocatedAddress?.toAddressSummary(),
-  )
-
   private fun Resident.toSummary(): ResidentSummary = ResidentSummary(
     residentId = this.id,
     forename = this.forename,
@@ -368,15 +346,8 @@ class AddressService(
     addressUprn = this.addressUprn,
   )
 
-  private fun AddCasCheckRequest.toSummary(): AddCasCheckRequestSummary = AddCasCheckRequestSummary(
-    caAdditionalInfo = this.caAdditionalInfo,
-    ppAdditionalInfo = this.ppAdditionalInfo,
-    preferencePriority = this.preferencePriority,
-  )
-
   private fun CurfewAddressCheckRequest.toSummary(): CheckRequestSummary = when (this) {
     is StandardAddressCheckRequest -> this.toSummary()
-    is CasCheckRequest -> this.toSummary()
     else -> error("Cannot transform request type of ${this::class.simpleName} to a check request summary")
   }
 }
