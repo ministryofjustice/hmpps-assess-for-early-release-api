@@ -6,6 +6,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.accommodation.assessment.cas.CasAccommodationStatusInfoResponse
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import java.time.LocalDate
 
 @Schema(description = "Response object which describes an assessment")
@@ -40,6 +41,9 @@ data class AssessmentOverviewSummary(
 
   @Schema(description = "The assessment status", example = "NOT_STARTED")
   val status: AssessmentStatus,
+
+  @Schema(description = "The status of address checks for this assessment", example = "IN_PROGRESS")
+  val addressChecksStatus: ResidentialChecksStatus,
 
   @Schema(description = "The community offender manager assigned to this assessment")
   val responsibleCom: ComSummary? = null,

@@ -52,6 +52,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestDa
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PROBATION_COM_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper.DAYS_TO_ADD
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.prison.PrisonerSearchPrisoner
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -180,6 +181,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           crd = LocalDate.of(2020, 11, 14),
           location = "Birmingham (HMP)",
           status = NOT_STARTED,
+          addressChecksStatus = ResidentialChecksStatus.NOT_STARTED,
           policyVersion = "1.0",
           optOutReasonType = OTHER,
           optOutReasonOther = "I have reason",
@@ -495,7 +497,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -505,7 +506,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if no role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation())
+        .headers(setAuthorisation(agent = PROBATION_COM_AGENT))
         .bodyValue(PRISON_CA_AGENT)
         .exchange()
         .expectStatus()
@@ -516,8 +517,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(PRISON_CA_AGENT)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PRISON_CA_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -535,8 +535,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // When
       val result = webTestClient.put()
         .uri(SUBMIT_FOR_ADDRESS_CHECKS_URL)
-        .headers(setAuthorisation(roles = roles))
-        .bodyValue(PRISON_CA_AGENT)
+        .headers(setAuthorisation(roles = roles, agent = PRISON_CA_AGENT))
         .exchange()
 
       // Then
@@ -556,7 +555,6 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return unauthorized if no token`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .bodyValue(PROBATION_COM_AGENT)
         .exchange()
         .expectStatus()
         .isUnauthorized
@@ -566,8 +564,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if no role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation())
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(agent = PROBATION_COM_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -577,8 +574,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
     fun `should return forbidden if wrong role`() {
       webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation(roles = listOf("ROLE_WRONG")))
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(roles = listOf("ROLE_WRONG"), agent = PROBATION_COM_AGENT))
         .exchange()
         .expectStatus()
         .isForbidden
@@ -596,8 +592,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       // When
       val results = webTestClient.put()
         .uri(SUBMIT_FOR_PRE_DECISION_CHECKS_URL)
-        .headers(setAuthorisation(roles = roles))
-        .bodyValue(PROBATION_COM_AGENT)
+        .headers(setAuthorisation(roles = roles, agent = PROBATION_COM_AGENT))
         .exchange()
 
       // Then
