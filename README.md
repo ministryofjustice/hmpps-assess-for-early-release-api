@@ -6,6 +6,12 @@
 
 This is the backend API for Assess for Early Release (Afer).
 
+### URLs
+1. Swagger : http://localhost:8089/swagger-ui/index.html?configUrl=/v3/api-docs
+2. Local   : http://localhost:3000/
+3. Info    : http://localhost:3000/info
+4. Dev     : https://assess-for-early-release-dev.hmpps.service.justice.gov.uk/
+
 ### Running application on command line
 
 ```Shell
