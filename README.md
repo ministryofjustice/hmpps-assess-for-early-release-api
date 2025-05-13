@@ -6,23 +6,9 @@
 
 This is the backend API for Assess for Early Release (Afer).
 
-# Checking changes before pushing
-
-```
-./gradlew clean ktlintformat detekt test integrationtest
-```
-
-Note: this uses test containers to start a postgres instance on a random port to run integration tests against. 
-
-If you'd prefer to run tests against a postgres DB instance running externally via docker-compose, then you can start an instance using:
-```
-docker compose -f docker-compose-test.yml up
-```
-The tests should automatically detect this running on port 5433 and use it instead. 
-
 ### Running application on command line
 
-```
+```Shell
 ./run-local.sh
 ```
 
@@ -33,11 +19,11 @@ If you want to run the spring application in side your IDE,
 follow the following steps:
 
 * Run in terminal
-```
+```Shell
 ./set-vars-to-env-file.sh
 ```
 * Then run in terminal
-```
+```Shell
 docker compose up
 ```
 * Add the following to your IJ IDE Run/Debug configurations "Environment variables"
@@ -49,3 +35,17 @@ docker compose up
 ```
 ./gradlew clean ktlintformat detekt test integrationtest
 ```
+
+# Checking changes before pushing
+
+```
+./gradlew clean ktlintformat detekt test integrationtest
+```
+
+Note: this uses test containers to start a postgres instance on a random port to run integration tests against.
+
+If you'd prefer to run tests against a postgres DB instance running externally via docker-compose, then you can start an instance using:
+```Shell
+docker compose -f docker-compose-test.yml up
+```
+The tests should automatically detect this running on port 5433 and use it instead. 
