@@ -14,7 +14,7 @@ This is the backend API for Assess for Early Release (Afer).
 
 Note: this uses test containers to start a postgres instance on a random port to run integration tests against. 
 
-If you'd prefer to run tests against a postgres instance running externally via docker-compose, then you can start an instance using:
+If you'd prefer to run tests against a postgres DB instance running externally via docker-compose, then you can start an instance using:
 ```
 docker compose -f docker-compose-test.yml up
 ```
