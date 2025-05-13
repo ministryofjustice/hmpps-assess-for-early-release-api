@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.config.API_DATE_FORMAT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.AssessmentStatus
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.accommodation.assessment.cas.CasAccommodationStatusInfoResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.ResidentialChecksStatus
 import java.time.LocalDate
 
@@ -89,6 +90,9 @@ data class AssessmentOverviewSummary(
 
   @Schema(description = "Information that the POM has provided about the offender's behaviour in prison", example = "Any concerns about them being released on HDC")
   val pomBehaviourInformation: String? = null,
+
+  @Schema(description = "Information On the current cas accommodation assessment")
+  val currentCasAccommodationStatusInfo: CasAccommodationStatusInfoResponse? = null,
 
   @Schema(description = "Last updated by", example = "Aled Evans")
   val lastUpdateBy: String? = null,

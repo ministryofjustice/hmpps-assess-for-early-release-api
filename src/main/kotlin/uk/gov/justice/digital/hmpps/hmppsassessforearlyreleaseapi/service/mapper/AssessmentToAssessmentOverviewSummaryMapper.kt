@@ -1,6 +1,7 @@
 package uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.mapper
 
 import org.springframework.stereotype.Component
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Assessment
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AssessmentOverviewSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.EligibilityStatus
@@ -9,6 +10,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.Eligibil
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.SUITABLE
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.SuitabilityStatus.UNSUITABLE
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.accommodation.assessment.cas.CasAccommodationStatusInfoResponse
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.toSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.AssessmentService.AssessmentWithEligibilityProgress
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.StatusHelpers.toStatus
@@ -54,7 +56,16 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       victimContactSchemeRequests = currentAssessment.victimContactSchemeRequests,
       pomBehaviourInformation = currentAssessment.pomBehaviourInformation,
       lastUpdateBy = currentAssessment.lastUpdateByUserEvent?.agent?.fullName,
+      currentCasAccommodationStatusInfo = getCurrentCasAccommodationAssessment(currentAssessment),
     )
+  }
+
+  private fun getCurrentCasAccommodationAssessment(currentAssessment: Assessment): CasAccommodationStatusInfoResponse? {
+    if (currentAssessment.casAccommodationAssessments.isNotEmpty()) {
+      val casAccommodationAssessment = currentAssessment.casAccommodationAssessments.last()
+      return CasAccommodationStatusInfoResponse(casAccommodationAssessment.id, casAccommodationAssessment.getStatus())
+    }
+    return null
   }
 
   private fun getToDoByDate(offender: Offender): LocalDate {

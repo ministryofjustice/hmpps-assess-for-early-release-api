@@ -17,11 +17,10 @@ object CheckRequestType {
 
 @Schema(
   description = "Describes a check request, a discriminator exists to distinguish between different types of check requests",
-  oneOf = [StandardAddressCheckRequestSummary::class, CasCheckRequestSummary::class],
+  oneOf = [StandardAddressCheckRequestSummary::class],
   discriminatorProperty = "requestType",
   discriminatorMapping = [
     DiscriminatorMapping(value = CheckRequestType.STANDARD_ADDRESS, schema = StandardAddressCheckRequestSummary::class),
-    DiscriminatorMapping(value = CheckRequestType.CAS, schema = CasCheckRequestSummary::class),
   ],
 )
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "requestType")

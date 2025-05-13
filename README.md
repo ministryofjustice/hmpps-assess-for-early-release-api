@@ -4,40 +4,32 @@
 [![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-assess-for-early-release-api)
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html)
 
-This is the backend API for Assess for Early Release.
+This is the backend API for Assess for Early Release (Afer).
 
-# Checking changes before pushing
-
-```
-./gradlew clean ktlintformat detekt test integrationtest
-```
-
-Note: this uses test containers to start a postgres instance on a random port to run integration tests against. 
-
-If you'd prefer to run tests against a postgres instance running externally via docker-compose, then you can start an instance using:
-```
-docker compose -f docker-compose-test.yml up
-```
-The tests should automatically detect this running on port 5433 and use it instead. 
+### URLs
+1. Swagger : http://localhost:8089/swagger-ui/index.html?configUrl=/v3/api-docs
+2. Local   : http://localhost:3000/
+3. Info    : http://localhost:3000/info
+4. Dev     : https://assess-for-early-release-dev.hmpps.service.justice.gov.uk/
 
 ### Running application on command line
 
-```
+```Shell
 ./run-local.sh
 ```
 
 ### Running application inside the IDE
 
-This option is needed if you want to trace to debug your code!
+This option is needed if you want to trace or debug your code!
 If you want to run the spring application in side your IDE, 
 follow the following steps:
 
 * Run in terminal
-```
+```Shell
 ./set-vars-to-env-file.sh
 ```
 * Then run in terminal
-```
+```Shell
 docker compose up
 ```
 * Add the following to your IJ IDE Run/Debug configurations "Environment variables"
@@ -45,7 +37,21 @@ docker compose up
 /Users/<<YOUR-USER-DIR>>/env-config/after.env
 ```
 <em>The IDE behaves a bit odd here, try and selected the folder and file do not type it in!</em>
-### Running all tests from command line
+### Running all tests from the command line
 ```
 ./gradlew clean ktlintformat detekt test integrationtest
 ```
+
+# Checking changes before pushing
+
+```
+./gradlew clean ktlintformat detekt test integrationtest
+```
+
+Note: this uses test containers to start a postgres instance on a random port to run integration tests against.
+
+If you'd prefer to run tests against a postgres DB instance running externally via docker-compose, then you can start an instance using:
+```Shell
+docker compose -f docker-compose-test.yml up
+```
+The tests should automatically detect this running on port 5433 and use it instead. 

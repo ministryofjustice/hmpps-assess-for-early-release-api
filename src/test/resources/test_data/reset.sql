@@ -4,7 +4,7 @@ TRUNCATE TABLE resident RESTART IDENTITY CASCADE;
 delete from postponement_reason;
 delete from residential_checks_task_answer;
 delete from standard_address_check_request;
-delete from cas_check_request;
+delete from cas_accommodation_assessment;
 delete from curfew_address_check_request;
 delete from address;
 delete from eligibility_check_result;

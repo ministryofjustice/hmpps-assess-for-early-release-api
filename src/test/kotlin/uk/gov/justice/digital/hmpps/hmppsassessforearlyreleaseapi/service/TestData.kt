@@ -10,9 +10,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.Offende
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_CA
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PRISON_DM
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRole.PROBATION_COM
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.accommodation.assessment.cas.CasAccommodationAssessment
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.accommodation.assessment.cas.CasStatus
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Address
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.AddressPreferencePriority
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.CurfewAddressCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.Resident
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.curfewAddress.StandardAddressCheckRequest
@@ -259,6 +260,13 @@ object TestData {
     val assessment = offender.assessments.first()
     assessment.status = status
     assessment.previousStatus = previousStatus
+    assessment.casAccommodationAssessments.add(
+      CasAccommodationAssessment(
+        id = 1,
+        assessment = assessment,
+        status = CasStatus.PROPOSED,
+      ),
+    )
     assessment.eligibilityCheckResults.clear()
     assessment.eligibilityCheckResults.addAll(
       POLICY_1_0.eligibilityCriteria
@@ -421,13 +429,6 @@ object TestData {
     return standardAddressCheckRequest
   }
 
-  fun aCasCheckRequest() = CasCheckRequest(
-    dateRequested = LocalDateTime.of(2024, 9, 7, 15, 19),
-    preferencePriority = AddressPreferencePriority.FIRST,
-    assessment = anOffender().assessments.first(),
-    allocatedAddress = anAddress(),
-  )
-
   fun aDeliusOffenderManager() = DeliusOffenderManager(
     id = 1,
     code = "staff-code",
@@ -506,7 +507,7 @@ object TestData {
 
   fun aAddressDetailsTaskAnswers(criterionMet: Boolean) = AddressDetailsTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aAddressDetailsAnswers(),
@@ -514,7 +515,7 @@ object TestData {
 
   fun aAssessPersonsRiskTaskAnswers(criterionMet: Boolean) = AssessPersonsRiskTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aAssessPersonsRiskAnswers(),
@@ -522,7 +523,7 @@ object TestData {
 
   fun aChildrenServicesChecksTaskAnswers(criterionMet: Boolean) = ChildrenServicesChecksTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aChildrenServicesChecksAnswers(),
@@ -530,7 +531,7 @@ object TestData {
 
   fun aPoliceChecksTaskAnswers(criterionMet: Boolean) = PoliceChecksTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aPoliceChecksAnswers(),
@@ -538,7 +539,7 @@ object TestData {
 
   fun aRiskManagementDecisionTaskAnswers(criterionMet: Boolean) = RiskManagementDecisionTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aRiskManagementDecisionAnswers(),
@@ -546,7 +547,7 @@ object TestData {
 
   fun aSuitabilityDecisionTaskAnswers(criterionMet: Boolean) = SuitabilityDecisionTaskAnswers(
     id = 1,
-    addressCheckRequest = aCasCheckRequest(),
+    addressCheckRequest = notStartedStandardAddressCheckRequest(),
     criterionMet = criterionMet,
     taskVersion = PolicyVersion.V1.name,
     answers = aSuitabilityDecisionAnswers(),

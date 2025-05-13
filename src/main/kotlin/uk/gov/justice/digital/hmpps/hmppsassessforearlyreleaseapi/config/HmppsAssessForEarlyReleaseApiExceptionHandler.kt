@@ -21,6 +21,18 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.Task
 
 @RestControllerAdvice
 class HmppsAssessForEarlyReleaseApiExceptionHandler {
+
+  @ExceptionHandler(IllegalStateException::class)
+  fun handleIllegalStateException(e: IllegalStateException): ResponseEntity<ErrorResponse> = ResponseEntity
+    .status(BAD_REQUEST)
+    .body(
+      ErrorResponse(
+        status = BAD_REQUEST,
+        userMessage = "IllegalStateException failure: ${e.message}",
+        developerMessage = e.message,
+      ),
+    ).also { log.info("IllegalStateException exception: {}", e.message) }
+
   @ExceptionHandler(ValidationException::class)
   fun handleValidationException(e: ValidationException): ResponseEntity<ErrorResponse> = ResponseEntity
     .status(BAD_REQUEST)
@@ -38,10 +50,10 @@ class HmppsAssessForEarlyReleaseApiExceptionHandler {
     .body(
       ErrorResponse(
         status = BAD_REQUEST,
-        userMessage = "Validation failure: ${e.message}",
+        userMessage = "HttpMessageNotReadableException failure: ${e.message}",
         developerMessage = e.message,
       ),
-    ).also { log.info("Validation exception: {}", e.message) }
+    ).also { log.info("HttpMessageNotReadableException exception: {}", e.message) }
 
   @ExceptionHandler(NoResourceFoundException::class)
   fun handleNoResourceFoundException(e: NoResourceFoundException): ResponseEntity<ErrorResponse> = ResponseEntity

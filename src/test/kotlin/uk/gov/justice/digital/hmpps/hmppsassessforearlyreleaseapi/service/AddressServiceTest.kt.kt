@@ -11,14 +11,12 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAd
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.curfewAddress.StandardAddressCheckRequestSummary
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CasCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.CurfewAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.ResidentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StandardAddressCheckRequestRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.resource.interceptor.AgentHolder
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_CA_AGENT
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.PRISON_NUMBER
-import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aCasCheckRequest
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.aStandardAddressCheckRequestWithAllChecksComplete
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.anOffender
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.os.OsPlacesApiClient
@@ -27,7 +25,6 @@ import java.util.Optional
 class AddressServiceTest {
   private val addressRepository = mock<AddressRepository>()
   private val assessmentService = mock<AssessmentService>()
-  private val casCheckRequestRepository = mock<CasCheckRequestRepository>()
   private val curfewAddressCheckRequestRepository = mock<CurfewAddressCheckRequestRepository>()
   private val osPlacesApiClient = mock<OsPlacesApiClient>()
   private val residentRepository = mock<ResidentRepository>()
@@ -37,7 +34,6 @@ class AddressServiceTest {
   private val addressService = AddressService(
     addressRepository,
     assessmentService,
-    casCheckRequestRepository,
     curfewAddressCheckRequestRepository,
     osPlacesApiClient,
     standardAddressCheckRequestRepository,
@@ -49,14 +45,12 @@ class AddressServiceTest {
   fun `should get all check requests linked to an assessment`() {
     // Given
     val addressCheckRequest = aStandardAddressCheckRequestWithAllChecksComplete()
-    val casCheckRequest = aCasCheckRequest()
     val assessment = anOffender().assessments.first()
 
     whenever(assessmentService.getCurrentAssessment(PRISON_NUMBER)).thenReturn(assessment)
     whenever(curfewAddressCheckRequestRepository.findByAssessment(assessment)).thenReturn(
       listOf(
         addressCheckRequest,
-        casCheckRequest,
       ),
     )
 
@@ -64,7 +58,7 @@ class AddressServiceTest {
     val checkRequests = addressService.getCheckRequestsForAssessment(PRISON_NUMBER)
 
     // Then
-    assertThat(checkRequests).hasSize(2)
+    assertThat(checkRequests).hasSize(1)
     val addressCheckRequestSummary = checkRequests.first() as StandardAddressCheckRequestSummary
     assertThat(addressCheckRequestSummary.requestType).isEqualTo(CheckRequestType.STANDARD_ADDRESS)
     assertThat(addressCheckRequestSummary.requestId).isEqualTo(addressCheckRequest.id)
@@ -73,13 +67,6 @@ class AddressServiceTest {
     assertThat(addressCheckRequestSummary.status).isEqualTo(addressCheckRequest.status)
     assertThat(addressCheckRequestSummary.residents).hasSize(1)
     assertThat(addressCheckRequestSummary.residents.first().residentId).isEqualTo(1)
-
-    val casCheckRequestSummary = checkRequests[1]
-    assertThat(casCheckRequestSummary.requestType).isEqualTo(CheckRequestType.CAS)
-    assertThat(casCheckRequestSummary.requestId).isEqualTo(casCheckRequest.id)
-    assertThat(casCheckRequestSummary.preferencePriority).isEqualTo(casCheckRequest.preferencePriority)
-    assertThat(casCheckRequestSummary.dateRequested).isEqualTo(casCheckRequest.dateRequested)
-    assertThat(casCheckRequestSummary.status).isEqualTo(casCheckRequest.status)
   }
 
   @Test
