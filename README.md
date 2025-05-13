@@ -45,7 +45,7 @@ docker compose up
 /Users/<<YOUR-USER-DIR>>/env-config/after.env
 ```
 <em>The IDE behaves a bit odd here, try and selected the folder and file do not type it in!</em>
-### Running all tests from command line
+### Running all tests from the command line
 ```
 ./gradlew clean ktlintformat detekt test integrationtest
 ```
