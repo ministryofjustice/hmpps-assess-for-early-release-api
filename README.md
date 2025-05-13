@@ -4,7 +4,7 @@
 [![Docker Repository on Quay](https://img.shields.io/badge/quay.io-repository-2496ED.svg?logo=docker)](https://quay.io/repository/hmpps/hmpps-assess-for-early-release-api)
 [![API docs](https://img.shields.io/badge/API_docs_-view-85EA2D.svg?logo=swagger)](https://assess-for-early-release-api-dev.hmpps.service.justice.gov.uk/swagger-ui/index.html)
 
-This is the backend API for Assess for Early Release.
+This is the backend API for Assess for Early Release (Afer).
 
 # Checking changes before pushing
 
