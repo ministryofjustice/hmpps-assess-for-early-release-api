@@ -28,7 +28,7 @@ The tests should automatically detect this running on port 5433 and use it inste
 
 ### Running application inside the IDE
 
-This option is needed if you want to trace to debug your code!
+This option is needed if you want to trace or debug your code!
 If you want to run the spring application in side your IDE, 
 follow the following steps:
 
