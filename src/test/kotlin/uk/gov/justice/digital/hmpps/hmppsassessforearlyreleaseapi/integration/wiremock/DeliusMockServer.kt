@@ -18,8 +18,8 @@ class DeliusMockServer : WireMockServer(DELIUS_WIREMOCK_PORT) {
             "id": 125,
             "code": "$code",
             "name": {
-              "forename": "Jimmy",
-              "surname": "Vivers"
+              "forename": "Konli",
+              "surname": "Gorkon"
             },
             "username": "a-com",
             "email": "staff-code-1-com@justice.gov.uk",

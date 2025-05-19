@@ -71,7 +71,7 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     // When
     assertThat(addresses).size().isEqualTo(3)
     assertThat(addresses[0].uprn).isEqualTo("100120991537")
-    assertThat(addresses[1].postcode).isEqualTo("SA420UQ")
+    assertThat(addresses[1].postcode).isEqualTo("TEST")
     assertThat(addresses[2].xcoordinate).isEqualTo(401003.0)
     assertThat(addresses[2].addressLastUpdated).isEqualTo(LocalDate.of(2021, 5, 1))
   }
@@ -102,9 +102,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
     val address = addressService.getAddressForUprn(uprn)
 
     // Then
-    assertThat(address.postcode).isEqualTo("SO16 0AS")
+    assertThat(address.postcode).isEqualTo("TEST")
     assertThat(address.uprn).isEqualTo(uprn)
-    assertThat(address.firstLine).isEqualTo("ORDNANCE SURVEY, 4 ADANAC DRIVE")
+    assertThat(address.firstLine).isEqualTo("ORDNANCE SURVEY, 4 TEST DRIVE")
 
     osPlacesMockServer.verify(1, getRequestedFor(urlEqualTo("/uprn?uprn=$uprn&key=$OS_API_KEY")))
     val savedAddress = addressRepository.findByUprn(uprn)
@@ -124,9 +124,9 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     osPlacesMockServer.verify(0, getRequestedFor(urlEqualTo("/uprn?uprn=$uprn&key=$OS_API_KEY")))
 
-    assertThat(address.postcode).isEqualTo("SO16 0AS")
+    assertThat(address.postcode).isEqualTo("TEST")
     assertThat(address.uprn).isEqualTo(uprn)
-    assertThat(address.firstLine).isEqualTo("4 ADANAC DRIVE")
+    assertThat(address.firstLine).isEqualTo("1 TEST STREET")
 
     val savedAddress = addressRepository.findByUprn(uprn)
     assertThat(savedAddress).isNotNull()
@@ -324,8 +324,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addMainResident = AddResidentRequest(
       residentId = 1,
-      forename = "Joshua",
-      surname = "Cook",
+      forename = "Kilmeny",
+      surname = "Varnak",
       phoneNumber = "07739754284",
       relation = "Father",
       dateOfBirth = LocalDate.now().minusYears(24),
@@ -336,8 +336,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addOtherResident1 = AddResidentRequest(
       residentId = 2,
-      forename = "Tom",
-      surname = "Cook",
+      forename = "Sarn",
+      surname = "Varnak",
       phoneNumber = "07739759898",
       relation = "Brother",
       dateOfBirth = LocalDate.now().minusYears(24),
@@ -348,8 +348,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addOtherResident2 = AddResidentRequest(
       residentId = null,
-      forename = "John",
-      surname = "Cesena",
+      forename = "Raka",
+      surname = "Oparai",
       phoneNumber = "07739759898",
       relation = "Son",
       dateOfBirth = LocalDate.now().minusYears(24),
@@ -448,8 +448,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addResidentRequest = AddResidentRequest(
       residentId = null,
-      forename = "Jane",
-      surname = "Doe",
+      forename = "Kadra",
+      surname = "Semparri",
       phoneNumber = "07739754284",
       relation = null,
       dateOfBirth = LocalDate.now().minusYears(30),
@@ -479,8 +479,8 @@ class AddressServiceTest : SqsIntegrationTestBase() {
 
     val addResidentRequest = AddResidentRequest(
       residentId = 1,
-      forename = "Joshua",
-      surname = "Cook",
+      forename = "Kilmeny",
+      surname = "Varnak",
       phoneNumber = "07739754284",
       relation = "Father",
       dateOfBirth = LocalDate.now().minusYears(24),

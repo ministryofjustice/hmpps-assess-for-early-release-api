@@ -7,10 +7,10 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.UserRol
 
 @Schema(description = "Details of the agent who is requesting a change be made to a resource")
 data class AgentDto(
-  @Schema(description = "The name of the user requesting the change", example = "BobSmith")
+  @Schema(description = "The name of the user requesting the change", example = "KalittaAmexar")
   val username: String,
 
-  @Schema(description = "The full name of the user requesting the change", example = "Bob Smith")
+  @Schema(description = "The full name of the user requesting the change", example = "Kalitta Amexar")
   val fullName: String,
 
   @Schema(description = "The role of the user requesting the change", example = "PROBATION_COM")

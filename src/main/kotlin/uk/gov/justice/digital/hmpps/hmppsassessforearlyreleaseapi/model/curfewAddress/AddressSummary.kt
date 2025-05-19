@@ -10,22 +10,22 @@ data class AddressSummary(
   @Schema(description = "The address's UPRN", example = "200010019924")
   val uprn: String,
 
-  @Schema(description = "The address's first line", example = "34 Maryport Street")
+  @Schema(description = "The address's first line", example = "1 Test Street")
   val firstLine: String? = null,
 
-  @Schema(description = "The address's second line", example = "Urchfont")
+  @Schema(description = "The address's second line", example = "Off Test Road")
   val secondLine: String? = null,
 
-  @Schema(description = "The address's town", example = "Chippenham")
+  @Schema(description = "The address's town", example = "Test Town")
   val town: String,
 
-  @Schema(description = "The address's county", example = "Shropshire")
+  @Schema(description = "The address's county", example = "Test County")
   val county: String,
 
-  @Schema(description = "The address's postcode", example = "RG13HS")
+  @Schema(description = "The address's postcode", example = "Test Postcode")
   val postcode: String,
 
-  @Schema(description = "The address's country", example = "Wales")
+  @Schema(description = "The address's country", example = "Test Country")
   val country: String,
 
   @Schema(description = "The address's x-coordinate", example = "401003.0,")

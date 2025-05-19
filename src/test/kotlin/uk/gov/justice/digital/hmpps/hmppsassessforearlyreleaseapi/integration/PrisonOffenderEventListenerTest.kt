@@ -163,8 +163,8 @@ class PrisonOffenderEventListenerTest : SqsIntegrationTestBase() {
       assertThat(it.staffCode).isEqualTo("STAFF1")
       assertThat(it.username).isEqualTo("a-com")
       assertThat(it.email).isEqualTo("staff-code-1-com@justice.gov.uk")
-      assertThat(it.forename).isEqualTo("Jimmy")
-      assertThat(it.surname).isEqualTo("Vivers")
+      assertThat(it.forename).isEqualTo("Konli")
+      assertThat(it.surname).isEqualTo("Gorkon")
     }
     assertThat(assessment.hdced).isEqualTo(hdced)
 

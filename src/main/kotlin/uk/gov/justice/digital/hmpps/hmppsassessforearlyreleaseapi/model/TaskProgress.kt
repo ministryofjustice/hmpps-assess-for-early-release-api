@@ -9,6 +9,6 @@ data class TaskProgress(
   @Schema(description = "The name of an outstanding task", example = "ASSESS_ELIGIBILITY")
   val name: Task,
 
-  @Schema(description = "The state of this task for a specific assessment", example = "Smith")
+  @Schema(description = "The state of this task for a specific assessment", example = "Amexar")
   val progress: TaskStatus,
 )
