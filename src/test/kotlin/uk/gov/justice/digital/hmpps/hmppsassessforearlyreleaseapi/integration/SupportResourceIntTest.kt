@@ -552,7 +552,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(firstAssessmentEvent.username).isEqualTo("a-prison-user-old")
       assertThat(firstAssessmentEvent.role).isEqualTo(UserRole.PRISON_CA)
       assertThat(firstAssessmentEvent.changes).contains("ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS")
-      assertThat(firstAssessmentEvent.fullName).isEqualTo("Hefin Evans")
+      assertThat(firstAssessmentEvent.fullName).isEqualTo("Gara Toral")
       assertThat(firstAssessmentEvent.onBehalfOf).isEqualTo("HEI")
       assertThat(firstAssessmentEvent.summary).isEqualTo("status changed from: 'NOT_STARTED', to: 'ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'")
 
