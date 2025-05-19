@@ -562,7 +562,7 @@ class SupportResourceIntTest : SqsIntegrationTestBase() {
       assertThat(lastAssessmentEvent.username).isEqualTo("a-probation-user")
       assertThat(lastAssessmentEvent.role).isEqualTo(UserRole.PROBATION_COM)
       assertThat(lastAssessmentEvent.changes).contains("NOT_STARTED")
-      assertThat(lastAssessmentEvent.fullName).isEqualTo("Ceri Evans")
+      assertThat(lastAssessmentEvent.fullName).isEqualTo("Margon Antaak")
       assertThat(lastAssessmentEvent.onBehalfOf).isEqualTo("BRI")
       assertThat(lastAssessmentEvent.summary).isEqualTo("status changed from: 'NOT_STARTED', to: 'ELIGIBILITY_AND_SUITABILITY_IN_PROGRESS'")
     }
