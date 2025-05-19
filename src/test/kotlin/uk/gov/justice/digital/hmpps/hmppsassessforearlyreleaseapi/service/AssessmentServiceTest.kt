@@ -22,6 +22,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.state.A
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.exception.ItemNotFoundException
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutReasonType.NO_REASON_GIVEN
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.OptOutRequest
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.StaffRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.TestData.BOOKING_ID
@@ -51,6 +52,7 @@ import java.time.LocalDate
 class AssessmentServiceTest {
   private val prisonService = mock<PrisonService>()
   private val assessmentRepository = mock<AssessmentRepository>()
+  private val assessmentEventRepository = mock<AssessmentEventRepository>()
   private val policyService = PolicyService()
   private val probationService = mock<ProbationService>()
   private val staffRepository = mock<StaffRepository>()
@@ -62,6 +64,7 @@ class AssessmentServiceTest {
   private val service =
     AssessmentService(
       assessmentRepository,
+      assessmentEventRepository,
       offenderToAssessmentSummaryMapper,
       assessmentToAssessmentOverviewSummaryMapper,
       prisonService,

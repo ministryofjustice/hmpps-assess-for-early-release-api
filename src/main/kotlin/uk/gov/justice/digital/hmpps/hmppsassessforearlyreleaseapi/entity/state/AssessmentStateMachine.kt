@@ -65,6 +65,7 @@ val assessmentStateMachine = StateMachine.create<AssessmentState, AssessmentLife
   }
 
   state<AwaitingAddressAndRiskChecks> {
+    on<SubmitForAddressChecks> { dontTransition() }
     on<ResidentialCheckAnswerProvided> { transitionTo(AddressAndRiskChecksInProgress) }
     on<Timeout> { transitionTo(TimedOut) }
     on<OptOut> { transitionTo(OptedOut(this.status)) }

@@ -36,6 +36,7 @@ class AssessmentToAssessmentOverviewSummaryMapper {
       hdced = currentAssessment.hdced,
       crd = currentAssessment.crd,
       location = prisonName,
+      addressChecksStatus = currentAssessment.addressChecksStatus,
       status = currentAssessment.status,
       responsibleCom = currentAssessment.responsibleCom?.toSummary(),
       teamCode = currentAssessment.teamCode,

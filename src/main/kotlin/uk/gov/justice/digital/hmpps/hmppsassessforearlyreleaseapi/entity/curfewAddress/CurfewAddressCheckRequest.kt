@@ -12,7 +12,9 @@ import jakarta.persistence.InheritanceType
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 import jakarta.validation.constraints.NotNull
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.AddressDeletionEvent
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.entity.residentialChecks.ResidentialChecksTaskAnswer
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.RESIDENTIAL_CHECKS_POLICY_V1
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.service.policy.model.residentialchecks.TaskStatus
@@ -51,6 +53,10 @@ abstract class CurfewAddressCheckRequest(
 
   @OneToMany(mappedBy = "addressCheckRequest", cascade = [CascadeType.ALL], orphanRemoval = true)
   val taskAnswers: MutableSet<ResidentialChecksTaskAnswer> = mutableSetOf(),
+
+  @OneToOne(cascade = [CascadeType.ALL])
+  @JoinColumn(name = "address_deletion_event_id", referencedColumnName = "id")
+  var addressDeletionEvent: AddressDeletionEvent? = null,
 
   @NotNull
   val createdTimestamp: LocalDateTime = LocalDateTime.now(),

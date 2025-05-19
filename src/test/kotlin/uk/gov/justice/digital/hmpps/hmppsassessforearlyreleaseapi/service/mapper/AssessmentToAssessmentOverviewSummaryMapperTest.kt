@@ -108,6 +108,7 @@ class AssessmentToAssessmentOverviewSummaryMapperTest {
     assertThat(assessmentOverviewSummary.surname).isEqualTo(offender.surname)
 
     assertThat(assessmentOverviewSummary.status).isEqualTo(expectedAssessment.status)
+    assertThat(assessmentOverviewSummary.addressChecksStatus).isEqualTo(expectedAssessment.addressChecksStatus)
     assertThat(assessmentOverviewSummary.optOutReasonOther).isEqualTo(expectedAssessment.optOutReasonOther)
     assertThat(assessmentOverviewSummary.optOutReasonType).isEqualTo(expectedAssessment.optOutReasonType)
     assertThat(assessmentOverviewSummary.teamCode).isEqualTo(expectedAssessment.teamCode)

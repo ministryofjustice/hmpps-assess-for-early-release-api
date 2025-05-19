@@ -26,6 +26,7 @@ import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.helpers.TestOf
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.integration.wiremock.HmppsAuthApiExtension.Companion.hmppsAuth
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.model.AgentDto
+import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AddressDeletionEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentEventRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.AssessmentRepository
 import uk.gov.justice.digital.hmpps.hmppsassessforearlyreleaseapi.repository.OffenderRepository
@@ -62,6 +63,9 @@ abstract class IntegrationTestBase {
 
   @Autowired
   protected lateinit var assessmentEventRepository: AssessmentEventRepository
+
+  @Autowired
+  protected lateinit var addressDeletionEventRepository: AddressDeletionEventRepository
 
   @Autowired
   private lateinit var cacheManager: CacheManager
