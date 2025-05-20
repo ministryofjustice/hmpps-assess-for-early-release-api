@@ -97,7 +97,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       result.expectStatus().isOk
       val addresses = result.expectBody(typeReference<List<AddressSummary>>()).returnResult().responseBody!!
       assertThat(addresses).hasSize(3)
-      assertThat(addresses.map { it.postcode }).containsOnly("SA420UQ")
+      assertThat(addresses.map { it.postcode }).containsOnly("TEST")
     }
   }
 
@@ -278,7 +278,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(addressCheckRequest.requestId).isEqualTo(ADDRESS_REQUEST_ID)
       assertThat(addressCheckRequest.preferencePriority).isEqualTo(AddressPreferencePriority.FIRST)
       assertThat(addressCheckRequest.status).isEqualTo(AddressCheckRequestStatus.IN_PROGRESS)
-      assertThat(addressCheckRequest.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+      assertThat(addressCheckRequest.address.firstLine).isEqualTo("1 TEST STREET")
       assertThat(addressCheckRequest.residents).hasSize(3)
       assertThat(addressCheckRequest.residents.first().residentId).isEqualTo(2)
     }
@@ -453,7 +453,7 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       assertThat(checkRequest).isInstanceOf(StandardAddressCheckRequestSummary::class.java)
 
       val standardAddressCheckRequestSummary = checkRequest as StandardAddressCheckRequestSummary
-      assertThat(standardAddressCheckRequestSummary.address.firstLine).isEqualTo("4 ADANAC DRIVE")
+      assertThat(standardAddressCheckRequestSummary.address.firstLine).isEqualTo("1 TEST STREET")
       val residentSummary = standardAddressCheckRequestSummary.residents
       assertThat(residentSummary).hasSize(3)
       assertThat(residentSummary.first().residentId).isEqualTo(2)
@@ -535,8 +535,8 @@ class AddressResourceIntTest : SqsIntegrationTestBase() {
       val invalidAddResidentRequest = listOf(
         AddResidentRequest(
           residentId = null,
-          forename = "Jane",
-          surname = "Doe",
+          forename = "Kadra",
+          surname = "Semparri",
           phoneNumber = "07739754284",
           relation = null,
           dateOfBirth = LocalDate.now().minusYears(30),

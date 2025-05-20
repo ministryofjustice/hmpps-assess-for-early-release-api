@@ -75,8 +75,8 @@ object TestData {
 
   const val PRISON_NUMBER = "A1234AA"
   const val BOOKING_ID = 123L
-  const val FORENAME = "Bob"
-  const val SURNAME = "Smith"
+  const val FORENAME = "Kalitta"
+  const val SURNAME = "Amexar"
   const val PRISON_ID = "AFG"
   const val PRISON_NAME = "Birmingham (HMP)"
   const val STAFF_CODE = "STAFF1"
@@ -325,11 +325,11 @@ object TestData {
 
   private fun anAddress() = Address(
     uprn = "200010019924",
-    firstLine = "Langley Road",
-    secondLine = "Kington Langley",
-    town = "Chippers",
-    county = "Wiltshire",
-    postcode = "SN118TK",
+    firstLine = "Test Street",
+    secondLine = "Off Some Road",
+    town = "Test Town",
+    county = "Test County",
+    postcode = "Test Postcode",
     country = "England",
     xCoordinate = 401003.0,
     yCoordinate = 154111.0,
@@ -339,8 +339,8 @@ object TestData {
   private fun residents() = mutableSetOf(
     Resident(
       id = 1,
-      forename = "Langley",
-      surname = "Road",
+      forename = "Mora",
+      surname = "Paghal",
       phoneNumber = "07768967676",
       relation = "Father",
       dateOfBirth = LocalDate.of(1989, 3, 21),
@@ -432,7 +432,7 @@ object TestData {
     id = 1,
     code = "staff-code",
     Name(forename = "forename", surname = "surname"),
-    team = Team(code = "team 1", "N55LAU"),
+    team = Team(code = "team 1", "TEAM1"),
     provider = Provider(code = "N03", description = "Midlands"),
     username = "username",
   )
@@ -555,8 +555,8 @@ object TestData {
   fun aPrisonApiUserDetails(): PrisonApiUserDetail = PrisonApiUserDetail(
     staffId = 8103,
     username = "STAFF1",
-    firstName = "Gaz",
-    lastName = "Lyndsay",
+    firstName = "Gira",
+    lastName = "Kahnrah",
     activeCaseLoadId = "LEI",
     accountStatus = "ACTIVE",
     lockDate = LocalDateTime.of(2028, 3, 21, 11, 28),

@@ -201,7 +201,7 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
           ),
           toDoEligibilityAndSuitabilityBy = LocalDate.now().plusDays(DAYS_TO_ADD),
           result = null,
-          lastUpdateBy = "Helen Reid",
+          lastUpdateBy = "Kovar Noj",
         ),
       )
     }
@@ -865,19 +865,19 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       val usernameCA = "a-prison-user"
 
       prisonRegisterMockServer.stubGetPrisons()
-      managedUsersMockServer.stubGetOffenderManager(usernameCA, email = "aled.evans@moj.gov.uk")
+      managedUsersMockServer.stubGetOffenderManager(usernameCA, email = "bura.hurn@moj.gov.uk")
       prisonApiMockServer.stubGetUserDetails(usernameCA, prisonId = "AKI")
 
       val usernameDM = "a-dm-user"
 
       prisonRegisterMockServer.stubGetPrisons()
-      managedUsersMockServer.stubGetOffenderManager(usernameDM, email = "gwyn.evans@moj.gov.uk")
+      managedUsersMockServer.stubGetOffenderManager(usernameDM, email = "kreg.rahnaz@moj.gov.uk")
       prisonApiMockServer.stubGetUserDetails(usernameDM, prisonId = "BMI")
 
       val usernamePB = "a-probation-user"
 
       prisonRegisterMockServer.stubGetPrisons()
-      deliusMockServer.stubGetStaffDetailsByUsername(usernamePB, email = "ceri.evans@moj.gov.uk")
+      deliusMockServer.stubGetStaffDetailsByUsername(usernamePB, email = "margon.antaak@moj.gov.uk")
       prisonApiMockServer.stubGetUserDetails(usernamePB, prisonId = "BMI")
 
       // When
@@ -895,21 +895,21 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
 
       assertThat(assessmentContactsResponse.contacts).containsExactly(
         ContactResponse(
-          fullName = "Ceri Evans",
+          fullName = "Margon Antaak",
           userRole = PROBATION_COM,
-          email = "ceri.evans@moj.gov.uk",
+          email = "margon.antaak@moj.gov.uk",
           locationName = null,
         ),
         ContactResponse(
-          fullName = "Gwyn Evans",
+          fullName = "Kreg Rahnaz",
           userRole = PRISON_DM,
-          email = "gwyn.evans@moj.gov.uk",
+          email = "kreg.rahnaz@moj.gov.uk",
           locationName = "Birmingham (HMP)",
         ),
         ContactResponse(
-          fullName = "Aled Evans",
+          fullName = "Bura Hurn",
           userRole = PRISON_CA,
-          email = "aled.evans@moj.gov.uk",
+          email = "bura.hurn@moj.gov.uk",
           locationName = "Acklington (HMP)",
         ),
       )
@@ -954,9 +954,9 @@ class AssessmentResourceIntTest : SqsIntegrationTestBase() {
       assertThat(assessmentContactsResponse.contacts).size().isEqualTo(3)
 
       assertThat(assessmentContactsResponse.contacts).containsExactly(
-        ContactResponse(fullName = "Ceri Evans", userRole = PROBATION_COM, email = null, locationName = null),
-        ContactResponse(fullName = "Gwyn Evans", userRole = PRISON_DM, email = null, locationName = null),
-        ContactResponse(fullName = "Aled Evans", userRole = PRISON_CA, email = null, locationName = null),
+        ContactResponse(fullName = "Margon Antaak", userRole = PROBATION_COM, email = null, locationName = null),
+        ContactResponse(fullName = "Kreg Rahnaz", userRole = PRISON_DM, email = null, locationName = null),
+        ContactResponse(fullName = "Bura Hurn", userRole = PRISON_CA, email = null, locationName = null),
       )
     }
   }

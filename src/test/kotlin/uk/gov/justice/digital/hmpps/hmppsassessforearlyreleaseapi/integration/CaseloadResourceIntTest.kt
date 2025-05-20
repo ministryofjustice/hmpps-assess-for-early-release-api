@@ -80,7 +80,7 @@ class CaseloadResourceIntTest : SqsIntegrationTestBase() {
       assertThat(offenders.map { it.prisonNumber }).containsExactlyInAnyOrder("A1234AA", "A1234AB", "A1234AD", "C1234CD")
       assertThat(offenders.map { it.crn }).containsExactlyInAnyOrder("DX12340A", null, "DX12340D", "DX12340F")
       assertPostponeDetails(offenders, "A1234AA")
-      assertThat(offenders.map { it.lastUpdateBy }).containsExactlyInAnyOrder("Helen Reid", null, null, null)
+      assertThat(offenders.map { it.lastUpdateBy }).containsExactlyInAnyOrder("Kovar Noj", null, null, null)
     }
   }
 

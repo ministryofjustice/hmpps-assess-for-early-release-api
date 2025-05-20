@@ -46,7 +46,7 @@ data class AssessmentResponse(
   @Schema(description = "The community offender manager assigned to this assessment", required = false)
   val responsibleCom: ComSummary?,
 
-  @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "N55LAU", required = false)
+  @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "Team1", required = false)
   val teamCode: String?,
 
   @Schema(description = "The postponement date", example = "2026-08-23", required = false)

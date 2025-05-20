@@ -59,7 +59,7 @@ import java.time.LocalDate
 
 class AssessmentTest {
 
-  private val anAgent = Agent("mtynan", fullName = "Mark Tynan", UserRole.PRISON_CA, "HPE")
+  private val anAgent = Agent("kerla.abarsha", fullName = "Kerla Abarsha", UserRole.PRISON_CA, "HPE")
   private val anAgentEntity = anAgent
   private val hdced = LocalDate.now().plusDays(14)
   private val crd = LocalDate.now().plusDays(31)

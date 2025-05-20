@@ -16,10 +16,10 @@ data class AddResidentRequest(
   @Schema(description = "A unique internal reference for the resident", example = "87320")
   val residentId: Long? = null,
 
-  @Schema(description = "The resident's forename", example = "Dave")
+  @Schema(description = "The resident's forename", example = "Grana")
   val forename: String,
 
-  @Schema(description = "The resident's surname", example = "Jones")
+  @Schema(description = "The resident's surname", example = "Mrith")
   val surname: String,
 
   @Schema(description = "The resident's phone number", example = "07634183674")

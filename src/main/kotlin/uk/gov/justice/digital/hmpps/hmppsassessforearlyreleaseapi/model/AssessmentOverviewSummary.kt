@@ -14,10 +14,10 @@ data class AssessmentOverviewSummary(
   @Schema(description = "The offender's booking id", example = "773722")
   val bookingId: Long,
 
-  @Schema(description = "The offender's first name", example = "Bob")
+  @Schema(description = "The offender's first name", example = "Kalitta")
   val forename: String?,
 
-  @Schema(description = "The offender's surname", example = "Smith")
+  @Schema(description = "The offender's surname", example = "Amexar")
   val surname: String?,
 
   @Schema(description = "The offender's date of birth", example = "2002-02-20")
@@ -47,7 +47,7 @@ data class AssessmentOverviewSummary(
   @Schema(description = "The community offender manager assigned to this assessment")
   val responsibleCom: ComSummary? = null,
 
-  @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "N55LAU")
+  @Schema(description = "The team that the COM responsible for this assessment is assigned to", example = "Team1")
   val teamCode: String? = null,
 
   @Schema(description = "The version of the policy that this assessment has been carried out under", example = "1.0")
@@ -90,6 +90,6 @@ data class AssessmentOverviewSummary(
   @Schema(description = "Information that the POM has provided about the offender's behaviour in prison", example = "Any concerns about them being released on HDC")
   val pomBehaviourInformation: String? = null,
 
-  @Schema(description = "Last updated by", example = "Aled Evans")
+  @Schema(description = "Last updated by", example = "Bura Hurn")
   val lastUpdateBy: String? = null,
 )

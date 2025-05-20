@@ -97,8 +97,8 @@ class OffenderManagerChangedEventListenerTest : SqsIntegrationTestBase() {
           "STAFF-CODE" to staffCode,
           "USERNAME" to STAFF_USERNAME.uppercase(),
           "EMAIL" to NEW_STAFF_EMAIL,
-          "FORENAME" to "Jimmy",
-          "SURNAME" to "Vivers",
+          "FORENAME" to "Konli",
+          "SURNAME" to "Gorkon",
         ),
         null,
       )

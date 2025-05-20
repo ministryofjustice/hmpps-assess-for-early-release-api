@@ -16,10 +16,10 @@ data class OffenderSummaryResponse(
   @Schema(description = "The offender's booking id", example = "773722")
   val bookingId: Long,
 
-  @Schema(description = "The offender's first name", example = "Bob")
+  @Schema(description = "The offender's first name", example = "Kalitta")
   val forename: String,
 
-  @Schema(description = "The offender's surname", example = "Smith")
+  @Schema(description = "The offender's surname", example = "Amexar")
   val surname: String,
 
   @Schema(description = "The offender's conditional release date date", example = "2026-08-23")
@@ -61,6 +61,6 @@ data class OffenderSummaryResponse(
   @Schema(description = "The case reference number assigned to a person on probation in NDelius ", example = "DX12340A", required = false)
   val crn: String? = null,
 
-  @Schema(description = "Last updated by", example = "Aled Evans")
+  @Schema(description = "Last updated by", example = "Bura Hurn")
   val lastUpdateBy: String? = null,
 )

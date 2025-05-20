@@ -11,13 +11,13 @@ data class ComSummary(
   @Schema(description = "The username", example = "X33221")
   val username: String?,
 
-  @Schema(description = "The offender managers email address", example = "bob.jones@justice.gov.uk")
+  @Schema(description = "The offender managers email address", example = "Kalitta.Amexar@justice.gov.uk")
   val email: String?,
 
-  @Schema(description = "The offender managers first name", example = "Bob")
+  @Schema(description = "The offender managers first name", example = "Kalitta")
   val forename: String?,
 
-  @Schema(description = "The offender managers surname", example = "Jones")
+  @Schema(description = "The offender managers surname", example = "Amexar")
   val surname: String?,
 )
 

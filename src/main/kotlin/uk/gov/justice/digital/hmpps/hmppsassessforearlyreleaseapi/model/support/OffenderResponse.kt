@@ -15,10 +15,10 @@ data class OffenderResponse(
   @Schema(description = "The prison code", example = "BRS")
   val prisonId: String,
 
-  @Schema(description = "The offender's first name", example = "Bob")
+  @Schema(description = "The offender's first name", example = "Kalitta")
   val forename: String,
 
-  @Schema(description = "The offender's surname", example = "Smith")
+  @Schema(description = "The offender's surname", example = "Amexar")
   val surname: String,
 
   @Schema(description = "The offender's date of birth", example = "2002-02-20")
